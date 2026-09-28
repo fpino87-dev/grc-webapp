@@ -384,7 +384,7 @@ These three parameters define the process's tolerance to disruption:
 | **RTO** (Recovery Time Objective) | How quickly the process must be restored after a disruption | E.g. "The MES system must be back in operation within 4 hours of the incident" |
 | **RPO** (Recovery Point Objective) | How far back in time data can be lost without unacceptable damage | E.g. "We cannot lose more than 1 hour of production data" — so backups must be at least hourly |
 
-The system uses RTO and RPO to verify that the linked BCP plan (M16) is consistent: if the BCP provides an RTO greater than the one declared in the BIA, a warning appears.
+The system uses RTO and RPO to verify that the linked BCP plan (M16) is consistent: if the RTO demonstrated by the plan (the one achieved in the latest test, or the declared one if not yet measured) exceeds the BIA target, a warning appears.
 
 ### Flow: draft → validation → approval
 
@@ -1170,56 +1170,65 @@ If the course grants a **competency**, those with an account receive it, backed 
 
 ## 15. Business Continuity (M16)
 
-[Screenshot: BCP plan list]
+The **BCP** page has three tabs: **Coverage**, **Plans** and **Exercises**. The open tab stays in the page address, so the link can be shared.
+
+Approval and tests are two separate things:
+
+- **approval** says that the plan is in force (draft → approved → archived);
+- the **test** proves that the plan works. It has a due date, calculated from the date of the last test and the plan's frequency.
+
+An overdue test **does not remove the approval**: the processes covered by the plan are shown as *uncovered because of an overdue test* until a new test is recorded.
+
+### Coverage
+
+Lists the BIA processes with criticality ≥ 4 and, for each one, its coverage state:
+
+| State | Meaning |
+|-------|---------|
+| **Covered** (green) | At least one approved plan with an up-to-date test |
+| **Uncovered: test overdue** (yellow) | Approved plan, but the test is overdue or has never been run |
+| **No plan** (red) | No approved plan: drafts and archived plans do not cover |
+
+Next to each plan its **demonstrated RTO** is shown: the RTO achieved in the latest test that measured it. If no test has measured it yet, the RTO declared in the plan is used, marked with \*. If it exceeds the BIA target it is highlighted in orange. A process without a plan has the link **Create plan for this process**. It is the same rule used by Reporting (Risk / BIA / BCP tab) and by the management review.
 
 ### How to create a BCP plan
 
-1. Go to **Governance → BCP → New plan**
+1. Click **+ New plan** (or **Create plan for this process** from Coverage)
 2. Fill in:
-   - **Plan name** (e.g. "BCP Plan — Production line B — South Plant")
-   - **Scope**: critical processes covered by the plan (select from BIA)
-   - **Plan owner**: person responsible for maintenance
-   - **Target RTO** and **Target RPO**: the values the plan must guarantee
-3. Click **Save draft**
+   - **Title**, **Site** and **Version**
+   - **Plan document (M07)**: the plan text is managed in **Documents**, with versions and approval. Here you link the site's document, an organisation document or one shared with the site. In the plan list, a plan without a document is flagged
+   - **Covered processes**: one or more BIA processes of the site
+   - Plan **RTO** and **RPO**: under each field the strictest BIA target of the selected processes is shown, in orange if the value exceeds it
+   - **Test frequency**: monthly, quarterly, half-yearly, yearly or every two years
+3. Click **Create plan**. The plan starts as a draft
 
-### Link with BIA RTO/RPO
+### Approval and archiving
 
-In the **Covered processes** section of the BCP plan, for each selected process the comparison is shown between:
+The **Approve** button is shown only to people who can approve the plan: the Compliance Officer with access to that site, or whoever holds a CISO appointment in force for the organisation, the BU or the site. **Archive** withdraws a plan that is no longer used: it stays available with its tests but no longer covers any process. Archived plans are shown by ticking **Show archived**.
 
-- **RTO required by BIA**: the maximum tolerable declared in the critical process
-- **RTO guaranteed by BCP**: what the plan can actually guarantee
+### Recording a test
 
-If the BCP guarantees an RTO greater than the one required by the BIA, an orange warning appears requiring review. The system does not block saving but requires an explicit justification.
+From the **Plans** tab click **+ Test**. A test can also be recorded on an approved plan. Enter:
 
-### Test types
+- **Test date**: today by default. A past date can be given, not a future one. A test older than the latest one recorded does not move the due date
+- **Type**: tabletop / discussion, drill / partial exercise, full interruption, parallel test
+- **Result**: passed, partial or failed
+- **RTO and RPO achieved**, participants, objectives with a tick for those met, notes and optional evidence
 
-The plan must be tested periodically. The available test types are:
+The achieved times are compared with the MTPD, RTO and RPO targets of **every** covered process. Any overruns are shown on saving.
 
-| Type | Description |
-|------|-------------|
-| **Tabletop** | Paper/discussion simulation. Participants in a meeting room, no real systems involved |
-| **Simulation** | Partial simulation with some real systems in test mode, without interrupting production |
-| **Full** | Complete test with plan activation on real systems, without impact on normal production |
-| **Drill** | Unannounced exercise to test the team's real response times |
+### Exercises
 
-To register a test: from the plan record click **New test**, select the type, date, participants and outcome.
+The **Exercises** tab is the test history: date, plan, type, result, RTO/RPO achieved (in orange if over the plan), objectives met and evidence. Objectives and notes can be read by hovering over the row. A test cannot be edited. If it was recorded by mistake it is deleted, and the plan's last test date is recalculated.
 
-### What happens if the test fails (automatic PDCA)
+### Automatic PDCA
 
-If the test is registered with outcome **Failed** or **Partially passed**:
+- **Partial** or **failed** result → a PDCA cycle is opened and the failed BCP test notification is sent
+- **Passed** result but times over the MTPD or BIA target → an overrun PDCA is opened
 
-1. A PDCA cycle is automatically created with starting phase PLAN
-2. The PDCA is assigned to the BCP plan owner
-3. The owner must fill in the action plan within 30 days
-4. The BCP plan remains in "To be updated" status until the PDCA is closed positively
+### Test due date
 
-### Plan expiry and alerts
-
-Every BCP plan has a mandatory review date (typically annual). As the date approaches:
-
-- **30 days before**: email notification to the plan owner
-- **At expiry**: the plan moves to "Expired" status with a red badge. A review task is automatically created
-- If the expired plan covers processes with MTPD < 48 hours, an escalation notification is sent to the Plant Manager
+Every night the system checks the approved plans. For each plan with an overdue or never-run test it opens **one** task for the Risk Manager, only one while it stays open. The plan stays approved. The test due date also appears in the Activity Schedule.
 
 ---
 
@@ -1576,7 +1585,7 @@ The tab is designed first for management, then for whoever works on the gaps:
 Split into three sub-sections, selectable at the top of the tab:
 
 - **Risks**: risks **above the acceptance threshold** approved by management (risk appetite from the Risk module; 14 is used when no policy exists), with the maximum number tolerated; heatmap with the cells above the threshold highlighted; the 10 highest-scoring risks (click to open them); breakdown by NIS2 Art. 21 and by threat category.
-- **Continuity**: critical processes (criticality ≥ 4) without an **approved** BCP and approved plans with a test due; process · risks · BCP · last test table. Drafts and archived plans do not cover a process.
+- **Continuity**: critical processes (criticality ≥ 4) without an **approved** BCP, processes with an approved plan but an overdue or never-run test (*uncovered: test overdue*) and approved plans with a test due; process · risks · BCP · last test table. Drafts and archived plans do not cover a process.
 - **Economic value**: inherent and residual annualised loss expectancy (ALE), risk reduced by controls and return on investment (ROSI) of planned treatments.
 
 #### Process indicators tab

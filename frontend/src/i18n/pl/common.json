@@ -3746,7 +3746,179 @@
   },
   "bcp": {
     "test_frequency_label": "Częstotliwość testu",
-    "status_superato": "Zaliczony"
+    "status_superato": "Zaliczony",
+    "title": "Ciągłość działania (BCP)",
+    "loading": "Ładowanie…",
+    "tabs": {
+      "coverage": "Pokrycie",
+      "plans": "Plany",
+      "tests": "Ćwiczenia"
+    },
+    "actions": {
+      "new_plan": "+ Nowy plan",
+      "add_test": "+ Test",
+      "edit": "Edytuj",
+      "approve": "Zatwierdź",
+      "archive": "Archiwizuj",
+      "delete": "Usuń",
+      "cancel": "Anuluj",
+      "close": "Zamknij",
+      "create": "Utwórz plan",
+      "save": "Zapisz zmiany",
+      "saving": "Zapisywanie…",
+      "record_test": "Zarejestruj test",
+      "remove": "Usuń"
+    },
+    "coverage": {
+      "state": {
+        "covered": "Pokryty",
+        "test_expired": "Niepokryty: test zaległy",
+        "missing": "Brak planu"
+      },
+      "hint": {
+        "covered": "Zatwierdzony plan z aktualnym testem",
+        "test_expired": "Zatwierdzony plan, ale test zaległy lub nigdy nieprzeprowadzony",
+        "missing": "Brak zatwierdzonego planu BCP"
+      },
+      "col_process": "Proces krytyczny",
+      "col_criticality": "Krytyczność",
+      "col_targets": "Cele BIA",
+      "col_coverage": "Pokrycie",
+      "col_plans": "Plany",
+      "create_plan": "+ Utwórz plan dla tego procesu",
+      "empty": "Brak procesów krytycznych (krytyczność ≥ 4) w BIA",
+      "rto_measured": "RTO uzyskane w ostatnim teście, który je zmierzył",
+      "rto_declared": "RTO zadeklarowane w planie: żaden test go jeszcze nie zmierzył",
+      "footnote": "Wymieniono procesy BIA o krytyczności ≥ 4. RTO planu to wartość wykazana w ostatnim teście; z * to wartość zadeklarowana, jeszcze niezmierzona."
+    },
+    "plans": {
+      "col_plan": "Plan",
+      "col_document": "Dokument",
+      "col_status": "Zatwierdzenie",
+      "col_test": "Test",
+      "empty": "Brak planów BCP",
+      "no_document": "Brak powiązanego dokumentu",
+      "processes": "Objęte procesy: {{count}}",
+      "next_test": "Następny test: {{date}}",
+      "show_archived": "Pokaż zarchiwizowane ({{count}})",
+      "archive_confirm": "Zarchiwizować plan? Pozostanie dostępny wraz z testami, ale nie będzie już obejmował żadnego procesu.",
+      "delete_confirm": "Usunąć ten plan BCP i jego testy?"
+    },
+    "tests": {
+      "all_plans": "Wszystkie plany",
+      "empty": "Brak zarejestrowanych testów",
+      "col_date": "Data",
+      "col_plan": "Plan",
+      "col_type": "Rodzaj",
+      "col_result": "Wynik",
+      "col_rto": "Uzyskane RTO",
+      "col_rpo": "Uzyskane RPO",
+      "col_objectives": "Cele",
+      "col_evidence": "Dowody",
+      "delete_confirm": "Usunąć ten test? Data ostatniego testu planu zostanie przeliczona."
+    },
+    "form": {
+      "new_title": "Nowy plan BCP",
+      "edit_title": "Edytuj plan BCP",
+      "title": "Tytuł",
+      "plant": "Zakład",
+      "version": "Wersja",
+      "select": "— wybierz —",
+      "document": "Dokument planu (M07)",
+      "no_document": "— brak dokumentu —",
+      "document_hint": "Treść planu zarządzana jest w Dokumentach: tutaj łączy się dokument zakładu, organizacji lub udostępniony zakładowi.",
+      "processes": "Objęte procesy",
+      "processes_pick_plant": "Najpierw wybierz zakład.",
+      "processes_empty": "Brak procesów BIA dla tego zakładu.",
+      "criticality": "krytyczność {{value}}",
+      "rto": "RTO planu (godziny)",
+      "rpo": "RPO planu (godziny)",
+      "bia_target": "Cel BIA: {{value}} h",
+      "frequency": "Częstotliwość testów",
+      "save_error": "Błąd podczas zapisywania"
+    },
+    "frequency": {
+      "1_months": "Co miesiąc",
+      "3_months": "Co kwartał",
+      "6_months": "Co pół roku",
+      "1_years": "Co rok",
+      "2_years": "Co dwa lata"
+    },
+    "record": {
+      "title": "Zarejestruj test BCP",
+      "date": "Data testu",
+      "type": "Rodzaj",
+      "result": "Wynik",
+      "failed_hint": "Wynik częściowy lub negatywny automatycznie otwiera PDCA.",
+      "rto_achieved": "Uzyskane RTO (h)",
+      "rpo_achieved": "Uzyskane RPO (h)",
+      "participants": "Uczestnicy",
+      "plan_value": "plan: {{value}} h",
+      "rto_hint": "Uzyskane czasy są porównywane z celami BIA objętych procesów i stają się wykazaną zdolnością planu.",
+      "objectives": "Cele testu",
+      "objective_placeholder": "Dodaj cel…",
+      "objectives_met": "Osiągnięte cele: {{met}}/{{total}}",
+      "notes": "Uwagi",
+      "evidence": "Dowód testu (opcjonalnie)",
+      "warnings_title": "Test zarejestrowany z ostrzeżeniami",
+      "warning": {
+        "rto_over_mtpd": "{{process}}: uzyskane RTO {{achieved}} h przekracza MTPD ({{target}} h)",
+        "rto_over_target": "{{process}}: uzyskane RTO {{achieved}} h przekracza cel BIA ({{target}} h)",
+        "rpo_over_target": "{{process}}: uzyskane RPO {{achieved}} h przekracza cel BIA ({{target}} h)"
+      },
+      "pdca_overrun": "Otwarto PDCA z powodu przekroczenia czasów.",
+      "pdca_failed": "Otwarto PDCA z powodu wyniku testu."
+    },
+    "test_state": {
+      "ok": "Test aktualny",
+      "overdue": "Test zaległy",
+      "never": "Nigdy nie testowany"
+    },
+    "result": {
+      "superato": "Zaliczony",
+      "parziale": "Częściowy",
+      "fallito": "Niezaliczony"
+    },
+    "test_type": {
+      "tabletop": "Tabletop / dyskusja",
+      "drill": "Ćwiczenie częściowe",
+      "full_interruption": "Pełne przerwanie",
+      "parallel": "Test równoległy"
+    },
+    "plan_status": {
+      "bozza": "wersja robocza",
+      "approvato": "zatwierdzony",
+      "archiviato": "zarchiwizowany"
+    },
+    "document_status": {
+      "bozza": "wersja robocza",
+      "revisione": "w przeglądzie",
+      "approvazione": "do zatwierdzenia",
+      "approvato": "zatwierdzony",
+      "archiviato": "zarchiwizowany"
+    },
+    "help": {
+      "title": "Ciągłość działania — M16",
+      "description": "Łączy procesy krytyczne z BIA z planami ciągłości działania i wykazuje testami, że czasy odtworzenia spełniają cele. Zatwierdzenie planu i testy są rozdzielone: zaległy test nie odbiera zatwierdzenia, ale proces staje się niepokryty z powodu zaległego testu.",
+      "steps": {
+        "1": "W zakładce Pokrycie sprawdź, które procesy krytyczne nie mają planu lub mają zaległy test",
+        "2": "Utwórz plan: zakład, objęte procesy, RTO/RPO i częstotliwość testów",
+        "3": "Połącz dokument planu zarządzany w Dokumentach (M07)",
+        "4": "Zatwierdź plan (Compliance Officer lub CISO zakładu)",
+        "5": "Rejestruj każdy test z datą, wynikiem i uzyskanymi czasami: stają się wykazaną zdolnością planu",
+        "6": "Wynik częściowy/negatywny lub czasy ponad cel otwierają PDCA; po terminie testu zadanie trafia do Risk Managera"
+      },
+      "connections": {
+        "bia": "procesy krytyczne i cele RTO/RPO/MTPD",
+        "documents": "dokument planu, z wersjami i zatwierdzeniem",
+        "pdca": "automatyczne PDCA przy niezaliczonym teście lub przekroczonych czasach",
+        "reporting": "pokrycie procesów krytycznych w Raportowaniu i w przeglądzie zarządzania"
+      },
+      "config": {
+        "bia": "Procesy krytyczne i cele RTO/RPO w BIA",
+        "document": "Dokument planu wgrany do Dokumentów"
+      }
+    }
   },
   "audit_trail": {
     "levels_guide": "Przewodnik po poziomach",
@@ -4416,7 +4588,9 @@
       "bia_bcp_table_hint": "Proces jest objęty tylko zatwierdzonym planem BCP; test należy powtórzyć, gdy planowana data minęła lub jej brak.",
       "col_risks": "Ryzyka (wysokie · średnie · niskie)",
       "kpi_processes": "Procesy krytyczne",
-      "ale_hint": "Oczekiwana roczna strata obliczona z kosztów przestoju w BIA: wyceniane są tylko ryzyka powiązane z procesem mającym koszt przestoju."
+      "ale_hint": "Oczekiwana roczna strata obliczona z kosztów przestoju w BIA: wyceniane są tylko ryzyka powiązane z procesem mającym koszt przestoju.",
+      "kpi_bia_test_expired": "Krytyczne z zaległym testem",
+      "kpi_bia_test_expired_sub": "zatwierdzony plan, test do powtórzenia"
     },
     "access_matrix": {
       "subtitle": "Kto ma dostęp i kto za co odpowiada — weryfikuj dostępy w dowolnym momencie.",
@@ -5658,7 +5832,8 @@
       "appetite_default": "Próg akceptowalności: ryzyko rezydualne powyżej {{score}} (wartość domyślna: brak zatwierdzonego apetytu na ryzyko).",
       "appetite_tolerated": "Tolerowane ryzyka powyżej progu: {{count}}.",
       "appetite_per_plant": "Progi różnią się między zakładami: każde ryzyko porównuje się z progiem jego zakładu.",
-      "top_over_appetite": "Ryzyka powyżej progu akceptowalności (najwyższe rezydualne)"
+      "top_over_appetite": "Ryzyka powyżej progu akceptowalności (najwyższe rezydualne)",
+      "critical_bcp_test_expired": "{{count}} procesów krytycznych z zaległym lub nigdy nieprzeprowadzonym testem ciągłości działania"
     },
     "participants": {
       "heading": "Zaproszeni i obecność",

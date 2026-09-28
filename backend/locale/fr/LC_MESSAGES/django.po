@@ -3125,3 +3125,36 @@ msgstr "Risques au-delà du seuil d'acceptabilité (résiduel le plus élevé)"
 #: apps/management_review/report/builder.py
 msgid "Rischi oltre soglia"
 msgstr "Risques au-delà du seuil"
+
+msgid "Uno o più processi indicati non esistono."
+msgstr "Un ou plusieurs processus indiqués n'existent pas."
+
+msgid "I processi coperti devono appartenere al sito del piano."
+msgstr "Les processus couverts doivent appartenir au site du plan."
+
+msgid "Il documento scelto non è disponibile per il sito del piano."
+msgstr "Le document choisi n'est pas disponible pour le site du plan."
+
+msgid "Si approva solo un piano in bozza."
+msgstr "Seul un plan en brouillon peut être approuvé."
+
+msgid "Il piano è già archiviato."
+msgstr "Le plan est déjà archivé."
+
+msgid "Un piano archiviato non si testa."
+msgstr "Un plan archivé ne peut pas être testé."
+
+msgid "Esito del test non valido."
+msgstr "Résultat du test non valide."
+
+msgid "Tipo di test non valido."
+msgstr "Type de test non valide."
+
+msgid "La data del test non può essere futura."
+msgstr "La date du test ne peut pas être dans le futur."
+
+msgid "%(n)s processi critici con piano BCP approvato ma test scaduto o mai eseguito: %(names)s"
+msgstr "%(n)s processus critiques avec un plan de continuité approuvé mais un test échu ou jamais réalisé : %(names)s"
+
+msgid "%(n)s processi critici con test BCP scaduto o mai eseguito"
+msgstr "%(n)s processus critiques avec un test de continuité échu ou jamais réalisé"

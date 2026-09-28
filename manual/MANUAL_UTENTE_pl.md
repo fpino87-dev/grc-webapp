@@ -384,7 +384,7 @@ Te trzy parametry określają tolerancję procesu na przerwę:
 | **RTO** (Recovery Time Objective) | W jakim czasie musimy przywrócić proces po przerwie | Np. „System MES musi wrócić do działania w ciągu 4 godzin od incydentu" |
 | **RPO** (Recovery Point Objective) | Do którego punktu w przeszłości możemy stracić dane bez akceptowalnych szkód | Np. „Nie możemy stracić więcej niż 1 godzinę danych produkcyjnych" — kopie zapasowe muszą być wykonywane co najmniej co godzinę |
 
-System używa RTO i RPO do sprawdzenia, czy powiązany plan BCP (M16) jest spójny: jeśli BCP zakłada RTO wyższe niż zadeklarowane w BIA, pojawia się ostrzeżenie.
+System używa RTO i RPO do sprawdzenia, czy powiązany plan BCP (M16) jest spójny: jeśli RTO wykazane przez plan (uzyskane w ostatnim teście lub zadeklarowane, jeśli jeszcze go nie zmierzono) przekracza cel BIA, pojawia się ostrzeżenie.
 
 ### Przepływ: szkic → walidacja → zatwierdzenie
 
@@ -1170,56 +1170,65 @@ Jeśli kurs przyznaje **kompetencję**, osoby z kontem otrzymują ją z dowodem 
 
 ## 15. Ciągłość działania (M16)
 
-[Zrzut ekranu: lista planów BCP]
+Strona **BCP** ma trzy zakładki: **Pokrycie**, **Plany** i **Ćwiczenia**. Otwarta zakładka pozostaje w adresie strony, więc link można udostępnić.
+
+Zatwierdzenie i testy to dwie odrębne rzeczy:
+
+- **zatwierdzenie** oznacza, że plan obowiązuje (wersja robocza → zatwierdzony → zarchiwizowany);
+- **test** wykazuje, że plan działa. Ma termin, liczony od daty ostatniego testu i częstotliwości planu.
+
+Zaległy test **nie odbiera zatwierdzenia**: procesy objęte planem są wyświetlane jako *niepokryte z powodu zaległego testu*, dopóki nie zostanie zarejestrowany nowy test.
+
+### Pokrycie
+
+Zawiera procesy BIA o krytyczności ≥ 4 i dla każdego stan pokrycia:
+
+| Stan | Znaczenie |
+|------|-----------|
+| **Pokryty** (zielony) | Co najmniej jeden zatwierdzony plan z aktualnym testem |
+| **Niepokryty: test zaległy** (żółty) | Zatwierdzony plan, ale test zaległy lub nigdy nieprzeprowadzony |
+| **Brak planu** (czerwony) | Brak zatwierdzonego planu: wersje robocze i plany zarchiwizowane nie obejmują procesu |
+
+Przy każdym planie widać jego **wykazane RTO**: RTO uzyskane w ostatnim teście, który je zmierzył. Jeśli żaden test go jeszcze nie zmierzył, używane jest RTO zadeklarowane w planie, oznaczone \*. Jeśli przekracza cel BIA, jest wyróżnione na pomarańczowo. Proces bez planu ma link **Utwórz plan dla tego procesu**. To ta sama reguła, której używa Raportowanie (zakładka Risk / BIA / BCP) i przegląd zarządzania.
 
 ### Jak utworzyć plan BCP
 
-1. Przejdź do **Ład organizacyjny → BCP → Nowy plan**
+1. Kliknij **+ Nowy plan** (lub **Utwórz plan dla tego procesu** w Pokryciu)
 2. Wypełnij:
-   - **Nazwa planu** (np. „Plan BCP — Linia produkcyjna B — Zakład Południe")
-   - **Zakres**: procesy krytyczne objęte planem (wybierz z BIA)
-   - **Właściciel planu**: odpowiedzialny za utrzymanie
-   - **Docelowe RTO** i **docelowe RPO**: wartości, które plan musi gwarantować
-3. Kliknij **Zapisz szkic**
+   - **Tytuł**, **Zakład** i **Wersję**
+   - **Dokument planu (M07)**: treść planu zarządzana jest w **Dokumentach**, z wersjami i zatwierdzeniem. Tutaj łączy się dokument zakładu, organizacji lub udostępniony zakładowi. Na liście planów plan bez dokumentu jest oznaczony
+   - **Objęte procesy**: jeden lub więcej procesów BIA zakładu
+   - **RTO** i **RPO** planu: pod każdym polem wyświetla się najbardziej rygorystyczny cel BIA wybranych procesów, na pomarańczowo, jeśli wartość go przekracza
+   - **Częstotliwość testów**: co miesiąc, co kwartał, co pół roku, co rok lub co dwa lata
+3. Kliknij **Utwórz plan**. Plan powstaje jako wersja robocza
 
-### Powiązanie z RTO/RPO z BIA
+### Zatwierdzenie i archiwizacja
 
-W sekcji **Objęte procesy** planu BCP, dla każdego wybranego procesu wyświetlane jest porównanie między:
+Przycisk **Zatwierdź** widzą tylko osoby, które mogą zatwierdzić plan: Compliance Officer z dostępem do tego zakładu lub osoba z obowiązującą nominacją CISO dla organizacji, BU lub zakładu. **Archiwizuj** wycofuje plan, który nie jest już używany: pozostaje dostępny wraz z testami, ale nie obejmuje już żadnego procesu. Plany zarchiwizowane pokazuje się, zaznaczając **Pokaż zarchiwizowane**.
 
-- **RTO wymaganym przez BIA**: maksimum tolerowane zadeklarowane w procesie krytycznym
-- **RTO gwarantowanym przez BCP**: tym, co plan jest w stanie faktycznie zagwarantować
+### Rejestracja testu
 
-Jeśli BCP gwarantuje RTO wyższe niż wymagane przez BIA, pojawia się pomarańczowe ostrzeżenie wymagające przeglądu. System nie blokuje zapisu, ale wymaga wyraźnego uzasadnienia.
+W zakładce **Plany** kliknij **+ Test**. Test można zarejestrować także dla zatwierdzonego planu. Podaj:
 
-### Typy testów
+- **Datę testu**: domyślnie dzisiaj. Można podać datę przeszłą, nie przyszłą. Test starszy niż ostatni zarejestrowany nie przesuwa terminu
+- **Rodzaj**: tabletop / dyskusja, ćwiczenie częściowe, pełne przerwanie, test równoległy
+- **Wynik**: zaliczony, częściowy lub niezaliczony
+- **Uzyskane RTO i RPO**, uczestników, cele z zaznaczeniem osiągniętych, uwagi i opcjonalny dowód
 
-Plan musi być okresowo testowany. Dostępne typy testów:
+Uzyskane czasy są porównywane z MTPD oraz celami RTO i RPO **każdego** objętego procesu. Ewentualne przekroczenia wyświetlają się przy zapisie.
 
-| Typ | Opis |
-|-----|------|
-| **Tabletop** | Symulacja papierowa/dyskusja. Uczestnicy w sali konferencyjnej, bez zaangażowania rzeczywistych systemów |
-| **Symulacja** | Częściowa symulacja z niektórymi rzeczywistymi systemami w trybie testowym, bez przerywania produkcji |
-| **Pełny** | Kompletny test z aktywacją planu na rzeczywistych systemach, bez wpływu na normalną produkcję |
-| **Drill** | Nieogłoszone ćwiczenie testujące rzeczywiste czasy reakcji zespołu |
+### Ćwiczenia
 
-Aby zarejestrować test: z karty planu kliknij **Nowy test**, wybierz typ, datę, uczestników i wynik.
+Zakładka **Ćwiczenia** to historia testów: data, plan, rodzaj, wynik, uzyskane RTO/RPO (na pomarańczowo, jeśli przekraczają plan), osiągnięte cele i dowody. Cele i uwagi można odczytać po najechaniu na wiersz. Testu nie można edytować. Jeśli został zarejestrowany przez pomyłkę, usuwa się go, a data ostatniego testu planu jest przeliczana.
 
-### Co się dzieje, gdy test nie powiedzie się (automatyczny PDCA)
+### Automatyczne PDCA
 
-Jeśli test jest zarejestrowany z wynikiem **Nieudany** lub **Częściowo zaliczony**:
+- Wynik **częściowy** lub **niezaliczony** → otwiera się cykl PDCA i wysyłane jest powiadomienie o niezaliczonym teście BCP
+- Wynik **zaliczony**, ale czasy ponad MTPD lub cel BIA → otwiera się PDCA z powodu przekroczenia
 
-1. Automatycznie tworzony jest cykl PDCA z fazą startową PLAN
-2. PDCA jest przypisywany właścicielowi planu BCP
-3. Właściciel musi opracować plan działania w ciągu 30 dni
-4. Plan BCP pozostaje w stanie „Do aktualizacji", dopóki PDCA nie zostanie zamknięty z pozytywnym wynikiem
+### Termin testu
 
-### Wygaśnięcie planów i alerty
-
-Każdy plan BCP ma obowiązkową datę przeglądu (zazwyczaj roczną). Gdy data się zbliża:
-
-- **30 dni przed**: powiadomienie e-mail do właściciela planu
-- **W dniu wygaśnięcia**: plan przechodzi do stanu „Wygasły" z czerwoną odznaką. Automatycznie tworzone jest zadanie przeglądu
-- Jeśli wygasły plan obejmuje procesy z MTPD < 48 godzin, do Plant Manager wysyłane jest powiadomienie eskalacyjne
+Każdej nocy system sprawdza zatwierdzone plany. Dla każdego planu z zaległym lub nigdy nieprzeprowadzonym testem otwiera **jedno** zadanie dla Risk Managera, tylko jedno, dopóki pozostaje otwarte. Plan pozostaje zatwierdzony. Termin testu widać także w Terminarzu.
 
 ---
 
@@ -1576,7 +1585,7 @@ Zakładka jest przeznaczona najpierw dla kierownictwa, a następnie dla osób pr
 Podzielona na trzy podsekcje, wybierane u góry zakładki:
 
 - **Ryzyka**: ryzyka **powyżej progu akceptowalności** zatwierdzonego przez kierownictwo (apetyt na ryzyko z modułu Ryzyka; bez polityki używane jest 14) wraz z maksymalną tolerowaną liczbą; mapa cieplna z wyróżnionymi komórkami powyżej progu; 10 ryzyk o najwyższym wyniku (kliknij, aby je otworzyć); podział według NIS2 art. 21 i kategorii zagrożenia.
-- **Ciągłość**: procesy krytyczne (krytyczność ≥ 4) bez **zatwierdzonego** planu BCP oraz zatwierdzone plany z testem do powtórzenia; tabela proces · ryzyka · BCP · ostatni test. Wersje robocze i plany zarchiwizowane nie obejmują procesu.
+- **Ciągłość**: procesy krytyczne (krytyczność ≥ 4) bez **zatwierdzonego** planu BCP, procesy z zatwierdzonym planem, ale z zaległym lub nigdy nieprzeprowadzonym testem (*niepokryte: test zaległy*) oraz zatwierdzone plany z testem do powtórzenia; tabela proces · ryzyka · BCP · ostatni test. Wersje robocze i plany zarchiwizowane nie obejmują procesu.
 - **Wartość ekonomiczna**: oczekiwana roczna strata (ALE) inherentna i rezydualna, ryzyko ograniczone przez kontrole oraz zwrot z inwestycji (ROSI) planowanych działań.
 
 #### Zakładka Wskaźniki procesów

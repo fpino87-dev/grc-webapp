@@ -1,25 +1,78 @@
-import logging
+import json
 
-from rest_framework import viewsets, filters, status
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Prefetch
+from django.utils.dateparse import parse_date
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
-from django.utils import timezone
-from django.db.models import Q
 
-from core.audit import log_action
-from core.scoping import PlantScopedQuerysetMixin
 from apps.bia.serializers import CriticalProcessSerializer
+from core.scoping import PlantScopedQuerysetMixin, get_user_plant_ids, require_plant_access
+from . import services
 from .models import BcpPlan, BcpTest
 from .permissions import BcpPermission
 from .serializers import BcpPlanSerializer, BcpTestSerializer
-from . import services
-from apps.auth_grc.models import GrcRole, UserPlantAccess
-from apps.governance.models import NormativeRole, RoleAssignment
+
+
+def _error(exc: ValidationError) -> Response:
+    return Response({"detail": " ".join(exc.messages)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+def _json_list(value) -> list:
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except ValueError:
+            return []
+    return value if isinstance(value, list) else []
+
+
+def _to_int(value):
+    if value in (None, ""):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _record_test_from_request(plan, request) -> Response:
+    data = request.data
+    raw_date = data.get("test_date")
+    test_date = parse_date(raw_date) if raw_date else None
+    if raw_date and test_date is None:
+        return Response({"detail": "Data del test non valida."}, status=400)
+    try:
+        test, warnings = services.record_test(
+            plan,
+            data.get("result", ""),
+            request.user,
+            notes=data.get("notes", ""),
+            test_type=data.get("test_type", "tabletop"),
+            objectives=_json_list(data.get("objectives")),
+            rto_achieved=_to_int(data.get("rto_achieved_hours")),
+            rpo_achieved=_to_int(data.get("rpo_achieved_hours")),
+            participants_count=_to_int(data.get("participants_count")) or 0,
+            evidence_ids=_json_list(data.get("evidence_ids")),
+            evidence_file=request.FILES.get("evidence_file"),
+            test_date=test_date,
+        )
+    except ValidationError as exc:
+        return _error(exc)
+    return Response(
+        {"test": BcpTestSerializer(test).data, "warnings": warnings},
+        status=status.HTTP_201_CREATED,
+    )
 
 
 class BcpPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = BcpPlan.objects.all()
+    queryset = BcpPlan.objects.select_related("plant", "document", "critical_process").prefetch_related(
+        "critical_processes",
+        Prefetch("tests", queryset=BcpTest.objects.filter(deleted_at__isnull=True)),
+    )
     serializer_class = BcpPlanSerializer
     permission_classes = [BcpPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -27,305 +80,127 @@ class BcpPlanViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     search_fields = ["title"]
     plant_field = "plant"
 
+    def _process_ids(self):
+        if "critical_processes" not in self.request.data:
+            return None
+        return _json_list(self.request.data.get("critical_processes"))
+
+    def create(self, request, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                return super().create(request, *args, **kwargs)
+        except ValidationError as exc:
+            return _error(exc)
+
+    def update(self, request, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                return super().update(request, *args, **kwargs)
+        except ValidationError as exc:
+            return _error(exc)
+
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user)
-        log_action(
-            user=self.request.user,
-            action_code="bcp.plan.create",
-            level="L2",
-            entity=instance,
-            payload={"id": str(instance.id), "title": instance.title},
-        )
+        plan = serializer.save(created_by=self.request.user)
+        services.save_plan(plan, self.request.user, created=True, process_ids=self._process_ids())
 
     def perform_update(self, serializer):
-        instance = serializer.save()
-
-        # Se l'utente aggiorna la frequenza, ricalcolo anche la prossima scadenza
-        # partendo da `last_test_date` (non dalla compliance schedule globale).
-        try:
-            data = getattr(self.request, "data", {}) or {}
-            frequency_changed = (
-                "test_frequency_value" in data or "test_frequency_unit" in data
-            )
-            if frequency_changed and instance.last_test_date:
-                def _add_duration(base, value: int, unit: str):
-                    import datetime as _dt
-
-                    if unit == "days":
-                        return base + _dt.timedelta(days=value)
-                    if unit == "weeks":
-                        return base + _dt.timedelta(weeks=value)
-                    if unit == "months":
-                        month = base.month - 1 + value
-                        year = base.year + month // 12
-                        month = month % 12 + 1
-                        day = min(
-                            base.day,
-                            [31, 28, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month],
-                        )
-                        return _dt.date(year, month, day)
-                    if unit == "years":
-                        try:
-                            return base.replace(year=base.year + value)
-                        except ValueError:
-                            return base.replace(year=base.year + value, day=28)
-                    # Fallback: approssimazione
-                    return base + _dt.timedelta(days=value * 30)
-
-                value = instance.test_frequency_value or 1
-                unit = instance.test_frequency_unit or "years"
-                instance.next_test_date = _add_duration(instance.last_test_date, value, unit)
-                instance.save(update_fields=["next_test_date", "updated_at"])
-        except Exception as exc:
-            # Non deve bloccare l'update del piano.
-            logging.getLogger(__name__).warning("BCP: ricalcolo next_test_date saltato: %s", exc)
-
-        log_action(
-            user=self.request.user,
-            action_code="bcp.plan.update",
-            level="L2",
-            entity=instance,
-            payload={"id": str(instance.id), "title": instance.title},
+        plan = serializer.save()
+        data = self.request.data
+        services.save_plan(
+            plan, self.request.user, created=False, process_ids=self._process_ids(),
+            frequency_changed="test_frequency_value" in data or "test_frequency_unit" in data,
         )
+
+    def destroy(self, request, *args, **kwargs):
+        services.delete_bcp_plan(self.get_object(), request.user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["get"], url_path="missing-plans")
     def missing_plans(self, request):
-        """GET /api/v1/bcp/plans/missing-plans/?plant=<uuid>
-        Restituisce processi critici (criticality >= 4) senza BCP plan attivo.
-        """
+        """Processi critici (criticità ≥ 4) del sito senza piano BCP approvato."""
         plant_id = request.query_params.get("plant")
         if not plant_id:
             return Response({"detail": "Parametro 'plant' obbligatorio."}, status=400)
         from apps.plants.models import Plant
-        try:
-            plant = Plant.objects.get(pk=plant_id)
-        except Plant.DoesNotExist:
+
+        plant = Plant.objects.filter(pk=plant_id).first()
+        if plant is None:
             return Response({"detail": "Plant non trovato."}, status=404)
-        # Risposta costruita direttamente dal plant richiesto (non dal queryset
-        # scoped del viewset): serve accesso al sito (sweep 2026-06-12).
-        from core.scoping import require_plant_access
         require_plant_access(request.user, plant)
         missing = services.check_missing_bcp_plans(plant)
-        serializer = CriticalProcessSerializer(missing, many=True)
-        return Response(serializer.data)
+        return Response(CriticalProcessSerializer(missing, many=True).data)
+
+    @action(detail=False, methods=["get"])
+    def coverage(self, request):
+        """Processi critici con stato di copertura: coperto, scoperto per test
+        scaduto, senza piano. `?plant=` facoltativo; senza, il perimetro
+        dell'utente."""
+        from apps.bia.models import CriticalProcess
+
+        processes = CriticalProcess.objects.all()
+        plant_id = request.query_params.get("plant")
+        if plant_id:
+            require_plant_access(request.user, plant_id)
+            processes = processes.filter(plant_id=plant_id)
+        else:
+            allowed = get_user_plant_ids(request.user)
+            if allowed is not None:
+                processes = processes.filter(plant_id__in=allowed)
+        return Response(services.coverage_rows(processes))
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
         plan = self.get_object()
-        user = request.user
-
-        # CISO approval: privilegi su plant (preferenza UserPlantAccess) con fallback su RoleAssignment governance.
-        today = timezone.localdate()
-        has_access = False
-        if user and user.is_authenticated:
-            # 1) Preferenza via UserPlantAccess (ruolo operativo)
-            if user.is_superuser:
-                has_access = True
-            else:
-                access_qs = UserPlantAccess.objects.filter(
-                    user=user,
-                    role=GrcRole.COMPLIANCE_OFFICER,
-                    deleted_at__isnull=True,
-                )
-
-                if access_qs.filter(scope_type="org").exists():
-                    has_access = True
-                elif plan.plant and plan.plant.bu_id and access_qs.filter(scope_type="bu", scope_bu_id=plan.plant.bu_id).exists():
-                    has_access = True
-                elif access_qs.filter(
-                    scope_type__in=["plant_list", "single_plant"],
-                    scope_plants=plan.plant,
-                ).exists():
-                    has_access = True
-
-            # 2) Fallback via governance RoleAssignment (ruolo NormativeRole.CISO)
-            if not has_access:
-                ra_qs = RoleAssignment.objects.filter(
-                    user=user,
-                    role=NormativeRole.CISO,
-                    deleted_at__isnull=True,
-                    valid_from__lte=today,
-                ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
-
-                if ra_qs.filter(scope_type="org").exists():
-                    has_access = True
-                elif ra_qs.filter(scope_type="plant", scope_id=plan.pk).exists():
-                    has_access = True
-
-        if not has_access:
+        if not services.can_approve_plan(request.user, plan):
             return Response(
                 {"detail": "Non hai i permessi per approvare questo piano BCP."},
                 status=status.HTTP_403_FORBIDDEN,
             )
+        try:
+            plan = services.approve_plan(plan, request.user)
+        except ValidationError as exc:
+            return _error(exc)
+        return Response(self.get_serializer(self.get_queryset().get(pk=plan.pk)).data)
 
-        plan = services.approve_plan(plan, user)
-        serializer = self.get_serializer(plan)
-        return Response(serializer.data)
+    @action(detail=True, methods=["post"])
+    def archive(self, request, pk=None):
+        try:
+            plan = services.archive_plan(self.get_object(), request.user)
+        except ValidationError as exc:
+            return _error(exc)
+        return Response(self.get_serializer(self.get_queryset().get(pk=plan.pk)).data)
 
     @action(detail=True, methods=["post"])
     def record_test(self, request, pk=None):
-        plan = self.get_object()
-        result = request.data.get("result", "")
-        notes = request.data.get("notes", "")
-        test_type = request.data.get("test_type", "tabletop")
-        objectives = request.data.get("objectives") or []
-        if isinstance(objectives, str):
-            try:
-                import json
-
-                objectives = json.loads(objectives) or []
-            except Exception:
-                objectives = []
-
-        evidence_ids = request.data.get("evidence_ids") or []
-        if isinstance(evidence_ids, str):
-            try:
-                import json
-
-                evidence_ids = json.loads(evidence_ids) or []
-            except Exception:
-                evidence_ids = []
-
-        evidence_file = request.FILES.get("evidence_file")
-
-        def _to_int(v):
-            if v is None or v == "":
-                return None
-            try:
-                return int(v)
-            except Exception:
-                return None
-
-        rto_achieved = _to_int(request.data.get("rto_achieved_hours"))
-        rpo_achieved = _to_int(request.data.get("rpo_achieved_hours"))
-        participants_count = _to_int(request.data.get("participants_count")) or 0
-
-        try:
-            test, warnings = services.record_test(
-                plan,
-                result,
-                request.user,
-                notes=notes,
-                test_type=test_type,
-                objectives=objectives,
-                rto_achieved=rto_achieved,
-                rpo_achieved=rpo_achieved,
-                participants_count=participants_count,
-                evidence_ids=evidence_ids,
-                evidence_file=evidence_file,
-            )
-        except Exception as e:
-            from django.core.exceptions import ValidationError
-
-            if isinstance(e, ValidationError):
-                return Response({"detail": str(e.message)}, status=400)
-            raise
-        serializer = BcpTestSerializer(test)
-        return Response({"test": serializer.data, "warnings": warnings})
-
-    def destroy(self, request, *args, **kwargs):
-        plan = self.get_object()
-        services.delete_bcp_plan(plan, request.user)
-        return Response(status=204)
+        return _record_test_from_request(self.get_object(), request)
 
 
 class BcpTestViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = BcpTest.objects.all()
+    """Storico dei test. Si registrano con POST (record_test) e si eliminano;
+    non si modificano: esito e tempi sono evidenza di audit."""
+
+    queryset = BcpTest.objects.select_related("plan", "plan__plant").prefetch_related("evidences")
     serializer_class = BcpTestSerializer
     permission_classes = [BcpPermission]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ["plan"]
+    filterset_fields = {"plan": ["exact"], "plan__plant": ["exact"]}
     plant_field = "plan__plant"
-
-    def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user)
-        log_action(
-            user=self.request.user,
-            action_code="bcp.test.create",
-            level="L2",
-            entity=instance,
-            payload={"id": str(instance.id), "plan_id": str(instance.plan_id)},
-        )
+    http_method_names = ["get", "post", "delete", "head", "options"]
 
     def create(self, request, *args, **kwargs):
-        """
-        Mantiene compatibilità con la UI:
-        POST /bcp/tests/ con payload senza test_date (viene impostata dal service).
-        """
-        from django.core.exceptions import ValidationError
         plan_id = request.data.get("plan")
         if not plan_id:
             return Response({"detail": "Parametro 'plan' obbligatorio."}, status=400)
-
-        try:
-            plan = BcpPlan.objects.get(pk=plan_id)
-        except BcpPlan.DoesNotExist:
+        # Solo piani del perimetro dell'utente.
+        plan = BcpPlan.objects.filter(pk=plan_id)
+        allowed = get_user_plant_ids(request.user)
+        if allowed is not None:
+            plan = plan.filter(plant_id__in=allowed)
+        plan = plan.select_related("plant").first()
+        if plan is None:
             return Response({"detail": "Piano BCP non trovato."}, status=404)
-
-        result = request.data.get("result", "")
-        notes = request.data.get("notes", "")
-        test_type = request.data.get("test_type", "tabletop")
-        objectives = request.data.get("objectives") or []
-        if isinstance(objectives, str):
-            try:
-                import json
-
-                objectives = json.loads(objectives) or []
-            except Exception:
-                objectives = []
-
-        evidence_ids = request.data.get("evidence_ids") or []
-        if isinstance(evidence_ids, str):
-            try:
-                import json
-
-                evidence_ids = json.loads(evidence_ids) or []
-            except Exception:
-                evidence_ids = []
-
-        evidence_file = request.FILES.get("evidence_file")
-
-        def _to_int(v):
-            if v is None or v == "":
-                return None
-            try:
-                return int(v)
-            except Exception:
-                return None
-
-        rto_achieved = _to_int(request.data.get("rto_achieved_hours"))
-        rpo_achieved = _to_int(request.data.get("rpo_achieved_hours"))
-        participants_count = _to_int(request.data.get("participants_count")) or 0
-
-        try:
-            test, warnings = services.record_test(
-                plan,
-                result,
-                request.user,
-                notes=notes,
-                test_type=test_type,
-                objectives=objectives,
-                rto_achieved=rto_achieved,
-                rpo_achieved=rpo_achieved,
-                participants_count=participants_count,
-                evidence_ids=evidence_ids,
-                evidence_file=evidence_file,
-            )
-        except ValidationError as e:
-            return Response({"detail": str(e.message)}, status=400)
-
-        serializer = BcpTestSerializer(test)
-        return Response({"test": serializer.data, "warnings": warnings}, status=201)
+        return _record_test_from_request(plan, request)
 
     def destroy(self, request, *args, **kwargs):
-        test = self.get_object()
-        from core.audit import log_action
-        test.soft_delete()
-        log_action(
-            user=request.user,
-            action_code="bcp.test.deleted",
-            level="L2",
-            entity=test,
-            payload={"id": str(test.id), "plan_id": str(test.plan_id)},
-        )
-        return Response(status=204)
+        services.delete_test(self.get_object(), request.user)
+        return Response(status=status.HTTP_204_NO_CONTENT)

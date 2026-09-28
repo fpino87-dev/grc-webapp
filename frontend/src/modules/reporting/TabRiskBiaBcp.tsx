@@ -388,9 +388,10 @@ function ContinuityView({ data }: { data: RiskBiaBcpData }) {
   const { kpis } = data;
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiTile label={t("reporting.risk_bia_bcp.kpi_processes")} value={data.bia_bcp_table.length} />
         <KpiTile label={t("reporting.risk_bia_bcp.kpi_bia_no_bcp")} value={kpis.bia_critical_no_bcp} variant={kpis.bia_critical_no_bcp > 0 ? "danger" : "ok"} sub={t("reporting.risk_bia_bcp.kpi_bia_no_bcp_sub")} />
+        <KpiTile label={t("reporting.risk_bia_bcp.kpi_bia_test_expired")} value={kpis.bia_critical_test_expired ?? 0} variant={(kpis.bia_critical_test_expired ?? 0) > 0 ? "warning" : "ok"} sub={t("reporting.risk_bia_bcp.kpi_bia_test_expired_sub")} />
         <KpiTile label={t("reporting.risk_bia_bcp.kpi_bcp_overdue")} value={kpis.bcp_test_overdue} variant={kpis.bcp_test_overdue > 0 ? "warning" : "ok"} sub={t("reporting.risk_bia_bcp.kpi_bcp_overdue_sub")} />
       </div>
       <BiaBcpTable rows={data.bia_bcp_table} />

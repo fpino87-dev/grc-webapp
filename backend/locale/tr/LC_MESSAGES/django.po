@@ -3059,3 +3059,36 @@ msgstr "Kabul edilebilirlik eşiğinin üzerindeki riskler (en yüksek artık)"
 #: apps/management_review/report/builder.py
 msgid "Rischi oltre soglia"
 msgstr "Eşik üstü riskler"
+
+msgid "Uno o più processi indicati non esistono."
+msgstr "Belirtilen süreçlerden biri veya birkaçı mevcut değil."
+
+msgid "I processi coperti devono appartenere al sito del piano."
+msgstr "Kapsanan süreçler planın tesisine ait olmalıdır."
+
+msgid "Il documento scelto non è disponibile per il sito del piano."
+msgstr "Seçilen doküman planın tesisi için kullanılamıyor."
+
+msgid "Si approva solo un piano in bozza."
+msgstr "Yalnızca taslak durumundaki bir plan onaylanabilir."
+
+msgid "Il piano è già archiviato."
+msgstr "Plan zaten arşivlenmiş."
+
+msgid "Un piano archiviato non si testa."
+msgstr "Arşivlenmiş bir plan test edilemez."
+
+msgid "Esito del test non valido."
+msgstr "Geçersiz test sonucu."
+
+msgid "Tipo di test non valido."
+msgstr "Geçersiz test türü."
+
+msgid "La data del test non può essere futura."
+msgstr "Test tarihi gelecekte olamaz."
+
+msgid "%(n)s processi critici con piano BCP approvato ma test scaduto o mai eseguito: %(names)s"
+msgstr "Onaylı iş sürekliliği planı olan ancak testi gecikmiş veya hiç yapılmamış %(n)s kritik süreç: %(names)s"
+
+msgid "%(n)s processi critici con test BCP scaduto o mai eseguito"
+msgstr "İş sürekliliği testi gecikmiş veya hiç yapılmamış %(n)s kritik süreç"

@@ -149,6 +149,8 @@ def build_summary_prompt(review: ManagementReview, lang: str) -> str:
     b = snap.get("bcp") or {}
     if b.get("processi_critici_senza_bcp"):
         lines.append(f"- Continuità: processi critici senza piano BCP {b['processi_critici_senza_bcp']}")
+    if b.get("processi_critici_test_scaduto"):
+        lines.append(f"- Continuità: processi critici con test BCP scaduto {b['processi_critici_test_scaduto']}")
     k = snap.get("kpi") or {}
     if k:
         counts = k.get("status_counts") or {}

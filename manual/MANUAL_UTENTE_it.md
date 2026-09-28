@@ -384,7 +384,7 @@ Questi tre parametri definiscono la tolleranza del processo all'interruzione:
 | **RTO** (Recovery Time Objective) | In quanto tempo dobbiamo ripristinare il processo dopo un'interruzione | Es. "Il sistema MES deve tornare operativo entro 4 ore dall'incidente" |
 | **RPO** (Recovery Point Objective) | Fino a quale punto nel passato possiamo perdere i dati senza danni accettabili | Es. "Non possiamo perdere più di 1 ora di dati di produzione" — quindi i backup devono essere almeno ogni ora |
 
-Il sistema usa RTO e RPO per verificare che il piano BCP collegato (M16) sia coerente: se il BCP prevede un RTO superiore a quello dichiarato nella BIA, appare un avviso.
+Il sistema usa RTO e RPO per verificare che il piano BCP collegato (M16) sia coerente: se l'RTO dimostrato dal piano (quello ottenuto nell'ultimo test, o quello dichiarato se non è ancora stato misurato) supera il target della BIA, appare un avviso.
 
 ### Flusso: bozza → validazione → approvazione
 
@@ -1170,56 +1170,65 @@ Se il corso attribuisce una **competenza**, chi ha un account la riceve con la p
 
 ## 15. Business Continuity (M16)
 
-[Schermata: lista piani BCP]
+La pagina **BCP** ha tre tab: **Copertura**, **Piani** ed **Esercitazioni**. Il tab aperto resta nell'indirizzo, quindi il link si può condividere.
+
+Approvazione e test sono due cose separate:
+
+- l'**approvazione** dice che il piano è in vigore (bozza → approvato → archiviato);
+- il **test** dimostra che il piano funziona. Ha una scadenza, calcolata dalla data dell'ultimo test e dalla frequenza del piano.
+
+Un test scaduto **non toglie l'approvazione**: i processi coperti dal piano risultano *scoperti per test scaduto* finché non si registra un nuovo test.
+
+### Copertura
+
+Elenca i processi della BIA con criticità ≥ 4 e, per ognuno, lo stato di copertura:
+
+| Stato | Significato |
+|-------|-------------|
+| **Coperto** (verde) | Almeno un piano approvato con test in regola |
+| **Scoperto per test scaduto** (giallo) | Piano approvato, ma test scaduto o mai eseguito |
+| **Senza piano** (rosso) | Nessun piano approvato: bozze e piani archiviati non coprono |
+
+Accanto a ogni piano compare il suo **RTO dimostrato**: è l'RTO ottenuto nell'ultimo test che lo ha misurato. Se nessun test l'ha ancora misurato si usa quello dichiarato nel piano, segnato con \*. Se supera il target della BIA è evidenziato in arancione. Per un processo senza piano c'è il link **Crea piano per questo processo**. È la stessa regola usata dal Reporting (tab Risk / BIA / BCP) e dal riesame di direzione.
 
 ### Come creare un piano BCP
 
-1. Vai su **Governance → BCP → Nuovo piano**
+1. Clicca **+ Nuovo piano** (oppure **Crea piano per questo processo** dalla Copertura)
 2. Compila:
-   - **Nome del piano** (es. "Piano BCP — Linea produzione B — Stabilimento Sud")
-   - **Scope**: processi critici coperti dal piano (seleziona dalla BIA)
-   - **Owner del piano**: responsabile della manutenzione
-   - **RTO obiettivo** e **RPO obiettivo**: i valori che il piano deve garantire
-3. Clicca **Salva bozza**
+   - **Titolo**, **Sito** e **Versione**
+   - **Documento del piano (M07)**: il testo del piano si gestisce in **Documenti**, con versioni e approvazione. Qui si collega il documento del sito, di organizzazione o condiviso con il sito. Nell'elenco dei piani, un piano senza documento è segnalato
+   - **Processi coperti**: uno o più processi BIA del sito
+   - **RTO** e **RPO** del piano: sotto ogni campo compare il target BIA più stringente dei processi scelti, in arancione se il valore lo supera
+   - **Frequenza dei test**: mensile, trimestrale, semestrale, annuale o biennale
+3. Clicca **Crea piano**. Il piano nasce in bozza
 
-### Collegamento con RTO/RPO della BIA
+### Approvazione e archiviazione
 
-Nella sezione **Processi coperti** del piano BCP, per ogni processo selezionato viene mostrato il confronto tra:
+Il pulsante **Approva** compare solo a chi può approvare il piano: il Compliance Officer con accesso a quel sito, oppure chi ha la nomina CISO in vigore per l'organizzazione, la BU o il sito. **Archivia** ritira un piano non più in uso: resta consultabile con i suoi test, ma non copre più nessun processo. I piani archiviati si vedono spuntando **Mostra archiviati**.
 
-- **RTO richiesto dalla BIA**: il massimo tollerabile dichiarato nel processo critico
-- **RTO garantito dal BCP**: quello che il piano riesce effettivamente a garantire
+### Registrare un test
 
-Se il BCP garantisce un RTO superiore a quello richiesto dalla BIA, appare un avviso arancione che richiede revisione. Il sistema non blocca il salvataggio ma richiede una giustificazione esplicita.
+Dal tab **Piani** clicca **+ Test**. Si può registrare un test anche su un piano approvato. Indica:
 
-### Tipi di test
+- **Data del test**: di default oggi. Si può indicare una data passata, non una futura. Un test più vecchio dell'ultimo registrato non sposta la scadenza
+- **Tipo**: tabletop / discussione, drill / esercitazione parziale, interruzione completa, test parallelo
+- **Esito**: superato, parziale o fallito
+- **RTO e RPO ottenuti**, partecipanti, obiettivi con spunta di quelli raggiunti, note ed evidenza facoltativa
 
-Il piano deve essere testato periodicamente. I tipi di test disponibili sono:
+I tempi ottenuti sono confrontati con MTPD, RTO e RPO target di **ogni** processo coperto. Gli eventuali sforamenti compaiono al salvataggio.
 
-| Tipo | Descrizione |
-|------|-------------|
-| **Tabletop** | Simulazione su carta/discussione. Partecipanti in sala riunioni, nessun sistema reale coinvolto |
-| **Simulation** | Simulazione parziale con alcuni sistemi reali in modalita' test, senza interruzione della produzione |
-| **Full** | Test completo con attivazione del piano su sistemi reali, senza impatto sulla produzione normale |
-| **Drill** | Esercitazione non annunciata per testare i tempi di risposta reali del team |
+### Esercitazioni
 
-Per registrare un test: dalla scheda del piano clicca **Nuovo test**, seleziona il tipo, la data, i partecipanti e l'esito.
+Il tab **Esercitazioni** è lo storico dei test: data, piano, tipo, esito, RTO/RPO ottenuti (in arancione se oltre il piano), obiettivi raggiunti ed evidenze. Gli obiettivi e le note si leggono passando sopra la riga. Un test non si modifica. Se è stato registrato per errore si elimina, e la data dell'ultimo test del piano viene ricalcolata.
 
-### Cosa succede se il test fallisce (PDCA automatico)
+### PDCA automatico
 
-Se il test viene registrato con esito **Fallito** o **Parzialmente superato**:
+- Esito **parziale** o **fallito** → si apre un ciclo PDCA e parte la notifica di test BCP fallito
+- Esito **superato** ma tempi oltre MTPD o target BIA → si apre un PDCA di sforamento
 
-1. Viene creato automaticamente un ciclo PDCA con fase di partenza PLAN
-2. Il PDCA viene assegnato all'owner del piano BCP
-3. L'owner deve compilare il piano d'azione entro 30 giorni
-4. Il piano BCP resta in stato "Da aggiornare" finche' il PDCA non viene chiuso positivamente
+### Scadenza del test
 
-### Scadenza piani e alert
-
-Ogni piano BCP ha una data di revisione obbligatoria (tipicamente annuale). Quando la data si avvicina:
-
-- **30 giorni prima**: notifica email all'owner del piano
-- **Alla scadenza**: il piano passa in stato "Scaduto" con badge rosso. Viene creato automaticamente un task di revisione
-- Se il piano scaduto copre processi con MTPD < 48 ore, viene inviata una notifica di escalation al Plant Manager
+Ogni notte il sistema controlla i piani approvati. Per ogni piano con test scaduto o mai eseguito apre **un** task al Risk Manager, uno solo finché resta aperto. Il piano resta approvato. La scadenza del test compare anche nello Scadenzario.
 
 ---
 
@@ -1576,7 +1585,7 @@ Il tab è pensato prima per la direzione, poi per chi lavora sui gap:
 Diviso in tre sotto-sezioni, selezionabili in cima al tab:
 
 - **Rischi**: rischi **oltre la soglia di accettabilità** approvata dalla direzione (propensione al rischio del modulo Rischi; senza policy si usa 14), con il numero massimo tollerato; heatmap con le celle oltre soglia evidenziate; i 10 rischi con punteggio più alto (clic per aprirli); ripartizione NIS2 art. 21 e per categoria di minaccia.
-- **Continuità**: processi critici (criticità ≥ 4) senza un piano BCP **approvato** e piani approvati con il test da rifare; tabella processo · rischi · BCP · ultimo test. Bozze e piani archiviati non coprono un processo.
+- **Continuità**: processi critici (criticità ≥ 4) senza un piano BCP **approvato**, processi con piano approvato ma test scaduto o mai eseguito (*scoperti per test scaduto*) e piani approvati con il test da rifare; tabella processo · rischi · BCP · ultimo test. Bozze e piani archiviati non coprono un processo.
 - **Valore economico**: perdita attesa annua (ALE) inerente e residua, rischio abbattuto dai controlli e ritorno degli investimenti (ROSI) dei trattamenti pianificati.
 
 #### Tab Indicatori di processo

@@ -237,16 +237,22 @@ def risk_bia_bcp(plant_id) -> dict:
         if ale_total_inherent else 0.0
     )
 
-    # Copertura BCP: regola unica di bcp.services (solo piani approvati).
-    from apps.bcp.services import critical_processes_without_bcp
+    # Copertura BCP: regola unica di bcp.services — senza piano approvato, e
+    # con piano approvato ma test scaduto o mai eseguito (scoperti per test).
+    from apps.bcp.services import critical_processes_test_expired, critical_processes_without_bcp
 
     approved_bcp_qs = bcp_qs.filter(status="approvato")
     bia_critical_no_bcp = len(critical_processes_without_bcp(bia_qs))
+    bia_critical_test_expired = len(critical_processes_test_expired(bia_qs))
 
-    # Test da rifare: solo sui piani approvati (una bozza non si testa).
-    bcp_test_overdue = approved_bcp_qs.filter(
-        Q(next_test_date__lt=today) | Q(next_test_date__isnull=True)
-    ).count()
+    # Test da rifare (scaduto o mai eseguito): solo sui piani approvati, con la
+    # regola unica bcp.services.plan_test_state.
+    from apps.bcp.services import TEST_OK, plan_test_state
+
+    bcp_test_overdue = sum(
+        1 for last, nxt in approved_bcp_qs.values_list("last_test_date", "next_test_date")
+        if plan_test_state(last, nxt, today) != TEST_OK
+    )
 
     # Heatmap 5x5
     heatmap_raw = (
@@ -414,7 +420,9 @@ def risk_bia_bcp(plant_id) -> dict:
             # Test da rifare solo per un piano approvato (come il riquadro).
             "test_overdue": bool(
                 best_bcp and best_bcp["status"] == "approvato"
-                and (best_bcp["next_test_date"] is None or best_bcp["next_test_date"] < today)
+                and plan_test_state(
+                    best_bcp["last_test_date"], best_bcp["next_test_date"], today,
+                ) != TEST_OK
             ),
         })
 
@@ -499,6 +507,7 @@ def risk_bia_bcp(plant_id) -> dict:
             "risks_formally_accepted": risks_formally_accepted,
             "risks_over_appetite": risks_over_appetite,
             "bia_critical_no_bcp": bia_critical_no_bcp,
+            "bia_critical_test_expired": bia_critical_test_expired,
             "bcp_test_overdue": bcp_test_overdue,
             "ale_total": float(ale_total),
             "ale_total_inherent": float(ale_total_inherent),

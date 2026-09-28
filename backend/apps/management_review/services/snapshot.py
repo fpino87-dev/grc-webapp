@@ -755,14 +755,18 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     }
 
     # ── 6. BCP ──
-    # Regola unica (bcp.services): criticità ≥ 4, senza piano BCP approvato.
+    # Regola unica (bcp.services): criticità ≥ 4, senza piano BCP approvato;
+    # a parte quelli con piano approvato ma test scaduto o mai eseguito.
     from apps.bia.models import CriticalProcess
-    from apps.bcp.services import critical_processes_without_bcp
+    from apps.bcp.services import critical_processes_test_expired, critical_processes_without_bcp
 
     missing_bcp = critical_processes_without_bcp(CriticalProcess.objects.filter(**scope))
+    test_expired = critical_processes_test_expired(CriticalProcess.objects.filter(**scope))
     bcp_summary = {
         "processi_critici_senza_bcp": len(missing_bcp),
         "nomi": [p.name for p in missing_bcp[:5]],
+        "processi_critici_test_scaduto": len(test_expired),
+        "nomi_test_scaduto": [p.name for p in test_expired[:5]],
     }
 
     # ── 7. Task scaduti ──

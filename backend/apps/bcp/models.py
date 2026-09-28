@@ -32,9 +32,21 @@ class BcpPlan(BaseModel):
     )
     last_test_date = models.DateField(null=True, blank=True)
     next_test_date = models.DateField(null=True, blank=True)
+    # Processi coperti dal piano: l'elenco è `critical_processes`. Il FK
+    # `critical_process` è storico: services.set_plan_processes lo riversa
+    # nell'elenco e lo azzera (i consumer contano comunque FK ∪ M2M).
     critical_processes = models.ManyToManyField("bia.CriticalProcess", blank=True)
     critical_process = models.ForeignKey(
         "bia.CriticalProcess",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="bcp_plans",
+    )
+    # Il testo del piano vive in M07 (versioni, approvazione, revisione):
+    # qui solo il riferimento al documento.
+    document = models.ForeignKey(
+        "documents.Document",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,

@@ -3746,7 +3746,179 @@
   },
   "bcp": {
     "test_frequency_label": "Test sıklığı",
-    "status_superato": "Başarılı"
+    "status_superato": "Başarılı",
+    "title": "İş Sürekliliği (BCP)",
+    "loading": "Yükleniyor…",
+    "tabs": {
+      "coverage": "Kapsam",
+      "plans": "Planlar",
+      "tests": "Tatbikatlar"
+    },
+    "actions": {
+      "new_plan": "+ Yeni plan",
+      "add_test": "+ Test",
+      "edit": "Düzenle",
+      "approve": "Onayla",
+      "archive": "Arşivle",
+      "delete": "Sil",
+      "cancel": "İptal",
+      "close": "Kapat",
+      "create": "Plan oluştur",
+      "save": "Değişiklikleri kaydet",
+      "saving": "Kaydediliyor…",
+      "record_test": "Testi kaydet",
+      "remove": "Kaldır"
+    },
+    "coverage": {
+      "state": {
+        "covered": "Kapsanıyor",
+        "test_expired": "Kapsam dışı: test gecikmiş",
+        "missing": "Plan yok"
+      },
+      "hint": {
+        "covered": "Testi güncel olan onaylı plan",
+        "test_expired": "Onaylı plan ancak test gecikmiş veya hiç yapılmamış",
+        "missing": "Onaylı BCP planı yok"
+      },
+      "col_process": "Kritik süreç",
+      "col_criticality": "Kritiklik",
+      "col_targets": "BIA hedefleri",
+      "col_coverage": "Kapsam",
+      "col_plans": "Planlar",
+      "create_plan": "+ Bu süreç için plan oluştur",
+      "empty": "BIA'da kritik süreç (kritiklik ≥ 4) yok",
+      "rto_measured": "Onu ölçen son testte elde edilen RTO",
+      "rto_declared": "Planda beyan edilen RTO: henüz hiçbir test ölçmedi",
+      "footnote": "Kritikliği ≥ 4 olan BIA süreçleri listelenir. Planın RTO'su son testte kanıtlanan değerdir; * ile gösterilen, henüz ölçülmemiş beyan edilen değerdir."
+    },
+    "plans": {
+      "col_plan": "Plan",
+      "col_document": "Doküman",
+      "col_status": "Onay",
+      "col_test": "Test",
+      "empty": "BCP planı yok",
+      "no_document": "Bağlı doküman yok",
+      "processes": "Kapsanan süreçler: {{count}}",
+      "next_test": "Sonraki test: {{date}}",
+      "show_archived": "Arşivlenenleri göster ({{count}})",
+      "archive_confirm": "Plan arşivlensin mi? Testleriyle birlikte görüntülenebilir kalır ancak artık hiçbir süreci kapsamaz.",
+      "delete_confirm": "Bu BCP planı ve testleri silinsin mi?"
+    },
+    "tests": {
+      "all_plans": "Tüm planlar",
+      "empty": "Kayıtlı test yok",
+      "col_date": "Tarih",
+      "col_plan": "Plan",
+      "col_type": "Tür",
+      "col_result": "Sonuç",
+      "col_rto": "Elde edilen RTO",
+      "col_rpo": "Elde edilen RPO",
+      "col_objectives": "Hedefler",
+      "col_evidence": "Kanıtlar",
+      "delete_confirm": "Bu test silinsin mi? Planın son test tarihi yeniden hesaplanacak."
+    },
+    "form": {
+      "new_title": "Yeni BCP planı",
+      "edit_title": "BCP planını düzenle",
+      "title": "Başlık",
+      "plant": "Tesis",
+      "version": "Sürüm",
+      "select": "— seçin —",
+      "document": "Plan dokümanı (M07)",
+      "no_document": "— doküman yok —",
+      "document_hint": "Plan metni Dokümanlar'da yönetilir: burada tesisin, organizasyonun veya tesisle paylaşılan dokümanı bağlarsınız.",
+      "processes": "Kapsanan süreçler",
+      "processes_pick_plant": "Önce tesisi seçin.",
+      "processes_empty": "Bu tesis için BIA süreci yok.",
+      "criticality": "kritiklik {{value}}",
+      "rto": "Plan RTO (saat)",
+      "rpo": "Plan RPO (saat)",
+      "bia_target": "BIA hedefi: {{value}} sa",
+      "frequency": "Test sıklığı",
+      "save_error": "Kaydetme sırasında hata"
+    },
+    "frequency": {
+      "1_months": "Aylık",
+      "3_months": "Üç aylık",
+      "6_months": "Altı aylık",
+      "1_years": "Yıllık",
+      "2_years": "İki yılda bir"
+    },
+    "record": {
+      "title": "BCP testini kaydet",
+      "date": "Test tarihi",
+      "type": "Tür",
+      "result": "Sonuç",
+      "failed_hint": "Kısmi veya başarısız sonuç otomatik olarak bir PDCA açar.",
+      "rto_achieved": "Elde edilen RTO (sa)",
+      "rpo_achieved": "Elde edilen RPO (sa)",
+      "participants": "Katılımcılar",
+      "plan_value": "plan: {{value}} sa",
+      "rto_hint": "Elde edilen süreler kapsanan süreçlerin BIA hedefleriyle karşılaştırılır ve planın kanıtlanmış kapasitesi olur.",
+      "objectives": "Test hedefleri",
+      "objective_placeholder": "Hedef ekle…",
+      "objectives_met": "Ulaşılan hedefler: {{met}}/{{total}}",
+      "notes": "Notlar",
+      "evidence": "Test kanıtı (isteğe bağlı)",
+      "warnings_title": "Test uyarılarla kaydedildi",
+      "warning": {
+        "rto_over_mtpd": "{{process}}: elde edilen RTO {{achieved}} sa, MTPD'yi ({{target}} sa) aşıyor",
+        "rto_over_target": "{{process}}: elde edilen RTO {{achieved}} sa, BIA hedefini ({{target}} sa) aşıyor",
+        "rpo_over_target": "{{process}}: elde edilen RPO {{achieved}} sa, BIA hedefini ({{target}} sa) aşıyor"
+      },
+      "pdca_overrun": "Süre aşımı için bir PDCA açıldı.",
+      "pdca_failed": "Test sonucu için bir PDCA açıldı."
+    },
+    "test_state": {
+      "ok": "Test güncel",
+      "overdue": "Test gecikmiş",
+      "never": "Hiç test edilmedi"
+    },
+    "result": {
+      "superato": "Başarılı",
+      "parziale": "Kısmi",
+      "fallito": "Başarısız"
+    },
+    "test_type": {
+      "tabletop": "Masa başı / tartışma",
+      "drill": "Kısmi tatbikat",
+      "full_interruption": "Tam kesinti",
+      "parallel": "Paralel test"
+    },
+    "plan_status": {
+      "bozza": "taslak",
+      "approvato": "onaylı",
+      "archiviato": "arşivlendi"
+    },
+    "document_status": {
+      "bozza": "taslak",
+      "revisione": "incelemede",
+      "approvazione": "onay bekliyor",
+      "approvato": "onaylı",
+      "archiviato": "arşivlendi"
+    },
+    "help": {
+      "title": "İş Sürekliliği — M16",
+      "description": "BIA'daki kritik süreçleri süreklilik planlarına bağlar ve testlerle kurtarma sürelerinin hedefleri karşıladığını kanıtlar. Plan onayı ve testler ayrıdır: gecikmiş bir test onayı kaldırmaz ancak süreci gecikmiş test nedeniyle kapsam dışı yapar.",
+      "steps": {
+        "1": "Kapsam sekmesinde hangi kritik süreçlerin planı olmadığını veya testinin geciktiğini görün",
+        "2": "Planı oluşturun: tesis, kapsanan süreçler, RTO/RPO ve test sıklığı",
+        "3": "Dokümanlar'da (M07) yönetilen plan dokümanını bağlayın",
+        "4": "Planı onaylayın (Compliance Officer veya tesis CISO'su)",
+        "5": "Her testi tarih, sonuç ve elde edilen sürelerle kaydedin: planın kanıtlanmış kapasitesi olurlar",
+        "6": "Kısmi/başarısız sonuç veya hedefi aşan süreler PDCA açar; test vadesi geldiğinde Risk Manager'a bir görev gider"
+      },
+      "connections": {
+        "bia": "kritik süreçler ve RTO/RPO/MTPD hedefleri",
+        "documents": "sürümleri ve onayıyla plan dokümanı",
+        "pdca": "başarısız test veya aşılan sürelerde otomatik PDCA",
+        "reporting": "Raporlama'da ve yönetim gözden geçirmesinde kritik süreçlerin kapsamı"
+      },
+      "config": {
+        "bia": "BIA'da kritik süreçler ve RTO/RPO hedefleri",
+        "document": "Dokümanlar'a yüklenmiş plan dokümanı"
+      }
+    }
   },
   "audit_trail": {
     "levels_guide": "Seviye kılavuzu",
@@ -4416,7 +4588,9 @@
       "bia_bcp_table_hint": "Bir süreç yalnızca onaylı bir BCP ile kapsanır; planlanan tarih geçmişse veya yoksa test yeniden yapılmalıdır.",
       "col_risks": "Riskler (yüksek · orta · düşük)",
       "kpi_processes": "Kritik süreçler",
-      "ale_hint": "BIA kesinti maliyetlerinden hesaplanan yıllık beklenen kayıp: yalnızca kesinti maliyeti olan bir sürece bağlı riskler değerlenir."
+      "ale_hint": "BIA kesinti maliyetlerinden hesaplanan yıllık beklenen kayıp: yalnızca kesinti maliyeti olan bir sürece bağlı riskler değerlenir.",
+      "kpi_bia_test_expired": "Testi gecikmiş kritikler",
+      "kpi_bia_test_expired_sub": "onaylı plan, test yenilenmeli"
     },
     "access_matrix": {
       "subtitle": "Kimin erişimi var ve kim neyden sorumlu — erişimleri istediğiniz zaman doğrulayın.",
@@ -5658,7 +5832,8 @@
       "appetite_default": "Kabul edilebilirlik eşiği: artık risk {{score}} üzerinde (varsayılan değer: onaylı risk iştahı yok).",
       "appetite_tolerated": "Tolere edilen eşik üstü riskler: {{count}}.",
       "appetite_per_plant": "Eşikler tesisler arasında farklıdır: her risk kendi tesisinin eşiğiyle karşılaştırılır.",
-      "top_over_appetite": "Kabul edilebilirlik eşiğinin üzerindeki riskler (en yüksek artık)"
+      "top_over_appetite": "Kabul edilebilirlik eşiğinin üzerindeki riskler (en yüksek artık)",
+      "critical_bcp_test_expired": "İş sürekliliği testi gecikmiş veya hiç yapılmamış {{count}} kritik süreç"
     },
     "participants": {
       "heading": "Davetliler ve katılım",

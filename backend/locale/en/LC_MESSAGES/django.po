@@ -3058,3 +3058,36 @@ msgstr "Risks above the acceptance threshold (highest residual)"
 #: apps/management_review/report/builder.py
 msgid "Rischi oltre soglia"
 msgstr "Risks above threshold"
+
+msgid "Uno o più processi indicati non esistono."
+msgstr "One or more of the given processes do not exist."
+
+msgid "I processi coperti devono appartenere al sito del piano."
+msgstr "Covered processes must belong to the plan's site."
+
+msgid "Il documento scelto non è disponibile per il sito del piano."
+msgstr "The selected document is not available for the plan's site."
+
+msgid "Si approva solo un piano in bozza."
+msgstr "Only a draft plan can be approved."
+
+msgid "Il piano è già archiviato."
+msgstr "The plan is already archived."
+
+msgid "Un piano archiviato non si testa."
+msgstr "An archived plan cannot be tested."
+
+msgid "Esito del test non valido."
+msgstr "Invalid test result."
+
+msgid "Tipo di test non valido."
+msgstr "Invalid test type."
+
+msgid "La data del test non può essere futura."
+msgstr "The test date cannot be in the future."
+
+msgid "%(n)s processi critici con piano BCP approvato ma test scaduto o mai eseguito: %(names)s"
+msgstr "%(n)s critical processes with an approved BCP but an overdue or never-run test: %(names)s"
+
+msgid "%(n)s processi critici con test BCP scaduto o mai eseguito"
+msgstr "%(n)s critical processes with an overdue or never-run BCP test"

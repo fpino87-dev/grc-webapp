@@ -421,6 +421,11 @@ def _risk_blocks(snap) -> list:
         blocks.append({"type": "paragraph", "label": _("Continuità operativa"),
                        "text": _("%(n)s processi critici senza piano BCP: %(names)s") % {
                            "n": bcp["processi_critici_senza_bcp"], "names": ", ".join(bcp.get("nomi", []))}})
+    if bcp.get("processi_critici_test_scaduto"):
+        blocks.append({"type": "paragraph", "label": _("Continuità operativa"),
+                       "text": _("%(n)s processi critici con piano BCP approvato ma test scaduto o mai eseguito: %(names)s") % {
+                           "n": bcp["processi_critici_test_scaduto"],
+                           "names": ", ".join(bcp.get("nomi_test_scaduto", []))}})
     return blocks
 
 
@@ -531,6 +536,9 @@ def _alerts(snap) -> list[str]:
         out.append(_("%(n)s rischi critici senza piano di mitigazione") % {"n": r["senza_piano"]})
     if bcp.get("processi_critici_senza_bcp", 0) > 0:
         out.append(_("%(n)s processi critici senza piano BCP") % {"n": bcp["processi_critici_senza_bcp"]})
+    if bcp.get("processi_critici_test_scaduto", 0) > 0:
+        out.append(_("%(n)s processi critici con test BCP scaduto o mai eseguito")
+                   % {"n": bcp["processi_critici_test_scaduto"]})
     if d.get("evidenze_scadute", 0) > 0:
         out.append(_("%(n)s evidenze scadute") % {"n": d["evidenze_scadute"]})
     if pdca.get("bloccati_plan_90gg", 0) > 0:

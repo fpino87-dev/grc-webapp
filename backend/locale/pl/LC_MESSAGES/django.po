@@ -3080,3 +3080,36 @@ msgstr "Ryzyka powyżej progu akceptowalności (najwyższe rezydualne)"
 #: apps/management_review/report/builder.py
 msgid "Rischi oltre soglia"
 msgstr "Ryzyka powyżej progu"
+
+msgid "Uno o più processi indicati non esistono."
+msgstr "Co najmniej jeden ze wskazanych procesów nie istnieje."
+
+msgid "I processi coperti devono appartenere al sito del piano."
+msgstr "Objęte procesy muszą należeć do zakładu planu."
+
+msgid "Il documento scelto non è disponibile per il sito del piano."
+msgstr "Wybrany dokument nie jest dostępny dla zakładu planu."
+
+msgid "Si approva solo un piano in bozza."
+msgstr "Zatwierdzić można tylko plan w wersji roboczej."
+
+msgid "Il piano è già archiviato."
+msgstr "Plan jest już zarchiwizowany."
+
+msgid "Un piano archiviato non si testa."
+msgstr "Zarchiwizowanego planu nie można testować."
+
+msgid "Esito del test non valido."
+msgstr "Nieprawidłowy wynik testu."
+
+msgid "Tipo di test non valido."
+msgstr "Nieprawidłowy rodzaj testu."
+
+msgid "La data del test non può essere futura."
+msgstr "Data testu nie może być w przyszłości."
+
+msgid "%(n)s processi critici con piano BCP approvato ma test scaduto o mai eseguito: %(names)s"
+msgstr "%(n)s procesów krytycznych z zatwierdzonym planem ciągłości działania, ale z zaległym lub nigdy nieprzeprowadzonym testem: %(names)s"
+
+msgid "%(n)s processi critici con test BCP scaduto o mai eseguito"
+msgstr "%(n)s procesów krytycznych z zaległym lub nigdy nieprzeprowadzonym testem ciągłości działania"

@@ -384,7 +384,7 @@ Bu üç parametre, sürecin kesintiye karşı toleransını tanımlar:
 | **RTO** (Kurtarma Süresi Hedefi) | Bir kesintiden sonra süreci ne kadar sürede geri yüklememiz gerekiyor | Ör. "MES sistemi olaydan sonra 4 saat içinde çalışır duruma gelmeli" |
 | **RPO** (Kurtarma Noktası Hedefi) | Kabul edilebilir zarara uğramadan geçmişteki hangi noktaya kadar veri kaybedebiliriz | Ör. "1 saatten fazla üretim verisi kaybedemeyiz" — dolayısıyla yedeklemeler en az saatte bir yapılmalı |
 
-Sistem, bağlantılı İSP planının (M16) tutarlı olup olmadığını doğrulamak için RTO ve RPO kullanır: İSP, İEA'da beyan edilenden daha yüksek bir RTO öngörüyorsa uyarı görünür.
+Sistem, bağlantılı İSP planının (M16) tutarlı olup olmadığını doğrulamak için RTO ve RPO kullanır: planın kanıtladığı RTO (son testte elde edilen veya henüz ölçülmediyse beyan edilen) İEA hedefini aşarsa uyarı görünür.
 
 ### Akış: taslak → doğrulama → onay
 
@@ -1170,56 +1170,65 @@ Kurs bir **yetkinlik** kazandırıyorsa, hesabı olanlar bunu oturumun kanıtıy
 
 ## 15. İş Sürekliliği (M16)
 
-[Ekran görüntüsü: İSP planları listesi]
+**BCP** sayfasının üç sekmesi vardır: **Kapsam**, **Planlar** ve **Tatbikatlar**. Açık sekme sayfa adresinde kalır, bu nedenle bağlantı paylaşılabilir.
 
-### İSP planı nasıl oluşturulur
+Onay ve test iki ayrı şeydir:
 
-1. **Yönetişim → İSP → Yeni plan** bölümüne gidin
+- **onay**, planın yürürlükte olduğunu gösterir (taslak → onaylı → arşivlendi);
+- **test**, planın işe yaradığını kanıtlar. Son test tarihinden ve planın sıklığından hesaplanan bir vadesi vardır.
+
+Gecikmiş bir test **onayı kaldırmaz**: yeni bir test kaydedilene kadar planın kapsadığı süreçler *gecikmiş test nedeniyle kapsam dışı* olarak görünür.
+
+### Kapsam
+
+Kritikliği ≥ 4 olan BIA süreçlerini ve her biri için kapsam durumunu listeler:
+
+| Durum | Anlamı |
+|-------|--------|
+| **Kapsanıyor** (yeşil) | Testi güncel olan en az bir onaylı plan |
+| **Kapsam dışı: test gecikmiş** (sarı) | Onaylı plan, ancak test gecikmiş veya hiç yapılmamış |
+| **Plan yok** (kırmızı) | Onaylı plan yok: taslaklar ve arşivlenmiş planlar kapsamaz |
+
+Her planın yanında **kanıtlanmış RTO**'su görünür: onu ölçen son testte elde edilen RTO. Henüz hiçbir test ölçmediyse planda beyan edilen RTO kullanılır ve \* ile işaretlenir. BIA hedefini aşarsa turuncu ile vurgulanır. Planı olmayan bir süreçte **Bu süreç için plan oluştur** bağlantısı bulunur. Bu, Raporlama'nın (Risk / BIA / BCP sekmesi) ve yönetim gözden geçirmesinin kullandığı kuralın aynısıdır.
+
+### BCP planı nasıl oluşturulur
+
+1. **+ Yeni plan**'a tıklayın (veya Kapsam'dan **Bu süreç için plan oluştur**)
 2. Doldurun:
-   - **Planın adı** (ör. "İSP Planı — B Üretim Hattı — Güney Tesisi")
-   - **Kapsam**: plan tarafından kapsanan kritik süreçler (İEA'dan seçin)
-   - **Planın sahibi**: bakımdan sorumlu
-   - **Hedef RTO** ve **Hedef RPO**: planın garanti etmesi gereken değerler
-3. **Taslak Kaydet**'e tıklayın
+   - **Başlık**, **Tesis** ve **Sürüm**
+   - **Plan dokümanı (M07)**: plan metni sürümleri ve onayıyla birlikte **Dokümanlar**'da yönetilir. Burada tesisin, organizasyonun veya tesisle paylaşılan dokümanı bağlarsınız. Plan listesinde dokümanı olmayan plan işaretlenir
+   - **Kapsanan süreçler**: tesisin bir veya daha fazla BIA süreci
+   - Planın **RTO** ve **RPO**'su: her alanın altında seçilen süreçlerin en sıkı BIA hedefi görünür, değer onu aşarsa turuncu olur
+   - **Test sıklığı**: aylık, üç aylık, altı aylık, yıllık veya iki yılda bir
+3. **Plan oluştur**'a tıklayın. Plan taslak olarak oluşturulur
 
-### İEA'nın RTO/RPO ile bağlantı
+### Onay ve arşivleme
 
-İSP planının **Kapsanan süreçler** bölümünde, seçilen her süreç için şunlar arasındaki karşılaştırma gösterilir:
+**Onayla** düğmesi yalnızca planı onaylayabilecek kişilere görünür: o tesise erişimi olan Compliance Officer veya organizasyon, BU ya da tesis için yürürlükte CISO ataması olan kişi. **Arşivle**, artık kullanılmayan bir planı geri çeker: testleriyle birlikte görüntülenebilir kalır ancak artık hiçbir süreci kapsamaz. Arşivlenmiş planlar **Arşivlenenleri göster** işaretlenerek görüntülenir.
 
-- **İEA'nın talep ettiği RTO**: kritik süreçte beyan edilen maksimum tolerans
-- **İSP'nin garanti ettiği RTO**: planın fiilen garantileyebildiği
+### Test kaydetme
 
-İSP, İEA'nın talep ettiğinden daha yüksek bir RTO garanti ediyorsa gözden geçirme talep eden turuncu bir uyarı görünür. Sistem kaydı engellemez ancak açık bir gerekçe ister.
+**Planlar** sekmesinden **+ Test**'e tıklayın. Onaylı bir plan için de test kaydedilebilir. Şunları girin:
 
-### Test türleri
+- **Test tarihi**: varsayılan olarak bugün. Geçmiş bir tarih girilebilir, gelecek bir tarih girilemez. Kaydedilen son testten daha eski bir test vadeyi değiştirmez
+- **Tür**: masa başı / tartışma, kısmi tatbikat, tam kesinti, paralel test
+- **Sonuç**: başarılı, kısmi veya başarısız
+- **Elde edilen RTO ve RPO**, katılımcılar, ulaşılanları işaretlenmiş hedefler, notlar ve isteğe bağlı kanıt
 
-Plan periyodik olarak test edilmelidir. Mevcut test türleri:
+Elde edilen süreler kapsanan **her** sürecin MTPD, RTO ve RPO hedefleriyle karşılaştırılır. Varsa aşımlar kayıt sırasında görünür.
 
-| Tür | Açıklama |
-|-----|----------|
-| **Masa başı** | Kağıt/tartışma simülasyonu. Katılımcılar toplantı odasında, hiçbir gerçek sistem dahil değil |
-| **Simülasyon** | Üretimi kesintiye uğratmadan test modunda bazı gerçek sistemlerle kısmi simülasyon |
-| **Tam** | Normal üretimi etkilemeden gerçek sistemlerde planın etkinleştirilmesiyle tam test |
-| **Tatbikat** | Ekibin gerçek tepki sürelerini test etmek için duyurulmamış alıştırma |
+### Tatbikatlar
 
-Test kaydetmek için: plan kartından **Yeni test**'e tıklayın, türü, tarihi, katılımcıları ve sonucu seçin.
+**Tatbikatlar** sekmesi test geçmişidir: tarih, plan, tür, sonuç, elde edilen RTO/RPO (planı aşıyorsa turuncu), ulaşılan hedefler ve kanıtlar. Hedefler ve notlar satırın üzerine gelinerek okunur. Bir test düzenlenemez. Yanlışlıkla kaydedildiyse silinir ve planın son test tarihi yeniden hesaplanır.
 
-### Test başarısız olursa ne olur (otomatik PDCA)
+### Otomatik PDCA
 
-Test **Başarısız** veya **Kısmen Geçti** sonucuyla kaydedilirse:
+- **Kısmi** veya **başarısız** sonuç → bir PDCA döngüsü açılır ve başarısız BCP testi bildirimi gönderilir
+- **Başarılı** sonuç ancak MTPD veya BIA hedefini aşan süreler → bir aşım PDCA'sı açılır
 
-1. PLAN başlangıç aşamasıyla otomatik olarak PDCA döngüsü oluşturulur
-2. PDCA, İSP planının sahibine atanır
-3. Sahip 30 gün içinde eylem planını doldurmak zorundadır
-4. İSP planı, PDCA olumlu sonuçla kapatılana kadar "Güncellenmeli" durumunda kalır
+### Test vadesi
 
-### Plan son tarihleri ve uyarılar
-
-Her İSP planının zorunlu bir gözden geçirme tarihi vardır (tipik olarak yıllık). Tarih yaklaştığında:
-
-- **30 gün önce**: planın sahibine e-posta bildirimi
-- **Son tarihte**: plan "Süresi Dolmuş" durumuna geçer ve kırmızı rozetle işaretlenir. Otomatik olarak gözden geçirme görevi oluşturulur
-- Süresi dolmuş plan MTPD < 48 saat olan süreçleri kapsıyorsa Tesis Yöneticisi'ne eskalasyon bildirimi gönderilir
+Sistem her gece onaylı planları kontrol eder. Testi gecikmiş veya hiç yapılmamış her plan için Risk Manager'a **bir** görev açar; görev açık kaldığı sürece yalnızca bir tane. Plan onaylı kalır. Test vadesi Vade Takvimi'nde de görünür.
 
 ---
 
@@ -1576,7 +1585,7 @@ Sekme önce yönetim, ardından açıklar üzerinde çalışanlar için tasarlan
 Sekmenin üstünden seçilebilen üç alt bölüme ayrılmıştır:
 
 - **Riskler**: yönetimin onayladığı **kabul edilebilirlik eşiğinin üzerindeki** riskler (Risk modülündeki risk iştahı; politika yoksa 14 kullanılır) ve tolere edilen azami sayı; eşiğin üzerindeki hücreleri vurgulanmış ısı haritası; en yüksek puanlı 10 risk (açmak için tıklayın); NIS2 md. 21'e ve tehdit kategorisine göre dağılım.
-- **Süreklilik**: **onaylı** BCP planı olmayan kritik süreçler (kritiklik ≥ 4) ve testi yenilenecek onaylı planlar; süreç · riskler · BCP · son test tablosu. Taslaklar ve arşivlenmiş planlar bir süreci kapsamaz.
+- **Süreklilik**: **onaylı** BCP planı olmayan kritik süreçler (kritiklik ≥ 4), onaylı planı olan ancak testi gecikmiş veya hiç yapılmamış süreçler (*kapsam dışı: test gecikmiş*) ve testi yenilenecek onaylı planlar; süreç · riskler · BCP · son test tablosu. Taslaklar ve arşivlenmiş planlar bir süreci kapsamaz.
 - **Ekonomik değer**: doğal ve artık yıllık beklenen kayıp (ALE), kontrollerle azaltılan risk ve planlanan önlemlerin yatırım getirisi (ROSI).
 
 #### Süreç göstergeleri sekmesi

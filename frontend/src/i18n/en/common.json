@@ -3746,7 +3746,179 @@
   },
   "bcp": {
     "test_frequency_label": "Test frequency",
-    "status_superato": "Passed"
+    "status_superato": "Passed",
+    "title": "Business Continuity (BCP)",
+    "loading": "Loading…",
+    "tabs": {
+      "coverage": "Coverage",
+      "plans": "Plans",
+      "tests": "Exercises"
+    },
+    "actions": {
+      "new_plan": "+ New plan",
+      "add_test": "+ Test",
+      "edit": "Edit",
+      "approve": "Approve",
+      "archive": "Archive",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "close": "Close",
+      "create": "Create plan",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "record_test": "Record test",
+      "remove": "Remove"
+    },
+    "coverage": {
+      "state": {
+        "covered": "Covered",
+        "test_expired": "Uncovered: test overdue",
+        "missing": "No plan"
+      },
+      "hint": {
+        "covered": "Approved plan with an up-to-date test",
+        "test_expired": "Approved plan but test overdue or never run",
+        "missing": "No approved BCP plan"
+      },
+      "col_process": "Critical process",
+      "col_criticality": "Criticality",
+      "col_targets": "BIA targets",
+      "col_coverage": "Coverage",
+      "col_plans": "Plans",
+      "create_plan": "+ Create plan for this process",
+      "empty": "No critical process (criticality ≥ 4) in the BIA",
+      "rto_measured": "RTO achieved in the latest test that measured it",
+      "rto_declared": "RTO declared in the plan: no test has measured it yet",
+      "footnote": "BIA processes with criticality ≥ 4 are listed. The plan RTO is the one demonstrated by the latest test; with * it is the declared one, not yet measured."
+    },
+    "plans": {
+      "col_plan": "Plan",
+      "col_document": "Document",
+      "col_status": "Approval",
+      "col_test": "Test",
+      "empty": "No BCP plan",
+      "no_document": "No linked document",
+      "processes": "Covered processes: {{count}}",
+      "next_test": "Next test: {{date}}",
+      "show_archived": "Show archived ({{count}})",
+      "archive_confirm": "Archive the plan? It stays available with its tests but no longer covers any process.",
+      "delete_confirm": "Delete this BCP plan and its tests?"
+    },
+    "tests": {
+      "all_plans": "All plans",
+      "empty": "No test recorded",
+      "col_date": "Date",
+      "col_plan": "Plan",
+      "col_type": "Type",
+      "col_result": "Result",
+      "col_rto": "RTO achieved",
+      "col_rpo": "RPO achieved",
+      "col_objectives": "Objectives",
+      "col_evidence": "Evidence",
+      "delete_confirm": "Delete this test? The plan's last test date will be recalculated."
+    },
+    "form": {
+      "new_title": "New BCP plan",
+      "edit_title": "Edit BCP plan",
+      "title": "Title",
+      "plant": "Site",
+      "version": "Version",
+      "select": "— select —",
+      "document": "Plan document (M07)",
+      "no_document": "— no document —",
+      "document_hint": "The plan text is managed in Documents: here you link the site's document, an organisation document or one shared with the site.",
+      "processes": "Covered processes",
+      "processes_pick_plant": "Choose the site first.",
+      "processes_empty": "No BIA process for this site.",
+      "criticality": "criticality {{value}}",
+      "rto": "Plan RTO (hours)",
+      "rpo": "Plan RPO (hours)",
+      "bia_target": "BIA target: {{value}}h",
+      "frequency": "Test frequency",
+      "save_error": "Error while saving"
+    },
+    "frequency": {
+      "1_months": "Monthly",
+      "3_months": "Quarterly",
+      "6_months": "Half-yearly",
+      "1_years": "Yearly",
+      "2_years": "Every two years"
+    },
+    "record": {
+      "title": "Record BCP test",
+      "date": "Test date",
+      "type": "Type",
+      "result": "Result",
+      "failed_hint": "A partial or failed result automatically opens a PDCA.",
+      "rto_achieved": "RTO achieved (h)",
+      "rpo_achieved": "RPO achieved (h)",
+      "participants": "Participants",
+      "plan_value": "plan: {{value}}h",
+      "rto_hint": "Achieved times are compared with the BIA targets of the covered processes and become the plan's demonstrated capability.",
+      "objectives": "Test objectives",
+      "objective_placeholder": "Add objective…",
+      "objectives_met": "Objectives met: {{met}}/{{total}}",
+      "notes": "Notes",
+      "evidence": "Test evidence (optional)",
+      "warnings_title": "Test recorded with warnings",
+      "warning": {
+        "rto_over_mtpd": "{{process}}: RTO achieved {{achieved}}h exceeds the MTPD ({{target}}h)",
+        "rto_over_target": "{{process}}: RTO achieved {{achieved}}h exceeds the BIA target ({{target}}h)",
+        "rpo_over_target": "{{process}}: RPO achieved {{achieved}}h exceeds the BIA target ({{target}}h)"
+      },
+      "pdca_overrun": "A PDCA has been opened for the time overrun.",
+      "pdca_failed": "A PDCA has been opened for the test result."
+    },
+    "test_state": {
+      "ok": "Test up to date",
+      "overdue": "Test overdue",
+      "never": "Never tested"
+    },
+    "result": {
+      "superato": "Passed",
+      "parziale": "Partial",
+      "fallito": "Failed"
+    },
+    "test_type": {
+      "tabletop": "Tabletop / discussion",
+      "drill": "Drill / partial exercise",
+      "full_interruption": "Full interruption",
+      "parallel": "Parallel test"
+    },
+    "plan_status": {
+      "bozza": "draft",
+      "approvato": "approved",
+      "archiviato": "archived"
+    },
+    "document_status": {
+      "bozza": "draft",
+      "revisione": "in review",
+      "approvazione": "awaiting approval",
+      "approvato": "approved",
+      "archiviato": "archived"
+    },
+    "help": {
+      "title": "Business Continuity — M16",
+      "description": "Links the BIA critical processes to continuity plans and proves with tests that recovery times meet the targets. Plan approval and tests are separate: an overdue test does not remove the approval but makes the process uncovered because of the overdue test.",
+      "steps": {
+        "1": "In the Coverage tab see which critical processes have no plan or an overdue test",
+        "2": "Create the plan: site, covered processes, RTO/RPO and test frequency",
+        "3": "Link the plan document managed in Documents (M07)",
+        "4": "Approve the plan (Compliance Officer or site CISO)",
+        "5": "Record each test with date, result and achieved times: they become the plan's demonstrated capability",
+        "6": "A partial/failed result or times over target open a PDCA; when the test falls due a task goes to the Risk Manager"
+      },
+      "connections": {
+        "bia": "critical processes and RTO/RPO/MTPD targets",
+        "documents": "plan document, with versions and approval",
+        "pdca": "automatic PDCA on failed test or exceeded times",
+        "reporting": "coverage of critical processes in Reporting and in the management review"
+      },
+      "config": {
+        "bia": "Critical processes and RTO/RPO targets in the BIA",
+        "document": "Plan document uploaded in Documents"
+      }
+    }
   },
   "audit_trail": {
     "levels_guide": "Levels guide",
@@ -4416,7 +4588,9 @@
       "bia_bcp_table_hint": "A process is covered only by an approved BCP; the test is due when its planned date has passed or is missing.",
       "col_risks": "Risks (high · medium · low)",
       "kpi_processes": "Critical processes",
-      "ale_hint": "Annualised loss expectancy calculated from BIA downtime costs: only risks linked to a process with a downtime cost are valued."
+      "ale_hint": "Annualised loss expectancy calculated from BIA downtime costs: only risks linked to a process with a downtime cost are valued.",
+      "kpi_bia_test_expired": "Critical with test overdue",
+      "kpi_bia_test_expired_sub": "approved plan, test to redo"
     },
     "access_matrix": {
       "subtitle": "Who has access and who is responsible for what — review accesses at any time.",
@@ -5658,7 +5832,8 @@
       "appetite_default": "Acceptance threshold: residual above {{score}} (default value: no approved risk appetite).",
       "appetite_tolerated": "Risks above threshold tolerated: {{count}}.",
       "appetite_per_plant": "Thresholds differ between sites: each risk is compared with its own site's threshold.",
-      "top_over_appetite": "Risks above the acceptance threshold (highest residual)"
+      "top_over_appetite": "Risks above the acceptance threshold (highest residual)",
+      "critical_bcp_test_expired": "{{count}} critical processes with an overdue or never-run BCP test"
     },
     "participants": {
       "heading": "Invitees and attendance",

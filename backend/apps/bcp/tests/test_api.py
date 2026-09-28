@@ -147,10 +147,10 @@ def test_retrieve_bcp_test(client, bcp_test):
 
 
 @pytest.mark.django_db
-def test_update_bcp_test(client, bcp_test):
+def test_update_bcp_test_not_allowed(client, bcp_test):
+    """Esito e tempi del test sono evidenza: non si modificano."""
     resp = client.patch(f"{URL_TESTS}{bcp_test.id}/", {"result": "fallito"}, format="json")
-    assert resp.status_code == 200
-    assert resp.data["result"] == "fallito"
+    assert resp.status_code == 405
 
 
 @pytest.mark.django_db

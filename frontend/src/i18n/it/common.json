@@ -3746,7 +3746,179 @@
   },
   "bcp": {
     "test_frequency_label": "Frequenza test",
-    "status_superato": "Superato"
+    "status_superato": "Superato",
+    "title": "Business Continuity (BCP)",
+    "loading": "Caricamento…",
+    "tabs": {
+      "coverage": "Copertura",
+      "plans": "Piani",
+      "tests": "Esercitazioni"
+    },
+    "actions": {
+      "new_plan": "+ Nuovo piano",
+      "add_test": "+ Test",
+      "edit": "Modifica",
+      "approve": "Approva",
+      "archive": "Archivia",
+      "delete": "Elimina",
+      "cancel": "Annulla",
+      "close": "Chiudi",
+      "create": "Crea piano",
+      "save": "Salva modifiche",
+      "saving": "Salvataggio…",
+      "record_test": "Registra test",
+      "remove": "Rimuovi"
+    },
+    "coverage": {
+      "state": {
+        "covered": "Coperto",
+        "test_expired": "Scoperto per test scaduto",
+        "missing": "Senza piano"
+      },
+      "hint": {
+        "covered": "Piano approvato con test in regola",
+        "test_expired": "Piano approvato ma test scaduto o mai eseguito",
+        "missing": "Nessun piano BCP approvato"
+      },
+      "col_process": "Processo critico",
+      "col_criticality": "Criticità",
+      "col_targets": "Target BIA",
+      "col_coverage": "Copertura",
+      "col_plans": "Piani",
+      "create_plan": "+ Crea piano per questo processo",
+      "empty": "Nessun processo critico (criticità ≥ 4) nella BIA",
+      "rto_measured": "RTO ottenuto nell'ultimo test che lo ha misurato",
+      "rto_declared": "RTO dichiarato nel piano: nessun test lo ha ancora misurato",
+      "footnote": "Sono elencati i processi BIA con criticità ≥ 4. L'RTO del piano è quello dimostrato dall'ultimo test; con * è quello dichiarato, non ancora misurato."
+    },
+    "plans": {
+      "col_plan": "Piano",
+      "col_document": "Documento",
+      "col_status": "Approvazione",
+      "col_test": "Test",
+      "empty": "Nessun piano BCP",
+      "no_document": "Nessun documento collegato",
+      "processes": "Processi coperti: {{count}}",
+      "next_test": "Prossimo test: {{date}}",
+      "show_archived": "Mostra archiviati ({{count}})",
+      "archive_confirm": "Archiviare il piano? Resterà consultabile con i suoi test ma non coprirà più nessun processo.",
+      "delete_confirm": "Eliminare questo piano BCP e i suoi test?"
+    },
+    "tests": {
+      "all_plans": "Tutti i piani",
+      "empty": "Nessun test registrato",
+      "col_date": "Data",
+      "col_plan": "Piano",
+      "col_type": "Tipo",
+      "col_result": "Esito",
+      "col_rto": "RTO ottenuto",
+      "col_rpo": "RPO ottenuto",
+      "col_objectives": "Obiettivi",
+      "col_evidence": "Evidenze",
+      "delete_confirm": "Eliminare questo test? La data dell'ultimo test del piano verrà ricalcolata."
+    },
+    "form": {
+      "new_title": "Nuovo piano BCP",
+      "edit_title": "Modifica piano BCP",
+      "title": "Titolo",
+      "plant": "Sito",
+      "version": "Versione",
+      "select": "— seleziona —",
+      "document": "Documento del piano (M07)",
+      "no_document": "— nessun documento —",
+      "document_hint": "Il testo del piano si gestisce in Documenti: qui si collega il documento del sito, di organizzazione o condiviso con il sito.",
+      "processes": "Processi coperti",
+      "processes_pick_plant": "Scegli prima il sito.",
+      "processes_empty": "Nessun processo BIA per questo sito.",
+      "criticality": "criticità {{value}}",
+      "rto": "RTO del piano (ore)",
+      "rpo": "RPO del piano (ore)",
+      "bia_target": "Target BIA: {{value}}h",
+      "frequency": "Frequenza dei test",
+      "save_error": "Errore durante il salvataggio"
+    },
+    "frequency": {
+      "1_months": "Mensile",
+      "3_months": "Trimestrale",
+      "6_months": "Semestrale",
+      "1_years": "Annuale",
+      "2_years": "Biennale"
+    },
+    "record": {
+      "title": "Registra test BCP",
+      "date": "Data del test",
+      "type": "Tipo",
+      "result": "Esito",
+      "failed_hint": "Con esito parziale o fallito si apre automaticamente un PDCA.",
+      "rto_achieved": "RTO ottenuto (h)",
+      "rpo_achieved": "RPO ottenuto (h)",
+      "participants": "Partecipanti",
+      "plan_value": "piano: {{value}}h",
+      "rto_hint": "I tempi ottenuti sono confrontati con i target BIA dei processi coperti e diventano la capacità dimostrata del piano.",
+      "objectives": "Obiettivi del test",
+      "objective_placeholder": "Aggiungi obiettivo…",
+      "objectives_met": "Obiettivi raggiunti: {{met}}/{{total}}",
+      "notes": "Note",
+      "evidence": "Evidenza del test (facoltativa)",
+      "warnings_title": "Test registrato con avvisi",
+      "warning": {
+        "rto_over_mtpd": "{{process}}: RTO ottenuto {{achieved}}h oltre l'MTPD ({{target}}h)",
+        "rto_over_target": "{{process}}: RTO ottenuto {{achieved}}h oltre il target BIA ({{target}}h)",
+        "rpo_over_target": "{{process}}: RPO ottenuto {{achieved}}h oltre il target BIA ({{target}}h)"
+      },
+      "pdca_overrun": "È stato aperto un PDCA per lo sforamento dei tempi.",
+      "pdca_failed": "È stato aperto un PDCA per l'esito del test."
+    },
+    "test_state": {
+      "ok": "Test in regola",
+      "overdue": "Test scaduto",
+      "never": "Mai testato"
+    },
+    "result": {
+      "superato": "Superato",
+      "parziale": "Parziale",
+      "fallito": "Fallito"
+    },
+    "test_type": {
+      "tabletop": "Tabletop / discussione",
+      "drill": "Drill / esercitazione parziale",
+      "full_interruption": "Interruzione completa",
+      "parallel": "Test parallelo"
+    },
+    "plan_status": {
+      "bozza": "bozza",
+      "approvato": "approvato",
+      "archiviato": "archiviato"
+    },
+    "document_status": {
+      "bozza": "bozza",
+      "revisione": "in revisione",
+      "approvazione": "in approvazione",
+      "approvato": "approvato",
+      "archiviato": "archiviato"
+    },
+    "help": {
+      "title": "Business Continuity — M16",
+      "description": "Collega i processi critici della BIA ai piani di continuità e dimostra con i test che i tempi di ripristino rispettano i target. Approvazione del piano e test sono separati: un test scaduto non toglie l'approvazione ma rende il processo scoperto per test scaduto.",
+      "steps": {
+        "1": "Nella tab Copertura guarda quali processi critici sono senza piano o con il test scaduto",
+        "2": "Crea il piano: sito, processi coperti, RTO/RPO e frequenza dei test",
+        "3": "Collega il documento del piano gestito in Documenti (M07)",
+        "4": "Approva il piano (Compliance Officer o CISO del sito)",
+        "5": "Registra ogni test con data, esito e tempi ottenuti: diventano la capacità dimostrata del piano",
+        "6": "Esito parziale/fallito o tempi oltre i target aprono un PDCA; alla scadenza del test parte un task al Risk Manager"
+      },
+      "connections": {
+        "bia": "processi critici e target RTO/RPO/MTPD",
+        "documents": "documento del piano, con versioni e approvazione",
+        "pdca": "PDCA automatico su test fallito o tempi sforati",
+        "reporting": "copertura dei processi critici in Reporting e nel riesame di direzione"
+      },
+      "config": {
+        "bia": "Processi critici e target RTO/RPO in BIA",
+        "document": "Documento del piano caricato in Documenti"
+      }
+    }
   },
   "audit_trail": {
     "levels_guide": "Guida ai livelli",
@@ -4416,7 +4588,9 @@
       "bia_bcp_table_hint": "Un processo è coperto solo da un piano BCP approvato; il test è da rifare se la data prevista è passata o manca.",
       "col_risks": "Rischi (alto · medio · basso)",
       "kpi_processes": "Processi critici",
-      "ale_hint": "Perdita attesa annua calcolata dai costi di fermo della BIA: solo i rischi collegati a un processo con costo di fermo sono valorizzati."
+      "ale_hint": "Perdita attesa annua calcolata dai costi di fermo della BIA: solo i rischi collegati a un processo con costo di fermo sono valorizzati.",
+      "kpi_bia_test_expired": "Critici con test scaduto",
+      "kpi_bia_test_expired_sub": "piano approvato, test da rifare"
     },
     "access_matrix": {
       "subtitle": "Chi ha accesso e chi è responsabile di cosa — valida gli accessi in qualunque momento.",
@@ -5658,7 +5832,8 @@
       "appetite_default": "Soglia di accettabilità: residuo oltre {{score}} (valore predefinito: nessuna propensione al rischio approvata).",
       "appetite_tolerated": "Rischi oltre soglia tollerati: {{count}}.",
       "appetite_per_plant": "Le soglie variano fra i siti: ogni rischio è confrontato con quella del proprio sito.",
-      "top_over_appetite": "Rischi oltre la soglia di accettabilità (residuo più alto)"
+      "top_over_appetite": "Rischi oltre la soglia di accettabilità (residuo più alto)",
+      "critical_bcp_test_expired": "{{count}} processi critici con test BCP scaduto o mai eseguito"
     },
     "participants": {
       "heading": "Convocati e presenze",

@@ -367,7 +367,10 @@ export function DocumentsBlock({ snap, approvedHere }: { snap: Snap; approvedHer
 export function RisksBlock({ snap }: { snap: Snap }) {
   const { t } = useTranslation();
   const r = snap.rischi;
-  const bcp = snap.bcp as { processi_critici_senza_bcp: number; nomi: string[] } | undefined;
+  const bcp = snap.bcp as {
+    processi_critici_senza_bcp: number; nomi: string[];
+    processi_critici_test_scaduto?: number; nomi_test_scaduto?: string[];
+  } | undefined;
   if (!r) return null;
   // Snapshot con le regole del Reporting: soglia di accettabilità approvata.
   const byAppetite = r.oltre_soglia !== undefined;
@@ -436,6 +439,12 @@ export function RisksBlock({ snap }: { snap: Snap }) {
         <div className="mt-3">
           <p className="text-xs text-red-600 font-medium">{t("management_review.snap.critical_no_bcp", { count: bcp.processi_critici_senza_bcp })}</p>
           {bcp.nomi.length > 0 && <p className="text-xs text-gray-600 mt-1">{bcp.nomi.join(", ")}</p>}
+        </div>
+      )}
+      {bcp && (bcp.processi_critici_test_scaduto ?? 0) > 0 && (
+        <div className="mt-3">
+          <p className="text-xs text-amber-700 font-medium">{t("management_review.snap.critical_bcp_test_expired", { count: bcp.processi_critici_test_scaduto })}</p>
+          {(bcp.nomi_test_scaduto ?? []).length > 0 && <p className="text-xs text-gray-600 mt-1">{bcp.nomi_test_scaduto!.join(", ")}</p>}
         </div>
       )}
     </div>

@@ -146,6 +146,8 @@ def _lines_rischi(snap) -> list[str]:
     bcp = snap.get("bcp") or {}
     if bcp.get("processi_critici_senza_bcp"):
         out.append(f"- Processi critici senza piano di continuità: {bcp['processi_critici_senza_bcp']}")
+    if bcp.get("processi_critici_test_scaduto"):
+        out.append(f"- Processi critici con test di continuità scaduto: {bcp['processi_critici_test_scaduto']}")
     return out
 
 

@@ -80,41 +80,28 @@ class CriticalProcess(BaseModel):
     @property
     def rto_bcp_status(self) -> str:
         """
-        Compare rto_target_hours against the best BCP plan RTO for this process.
+        Confronta rto_target_hours con l'RTO del miglior piano BCP approvato
+        che copre il processo. L'RTO del piano è quello **dimostrato**
+        dall'ultimo test che lo ha misurato; senza test, quello dichiarato
+        (bcp.services.demonstrated_rto).
         Returns: 'ok' | 'warning' | 'critical' | 'unknown'
         """
         if self.rto_target_hours is None:
             return "unknown"
+        from django.db.models import Q
         from apps.bcp.models import BcpPlan
+        from apps.bcp.services import demonstrated_rto
 
-        # Considera solo piani BCP approvati: per la UX deve essere chiaro
-        # che "BCP ok/warning/critical" dipende dal piano approvato.
-        direct_best = (
-            self.bcp_plans.filter(
-                deleted_at__isnull=True,
-                status="approvato",
-                rto_hours__isnull=False,
-            )
-            .order_by("rto_hours")
-            .first()
+        plans = (
+            BcpPlan.objects.filter(deleted_at__isnull=True, status="approvato")
+            .filter(Q(critical_process=self) | Q(critical_processes=self))
+            .distinct()
         )
-        m2m_best = (
-            BcpPlan.objects.filter(
-                deleted_at__isnull=True,
-                status="approvato",
-                rto_hours__isnull=False,
-                critical_processes=self,
-            )
-            .order_by("rto_hours")
-            .first()
-        )
-
-        candidates = [c for c in [direct_best, m2m_best] if c is not None]
-        best_bcp = min(candidates, key=lambda c: c.rto_hours) if candidates else None
-        if best_bcp is None:
+        rtos = [r for r in (demonstrated_rto(p) for p in plans) if r is not None]
+        if not rtos:
             return "unknown"
 
-        ratio = best_bcp.rto_hours / self.rto_target_hours
+        ratio = min(rtos) / self.rto_target_hours
         if ratio <= 1.0:
             return "ok"
         elif ratio <= 1.5:

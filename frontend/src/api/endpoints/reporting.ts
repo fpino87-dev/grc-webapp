@@ -183,6 +183,7 @@ export interface RiskBiaBcpData {
     risks_formally_accepted: number;
     risks_over_appetite: number;
     bia_critical_no_bcp: number;
+    bia_critical_test_expired: number;
     bcp_test_overdue: number;
     ale_total: number;
     ale_total_inherent: number;

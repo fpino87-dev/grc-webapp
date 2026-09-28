@@ -410,7 +410,7 @@ def test_risk_bia_bcp_table_best_plan_and_last_test(plant, user):
     # piano approvato (preferito) con un test
     approved = BcpPlan.objects.create(plant=plant, title="approved", status="approvato",
                                      critical_process=proc, next_test_date=today + timedelta(days=30),
-                                     created_by=user)
+                                     last_test_date=today - timedelta(days=5), created_by=user)
     BcpPlan.objects.create(plant=plant, title="draft", status="bozza",
                           critical_process=proc, created_by=user)
     BcpTest.objects.create(plan=approved, test_date=today - timedelta(days=5),
@@ -631,6 +631,7 @@ def test_bcp_coverage_only_approved_and_m2m_link(plant, user):
 
     via_m2m = CriticalProcess.objects.create(plant=plant, name="M2M", criticality=5)
     plan = BcpPlan.objects.create(plant=plant, title="Approvato M2M", status="approvato",
+                                  last_test_date=today - timedelta(days=10),
                                   next_test_date=today + timedelta(days=30), created_by=user)
     plan.critical_processes.add(via_m2m)
 

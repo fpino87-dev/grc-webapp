@@ -384,7 +384,7 @@ Ces trois paramètres définissent la tolérance du processus à l'interruption 
 | **RTO** (Recovery Time Objective) | En combien de temps nous devons restaurer le processus après une interruption | Ex. "Le système MES doit redevenir opérationnel dans les 4 heures suivant l'incident" |
 | **RPO** (Recovery Point Objective) | Jusqu'à quel point dans le passé pouvons-nous perdre des données sans dommages acceptables | Ex. "Nous ne pouvons pas perdre plus d'1 heure de données de production" — donc les sauvegardes doivent être effectuées au moins toutes les heures |
 
-Le système utilise RTO et RPO pour vérifier que le plan BCP associé (M16) est cohérent : si le BCP prévoit un RTO supérieur à celui déclaré dans la BIA, un avertissement apparaît.
+Le système utilise RTO et RPO pour vérifier que le plan BCP associé (M16) est cohérent : si le RTO démontré par le plan (celui obtenu lors du dernier test, ou celui déclaré s'il n'a pas encore été mesuré) dépasse l'objectif de la BIA, un avertissement apparaît.
 
 ### Flux : brouillon → validation → approbation
 
@@ -1170,56 +1170,65 @@ Si le cours attribue une **compétence**, ceux qui ont un compte la reçoivent, 
 
 ## 15. Continuité d'Activité (M16)
 
-[Écran : liste des plans BCP]
+La page **PCA** comporte trois onglets : **Couverture**, **Plans** et **Exercices**. L'onglet ouvert reste dans l'adresse de la page, le lien peut donc être partagé.
 
-### Comment créer un plan BCP
+Approbation et tests sont deux choses distinctes :
 
-1. Allez sur **Gouvernance → BCP → Nouveau plan**
+- l'**approbation** indique que le plan est en vigueur (brouillon → approuvé → archivé) ;
+- le **test** démontre que le plan fonctionne. Il a une échéance, calculée à partir de la date du dernier test et de la fréquence du plan.
+
+Un test échu **ne retire pas l'approbation** : les processus couverts par le plan apparaissent *non couverts pour test échu* jusqu'à l'enregistrement d'un nouveau test.
+
+### Couverture
+
+Liste les processus de la BIA de criticité ≥ 4 et, pour chacun, l'état de couverture :
+
+| État | Signification |
+|------|---------------|
+| **Couvert** (vert) | Au moins un plan approuvé avec un test à jour |
+| **Non couvert : test échu** (jaune) | Plan approuvé, mais test échu ou jamais réalisé |
+| **Sans plan** (rouge) | Aucun plan approuvé : les brouillons et les plans archivés ne couvrent pas |
+
+À côté de chaque plan figure son **RTO démontré** : le RTO obtenu lors du dernier test qui l'a mesuré. Si aucun test ne l'a encore mesuré, on utilise le RTO déclaré dans le plan, marqué d'un \*. S'il dépasse l'objectif BIA, il est mis en évidence en orange. Un processus sans plan propose le lien **Créer un plan pour ce processus**. C'est la même règle que celle du Reporting (onglet Risk / BIA / BCP) et de la revue de direction.
+
+### Comment créer un plan de continuité
+
+1. Cliquez sur **+ Nouveau plan** (ou **Créer un plan pour ce processus** depuis la Couverture)
 2. Renseignez :
-   - **Nom du plan** (ex. "Plan BCP — Ligne de production B — Établissement Sud")
-   - **Périmètre** : processus critiques couverts par le plan (sélectionnez depuis la BIA)
-   - **Propriétaire du plan** : responsable de la maintenance
-   - **RTO objectif** et **RPO objectif** : les valeurs que le plan doit garantir
-3. Cliquez sur **Enregistrer le brouillon**
+   - **Titre**, **Site** et **Version**
+   - **Document du plan (M07)** : le texte du plan se gère dans **Documents**, avec versions et approbation. Ici on lie le document du site, de l'organisation ou partagé avec le site. Dans la liste des plans, un plan sans document est signalé
+   - **Processus couverts** : un ou plusieurs processus BIA du site
+   - **RTO** et **RPO** du plan : sous chaque champ s'affiche l'objectif BIA le plus strict des processus choisis, en orange si la valeur le dépasse
+   - **Fréquence des tests** : mensuelle, trimestrielle, semestrielle, annuelle ou tous les deux ans
+3. Cliquez sur **Créer le plan**. Le plan est créé en brouillon
 
-### Connexion avec RTO/RPO de la BIA
+### Approbation et archivage
 
-Dans la section **Processus couverts** du plan BCP, pour chaque processus sélectionné, la comparaison est affichée entre :
+Le bouton **Approuver** n'apparaît qu'aux personnes pouvant approuver le plan : le Compliance Officer ayant accès à ce site, ou le titulaire d'une nomination RSSI en vigueur pour l'organisation, la BU ou le site. **Archiver** retire un plan qui n'est plus utilisé : il reste consultable avec ses tests mais ne couvre plus aucun processus. Les plans archivés s'affichent en cochant **Afficher les archivés**.
 
-- **RTO requis par la BIA** : le maximum tolérable déclaré dans le processus critique
-- **RTO garanti par le BCP** : celui que le plan peut effectivement garantir
+### Enregistrer un test
 
-Si le BCP garantit un RTO supérieur à celui requis par la BIA, un avertissement orange apparaît demandant une révision. Le système ne bloque pas l'enregistrement mais requiert une justification explicite.
+Depuis l'onglet **Plans**, cliquez sur **+ Test**. On peut aussi enregistrer un test sur un plan approuvé. Indiquez :
 
-### Types de tests
+- **Date du test** : aujourd'hui par défaut. On peut indiquer une date passée, pas une date future. Un test plus ancien que le dernier enregistré ne déplace pas l'échéance
+- **Type** : sur table / discussion, exercice partiel, interruption complète, test en parallèle
+- **Résultat** : réussi, partiel ou échoué
+- **RTO et RPO obtenus**, participants, objectifs avec coche de ceux atteints, notes et preuve facultative
 
-Le plan doit être testé périodiquement. Les types de tests disponibles sont :
+Les temps obtenus sont comparés à la PMIA et aux objectifs RTO et RPO de **chaque** processus couvert. Les éventuels dépassements s'affichent à l'enregistrement.
 
-| Type | Description |
-|------|-------------|
-| **Tabletop** | Simulation sur papier/discussion. Participants en salle de réunion, aucun système réel impliqué |
-| **Simulation** | Simulation partielle avec certains systèmes réels en mode test, sans interruption de la production |
-| **Complet** | Test complet avec activation du plan sur des systèmes réels, sans impact sur la production normale |
-| **Exercice** | Exercice non annoncé pour tester les temps de réponse réels de l'équipe |
+### Exercices
 
-Pour enregistrer un test : depuis la fiche du plan, cliquez sur **Nouveau test**, sélectionnez le type, la date, les participants et le résultat.
+L'onglet **Exercices** est l'historique des tests : date, plan, type, résultat, RTO/RPO obtenus (en orange s'ils dépassent le plan), objectifs atteints et preuves. Les objectifs et les notes se lisent en survolant la ligne. Un test ne se modifie pas. S'il a été enregistré par erreur, on le supprime et la date du dernier test du plan est recalculée.
 
-### Que se passe-t-il si le test échoue (cycle PDCA automatique)
+### PDCA automatique
 
-Si le test est enregistré avec le résultat **Échoué** ou **Partiellement réussi** :
+- Résultat **partiel** ou **échoué** → un cycle PDCA s'ouvre et la notification de test de continuité échoué est envoyée
+- Résultat **réussi** mais temps au-delà de la PMIA ou de l'objectif BIA → un PDCA de dépassement s'ouvre
 
-1. Un cycle PDCA est automatiquement créé avec la phase de départ PLAN
-2. Le PDCA est assigné au propriétaire du plan BCP
-3. Le propriétaire doit rédiger le plan d'action dans les 30 jours
-4. Le plan BCP reste à l'état "À mettre à jour" jusqu'à ce que le PDCA soit clôturé positivement
+### Échéance du test
 
-### Expiration des plans et alertes
-
-Chaque plan BCP a une date de révision obligatoire (typiquement annuelle). Lorsque la date approche :
-
-- **30 jours avant** : notification email au propriétaire du plan
-- **À l'échéance** : le plan passe à l'état "Expiré" avec un badge rouge. Une tâche de révision est automatiquement créée
-- Si le plan expiré couvre des processus avec MTPD < 48 heures, une notification d'escalade est envoyée au Plant Manager
+Chaque nuit, le système contrôle les plans approuvés. Pour chaque plan dont le test est échu ou n'a jamais été réalisé, il ouvre **une** tâche pour le Risk Manager, une seule tant qu'elle reste ouverte. Le plan reste approuvé. L'échéance du test apparaît aussi dans l'Échéancier.
 
 ---
 
@@ -1576,7 +1585,7 @@ L'onglet est conçu d'abord pour la direction, puis pour ceux qui traitent les �
 Divisé en trois sous-sections, sélectionnables en haut de l'onglet :
 
 - **Risques** : risques **au-delà du seuil d'acceptabilité** approuvé par la direction (appétence au risque du module Risques ; sans politique, 14 est utilisé), avec le nombre maximal toléré ; heatmap avec les cellules au-delà du seuil mises en évidence ; les 10 risques au score le plus élevé (cliquez pour les ouvrir) ; répartition NIS2 art. 21 et par catégorie de menace.
-- **Continuité** : processus critiques (criticité ≥ 4) sans PCA **approuvé** et plans approuvés avec test à refaire ; tableau processus · risques · PCA · dernier test. Les brouillons et les plans archivés ne couvrent pas un processus.
+- **Continuité** : processus critiques (criticité ≥ 4) sans PCA **approuvé**, processus avec plan approuvé mais test échu ou jamais réalisé (*non couverts : test échu*) et plans approuvés avec test à refaire ; tableau processus · risques · PCA · dernier test. Les brouillons et les plans archivés ne couvrent pas un processus.
 - **Valeur économique** : perte annuelle attendue (ALE) inhérente et résiduelle, risque réduit par les contrôles et retour sur investissement (ROSI) des traitements planifiés.
 
 #### Onglet Indicateurs de processus
