@@ -190,6 +190,11 @@ class OsintScan(BaseModel):
     ssl_days_remaining = models.IntegerField(null=True, blank=True)
     ssl_issuer = models.CharField(max_length=255, blank=True)
     ssl_wildcard = models.BooleanField(default=False)
+    # Catena del certificato verificabile da un client standard? False = il
+    # certificato non è scaduto ma la verifica fallisce (catena incompleta, CA
+    # non riconosciuta, nome non corrispondente): `ssl_verify_error` dice perché.
+    ssl_trusted = models.BooleanField(null=True, blank=True)
+    ssl_verify_error = models.CharField(max_length=200, blank=True)
 
     # DNS
     spf_present = models.BooleanField(null=True, blank=True)
@@ -369,6 +374,7 @@ class OsintAlert(BaseModel):
 class FindingCode(models.TextChoices):
     SSL_EXPIRY = "ssl_expiry", "SSL in scadenza"
     SSL_EXPIRED = "ssl_expired", "SSL scaduto/non raggiungibile"
+    SSL_UNTRUSTED = "ssl_untrusted", "Certificato non verificabile (catena incompleta o CA non riconosciuta)"
     NO_HTTPS = "no_https", "Sito servito in HTTP puro (nessun HTTPS)"
     DMARC_MISSING = "dmarc_missing", "DMARC assente"
     DMARC_NONE = "dmarc_none", "DMARC p=none"

@@ -4799,7 +4799,8 @@
       "urlhaus_listed": "Ana bilgisayarda bilinen kötü amaçlı yazılım URL'leri (URLhaus): {{count}}",
       "enricher_error": "Kısmi veri: {{names}} zenginleştiricileri tamamlanmadı",
       "ssl_unreachable": "{{domain}} üzerinde port 443 erişilemiyor — SSL sertifikası algılanamadı",
-      "ssl_no_https": "{{domain}} üzerinde HTTPS tespit edilmedi — domain web hizmeti sunmuyor (yalnızca e-posta veya dahili domainler için normal)"
+      "ssl_no_https": "{{domain}} üzerinde HTTPS tespit edilmedi — domain web hizmeti sunmuyor (yalnızca e-posta veya dahili domainler için normal)",
+      "ssl_untrusted": "Sertifika doğrulanamıyor"
     },
     "ai": {
       "title": "Yapay Zeka Analizi",
@@ -5100,7 +5101,8 @@
       "service_breach": "Hizmet veri ihlali",
       "remote_access_kev": "Sömürülen güvenlik açığı olan uzaktan erişim",
       "admin_service_exposed": "Açıkta yönetim hizmeti",
-      "service_cert": "Kullanılan bir hizmette süresi dolmuş sertifika"
+      "service_cert": "Kullanılan bir hizmette süresi dolmuş sertifika",
+      "ssl_untrusted": "Sertifika doğrulanamıyor (eksik zincir veya tanınmayan sertifika otoritesi)"
     },
     "finding_explain": {
       "ssl_expiry": "Sitenin sertifikasının süresi yakında doluyor: sonrasında tarayıcılar erişimi engelleyecek.",
@@ -5130,7 +5132,8 @@
       "service_breach": "Bu alan adının çevrimiçi hizmeti kamuya açık bir veri ihlalinde yer alıyor.",
       "remote_access_kev": "Bir uzaktan erişim sistemi (VPN, ağ geçidi, web posta) CISA KEV kataloğundaki, saldırganlarca aktif olarak sömürülen bir açık barındırıyor.",
       "admin_service_exposed": "Bir sunucu internete yönetim hizmetleri (RDP, SMB, Telnet, VNC) açıyor; sık hedeflenen bir durum.",
-      "service_cert": "Bu tedarikçiyle kullandığınız bir hizmetin sertifikasının süresi dolmuş veya dolmak üzere."
+      "service_cert": "Bu tedarikçiyle kullandığınız bir hizmetin sertifikasının süresi dolmuş veya dolmak üzere.",
+      "ssl_untrusted": "Sertifika geçerli ancak standart bir istemci onu doğrulayamıyor; genellikle sunucu ara sertifikayı göndermediği için: tarayıcılar bunu tolere eder, entegrasyonlar ve otomatik araçlar etmez."
     },
     "finding_action": {
       "domain_spoofable": "Muhasebeyi uyarın: bu tedarikçiden gelen her banka bilgisi değişikliği talebi, bilinen bir kişiyle telefonla doğrulanmalıdır.",

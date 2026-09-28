@@ -70,25 +70,55 @@ def _check_spf(txts: list[str]) -> tuple[bool, str]:
     return True, "pass"
 
 
-def _check_dmarc(domain: str) -> tuple[bool, str]:
-    """(present, policy). policy = 'none'|'quarantine'|'reject'"""
+def _dmarc_tags(txt: str) -> dict:
+    """Tag di un record DMARC ("v=DMARC1; p=quarantine; sp=none") → dict.
+
+    Lettura per tag e non per sottostringa: con la ricerca di "p=reject"
+    anche "sp=reject" risultava policy reject del dominio."""
+    tags = {}
+    for part in txt.split(";"):
+        key, sep, value = part.partition("=")
+        if sep:
+            tags[key.strip().lower()] = value.strip().lower()
+    return tags
+
+
+def _dmarc_record(name: str) -> dict | None:
     import dns.resolver
+
     try:
-        txts = []
-        answers = dns.resolver.resolve(f"_dmarc.{domain}", "TXT", raise_on_no_answer=False)
+        answers = dns.resolver.resolve(f"_dmarc.{name}", "TXT", raise_on_no_answer=False)
         txts = [b"".join(r.strings).decode(errors="replace") for r in answers]
     except Exception:
-        return False, ""
-
+        return None
     for txt in txts:
-        if "v=DMARC1" in txt:
-            if "p=reject" in txt:
-                return True, "reject"
-            elif "p=quarantine" in txt:
-                return True, "quarantine"
-            elif "p=none" in txt:
-                return True, "none"
-            return True, "unknown"
+        tags = _dmarc_tags(txt)
+        if tags.get("v") == "dmarc1":
+            return tags
+    return None
+
+
+def _policy(value: str | None) -> str:
+    return value if value in ("none", "quarantine", "reject") else "unknown"
+
+
+def _check_dmarc(domain: str) -> tuple[bool, str]:
+    """(present, policy). policy = 'none'|'quarantine'|'reject'|'unknown'.
+
+    Senza un record proprio vale quello del dominio padre (RFC 7489 §6.6.3,
+    risalita dell'albero DNS come in DMARCbis): per un sottodominio si applica
+    `sp=` se indicato, altrimenti `p=`. Così «it.azienda.com» senza record
+    eredita la policy di «azienda.com» invece di risultare privo di DMARC.
+    La risalita si ferma prima dell'ultima etichetta (il TLD)."""
+    own = _dmarc_record(domain)
+    if own is not None:
+        return True, _policy(own.get("p"))
+    labels = domain.strip(".").split(".")
+    for i in range(1, len(labels) - 1):
+        parent = ".".join(labels[i:])
+        inherited = _dmarc_record(parent)
+        if inherited is not None:
+            return True, _policy(inherited.get("sp") or inherited.get("p"))
     return False, ""
 
 

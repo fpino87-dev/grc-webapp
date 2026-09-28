@@ -72,6 +72,10 @@ def _detect_finding_codes(entity, scan) -> dict[str, dict]:
             }
     elif scan.ssl_valid is False:
         detected[FindingCode.SSL_EXPIRED] = {"expiry_date": str(scan.ssl_expiry_date or "")}
+    # Non scaduto ma non verificabile: i browser spesso recuperano l'anello
+    # mancante da soli, molti client e integrazioni no.
+    if scan.ssl_valid is True and getattr(scan, "ssl_trusted", None) is False:
+        detected[FindingCode.SSL_UNTRUSTED] = {"reason": getattr(scan, "ssl_verify_error", "") or ""}
 
     # Nessun HTTPS ma il sito risponde in chiaro: è un finding, non una non
     # applicabilità. Un dominio che non risponde a nulla non compare qui.
@@ -297,7 +301,7 @@ def _severity_for(code: str, params: dict | None = None) -> str:
     medium = {
         FindingCode.SSL_EXPIRY, FindingCode.DMARC_MISSING, FindingCode.SPF_MISSING,
         FindingCode.SPF_PLUS_ALL, FindingCode.DOMAIN_EXPIRY_SOON,
-        FindingCode.HEADERS_MISSING, FindingCode.DKIM_MISSING,
+        FindingCode.HEADERS_MISSING, FindingCode.DKIM_MISSING, FindingCode.SSL_UNTRUSTED,
     }
     # MTA_STS_MISSING resta INFO (default sotto): è un irrobustimento, non un gap
     # diretto come l'assenza di DKIM/DMARC.

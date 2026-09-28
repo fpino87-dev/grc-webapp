@@ -4799,7 +4799,8 @@
       "urlhaus_listed": "Znane adresy URL malware na hoście (URLhaus): {{count}}",
       "enricher_error": "Częściowe dane: enrichery {{names}} nie ukończone",
       "ssl_unreachable": "Port 443 niedostępny na {{domain}} — nie wykryto certyfikatu SSL",
-      "ssl_no_https": "Nie wykryto HTTPS na {{domain}} — domena nie udostępnia usług web (normalne dla domen tylko e-mail lub wewnętrznych)"
+      "ssl_no_https": "Nie wykryto HTTPS na {{domain}} — domena nie udostępnia usług web (normalne dla domen tylko e-mail lub wewnętrznych)",
+      "ssl_untrusted": "Certyfikat nie do zweryfikowania"
     },
     "ai": {
       "title": "Analiza AI",
@@ -5100,7 +5101,8 @@
       "service_breach": "Wyciek danych z usługi",
       "remote_access_kev": "Dostęp zdalny z wykorzystywaną podatnością",
       "admin_service_exposed": "Wystawiona usługa administracyjna",
-      "service_cert": "Wygasły certyfikat w używanej usłudze"
+      "service_cert": "Wygasły certyfikat w używanej usłudze",
+      "ssl_untrusted": "Certyfikat nie do zweryfikowania (niepełny łańcuch lub nierozpoznany urząd certyfikacji)"
     },
     "finding_explain": {
       "ssl_expiry": "Certyfikat strony wkrótce wygasa: potem przeglądarki zablokują dostęp.",
@@ -5130,7 +5132,8 @@
       "service_breach": "Usługa online tej domeny występuje w publicznym wycieku danych.",
       "remote_access_kev": "System dostępu zdalnego (VPN, brama, poczta WWW) ma podatność z katalogu CISA KEV, aktywnie wykorzystywaną przez atakujących.",
       "admin_service_exposed": "Host wystawia w internecie usługi administracyjne (RDP, SMB, Telnet, VNC), częsty cel ataków.",
-      "service_cert": "Certyfikat usługi, z której korzystacie u tego dostawcy, wygasł lub wkrótce wygaśnie."
+      "service_cert": "Certyfikat usługi, z której korzystacie u tego dostawcy, wygasł lub wkrótce wygaśnie.",
+      "ssl_untrusted": "Certyfikat jest ważny, ale standardowy klient nie może go zweryfikować, zwykle dlatego, że serwer nie wysyła certyfikatu pośredniego: przeglądarki to tolerują, integracje i narzędzia automatyczne nie."
     },
     "finding_action": {
       "domain_spoofable": "Uprzedź księgowość: każdą prośbę tego dostawcy o zmianę danych bankowych trzeba zweryfikować telefonicznie ze znanym kontaktem.",

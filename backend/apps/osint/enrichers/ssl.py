@@ -55,8 +55,12 @@ def _der_to_ssl_dict(der: bytes) -> dict | None:
 
         not_after = cert.not_valid_after_utc.strftime("%b %d %H:%M:%S %Y GMT")
 
+        # Stesso formato di ssl.getpeercert(): tupla di RDN, ciascuno tupla di
+        # coppie (nome, valore). Con un livello di annidamento in più la lettura
+        # dell'emittente falliva e un certificato valido ma con catena non
+        # verificabile risultava «scaduto».
         issuer_rdns = tuple(
-            (((_OID_NAMES.get(a.oid.dotted_string, a.oid.dotted_string), a.value),),)
+            ((_OID_NAMES.get(a.oid.dotted_string, a.oid.dotted_string), a.value),)
             for a in cert.issuer
         )
 
@@ -74,12 +78,20 @@ def _der_to_ssl_dict(der: bytes) -> dict | None:
 
 
 def _get_tls_cert(domain: str) -> dict | None:
+    """Certificato in uso sul dominio (vedi `_tls_probe`), None se non raggiungibile."""
+    return _tls_probe(domain)[0]
+
+
+def _tls_probe(domain: str) -> tuple[dict | None, bool | None, str]:
     """Connessione TLS diretta per leggere il certificato in uso.
 
     Prima tenta con verifica completa del certificato. Se la verifica fallisce per
-    un problema TLS (cert scaduto, self-signed, mismatch) riprova senza verifica
-    in modo da rilevare comunque i dati del certificato (scadenza, emittente).
-    Ritorna None solo se il server HTTPS non è raggiungibile.
+    un problema TLS (cert scaduto, self-signed, catena incompleta, mismatch)
+    riprova senza verifica in modo da rilevare comunque i dati del certificato.
+
+    Ritorna (certificato, attendibile, motivo): certificato None se il server
+    HTTPS non è raggiungibile; `attendibile` False quando la verifica fallisce e
+    il certificato è letto senza verifica, con il motivo dell'errore.
 
     Anti-SSRF / anti DNS-rebinding (review #3): il dominio viene risolto a un IP
     PUBBLICO validato e la connessione TCP avviene verso quell'IP (pinning),
@@ -91,20 +103,23 @@ def _get_tls_cert(domain: str) -> dict | None:
 
     ip = safe_resolve_public_ip(domain)
     if not ip:
-        return None  # non risolvibile a un IP pubblico → non connettere
+        return None, None, ""  # non risolvibile a un IP pubblico → non connettere
 
     # Tentativo 1: verifica completa (connessione all'IP pinnato, SNI=domain)
+    reason = ""
     try:
         ctx = ssl.create_default_context()
         ctx.minimum_version = ssl.TLSVersion.TLSv1_2
         with socket.create_connection((ip, 443), timeout=TLS_TIMEOUT) as sock:
             with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
-                return ssock.getpeercert()
-    except ssl.SSLError:
-        pass  # problema certificato — riprova senza verifica
+                return ssock.getpeercert(), True, ""
+    except ssl.SSLCertVerificationError as exc:
+        reason = (getattr(exc, "verify_message", "") or str(exc))[:200]
+    except ssl.SSLError as exc:
+        reason = str(exc)[:200]  # problema TLS — riprova senza verifica
     except Exception as exc:
         logger.debug("TLS direct check failed for %s (%s): %s", domain, ip, exc)
-        return None  # server non raggiungibile
+        return None, None, ""  # server non raggiungibile
 
     # Tentativo 2: no-verify per rilevare cert scaduti/non validi
     try:
@@ -118,11 +133,12 @@ def _get_tls_cert(domain: str) -> dict | None:
             with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
                 der = ssock.getpeercert(binary_form=True)
         if not der:
-            return None
-        return _der_to_ssl_dict(der)
+            return None, None, ""
+        cert = _der_to_ssl_dict(der)
+        return cert, (False if cert else None), reason
     except Exception as exc:
         logger.debug("TLS no-verify check failed for %s (%s): %s", domain, ip, exc)
-        return None
+        return None, None, ""
 
 
 def _parse_cert(cert: dict) -> tuple[bool, date | None, int | None, str, bool]:
@@ -250,13 +266,17 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         scan.enricher_errors["ssl"] = "non_public_target"
         return False
     try:
-        cert = _get_tls_cert(domain)
-        if cert is None and not domain.startswith("www."):
-            cert = _get_tls_cert(f"www.{domain}")
+        # Solo il dominio stesso: il certificato di «www.<dominio>» appartiene a
+        # un altro host (monitorato come entità propria se serve). Attribuirlo
+        # al dominio dava «certificato scaduto» su un dominio che non serve
+        # nulla sul web (nessun record A).
+        cert, trusted, reason = _tls_probe(domain)
 
         if cert:
             ssl_valid, expiry, days, issuer, wildcard = _parse_cert(cert)
             scan.ssl_valid = ssl_valid
+            scan.ssl_trusted = trusted
+            scan.ssl_verify_error = reason if trusted is False else ""
             scan.https_available = True
             scan.http_only = False
             scan.ssl_expiry_date = expiry

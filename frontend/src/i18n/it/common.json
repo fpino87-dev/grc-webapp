@@ -4799,7 +4799,8 @@
       "urlhaus_listed": "URL malware noti sull'host (URLhaus): {{count}}",
       "enricher_error": "Dati parziali: enricher {{names}} non completati",
       "ssl_unreachable": "Porta 443 non raggiungibile su {{domain}} — nessun certificato SSL rilevato",
-      "ssl_no_https": "Nessun HTTPS rilevato su {{domain}} — il dominio non espone servizi web (normale per domini solo email o interni)"
+      "ssl_no_https": "Nessun HTTPS rilevato su {{domain}} — il dominio non espone servizi web (normale per domini solo email o interni)",
+      "ssl_untrusted": "Certificato non verificabile"
     },
     "ai": {
       "title": "Analisi AI",
@@ -5100,7 +5101,8 @@
       "service_breach": "Violazione dei dati del servizio",
       "remote_access_kev": "Accesso remoto con vulnerabilità sfruttata",
       "admin_service_exposed": "Servizio di amministrazione esposto",
-      "service_cert": "Certificato scaduto su un servizio usato"
+      "service_cert": "Certificato scaduto su un servizio usato",
+      "ssl_untrusted": "Certificato non verificabile (catena incompleta o CA non riconosciuta)"
     },
     "finding_explain": {
       "ssl_expiry": "Il certificato del sito scade a breve: alla scadenza i browser bloccheranno l'accesso.",
@@ -5130,7 +5132,8 @@
       "service_breach": "Il servizio online di questo dominio compare in una violazione di dati pubblica.",
       "remote_access_kev": "Un sistema di accesso remoto (VPN, gateway, webmail) espone una vulnerabilità nel catalogo CISA KEV, attivamente sfruttata dagli attaccanti.",
       "admin_service_exposed": "Un host espone su internet servizi di amministrazione (RDP, SMB, Telnet, VNC), un bersaglio frequente.",
-      "service_cert": "Il certificato di un servizio che usate con questo fornitore è scaduto o sta per scadere."
+      "service_cert": "Il certificato di un servizio che usate con questo fornitore è scaduto o sta per scadere.",
+      "ssl_untrusted": "Il certificato è valido ma un client standard non riesce a verificarlo, di solito perché il server non invia il certificato intermedio: i browser lo tollerano, integrazioni e strumenti automatici no."
     },
     "finding_action": {
       "domain_spoofable": "Avvisa l'amministrazione: ogni richiesta di cambio coordinate bancarie di questo fornitore va verificata per telefono con un contatto noto.",

@@ -50,6 +50,28 @@
     ],
     "estimated_effort_h": 2
   },
+  "ssl_untrusted": {
+    "title": "Certificato non verificabile: catena incompleta o CA non riconosciuta",
+    "what": "Il certificato non è scaduto, ma un client standard non riesce a verificarlo: di solito il server non invia il certificato intermedio della CA (catena incompleta), oppure la CA non è riconosciuta o il nome non corrisponde. I browser spesso recuperano da soli l'intermedio mancante, per questo il sito sembra funzionare.",
+    "impact": "Integrazioni, API, client di posta, dispositivi e strumenti automatici rifiutano la connessione o, peggio, vengono configurati per ignorare gli errori di certificato, aprendo la strada ad attacchi man-in-the-middle.",
+    "compliance": [
+      {"framework": "ISO27001", "control": "A.8.24 — Cryptography"},
+      {"framework": "TISAX_L3", "control": "5.2.1 — Crypto-Konzept"},
+      {"framework": "NIS2", "control": "art.21 §2(g)"}
+    ],
+    "owner_role": "it_infra",
+    "fix_steps": [
+      "Verifica la catena: `openssl s_client -connect host:443 -servername host` — «Verify return code: 21» indica l'intermedio mancante.",
+      "Installa sul server il file con certificato + intermedi forniti dalla CA (fullchain), non il solo certificato del sito.",
+      "Se la CA non è riconosciuta o il nome non corrisponde, emetti un certificato da una CA pubblica che copra esattamente l'host.",
+      "Riavvia il servizio e ripeti la verifica: il codice deve essere 0 (ok)."
+    ],
+    "verification": "`openssl s_client` restituisce «Verify return code: 0 (ok)»; SSL Labs non segnala «Chain issues». Al prossimo scan il problema si chiude da solo.",
+    "external_refs": [
+      {"label": "SSL Labs", "url": "https://www.ssllabs.com/ssltest/"}
+    ],
+    "estimated_effort_h": 1
+  },
   "dmarc_missing": {
     "title": "DMARC non configurato",
     "what": "Il dominio non ha un record DMARC. Senza DMARC, attaccanti possono inviare email che sembrano provenire dal tuo dominio (spoofing/phishing), e i destinatari non hanno modo di verificare l'autenticità.",

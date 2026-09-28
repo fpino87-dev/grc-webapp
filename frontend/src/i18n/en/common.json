@@ -4799,7 +4799,8 @@
       "urlhaus_listed": "Known malware URLs on the host (URLhaus): {{count}}",
       "enricher_error": "Partial data: enrichers {{names}} did not complete",
       "ssl_unreachable": "Port 443 unreachable on {{domain}} — no SSL certificate detected",
-      "ssl_no_https": "No HTTPS detected on {{domain}} — domain does not expose web services (normal for email-only or internal domains)"
+      "ssl_no_https": "No HTTPS detected on {{domain}} — domain does not expose web services (normal for email-only or internal domains)",
+      "ssl_untrusted": "Certificate cannot be verified"
     },
     "ai": {
       "title": "AI Analysis",
@@ -5100,7 +5101,8 @@
       "service_breach": "Service data breach",
       "remote_access_kev": "Remote access with an exploited vulnerability",
       "admin_service_exposed": "Exposed administration service",
-      "service_cert": "Expired certificate on a service in use"
+      "service_cert": "Expired certificate on a service in use",
+      "ssl_untrusted": "Certificate cannot be verified (incomplete chain or unrecognised CA)"
     },
     "finding_explain": {
       "ssl_expiry": "The site's certificate expires soon: after that, browsers will block access.",
@@ -5130,7 +5132,8 @@
       "service_breach": "The online service of this domain appears in a public data breach.",
       "remote_access_kev": "A remote access system (VPN, gateway, webmail) exposes a vulnerability listed in the CISA KEV catalog, actively exploited by attackers.",
       "admin_service_exposed": "A host exposes administration services on the internet (RDP, SMB, Telnet, VNC), a frequent target.",
-      "service_cert": "The certificate of a service you use with this supplier has expired or is about to expire."
+      "service_cert": "The certificate of a service you use with this supplier has expired or is about to expire.",
+      "ssl_untrusted": "The certificate is valid but a standard client cannot verify it, usually because the server does not send the intermediate certificate: browsers tolerate it, integrations and automated tools do not."
     },
     "finding_action": {
       "domain_spoofable": "Warn accounts payable: any request from this supplier to change bank details must be verified by phone with a known contact.",

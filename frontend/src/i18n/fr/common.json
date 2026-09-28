@@ -4799,7 +4799,8 @@
       "urlhaus_listed": "URL de logiciels malveillants connues sur l'hôte (URLhaus) : {{count}}",
       "enricher_error": "Données partielles : enrichisseurs {{names}} non terminés",
       "ssl_unreachable": "Port 443 injoignable sur {{domain}} — aucun certificat SSL détecté",
-      "ssl_no_https": "Aucun HTTPS détecté sur {{domain}} — le domaine n'expose pas de services web (normal pour les domaines uniquement email ou internes)"
+      "ssl_no_https": "Aucun HTTPS détecté sur {{domain}} — le domaine n'expose pas de services web (normal pour les domaines uniquement email ou internes)",
+      "ssl_untrusted": "Certificat non vérifiable"
     },
     "ai": {
       "title": "Analyse IA",
@@ -5100,7 +5101,8 @@
       "service_breach": "Violation de données du service",
       "remote_access_kev": "Accès distant avec une vulnérabilité exploitée",
       "admin_service_exposed": "Service d'administration exposé",
-      "service_cert": "Certificat expiré sur un service utilisé"
+      "service_cert": "Certificat expiré sur un service utilisé",
+      "ssl_untrusted": "Certificat non vérifiable (chaîne incomplète ou AC non reconnue)"
     },
     "finding_explain": {
       "ssl_expiry": "Le certificat du site expire bientôt : ensuite, les navigateurs bloqueront l'accès.",
@@ -5130,7 +5132,8 @@
       "service_breach": "Le service en ligne de ce domaine figure dans une violation de données publique.",
       "remote_access_kev": "Un système d'accès distant (VPN, passerelle, webmail) expose une vulnérabilité du catalogue CISA KEV, activement exploitée.",
       "admin_service_exposed": "Un hôte expose sur internet des services d'administration (RDP, SMB, Telnet, VNC), une cible fréquente.",
-      "service_cert": "Le certificat d'un service que vous utilisez avec ce fournisseur a expiré ou va expirer."
+      "service_cert": "Le certificat d'un service que vous utilisez avec ce fournisseur a expiré ou va expirer.",
+      "ssl_untrusted": "Le certificat est valide mais un client standard ne peut pas le vérifier, généralement parce que le serveur n'envoie pas le certificat intermédiaire : les navigateurs le tolèrent, les intégrations et outils automatiques non."
     },
     "finding_action": {
       "domain_spoofable": "Prévenez la comptabilité : toute demande de ce fournisseur de changer ses coordonnées bancaires doit être vérifiée par téléphone avec un contact connu.",
