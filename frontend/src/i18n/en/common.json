@@ -5095,7 +5095,8 @@
       "computing": "Computing…",
       "manage": "Manage KPIs",
       "all_plants": "All plants",
-      "empty": "No active KPI configured"
+      "empty": "No active KPI configured",
+      "scope_org": "Organisation"
     },
     "definitions": {
       "title": "KPI Definitions",

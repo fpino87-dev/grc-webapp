@@ -5095,7 +5095,8 @@
       "computing": "Hesaplanıyor…",
       "manage": "KPI'ları yönet",
       "all_plants": "Tüm tesisler",
-      "empty": "Aktif KPI yapılandırılmamış"
+      "empty": "Aktif KPI yapılandırılmamış",
+      "scope_org": "Organizasyon"
     },
     "definitions": {
       "title": "KPI Tanımları",

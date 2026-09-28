@@ -39,10 +39,12 @@ function Sparkline({ kpiCode, plantId }: { kpiCode: string; plantId?: string }) 
 function KpiCard({
   kpi,
   plantId,
+  scopeLabel,
   onOpen,
 }: {
   kpi: KpiDefinitionListItem;
   plantId?: string;
+  scopeLabel: string;
   onOpen: () => void;
 }) {
   const { t } = useTranslation();
@@ -65,6 +67,7 @@ function KpiCard({
       </div>
       <Sparkline kpiCode={kpi.kpi_code} plantId={plantId} />
       <p className="mt-1 text-[11px] text-gray-400">{kpi.kpi_code}</p>
+      <p className="text-[10px] text-gray-400 truncate" title={scopeLabel}>{scopeLabel}</p>
     </button>
   );
 }
@@ -102,6 +105,9 @@ export function KpiDashboard() {
   });
 
   const kpis: KpiDefinitionListItem[] = data?.results ?? [];
+  const plantLabel = new Map((plants ?? []).map((p) => [p.id, `${p.code} — ${p.name}`]));
+  const scopeLabel = (kpi: KpiDefinitionListItem) =>
+    kpi.plant ? plantLabel.get(kpi.plant) ?? "—" : t("kpi.dashboard.scope_org");
 
   return (
     <div>
@@ -153,6 +159,7 @@ export function KpiDashboard() {
               key={kpi.id}
               kpi={kpi}
               plantId={effectivePlant || undefined}
+              scopeLabel={scopeLabel(kpi)}
               onOpen={() => setOpenKpi(kpi)}
             />
           ))}
