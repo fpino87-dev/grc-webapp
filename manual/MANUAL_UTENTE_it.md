@@ -527,6 +527,12 @@ Ogni documento approvato riceve un numero di versione (es. v1.0, v1.1, v2.0). Lo
 - Changelog (note del revisore)
 - Hash del file per garantire l'integrita'
 
+### Copia PDF e file consegnati all'auditor
+
+Quando carichi una versione in formato Word (.docx o .doc), la piattaforma ne genera in automatico una **copia PDF**. Il file Word resta l'originale da scaricare e modificare; il PDF non è una nuova versione e non cambia lo stato di approvazione. Nella colonna File compare il pulsante **PDF** quando la copia è pronta, *PDF in preparazione* mentre viene generata (se il servizio di conversione non è disponibile si riprova durante la notte) oppure *PDF non generato* se il file non si è potuto convertire: in quel caso carica direttamente la versione in PDF. Fogli di calcolo, presentazioni e PDF restano nel formato originale.
+
+Il **pacchetto audit** (Controlli) contiene per ogni documento la **versione in vigore**, cioè quella approvata, anche se nel frattempo è stata caricata una nuova bozza; in formato PDF quando la copia esiste, altrimenti nel formato originale. Il file `DOCUMENTI.csv` del pacchetto elenca per ogni documento la versione, se è quella approvata, il formato e l'impronta SHA-256 del file consegnato. Delle versioni superate resta nello storico la registrazione (numero, autore, impronta), non il file.
+
 ---
 
 ## 8. Gestione Incidenti (M09)
@@ -1405,7 +1411,6 @@ Vai su **Governance → Ruoli & organi** e scorri fino a **Organi di governo**. 
 3. Chi lascia l'organo si chiude con **Chiudi carica** (data di fine), non si elimina: resta nei verbali passati e tra gli **ex componenti**. **Elimina** serve solo a correggere un inserimento errato e non è consentito se il componente compare in un riesame
 
 Regole: un solo presidente in carica per volta; lo stesso account non può essere collegato a due componenti dello stesso organo nello stesso periodo. Gestiscono gli organi Super Admin e Compliance Officer, solo per organi il cui perimetro rientra interamente nel proprio; gli altri ruoli li consultano per i siti del proprio perimetro. Componenti e segnalazioni (account disattivato, carica in scadenza, presidente mancante) compaiono anche in **Reporting → Accessi & responsabilità** e nel pacchetto audit.
-
 
 ### Alert ruoli in scadenza e ruoli vacanti obbligatori
 

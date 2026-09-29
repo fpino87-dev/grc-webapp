@@ -527,6 +527,12 @@ Każdy zatwierdzony dokument otrzymuje numer wersji (np. v1.0, v1.1, v2.0). Peł
 - Dziennik zmian (notatki recenzenta)
 - Hash pliku gwarantujący integralność
 
+### Kopia PDF i pliki przekazywane audytorowi
+
+Po przesłaniu wersji w formacie Word (.docx lub .doc) platforma automatycznie generuje **kopię PDF**. Plik Word pozostaje oryginałem do pobrania i edycji; PDF nie jest nową wersją i nie zmienia statusu zatwierdzenia. W kolumnie Plik pojawia się przycisk **PDF**, gdy kopia jest gotowa, *PDF w przygotowaniu* w trakcie generowania (jeśli usługa konwersji jest niedostępna, ponowna próba nastąpi w nocy) lub *PDF nie został wygenerowany*, jeśli pliku nie udało się przekonwertować: w takim przypadku prześlij bezpośrednio wersję PDF. Arkusze kalkulacyjne, prezentacje i pliki PDF pozostają w oryginalnym formacie.
+
+**Pakiet audytowy** (Kontrole) zawiera dla każdego dokumentu **obowiązującą wersję**, czyli zatwierdzoną, nawet jeśli w międzyczasie przesłano nowy projekt; w formacie PDF, gdy kopia istnieje, w przeciwnym razie w formacie oryginalnym. Plik `DOCUMENTI.csv` w pakiecie podaje dla każdego dokumentu wersję, czy jest to wersja zatwierdzona, format oraz skrót SHA-256 przekazanego pliku. Dla wersji zastąpionych historia zachowuje zapis (numer, autor, skrót), a nie plik.
+
 ---
 
 ## 8. Zarządzanie incydentami (M09)
@@ -1405,7 +1411,6 @@ Przejdź do **Governance → Role i organy** i przewiń do **Organy zarządcze**
 3. Odejście z organu zamyka się przyciskiem **Zakończ kadencję** (data końcowa), bez usuwania: osoba pozostaje w dotychczasowych protokołach i wśród **byłych członków**. **Usuń** służy wyłącznie do poprawienia błędnego wpisu i nie jest dozwolone, jeśli członek występuje w przeglądzie
 
 Zasady: jednocześnie tylko jeden urzędujący przewodniczący; to samo konto nie może być powiązane z dwoma członkami tego samego organu w tym samym okresie. Organami zarządzają Super Admin i Compliance Officer, tylko tymi, których zakres w całości mieści się w ich własnym; pozostałe role przeglądają je dla zakładów ze swojego zakresu. Członkowie i ostrzeżenia (konto dezaktywowane, kończąca się kadencja, brak przewodniczącego) pojawiają się też w **Reporting → Dostępy i odpowiedzialności** oraz w pakiecie audytowym.
-
 
 ### Alerty o rolach wygasających i wakatach obowiązkowych ról
 

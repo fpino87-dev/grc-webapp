@@ -527,6 +527,12 @@ Chaque document approuvé reçoit un numéro de version (ex. v1.0, v1.1, v2.0). 
 - Le journal des modifications (notes du réviseur)
 - Le hash du fichier pour garantir l'intégrité
 
+### Copie PDF et fichiers remis à l'auditeur
+
+Lorsque vous chargez une version au format Word (.docx ou .doc), la plateforme génère automatiquement une **copie PDF**. Le fichier Word reste l'original à télécharger et à modifier ; le PDF n'est pas une nouvelle version et ne modifie pas le statut d'approbation. La colonne Fichier affiche le bouton **PDF** lorsque la copie est prête, *PDF en préparation* pendant sa génération (si le service de conversion n'est pas disponible, une nouvelle tentative a lieu pendant la nuit) ou *PDF non généré* si le fichier n'a pas pu être converti : dans ce cas, chargez directement la version PDF. Les tableurs, présentations et PDF restent dans leur format d'origine.
+
+Le **dossier d'audit** (Contrôles) contient pour chaque document la **version en vigueur**, c'est-à-dire la version approuvée, même si un nouveau brouillon a été chargé entre-temps ; au format PDF lorsque la copie existe, sinon au format d'origine. Le fichier `DOCUMENTI.csv` du dossier indique pour chaque document la version, s'il s'agit de la version approuvée, le format et l'empreinte SHA-256 du fichier remis. Pour les versions remplacées, l'historique conserve l'enregistrement (numéro, auteur, empreinte), pas le fichier.
+
 ---
 
 ## 8. Gestion des Incidents (M09)
@@ -1405,7 +1411,6 @@ Allez dans **Governance → Rôles & organes** et descendez jusqu'à **Organes d
 3. Un départ se clôt avec **Clore le mandat** (date de fin), sans suppression : la personne reste dans les procès-verbaux passés et parmi les **anciens membres**. **Supprimer** sert uniquement à corriger une saisie erronée et n'est pas permis si le membre figure dans une revue
 
 Règles : un seul président en fonction à la fois ; un même compte ne peut pas être associé à deux membres du même organe sur la même période. Super Admin et Compliance Officer gèrent les organes, uniquement ceux dont le périmètre est entièrement compris dans le leur ; les autres rôles les consultent pour les sites de leur périmètre. Membres et signalements (compte désactivé, mandat arrivant à échéance, président manquant) figurent aussi dans **Reporting → Accès & responsabilités** et dans le pack d'audit.
-
 
 ### Alertes rôles qui expirent et rôles obligatoires vacants
 

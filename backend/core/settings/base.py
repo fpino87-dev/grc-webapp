@@ -187,6 +187,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.documents.tasks.remind_unapproved_mandatory_documents",
         "schedule": crontab(hour=7, minute=50),  # subito dopo le scadenze documentali
     },
+    "generate-pending-document-pdfs": {
+        "task": "apps.documents.tasks.generate_pending_pdfs_task",
+        "schedule": crontab(hour=3, minute=30),  # notte, dopo il backup delle 02:00
+    },
     "notify-expiring-roles": {
         "task": "apps.governance.tasks.notify_expiring_roles_task",
         "schedule": crontab(hour=8, minute=0),
@@ -296,6 +300,13 @@ BACKUP_ENCRYPTION_KEY = env("BACKUP_ENCRYPTION_KEY", default="")
 # Limite upload per l'import di backup (.dump/.dump.enc) — separato dai 50MB
 # degli allegati documentali: i dump pg_dump possono essere molto più grandi.
 BACKUP_IMPORT_MAX_BYTES = env.int("BACKUP_IMPORT_MAX_BYTES", default=2 * 1024**3)  # 2 GB
+
+# Conversione in PDF dei documenti Word (M07) per i pacchetti audit: servizio
+# Gotenberg (LibreOffice) nella rete interna di compose, mai esposto. Vuoto =
+# conversione disattivata: le versioni restano "da generare" e vengono
+# convertite quando il servizio torna disponibile.
+GOTENBERG_URL = env("GOTENBERG_URL", default="http://gotenberg:3000")
+GOTENBERG_TIMEOUT = env.int("GOTENBERG_TIMEOUT", default=150)  # secondi, oltre --api-timeout di gotenberg
 
 # newfix S12 — limiti upload e body size. Django default e' 2.5 MB con JSON
 # body unbounded -> denial of memory possibile. Allinea il prodotto alle

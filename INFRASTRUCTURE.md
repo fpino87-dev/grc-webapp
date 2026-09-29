@@ -73,6 +73,7 @@
 | Cifratura | cryptography (Fernet, AES-256-GCM per i backup) | — |
 | MIME check | python-magic | — |
 | Error monitoring | sentry-sdk (opzionale) | 2.x |
+| Conversione Word → PDF | Gotenberg (LibreOffice), container `gotenberg` | 8 |
 
 ### Frontend
 
@@ -311,6 +312,10 @@ services:
   celery-beat:
     command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
+  gotenberg:                            # conversione Word → PDF (M07)
+    image: gotenberg/gotenberg:8
+    networks: [converter]               # rete interna, nessuna porta pubblicata
+
   frontend:
     volumes: [./frontend:/app, /app/node_modules]
     ports: ["3001:3000"]
@@ -319,6 +324,16 @@ services:
     image: mailhog/mailhog
     ports: ["1026:1025", "8026:8025"]
 ```
+
+### Conversione PDF dei documenti (Gotenberg)
+
+I documenti Word caricati in M07 vengono accompagnati da una copia PDF generata dal container `gotenberg` (LibreOffice): il PDF è il file consegnato nei pacchetti audit, il `.docx` resta per le modifiche.
+
+- **Isolamento**: `gotenberg` è solo sulla rete `converter` (`internal: true`, nessuna uscita verso internet, nessuna porta pubblicata); lo raggiungono `backend` e `celery`. Le route Chromium e PDF engines, i webhook e il download da URL sono disattivati: il servizio accetta solo file e restituisce PDF.
+- **Configurazione**: `GOTENBERG_URL` (default `http://gotenberg:3000`, vuoto = conversione disattivata) e `GOTENBERG_TIMEOUT` (secondi, default 150; `--api-timeout` di gotenberg è 120s). Un documento complesso può richiedere oltre un minuto.
+- **Esecuzione**: la conversione parte in Celery dopo il caricamento; il job notturno `generate-pending-document-pdfs` (03:30) riprova le versioni rimaste in coda perché il servizio non era disponibile. Per i documenti caricati prima dell'introduzione o dopo un fermo: `python manage.py convert_document_pdfs` (`--retry-failed` per ritentare quelle fallite).
+- **Font**: l'immagine include Carlito e Caladea (metricamente compatibili con Calibri e Cambria) oltre a Liberation e DejaVu. Per font aziendali particolari, montare la cartella dei font in `/usr/local/share/fonts/` del container `gotenberg`.
+- **Risorse**: immagine ~700 MB; LibreOffice si spegne dopo 10 minuti di inattività.
 
 ---
 

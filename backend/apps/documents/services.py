@@ -16,6 +16,7 @@ from core.uploads import (
     validate_uploaded_file,
 )
 
+from . import pdf_converter
 from .models import Document, DocumentApproval, DocumentVersion, Evidence
 
 # ── Macchina a stati del workflow documentale (M07) ─────────────────────────
@@ -286,6 +287,9 @@ def approve_document(
                 "version": (approved.version_label or f"v{approved.version_number}") if approved else None,
             },
         )
+    # Le versioni superate da questa approvazione non servono più in storage.
+    transaction.on_commit(lambda: prune_superseded_files(document))
+
     # Il documento è in vigore: i promemoria automatici aperti su di esso non
     # servono più (stesso schema dei promemoria del piano formativo, M15).
     close_document_reminders(document, user, _("Documento approvato."))
@@ -534,11 +538,6 @@ def add_version_with_file(document, uploaded_file, user, change_summary="", vers
         uploaded_file.seek(0)
     storage_path = default_storage.save(relative_path, uploaded_file)
 
-    # La rimozione del file della versione precedente è schedulata DOPO il commit
-    # (transaction.on_commit): se la scrittura DB sotto fa rollback, il file vecchio
-    # resta integro (la riga superstite continuerebbe a puntarci). Best-effort.
-    old_path = last.storage_path if (last and last.storage_path) else None
-
     # Atomica (P1-2) solo sulle scritture DB (create versione + audit). Lo storage
     # del nuovo file è già avvenuto sopra e resta fuori dalla transazione (I/O su FS).
     with transaction.atomic():
@@ -552,6 +551,11 @@ def add_version_with_file(document, uploaded_file, user, change_summary="", vers
             storage_path=storage_path,
             change_summary=change_summary,
             uploaded_by=user,
+            pdf_status=(
+                DocumentVersion.PDF_PENDING
+                if pdf_converter.is_convertible(original_name)
+                else DocumentVersion.PDF_NOT_APPLICABLE
+            ),
         )
         log_action(
             user=user,
@@ -568,18 +572,219 @@ def add_version_with_file(document, uploaded_file, user, change_summary="", vers
 
     _reopen_for_new_version(document, user, version)
 
-    if old_path:
-        def _delete_old():
+    # Dopo il commit: il file della versione precedente se ne va solo se non è
+    # quella in vigore, e la copia PDF si genera in background.
+    transaction.on_commit(lambda: prune_superseded_files(document))
+    if version.pdf_status == DocumentVersion.PDF_PENDING:
+        schedule_version_pdf(version)
+    return version
+
+
+# ── File conservati e copia PDF ─────────────────────────────────────────────
+# Per ogni documento restano nello storage solo i file dell'ultima versione
+# caricata e della versione approvata (in vigore): è quest'ultima che va
+# all'auditor anche mentre una nuova bozza è in revisione. Delle versioni
+# superate resta la riga (numero, autore, hash), non il file.
+
+def prune_superseded_files(document) -> int:
+    """Elimina i file delle versioni né ultime né in vigore. Best-effort."""
+    versions = list(document.versions.all())
+    if not versions:
+        return 0
+    keep = {versions[0].pk}
+    current = approved_version(document)
+    if current is not None:
+        keep.add(current.pk)
+    pruned = 0
+    for v in versions[1:]:
+        if v.pk in keep or not (v.storage_path or v.pdf_storage_path):
+            continue
+        for path in (v.storage_path, v.pdf_storage_path):
+            if not path:
+                continue
             try:
-                default_storage.delete(old_path)
+                default_storage.delete(path)
             except Exception as exc:
                 logging.getLogger(__name__).warning(
-                    "Documento %s: rimozione file versione precedente fallita "
+                    "Documento %s: rimozione file della versione %s fallita "
                     "(possibile file orfano in storage): %s",
-                    document.pk, exc,
+                    document.pk, v.version_number, exc,
                 )
-        transaction.on_commit(_delete_old)
-    return version
+        v.storage_path = ""
+        v.pdf_storage_path = ""
+        if v.pdf_status in (DocumentVersion.PDF_PENDING, DocumentVersion.PDF_READY):
+            v.pdf_status = DocumentVersion.PDF_NOT_APPLICABLE
+        v.save(update_fields=["storage_path", "pdf_storage_path", "pdf_status", "updated_at"])
+        pruned += 1
+    return pruned
+
+
+def schedule_version_pdf(version) -> None:
+    """Accoda la generazione del PDF dopo il commit della transazione."""
+    from .tasks import generate_version_pdf_task
+
+    version_id = str(version.pk)
+    transaction.on_commit(lambda: generate_version_pdf_task.delay(version_id))
+
+
+def _pdf_audit_user(version):
+    if version.uploaded_by_id:
+        return version.uploaded_by
+    from django.contrib.auth import get_user_model
+
+    return get_user_model().objects.filter(is_superuser=True).first()
+
+
+def generate_version_pdf(version) -> str:
+    """Genera (o rigenera) la copia PDF di una versione Word.
+
+    Esiti: ``ok``; ``pending`` se il servizio non è raggiungibile (si riprova
+    col passaggio notturno); ``failed`` se il file non è convertibile; ``na``
+    se non c'è niente da convertire (formato non Word o file non più in
+    storage). Restituisce lo stato finale.
+    """
+    log = logging.getLogger(__name__)
+    if not version.storage_path or not pdf_converter.is_convertible(version.file_name):
+        _set_pdf_status(version, DocumentVersion.PDF_NOT_APPLICABLE)
+        return version.pdf_status
+    if not default_storage.exists(version.storage_path):
+        _set_pdf_status(version, DocumentVersion.PDF_NOT_APPLICABLE)
+        return version.pdf_status
+
+    with default_storage.open(version.storage_path, "rb") as fh:
+        content = fh.read()
+    try:
+        pdf_bytes = pdf_converter.convert_to_pdf(version.file_name, content)
+    except pdf_converter.ConversionUnavailable as exc:
+        log.warning("PDF versione %s rimandato: servizio non disponibile (%s)", version.pk, exc)
+        _set_pdf_status(version, DocumentVersion.PDF_PENDING)
+        return version.pdf_status
+    except pdf_converter.ConversionFailed as exc:
+        log.warning("PDF versione %s non generato: %s", version.pk, exc)
+        _set_pdf_status(version, DocumentVersion.PDF_FAILED)
+        _log_pdf_outcome(version, "document.pdf_failed", {"reason": str(exc)[:200]})
+        return version.pdf_status
+
+    from django.core.files.base import ContentFile
+
+    stem = os.path.splitext(os.path.basename(version.file_name))[0] or "documento"
+    relative_path = os.path.join(
+        "documents", str(version.document_id), f"v{version.version_number}", "pdf", f"{stem}.pdf",
+    )
+    old_pdf = version.pdf_storage_path
+    version.pdf_storage_path = default_storage.save(relative_path, ContentFile(pdf_bytes))
+    version.pdf_sha256 = hashlib.sha256(pdf_bytes).hexdigest()
+    version.pdf_generated_at = timezone.now()
+    version.pdf_status = DocumentVersion.PDF_READY
+    version.save(update_fields=[
+        "pdf_storage_path", "pdf_sha256", "pdf_generated_at", "pdf_status", "updated_at",
+    ])
+    if old_pdf and old_pdf != version.pdf_storage_path:
+        try:
+            default_storage.delete(old_pdf)
+        except Exception as exc:
+            log.warning("PDF versione %s: vecchia copia non rimossa: %s", version.pk, exc)
+    _log_pdf_outcome(version, "document.pdf_generated", {"pdf_sha256": version.pdf_sha256})
+    return version.pdf_status
+
+
+def generate_pending_pdfs(include_failed=False, limit=None) -> dict:
+    """Converte le versioni "da generare" (e, a richiesta, quelle fallite).
+
+    Si ferma al primo servizio non disponibile: inutile insistere, le versioni
+    restano in coda per il passaggio successivo.
+    """
+    statuses = [DocumentVersion.PDF_PENDING]
+    if include_failed:
+        statuses.append(DocumentVersion.PDF_FAILED)
+    qs = (
+        DocumentVersion.objects.filter(pdf_status__in=statuses, document__deleted_at__isnull=True)
+        .select_related("document", "uploaded_by")
+        .order_by("created_at")
+    )
+    if limit:
+        qs = qs[:limit]
+    counts = {"ok": 0, "failed": 0, "na": 0, "pending": 0}
+    if not pdf_converter.is_enabled():
+        counts["pending"] = qs.count()
+        return counts
+    for version in qs:
+        status = generate_version_pdf(version)
+        counts[status] = counts.get(status, 0) + 1
+        if status == DocumentVersion.PDF_PENDING:
+            break
+    return counts
+
+
+def _set_pdf_status(version, status) -> None:
+    if version.pdf_status != status:
+        version.pdf_status = status
+        version.save(update_fields=["pdf_status", "updated_at"])
+
+
+def _log_pdf_outcome(version, action_code, extra) -> None:
+    user = _pdf_audit_user(version)
+    if user is None:
+        return
+    log_action(
+        user=user,
+        action_code=action_code,
+        level="L1",
+        entity=version.document,
+        payload={
+            "id": str(version.document_id),
+            "version": version.version_label or f"v{version.version_number}",
+            "sha256": version.sha256,
+            **extra,
+        },
+    )
+
+
+def export_file(document):
+    """Il file del documento da consegnare all'esterno (pacchetti audit).
+
+    Versione: quella in vigore se l'approvazione la registra, altrimenti
+    l'ultima caricata (documenti mai approvati o approvazioni storiche senza
+    collegamento alla versione). Formato: la copia PDF se disponibile,
+    altrimenti il file originale.
+
+    Restituisce ``None`` se non c'è un file in storage, altrimenti un dict con
+    ``version``, ``storage_path``, ``extension``, ``sha256``, ``is_pdf_copy``,
+    ``pdf_missing`` (Word senza copia PDF: va segnalato a chi prepara l'audit)
+    e ``is_approved_version``.
+    """
+    candidates = []
+    current = approved_version(document)
+    if current is not None and current.deleted_at is None:
+        candidates.append(current)
+    latest = document.versions.first()
+    if latest is not None and latest not in candidates:
+        candidates.append(latest)
+
+    for version in candidates:
+        if version.pdf_status == DocumentVersion.PDF_READY and version.pdf_storage_path \
+                and default_storage.exists(version.pdf_storage_path):
+            return {
+                "version": version,
+                "storage_path": version.pdf_storage_path,
+                "extension": ".pdf",
+                "sha256": version.pdf_sha256,
+                "is_pdf_copy": True,
+                "pdf_missing": False,
+                "is_approved_version": version is current,
+            }
+        if version.storage_path and default_storage.exists(version.storage_path):
+            _, ext = os.path.splitext(version.file_name or version.storage_path)
+            return {
+                "version": version,
+                "storage_path": version.storage_path,
+                "extension": ext,
+                "sha256": version.sha256,
+                "is_pdf_copy": False,
+                "pdf_missing": pdf_converter.is_convertible(version.file_name),
+                "is_approved_version": version is current,
+            }
+    return None
 
 
 def get_expiring_documents(days=30):

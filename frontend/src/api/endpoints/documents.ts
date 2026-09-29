@@ -11,6 +11,8 @@ export interface DocumentVersionSummary {
   file_name: string;
   storage_path: string;
   file_url?: string | null;
+  /** Copia PDF dei file Word: "na" = non prevista (altri formati). */
+  pdf_status?: "na" | "pending" | "ok" | "failed";
 }
 
 // Approvazione in applicazione oppure delibera dell'organo di governo
@@ -121,6 +123,10 @@ export const documentsApi = {
 
   downloadDocument: (id: string) =>
     apiClient.get<Blob>(`/documents/documents/${id}/download-latest/`, {
+      responseType: "blob",
+    }).then(r => r.data),
+  downloadDocumentPdf: (id: string) =>
+    apiClient.get<Blob>(`/documents/documents/${id}/download-pdf/`, {
       responseType: "blob",
     }).then(r => r.data),
 

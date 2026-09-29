@@ -38,6 +38,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import shutil
 import tempfile
 import zipfile
@@ -174,19 +175,28 @@ def _collect_documents(out_dir: Path, plant, frameworks: list[str]) -> dict:
         .distinct()
     )
 
+    from apps.documents.services import export_file
+
     index_rows: list[dict] = []
     copied = 0
     skipped_missing = 0
     for doc in qs:
-        last_version = (
+        # Versione in vigore, in PDF quando il file è Word e la copia è pronta.
+        exported = export_file(doc)
+        version = exported["version"] if exported else (
             DocumentVersion.objects
             .filter(document=doc, deleted_at__isnull=True)
             .order_by("-version_number").first()
         )
-        if not last_version:
+        if not version:
             continue
-        src = _media_path(last_version.storage_path)
-        target_name = f"{_safe_filename(doc.title)}__v{last_version.version_number}__{_safe_filename(last_version.file_name)}"
+        src = _media_path(exported["storage_path"]) if exported else None
+        if exported and exported["is_pdf_copy"]:
+            stem = os.path.splitext(version.file_name)[0]
+            file_label = f"{stem}.pdf"
+        else:
+            file_label = version.file_name
+        target_name = f"{_safe_filename(doc.title)}__v{version.version_number}__{_safe_filename(file_label)}"
         target = docs_dir / target_name
 
         if src:
@@ -194,7 +204,7 @@ def _collect_documents(out_dir: Path, plant, frameworks: list[str]) -> dict:
             copied += 1
         else:
             target.write_text(
-                f"FILE NON TROVATO IN STORAGE: {last_version.storage_path}\n",
+                f"FILE NON TROVATO IN STORAGE: {version.storage_path}\n",
                 encoding="utf-8",
             )
             skipped_missing += 1
@@ -203,13 +213,18 @@ def _collect_documents(out_dir: Path, plant, frameworks: list[str]) -> dict:
             "title": doc.title,
             "category": doc.category,
             "document_type": doc.document_type,
-            "version": last_version.version_number,
+            "version": version.version_number,
             "approved_at": doc.approved_at.isoformat() if doc.approved_at else "",
             "expiry_date": str(doc.expiry_date) if doc.expiry_date else "",
             "owner": (doc.owner.email if doc.owner else ""),
             "approver": (doc.approver.email if doc.approver else ""),
             "filename": target_name,
-            "sha256_documented": last_version.sha256 or "",
+            "format": (
+                "pdf_copy" if exported and exported["is_pdf_copy"]
+                else "word_no_pdf" if exported and exported["pdf_missing"]
+                else "original"
+            ),
+            "sha256_documented": (exported["sha256"] if exported else version.sha256) or "",
             "missing_file": (src is None),
         })
 

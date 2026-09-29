@@ -1994,7 +1994,15 @@
       "review_badge": "Zatwierdzono na przeglądzie zarządzania"
     },
     "unapproved_version": "Wersja niezatwierdzona",
-    "approved_version": "Obowiązuje: {{version}}"
+    "approved_version": "Obowiązuje: {{version}}",
+    "pdf_copy": {
+      "download": "PDF",
+      "download_title": "Pobierz kopię PDF (przekazywaną audytorowi)",
+      "pending": "PDF w przygotowaniu",
+      "pending_hint": "Kopia PDF jest generowana automatycznie; jeśli usługa konwersji jest niedostępna, ponowna próba nastąpi w nocy.",
+      "failed": "PDF nie został wygenerowany",
+      "failed_hint": "Nie udało się przekonwertować pliku Word: pakiety audytowe będą zawierać plik oryginalny. Prześlij wersję PDF lub powiadom administratora."
+    }
   },
   "schedule": {
     "activity": {

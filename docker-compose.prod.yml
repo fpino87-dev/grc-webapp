@@ -66,6 +66,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks: [default, converter]
 
   celery:
     build:
@@ -89,6 +90,7 @@ services:
     depends_on:
       - backend
       - redis
+    networks: [default, converter]
 
   celery-beat:
     build:
@@ -106,6 +108,25 @@ services:
     depends_on:
       - backend
       - redis
+
+  # Conversione Word → PDF dei documenti (M07) per i pacchetti audit.
+  # Rete interna senza uscita verso internet e nessuna porta pubblicata: lo
+  # raggiungono solo backend e celery. Route Chromium, webhook e download da
+  # URL disattivati (niente SSRF); LibreOffice si spegne quando è inattivo.
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+    command:
+      - gotenberg
+      - --chromium-disable-routes
+      - --pdfengines-disable-routes
+      - --webhook-disable
+      - --api-disable-download-from
+      - --prometheus-disable-collect
+      - --api-timeout=120s
+      - --libreoffice-idle-shutdown-timeout=10m
+      - --log-level=warn
+    networks: [converter]
 
   frontend:
     build:
@@ -130,3 +151,9 @@ volumes:
   pgdata:
   redisdata:
   backupdata:
+
+networks:
+  default:
+  # Rete senza gateway verso l'esterno: gotenberg non esce su internet.
+  converter:
+    internal: true

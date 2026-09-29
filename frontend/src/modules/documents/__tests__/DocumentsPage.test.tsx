@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { DocumentsPage } from "../DocumentsPage";
@@ -32,6 +32,7 @@ vi.mock("../../../api/endpoints/documents", () => ({
     remove: vi.fn(),
     uploadVersion: vi.fn(),
     downloadDocument: vi.fn(),
+    downloadDocumentPdf: vi.fn(),
     downloadEvidence: vi.fn(),
     createEvidence: vi.fn(),
     removeEvidence: vi.fn(),
@@ -120,6 +121,33 @@ describe("DocumentsPage", () => {
     renderPage();
     expect(await screen.findByText("Politica sicurezza informazioni")).toBeInTheDocument();
     expect(screen.getByText("D-ITA-INF-001")).toBeInTheDocument();
+  });
+
+  it("copia PDF: pulsante se pronta, stato se in preparazione o fallita", async () => {
+    const version = { id: "v1", version_number: 1, file_name: "Politica.docx", storage_path: "x" };
+    mockList.mockResolvedValue({ results: [
+      makeDoc({ id: "d-ok", title: "Doc pronto", latest_version: { ...version, pdf_status: "ok" } }),
+      makeDoc({ id: "d-pend", title: "Doc in coda", latest_version: { ...version, pdf_status: "pending" } }),
+      makeDoc({ id: "d-ko", title: "Doc fallito", latest_version: { ...version, pdf_status: "failed" } }),
+      makeDoc({ id: "d-xls", title: "Registro", latest_version: { ...version, file_name: "r.xlsx", pdf_status: "na" } }),
+    ] } as never);
+    renderPage();
+    await screen.findByText("Doc pronto");
+    expect(screen.getAllByText("documents.pdf_copy.download")).toHaveLength(1);
+    expect(screen.getByText("documents.pdf_copy.pending")).toBeInTheDocument();
+    expect(screen.getByText("documents.pdf_copy.failed")).toBeInTheDocument();
+
+    vi.mocked(documentsApi.downloadDocumentPdf).mockResolvedValue(new Blob(["%PDF"]));
+    window.URL.createObjectURL = vi.fn(() => "blob:x");
+    window.URL.revokeObjectURL = vi.fn();
+    let savedAs = "";
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+      savedAs = this.download;
+    });
+    fireEvent.click(screen.getByText("documents.pdf_copy.download"));
+    expect(documentsApi.downloadDocumentPdf).toHaveBeenCalledWith("d-ok");
+    await waitFor(() => expect(savedAs).toBe("Politica.pdf"));
+    click.mockRestore();
   });
 
   it("esclude i contratti dal tab Documenti e dai contatori del banner", async () => {

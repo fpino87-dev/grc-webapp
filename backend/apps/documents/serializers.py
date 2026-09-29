@@ -11,6 +11,8 @@ class DocumentVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentVersion
         fields = "__all__"
+        # La copia PDF la scrive solo il servizio di conversione.
+        read_only_fields = ["pdf_status", "pdf_storage_path", "pdf_sha256", "pdf_generated_at"]
 
     def get_version_display(self, obj):
         """Il numero di revisione del documento, se chi ha caricato il file

@@ -1994,7 +1994,15 @@
       "review_badge": "Approuvé en revue de direction"
     },
     "unapproved_version": "Version non approuvée",
-    "approved_version": "En vigueur : {{version}}"
+    "approved_version": "En vigueur : {{version}}",
+    "pdf_copy": {
+      "download": "PDF",
+      "download_title": "Télécharger la copie PDF (celle remise à l'auditeur)",
+      "pending": "PDF en préparation",
+      "pending_hint": "La copie PDF est générée automatiquement ; si le service de conversion n'est pas disponible, une nouvelle tentative a lieu pendant la nuit.",
+      "failed": "PDF non généré",
+      "failed_hint": "Le fichier Word n'a pas pu être converti : les dossiers d'audit contiendront le fichier original. Chargez la version PDF ou prévenez l'administrateur."
+    }
   },
   "schedule": {
     "activity": {

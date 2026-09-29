@@ -527,6 +527,12 @@ Onaylanan her belge bir sürüm numarası alır (ör. v1.0, v1.1, v2.0). Tüm s�
 - Değişiklik günlüğü (gözden geçirenin notları)
 - Bütünlüğü sağlamak için dosya karması
 
+### PDF kopyası ve denetçiye verilen dosyalar
+
+Word biçiminde (.docx veya .doc) bir sürüm yüklediğinizde platform otomatik olarak bir **PDF kopyası** oluşturur. Word dosyası indirilecek ve düzenlenecek orijinal olarak kalır; PDF yeni bir sürüm değildir ve onay durumunu değiştirmez. Dosya sütununda kopya hazır olduğunda **PDF** düğmesi, oluşturulurken *PDF hazırlanıyor* (dönüştürme hizmeti kullanılamıyorsa gece yeniden denenir) veya dosya dönüştürülemediyse *PDF oluşturulamadı* görünür: bu durumda PDF sürümünü doğrudan yükleyin. Elektronik tablolar, sunumlar ve PDF'ler orijinal biçimlerinde kalır.
+
+**Denetim paketi** (Kontroller) her belge için **yürürlükteki sürümü**, yani onaylanmış sürümü içerir; bu arada yeni bir taslak yüklenmiş olsa bile. Kopya varsa PDF biçiminde, yoksa orijinal biçimde. Paketteki `DOCUMENTI.csv` dosyası her belge için sürümü, onaylanmış sürüm olup olmadığını, biçimi ve teslim edilen dosyanın SHA-256 özetini listeler. Yerini yenisine bırakan sürümler için geçmişte dosya değil kayıt (numara, yazar, özet) saklanır.
+
 ---
 
 ## 8. Olay Yönetimi (M09)
@@ -1405,7 +1411,6 @@ Bir pozisyon artık gerekli değilse (ör. normatif kapsam değişikliği):
 3. Organdan ayrılan kişi silinmez, **Görevi sonlandır** (bitiş tarihi) ile kapatılır: geçmiş tutanaklarda ve **eski üyeler** arasında kalır. **Sil** yalnızca hatalı bir girişi düzeltmek içindir ve üye bir gözden geçirmede yer alıyorsa izin verilmez
 
 Kurallar: aynı anda yalnızca bir görevdeki başkan; aynı hesap, aynı dönemde aynı organın iki üyesine bağlanamaz. Organları Super Admin ve Compliance Officer yönetir, yalnızca kapsamı tamamen kendi kapsamlarında olanları; diğer roller kendi kapsamlarındaki tesisler için görüntüler. Üyeler ve uyarılar (devre dışı hesap, sona eren görev, eksik başkan) **Reporting → Erişim ve sorumluluklar** bölümünde ve denetim paketinde de görünür.
-
 
 ### Sona eren rol uyarıları ve zorunlu boş rol uyarıları
 

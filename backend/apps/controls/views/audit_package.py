@@ -28,6 +28,42 @@ def _sort_control_key(external_id: str):
     return result
 
 
+def _document_row(control_id: str, doc, exported: dict, fname: str) -> list:
+    version = exported["version"]
+    if exported["is_pdf_copy"]:
+        fmt = "PDF (copia del file Word)"
+    elif exported["pdf_missing"]:
+        fmt = "Word — copia PDF non disponibile"
+    else:
+        fmt = "Originale"
+    return [
+        control_id,
+        doc.document_code or "",
+        doc.title,
+        version.version_label or f"v{version.version_number}",
+        "sì" if exported["is_approved_version"] else "no",
+        doc.status,
+        fmt,
+        fname,
+        exported["sha256"] or "",
+    ]
+
+
+def _write_documents_index(zf, zip_name: str, rows: list[list]) -> None:
+    """DOCUMENTI.csv: un rigo per documento esportato in una cartella controllo."""
+    import io
+
+    from core.csv_safe import safe_writer
+
+    buf = io.StringIO()
+    w = safe_writer(buf)
+    w.writerow(["ID Controllo", "Codice", "Titolo", "Versione", "Versione approvata",
+                "Stato documento", "Formato", "File", "SHA-256 file"])
+    for row in rows:
+        w.writerow(row)
+    zf.writestr(f"{zip_name}/DOCUMENTI.csv", buf.getvalue().encode("utf-8-sig"))
+
+
 def _add_audit_programs(zf, zip_name: str, fw_codes: list[str], plant_id, today) -> None:
     """
     Aggiunge PROGRAMMA_AUDIT/ con un CSV per ogni programma approvato/in_corso
@@ -119,6 +155,7 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
     from core.csv_safe import safe_writer
     from apps.management_review.models import ManagementReview
     from apps.documents.models import Document
+    from apps.documents.services import export_file
 
     from django.db.models import Count, Q
 
@@ -172,15 +209,13 @@ def _add_management_reviews(zf, zip_name: str, plant_id, default_storage) -> Non
             continue
         try:
             doc = Document.objects.get(pk=r.document_id, deleted_at__isnull=True)
-            version = doc.versions.order_by("-version_number").first()
-            if not version or not version.storage_path:
+            exported = export_file(doc)
+            if exported is None:
                 continue
-            if not default_storage.exists(version.storage_path):
-                continue
-            content = default_storage.open(version.storage_path, "rb").read()
-            _, ext = _os.path.splitext(version.file_name or version.storage_path)
+            with default_storage.open(exported["storage_path"], "rb") as fh:
+                content = fh.read()
             safe_title = _sanitize_name(r.title, 50)
-            fname = f"{r.review_date.isoformat()}_{safe_title}{ext}"
+            fname = f"{r.review_date.isoformat()}_{safe_title}{exported['extension']}"
             zf.writestr(
                 f"{zip_name}/REVISIONI_DIREZIONE/{fname}",
                 content,
@@ -322,6 +357,8 @@ class AuditPackageView(APIView):
         import zipfile
         from core.csv_safe import safe_writer
         from django.core.files.storage import default_storage
+
+        from apps.documents.services import export_file
         from django.http import HttpResponse
         from django.utils import timezone
         from core.audit import log_action
@@ -492,26 +529,33 @@ class AuditPackageView(APIView):
             _add_risk_register(zf, zip_name, plant_id)
 
             # ── Cartelle per controllo ─────────────────────────────────────────
+            # Documenti: versione in vigore, in PDF quando il file è Word e la
+            # copia è pronta (vedi documents.services.export_file). DOCUMENTI.csv
+            # dice all'auditor quale versione ha in mano e con quale impronta.
+            doc_rows: list[list] = []
             for ctrl in controls_list:
                 safe_title = _sanitize_name(ctrl["title"], 60)
                 folder = f"{ctrl['external_id']} - {safe_title}"
 
                 # Documenti collegati
                 for doc in ctrl["doc_objects"]:
-                    version = doc.versions.order_by("-version_number").first()
-                    if not version or not version.storage_path:
-                        continue
-                    if not default_storage.exists(version.storage_path):
+                    exported = export_file(doc)
+                    if exported is None:
                         continue
                     try:
-                        content = default_storage.open(version.storage_path, "rb").read()
-                        _, ext = _os.path.splitext(version.file_name or version.storage_path)
+                        with default_storage.open(exported["storage_path"], "rb") as fh:
+                            content = fh.read()
                         prefix = (doc.document_code + "_") if doc.document_code else ""
                         safe_doc = _sanitize_name(doc.title, 50)
-                        fname = f"{prefix}{safe_doc}{ext}"
+                        fname = f"{prefix}{safe_doc}{exported['extension']}"
                         zf.writestr(f"{zip_name}/{folder}/documenti/{fname}", content)
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        import logging
+                        logging.getLogger(__name__).warning(
+                            "audit-package: documento %s saltato: %s", doc.pk, exc,
+                        )
+                        continue
+                    doc_rows.append(_document_row(ctrl["external_id"], doc, exported, fname))
 
                 # Evidenze collegate
                 for ev in ctrl["ev_objects"]:
@@ -525,6 +569,8 @@ class AuditPackageView(APIView):
                         zf.writestr(f"{zip_name}/{folder}/evidenze/{fname}", content)
                     except Exception:
                         pass
+
+            _write_documents_index(zf, zip_name, doc_rows)
 
         log_action(
             user=request.user,

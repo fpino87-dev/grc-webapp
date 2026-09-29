@@ -1994,7 +1994,15 @@
       "review_badge": "Yönetim gözden geçirmesinde onaylandı"
     },
     "unapproved_version": "Onaylanmamış sürüm",
-    "approved_version": "Yürürlükte: {{version}}"
+    "approved_version": "Yürürlükte: {{version}}",
+    "pdf_copy": {
+      "download": "PDF",
+      "download_title": "PDF kopyasını indir (denetçiye verilen kopya)",
+      "pending": "PDF hazırlanıyor",
+      "pending_hint": "PDF kopyası otomatik olarak oluşturulur; dönüştürme hizmeti kullanılamıyorsa gece yeniden denenir.",
+      "failed": "PDF oluşturulamadı",
+      "failed_hint": "Word dosyası dönüştürülemedi: denetim paketlerinde orijinal dosya yer alacak. PDF sürümünü yükleyin veya yöneticiyi bilgilendirin."
+    }
   },
   "schedule": {
     "activity": {

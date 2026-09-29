@@ -135,6 +135,26 @@ class DocumentVersion(BaseModel):
         null=True,
         blank=True,
     )
+    # Copia PDF generata dal sistema (Gotenberg/LibreOffice) per i file di
+    # testo modificabili (.docx, .odt, …): l'originale resta il file da
+    # scaricare e modificare, il PDF è quello consegnato all'auditor nei
+    # pacchetti. Non è una nuova versione e non tocca l'approvazione.
+    PDF_NOT_APPLICABLE = "na"
+    PDF_PENDING = "pending"
+    PDF_READY = "ok"
+    PDF_FAILED = "failed"
+    PDF_STATUS_CHOICES = [
+        (PDF_NOT_APPLICABLE, "Non prevista"),
+        (PDF_PENDING, "Da generare"),
+        (PDF_READY, "Disponibile"),
+        (PDF_FAILED, "Conversione non riuscita"),
+    ]
+    pdf_status = models.CharField(
+        max_length=10, choices=PDF_STATUS_CHOICES, default=PDF_NOT_APPLICABLE,
+    )
+    pdf_storage_path = models.CharField(max_length=500, blank=True)
+    pdf_sha256 = models.CharField(max_length=64, blank=True)
+    pdf_generated_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = [["document", "version_number"]]

@@ -1994,7 +1994,15 @@
       "review_badge": "Approved in management review"
     },
     "unapproved_version": "Version not approved",
-    "approved_version": "In force: {{version}}"
+    "approved_version": "In force: {{version}}",
+    "pdf_copy": {
+      "download": "PDF",
+      "download_title": "Download the PDF copy (the one given to the auditor)",
+      "pending": "PDF being prepared",
+      "pending_hint": "The PDF copy is generated automatically; if the conversion service is unavailable it is retried overnight.",
+      "failed": "PDF not generated",
+      "failed_hint": "The Word file could not be converted: audit packages will contain the original file. Upload the PDF version or notify the administrator."
+    }
   },
   "schedule": {
     "activity": {

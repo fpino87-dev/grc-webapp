@@ -75,12 +75,15 @@ export function TabDocumenti() {
     return true;
   });
 
-  async function handleDownloadDocument(doc: Document) {
+  async function handleDownloadDocument(doc: Document, asPdf = false) {
     try {
-      const blob = await documentsApi.downloadDocument(doc.id);
+      const blob = asPdf
+        ? await documentsApi.downloadDocumentPdf(doc.id)
+        : await documentsApi.downloadDocument(doc.id);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
-      const filename = doc.latest_version?.file_name || `${doc.title || "documento"}.pdf`;
+      const original = doc.latest_version?.file_name || `${doc.title || "documento"}.pdf`;
+      const filename = asPdf ? original.replace(/\.[^.]+$/, "") + ".pdf" : original;
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
@@ -210,13 +213,35 @@ export function TabDocumenti() {
                   <td className="px-4 py-3 text-xs">
                     {doc.latest_version ? (
                       <div className="flex flex-col gap-0.5">
-                        <button
-                          type="button"
-                          onClick={() => handleDownloadDocument(doc)}
-                          className="text-indigo-600 hover:underline text-left"
-                        >
-                          {t("documents.actions.download")}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadDocument(doc)}
+                            className="text-indigo-600 hover:underline text-left"
+                          >
+                            {t("documents.actions.download")}
+                          </button>
+                          {doc.latest_version.pdf_status === "ok" && (
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadDocument(doc, true)}
+                              title={t("documents.pdf_copy.download_title")}
+                              className="text-[10px] font-semibold text-red-700 bg-red-50 hover:bg-red-100 rounded px-1 py-0.5"
+                            >
+                              {t("documents.pdf_copy.download")}
+                            </button>
+                          )}
+                        </div>
+                        {doc.latest_version.pdf_status === "pending" && (
+                          <span className="text-[10px] text-gray-400 cursor-help" title={t("documents.pdf_copy.pending_hint")}>
+                            {t("documents.pdf_copy.pending")}
+                          </span>
+                        )}
+                        {doc.latest_version.pdf_status === "failed" && (
+                          <span className="text-[10px] text-amber-700 cursor-help" title={t("documents.pdf_copy.failed_hint")}>
+                            {t("documents.pdf_copy.failed")}
+                          </span>
+                        )}
                         <span className="text-[10px] text-gray-500">{doc.latest_version.version_display}</span>
                         {doc.has_unapproved_version && (
                           <span className="text-[10px] text-amber-700 bg-amber-50 rounded px-1 py-0.5">

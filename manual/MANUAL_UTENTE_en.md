@@ -527,6 +527,12 @@ Each approved document receives a version number (e.g. v1.0, v1.1, v2.0). The co
 - Changelog (reviewer's notes)
 - File hash to guarantee integrity
 
+### PDF copy and files handed to the auditor
+
+When you upload a version in Word format (.docx or .doc), the platform automatically generates a **PDF copy**. The Word file remains the original to download and edit; the PDF is not a new version and does not change the approval status. The File column shows the **PDF** button when the copy is ready, *PDF being prepared* while it is generated (if the conversion service is unavailable it is retried overnight), or *PDF not generated* if the file could not be converted: in that case upload the PDF version directly. Spreadsheets, presentations and PDFs stay in their original format.
+
+The **audit package** (Controls) contains, for each document, the **version in force**, i.e. the approved one, even if a new draft has been uploaded in the meantime; as PDF when the copy exists, otherwise in the original format. The package's `DOCUMENTI.csv` file lists, for each document, the version, whether it is the approved one, the format and the SHA-256 fingerprint of the delivered file. For superseded versions the history keeps the record (number, author, fingerprint), not the file.
+
 ---
 
 ## 8. Incident Management (M09)
@@ -1405,7 +1411,6 @@ Go to **Governance → Roles & bodies** and scroll to **Governing bodies**. This
 3. Someone leaving the body is closed with **End term** (end date), not deleted: they stay in past minutes and among **former members**. **Delete** only corrects a wrong entry and is not allowed if the member appears in a review
 
 Rules: only one chair in office at a time; the same account cannot be linked to two members of the same body in the same period. Super Admin and Compliance Officer manage the bodies, only those whose scope lies entirely within their own; other roles see them for the sites in their scope. Members and warnings (deactivated account, term expiring, missing chair) also appear in **Reporting → Access & responsibilities** and in the audit pack.
-
 
 ### Alerts for expiring roles and mandatory vacant roles
 

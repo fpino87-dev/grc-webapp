@@ -116,6 +116,20 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @staticmethod
+    def _serve_stored_file(storage_path, filename):
+        # Prevenzione path traversal: il percorso non deve contenere ".."
+        if ".." in storage_path or storage_path.startswith("/"):
+            raise Http404("Percorso file non valido.")
+        if not default_storage.exists(storage_path):
+            raise Http404("File non trovato nello storage.")
+        return FileResponse(
+            default_storage.open(storage_path, "rb"),
+            as_attachment=True,
+            # Usa solo il basename per il filename nel Content-Disposition
+            filename=os.path.basename(filename or storage_path),
+        )
+
     @action(detail=True, methods=["get"], url_path="download-latest")
     def download_latest(self, request, pk=None):
         """
@@ -125,23 +139,17 @@ class DocumentViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
         version = document.versions.first()
         if not version or not version.storage_path:
             raise Http404("Nessun file disponibile per questo documento.")
+        return self._serve_stored_file(version.storage_path, version.file_name)
 
-        # Prevenzione path traversal: il basename non deve contenere ".."
-        storage_path = version.storage_path
-        if ".." in storage_path or storage_path.startswith("/"):
-            raise Http404("Percorso file non valido.")
-
-        if not default_storage.exists(storage_path):
-            raise Http404("File non trovato nello storage.")
-
-        file_handle = default_storage.open(storage_path, "rb")
-        # Usa solo il basename per il filename nel Content-Disposition
-        filename = os.path.basename(version.file_name or storage_path)
-        return FileResponse(
-            file_handle,
-            as_attachment=True,
-            filename=filename,
-        )
+    @action(detail=True, methods=["get"], url_path="download-pdf")
+    def download_pdf(self, request, pk=None):
+        """Copia PDF dell'ultima versione (solo per i file Word convertiti)."""
+        document = self.get_object()
+        version = document.versions.first()
+        if not version or version.pdf_status != "ok" or not version.pdf_storage_path:
+            raise Http404("Copia PDF non disponibile per questo documento.")
+        stem = os.path.splitext(os.path.basename(version.file_name))[0] or "documento"
+        return self._serve_stored_file(version.pdf_storage_path, f"{stem}.pdf")
 
     def _workflow_denied(self, doc, workflow_action, message):
         """403 con il motivo corretto: manca il ruolo, oppure la governance non

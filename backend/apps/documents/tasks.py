@@ -258,3 +258,24 @@ def remind_unapproved_mandatory_documents():
         created += 1
 
     return f"remind_unapproved_mandatory_documents: {created} task creati, {closed} chiusi"
+
+
+@shared_task(ignore_result=True)
+def generate_version_pdf_task(version_id):
+    """Copia PDF di una versione Word appena caricata (vedi services)."""
+    from .models import DocumentVersion
+    from .services import generate_version_pdf
+
+    version = DocumentVersion.objects.select_related("document").filter(pk=version_id).first()
+    if version is None:
+        return None
+    return generate_version_pdf(version)
+
+
+@shared_task(ignore_result=True)
+def generate_pending_pdfs_task():
+    """Notturno: converte le versioni rimaste "da generare" (servizio di
+    conversione giù al momento del caricamento, versioni pregresse)."""
+    from .services import generate_pending_pdfs
+
+    return generate_pending_pdfs()

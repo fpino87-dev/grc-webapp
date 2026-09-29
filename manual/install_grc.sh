@@ -315,6 +315,8 @@ print('Backup:', r.filename, r.status)
   # 3. Immagini
   info "Rebuild immagini Docker..."
   ${COMPOSE} build
+  # Immagini non costruite localmente (conversione PDF): aggiornamenti del tag
+  ${COMPOSE} pull gotenberg || warn "Immagine gotenberg non aggiornata (conversione PDF): si usa quella presente"
 
   # 4. Anteprima delle migrazioni di dati (nuovo codice, database non ancora migrato)
   info "Anteprima delle migrazioni dei dati..."
