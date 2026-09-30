@@ -98,6 +98,9 @@ MIDDLEWARE = [
 ROOT_URLCONF = "core.urls"
 WSGI_APPLICATION = "core.wsgi.application"
 
+# Accesso con username oppure con email (la pagina di login chiede entrambi).
+AUTHENTICATION_BACKENDS = ["core.auth_backends.EmailOrUsernameBackend"]
+
 TEMPLATES = [{
     "BACKEND": "django.template.backends.django.DjangoTemplates",
     "DIRS": [BASE_DIR / "templates"],

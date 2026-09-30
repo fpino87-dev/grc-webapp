@@ -3170,3 +3170,6 @@ msgstr "Cette définition ne s'applique pas au site indiqué : le site a sa prop
 
 msgid "I problemi dei fornitori si segnalano al fornitore: non generano task interni."
 msgstr "Les problèmes des fournisseurs sont signalés au fournisseur : ils ne génèrent pas de tâches internes."
+
+msgid "Esiste già un utente con questa email: l'email si usa anche per accedere."
+msgstr "Un utilisateur avec cet e-mail existe déjà : l'e-mail sert aussi à se connecter."

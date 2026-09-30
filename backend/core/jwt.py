@@ -98,14 +98,15 @@ def _audit_login(user, *, success: bool, request=None, extra: dict | None = None
         pass
 
 
-def _resolve_user_by_email(email: str):
-    """Ritorna l'utente con email matching o None. Usato per audit fallimenti
-    login: solo gli account registrati producono `auth.login.failure`."""
-    if not email:
-        return None
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-    return User.objects.filter(email__iexact=email).first()
+def _resolve_login_user(identifier: str):
+    """Utente a cui si riferisce l'identificativo digitato (username o email),
+    o None. Usato per l'audit dei fallimenti di login: solo gli account
+    registrati producono `auth.login.failure`. Stessa regola del backend di
+    autenticazione, così anche un tentativo fallito con lo username viene
+    tracciato (prima si cercava solo per email)."""
+    from core.auth_backends import find_login_user
+
+    return find_login_user(identifier)
 
 
 class LoginRateThrottle(AnonRateThrottle):
@@ -262,8 +263,8 @@ class GrcTokenObtainPairView(TokenObtainPairView):
         except Exception:
             # newfix F2 — log fallimento login (solo se l'email corrisponde a un
             # utente esistente, per non generare rumore/leak su email random).
-            email_attempted = (request.data.get("email") or request.data.get("username") or "")
-            failed_user = _resolve_user_by_email(email_attempted)
+            identifier = str(request.data.get("email") or request.data.get("username") or "")
+            failed_user = _resolve_login_user(identifier)
             _audit_login(
                 failed_user, success=False, request=request,
                 extra={"reason": "invalid_credentials"},

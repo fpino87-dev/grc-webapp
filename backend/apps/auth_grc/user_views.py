@@ -18,6 +18,27 @@ def _validate_password_policy(value):
     django_validate_password(value)
     return value
 
+
+def _validate_unique_email(value, instance=None):
+    """L'email serve anche per accedere: due account con la stessa email non
+    potrebbero usarla al login (il backend rifiuta un'email ambigua). Si
+    controlla solo quando l'email viene impostata o cambiata."""
+    from django.utils.translation import gettext as _
+
+    email = (value or "").strip()
+    if not email:
+        return email
+    if instance is not None and (instance.email or "").lower() == email.lower():
+        return email
+    others = User.objects.filter(email__iexact=email)
+    if instance is not None:
+        others = others.exclude(pk=instance.pk)
+    if others.exists():
+        raise serializers.ValidationError(
+            _("Esiste già un utente con questa email: l'email si usa anche per accedere.")
+        )
+    return email
+
 User = get_user_model()
 
 
@@ -38,6 +59,9 @@ class UserSerializer(serializers.ModelSerializer):
                   "grc_role", "plant_access", "accesses", "responsibilities", "warnings", "mfa_enabled"]
         read_only_fields = ["id", "date_joined", "last_login", "grc_role", "plant_access",
                             "accesses", "responsibilities", "warnings", "mfa_enabled"]
+
+    def validate_email(self, value):
+        return _validate_unique_email(value, self.instance)
 
     def _bu_plants(self):
         from .services import bu_plants_map
@@ -126,6 +150,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "first_name", "last_name", "password", "is_staff", "grc_role", "accesses"]
+
+    def validate_email(self, value):
+        return _validate_unique_email(value)
 
     def create(self, validated_data):
         from .services import create_grc_user

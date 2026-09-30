@@ -3104,3 +3104,6 @@ msgstr "Bu tanım belirtilen tesis için geçerli değil: tesisin KPI için kend
 
 msgid "I problemi dei fornitori si segnalano al fornitore: non generano task interni."
 msgstr "Tedarikçi sorunları tedarikçiye bildirilir: dahili görev oluşturmaz."
+
+msgid "Esiste già un utente con questa email: l'email si usa anche per accedere."
+msgstr "Bu e-postaya sahip bir kullanıcı zaten var: e-posta oturum açmak için de kullanılır."

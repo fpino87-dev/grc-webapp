@@ -3125,3 +3125,6 @@ msgstr "Ta definicja nie dotyczy wskazanego zakładu: zakład ma własną defini
 
 msgid "I problemi dei fornitori si segnalano al fornitore: non generano task interni."
 msgstr "Problemy dostawców zgłasza się dostawcy: nie tworzą zadań wewnętrznych."
+
+msgid "Esiste già un utente con questa email: l'email si usa anche per accedere."
+msgstr "Użytkownik z tym adresem e-mail już istnieje: adres e-mail służy także do logowania."
