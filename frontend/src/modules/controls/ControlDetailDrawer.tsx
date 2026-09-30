@@ -129,6 +129,7 @@ export function ControlDetailDrawer({ instanceId, onClose }: Props) {
                   documents={info.linked_documents}
                   requirements={info.requirements}
                   evidenceRequirement={info.evidence_requirement}
+                  plantId={info.plant_id}
                 />
               )}
               {tab === "storico"     && <TabStorico history={info.evaluation_history} />}

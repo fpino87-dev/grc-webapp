@@ -145,8 +145,8 @@ export const documentsApi = {
       headers: { "Content-Type": "multipart/form-data" },
     }).then(r => r.data);
   },
-  searchEvidences: (search: string) =>
-    fetchAllPages<Evidence>("/documents/evidences/", {search}).then((results) => ({ results, count: results.length })),
+  searchEvidences: (search: string, plant?: string) =>
+    fetchAllPages<Evidence>("/documents/evidences/", {search, ...(plant ? {plant} : {})}).then((results) => ({ results, count: results.length })),
   linkControls: (docId: string, controlInstanceIds: string[]) =>
     apiClient.post(`/documents/documents/${docId}/link-controls/`, { control_instance_ids: controlInstanceIds }).then(r => r.data),
   searchDocuments: (search: string, plant?: string) =>

@@ -27,7 +27,7 @@ function DocsColumn({
 
   const requirementLabel = useRequirementLabel();
 
-  const { data: searchResults } = useQuery({
+  const { data: searchResults, isFetching: searching } = useQuery({
     queryKey: ["doc-search", debounced, plant],
     queryFn: () => documentsApi.searchDocuments(debounced, plant ?? undefined),
     enabled: debounced.length > 2,
@@ -43,6 +43,8 @@ function DocsColumn({
   });
 
   const linkedIds = new Set(documents.map(d => d.id));
+  const linkable = (searchResults?.results ?? []).filter(d => !linkedIds.has(d.id));
+  const searched = debounced.length > 2 && debounced === searchQ && !!searchResults && !searching;
 
   return (
     <div className="space-y-3">
@@ -114,13 +116,19 @@ function DocsColumn({
         <input
           type="text"
           value={searchQ}
-          onChange={e => setSearchQ(e.target.value)}
+          onChange={e => { setSearchQ(e.target.value); linkMut.reset(); }}
           placeholder={t("controls.drawer.docs.search_placeholder")}
           className="w-full border rounded px-2 py-1 text-xs"
         />
-        {searchResults && searchResults.results.length > 0 && (
+        {linkMut.isError && (
+          <p className="text-xs text-red-600">{t("controls.drawer.docs.link_doc_failed")}</p>
+        )}
+        {searched && linkable.length === 0 && (
+          <p className="text-xs text-gray-400 italic">{t("controls.drawer.docs.no_linkable_docs")}</p>
+        )}
+        {linkable.length > 0 && (
           <div className="border rounded divide-y divide-gray-100 max-h-32 overflow-y-auto bg-white">
-            {searchResults.results.filter(d => !linkedIds.has(d.id)).slice(0, 8).map(d => (
+            {linkable.slice(0, 8).map(d => (
               <button
                 key={d.id}
                 onClick={() => linkMut.mutate(d.id)}
@@ -307,9 +315,11 @@ function EvidencesColumn({
     }
   }
 
-  const { data: searchResults } = useQuery({
-    queryKey: ["ev-search", debounced],
-    queryFn: () => documentsApi.searchEvidences(debounced),
+  // Ricerca limitata al sito del controllo (più le evidenze di organizzazione):
+  // il backend rifiuta il collegamento di evidenze di un altro sito.
+  const { data: searchResults, isFetching: searching } = useQuery({
+    queryKey: ["ev-search", debounced, plant],
+    queryFn: () => documentsApi.searchEvidences(debounced, plant ?? undefined),
     enabled: debounced.length > 2,
   });
 
@@ -323,6 +333,8 @@ function EvidencesColumn({
   });
 
   const linkedEvIds = new Set(evidences.map(e => e.id));
+  const linkable = (searchResults?.results ?? []).filter(ev => !linkedEvIds.has(ev.id));
+  const searched = debounced.length > 2 && debounced === searchQ && !!searchResults && !searching;
 
   return (
     <div className="space-y-3">
@@ -405,13 +417,19 @@ function EvidencesColumn({
         <input
           type="text"
           value={searchQ}
-          onChange={e => setSearchQ(e.target.value)}
+          onChange={e => { setSearchQ(e.target.value); linkMut.reset(); }}
           placeholder={t("controls.drawer.docs.search_placeholder")}
           className="w-full border rounded px-2 py-1 text-xs"
         />
-        {searchResults && searchResults.results.length > 0 && (
+        {linkMut.isError && (
+          <p className="text-xs text-red-600">{t("controls.drawer.docs.link_evidence_failed")}</p>
+        )}
+        {searched && linkable.length === 0 && (
+          <p className="text-xs text-gray-400 italic">{t("controls.drawer.docs.no_linkable_evidence")}</p>
+        )}
+        {linkable.length > 0 && (
           <div className="border rounded divide-y divide-gray-100 max-h-32 overflow-y-auto bg-white">
-            {searchResults.results.filter(ev => !linkedEvIds.has(ev.id)).slice(0, 8).map(ev => (
+            {linkable.slice(0, 8).map(ev => (
               <button
                 key={ev.id}
                 onClick={() => linkMut.mutate(ev.id)}
@@ -446,14 +464,20 @@ export function TabDocEvidence({
   documents,
   requirements,
   evidenceRequirement,
+  plantId,
 }: {
   instanceId: string;
   evidences: EvidenceRef[];
   documents: LinkedDocument[];
   requirements: RequirementsCheck;
   evidenceRequirement: EvidenceRequirement;
+  plantId?: string;
 }) {
-  const plant = useAuthStore(s => s.selectedPlant?.id ?? null);
+  // Il sito è quello del CONTROLLO, non quello selezionato in alto: con "tutti
+  // i siti" (o un sito diverso) la ricerca proponeva documenti ed evidenze che
+  // il backend poi rifiuta di collegare, e il clic non faceva nulla.
+  const selectedPlant = useAuthStore(s => s.selectedPlant?.id ?? null);
+  const plant = plantId ?? selectedPlant;
   const noRequirements = !evidenceRequirement ||
     (!evidenceRequirement.documents?.length && !evidenceRequirement.evidences?.length &&
      !evidenceRequirement.min_documents && !evidenceRequirement.min_evidences);
