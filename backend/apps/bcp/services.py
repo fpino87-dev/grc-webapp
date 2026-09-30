@@ -534,16 +534,18 @@ def record_test(
 
 def _evidences_for_plan(plan: BcpPlan, evidence_ids) -> list:
     """Evidenze esistenti collegabili a un test del piano: non eliminate e del
-    sito del piano o di organizzazione (le stesse che l'elenco evidenze mostra
-    per quel sito)."""
+    sito del piano, di organizzazione o condivise con il sito (le stesse che
+    l'elenco evidenze mostra per quel sito)."""
     from apps.documents.models import Evidence
+    from apps.documents.services import evidence_available_to_plant_q
 
     ids = {str(e) for e in (evidence_ids or []) if e}
     if not ids:
         return []
     evidences = list(
         Evidence.objects.filter(pk__in=ids, deleted_at__isnull=True)
-        .filter(Q(plant_id=plan.plant_id) | Q(plant__isnull=True))
+        .filter(evidence_available_to_plant_q(plan.plant_id))
+        .distinct()
     )
     if len(evidences) != len(ids):
         raise ValidationError(_("Una o più evidenze indicate non esistono o non sono del sito del piano."))

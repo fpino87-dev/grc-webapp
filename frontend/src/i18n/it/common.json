@@ -632,9 +632,9 @@
         "link_doc": "Collega documento",
         "link_existing_evidence": "Collega evidenza esistente",
         "no_linkable_docs": "Nessun documento collegabile trovato: si collegano i documenti di questo sito, quelli condivisi con questo sito e quelli di organizzazione.",
-        "no_linkable_evidence": "Nessuna evidenza collegabile trovata: si collegano solo le evidenze di questo sito o di organizzazione.",
+        "no_linkable_evidence": "Nessuna evidenza collegabile trovata: si collegano le evidenze di questo sito, quelle condivise con questo sito e quelle di organizzazione.",
         "link_doc_failed": "Documento non collegato: non appartiene a questo sito e non è condiviso con esso.",
-        "link_evidence_failed": "Evidenza non collegata: appartiene a un altro sito.",
+        "link_evidence_failed": "Evidenza non collegata: appartiene a un altro sito e non è condivisa con questo.",
         "search_placeholder": "Cerca per titolo...",
         "upload_new_evidence": "Carica nuova evidenza",
         "new_evidence_title_placeholder": "Titolo *",
@@ -1910,6 +1910,11 @@
       "result_linked": "Collegato a {{count}} controlli"
     },
     "evidence": {
+      "share": {
+        "badge": "condivisa",
+        "hint": "L'evidenza resterà di proprietà del sito originale. I siti selezionati potranno vederla, scaricarla e collegarla ai propri controlli, senza poterla modificare o eliminare.",
+        "none_selected": "Nessun sito selezionato — l'evidenza sarà utilizzabile solo dal sito proprietario"
+      },
       "empty": "Nessuna evidenza trovata",
       "link_controls": {
         "title": "Collega evidenza a controlli",

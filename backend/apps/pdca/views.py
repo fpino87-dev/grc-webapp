@@ -267,8 +267,7 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         """POST {motivo, evidence_id?} o multipart con `file` (+ `evidence_title`).
         Le osservazioni/opportunità collegate aperte diventano "non perseguite"."""
         from apps.audit_prep.views import _require_all_group_sites
-        from apps.documents.models import Evidence
-        from core.scoping import scope_queryset_by_plant
+        from apps.documents.services import evidences_visible_to
 
         cycle = self.get_object()
         # rilievo comune: la decisione tocca anche gli altri siti del gruppo
@@ -279,9 +278,9 @@ class PdcaCycleViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         evidence_id = request.data.get("evidence_id")
         if evidence_id:
             try:
-                evidence = scope_queryset_by_plant(
-                    Evidence.objects.all(), request.user, plant_field="plant",
-                ).filter(pk=uuid.UUID(str(evidence_id))).first()
+                evidence = evidences_visible_to(request.user).filter(
+                    pk=uuid.UUID(str(evidence_id))
+                ).first()
             except ValueError:
                 evidence = None
             if evidence is None:

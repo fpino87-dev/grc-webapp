@@ -677,8 +677,7 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         from django.core.exceptions import ValidationError as DjangoValidationError
         from django.utils.translation import gettext as _
 
-        from apps.documents.models import Evidence
-        from core.scoping import scope_queryset_by_plant
+        from apps.documents.services import evidences_visible_to
 
         finding = self.get_object()
         if finding.common_key and finding.audit_prep.group_id:
@@ -686,9 +685,7 @@ class AuditFindingViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         evidence = None
         evidence_id = request.data.get("evidence_id")
         if evidence_id:
-            evidence = _get_scoped(
-                scope_queryset_by_plant(Evidence.objects.all(), request.user, plant_field="plant"), evidence_id,
-            )
+            evidence = _get_scoped(evidences_visible_to(request.user), evidence_id)
             if evidence is None:
                 return Response({"error": _("Evidenza non trovata.")}, status=404)
         try:

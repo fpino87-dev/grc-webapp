@@ -6,6 +6,7 @@ import os
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from django.utils.translation import gettext as _
@@ -893,6 +894,83 @@ def delete_document(document, user) -> None:
         entity=document,
         payload={"id": str(document.pk), "title": document.title, "status": document.status},
     )
+
+
+# ---------------------------------------------------------------------------
+# Condivisione delle evidenze fra siti (stessa regola dei documenti: l'evidenza
+# resta del sito proprietario, i siti con cui è condivisa la vedono, la
+# scaricano e la collegano ai propri controlli).
+# ---------------------------------------------------------------------------
+
+def evidence_available_to_plant_q(plant_id) -> Q:
+    """Evidenze utilizzabili da un sito: sue, di organizzazione (plant null) o
+    condivise con esso. Il join sul M2M può duplicare le righe: `.distinct()`."""
+    return Q(plant_id=plant_id) | Q(plant__isnull=True) | Q(shared_plants=plant_id)
+
+
+def evidences_visible_to(user, qs=None):
+    """Evidenze leggibili dall'utente: dei suoi siti, condivise con i suoi siti
+    o di organizzazione. Scope org / superuser: tutte."""
+    from core.scoping import get_user_plant_ids
+
+    qs = Evidence.objects.all() if qs is None else qs
+    plant_ids = get_user_plant_ids(user)
+    if plant_ids is None:
+        return qs
+    return qs.filter(
+        Q(plant_id__in=plant_ids) | Q(shared_plants__in=plant_ids) | Q(plant__isnull=True)
+    ).distinct()
+
+
+def evidences_manageable_by(user, qs=None):
+    """Evidenze che l'utente può modificare, eliminare o condividere: dei suoi
+    siti o di organizzazione. Il sito che la riceve in condivisione la usa, ma
+    non la gestisce."""
+    from core.scoping import scope_queryset_by_plant
+
+    qs = Evidence.objects.all() if qs is None else qs
+    return scope_queryset_by_plant(qs, user, plant_field="plant", allow_null_plant=True)
+
+
+def share_evidence(evidence, plant_ids, user) -> list:
+    """Imposta i siti con cui l'evidenza è condivisa (`plant_ids` sostituisce
+    l'elenco). Chi non ha scope org agisce solo sui siti a cui ha accesso: le
+    condivisioni verso gli altri siti restano come sono."""
+    from apps.plants.models import Plant
+    from core.scoping import get_user_plant_ids
+
+    if evidence.plant_id is None:
+        raise ValidationError(
+            _("Un'evidenza di organizzazione è già disponibile per tutti i siti.")
+        )
+    try:
+        requested = set(
+            Plant.objects.filter(pk__in=list(plant_ids or []), deleted_at__isnull=True)
+            .exclude(pk=evidence.plant_id)
+            .values_list("pk", flat=True)
+        )
+    except (ValidationError, ValueError, TypeError):
+        raise ValidationError(_("Elenco dei siti non valido.")) from None
+
+    current = set(evidence.shared_plants.values_list("pk", flat=True))
+    accessible = get_user_plant_ids(user)
+    if accessible is not None:
+        accessible = set(accessible)
+        requested = (requested & accessible) | (current - accessible)
+
+    evidence.shared_plants.set(requested)
+    log_action(
+        user=user,
+        action_code="evidence.shared",
+        level="L2",
+        entity=evidence,
+        payload={
+            "plant_ids": sorted(str(p) for p in requested),
+            "added": sorted(str(p) for p in requested - current),
+            "removed": sorted(str(p) for p in current - requested),
+        },
+    )
+    return list(Plant.objects.filter(pk__in=requested).order_by("code"))
 
 
 def delete_evidence(evidence, user) -> None:

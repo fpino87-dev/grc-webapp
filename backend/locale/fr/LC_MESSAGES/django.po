@@ -3173,3 +3173,9 @@ msgstr "Les problèmes des fournisseurs sont signalés au fournisseur : ils ne g
 
 msgid "Esiste già un utente con questa email: l'email si usa anche per accedere."
 msgstr "Un utilisateur avec cet e-mail existe déjà : l'e-mail sert aussi à se connecter."
+
+msgid "Un'evidenza di organizzazione è già disponibile per tutti i siti."
+msgstr "Une preuve de l'organisation est déjà disponible pour tous les sites."
+
+msgid "Elenco dei siti non valido."
+msgstr "Liste de sites non valide."

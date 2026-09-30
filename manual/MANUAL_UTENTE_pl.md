@@ -507,6 +507,15 @@ Metoda 2 — z karty dowodu:
 
 Dowód może obejmować wiele kontroli jednocześnie, nawet z różnych frameworków.
 
+### Udostępnianie dokumentów i dowodów innym zakładom
+
+Dokument lub dowód należy do jednego zakładu. Aby użyć go w innym zakładzie bez ponownego wgrywania pliku, zakład będący właścicielem udostępnia go przyciskiem **🔗** na liście (zakładka **Dokumenty** lub **Dowody**) i wybiera zakłady.
+
+- Wybrane zakłady widzą go na swoich listach z etykietą **udostępniony**, pobierają go i wiążą z własnymi kontrolami, jak element własnego zakładu.
+- Pozostaje własnością pierwotnego zakładu: dowodu otrzymanego przez udostępnienie nie można edytować, usunąć ani udostępnić dalej.
+- W karcie kontroli można powiązać tylko dokumenty i dowody zakładu tej kontroli, udostępnione temu zakładowi lub należące do organizacji. Nieudostępnione elementy innego zakładu nie pojawiają się w wyszukiwaniu.
+- Użytkownik zakładu udostępnia tylko zakładom, do których ma dostęp; udostępnienie dowodu jest zapisywane w ścieżce audytu.
+
 ### Wygaśnięcie dowodów i kolorowe odznaki
 
 Dowody z datą wygaśnięcia pokazują kolorową odznakę na karcie kontroli i na liście dowodów:

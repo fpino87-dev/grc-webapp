@@ -635,9 +635,9 @@
         "link_doc": "Powiąż dokument",
         "link_existing_evidence": "Powiąż istniejący dowód",
         "no_linkable_docs": "Nie znaleziono dokumentu do powiązania: można powiązać dokumenty tego zakładu, udostępnione temu zakładowi oraz dokumenty organizacji.",
-        "no_linkable_evidence": "Nie znaleziono dowodu do powiązania: można powiązać tylko dowody tego zakładu lub organizacji.",
+        "no_linkable_evidence": "Nie znaleziono dowodu do powiązania: można powiązać dowody tego zakładu, udostępnione temu zakładowi oraz dowody organizacji.",
         "link_doc_failed": "Dokument nie został powiązany: nie należy do tego zakładu i nie jest mu udostępniony.",
-        "link_evidence_failed": "Dowód nie został powiązany: należy do innego zakładu.",
+        "link_evidence_failed": "Dowód nie został powiązany: należy do innego zakładu i nie jest udostępniony temu zakładowi.",
         "search_placeholder": "Szukaj po tytule...",
         "upload_new_evidence": "Prześlij nowy dowód",
         "new_evidence_title_placeholder": "Tytuł *",
@@ -1910,6 +1910,11 @@
       "result_linked": "Powiązano z {{count}} kontrolami"
     },
     "evidence": {
+      "share": {
+        "badge": "udostępniony",
+        "hint": "Dowód pozostaje własnością pierwotnego zakładu. Wybrane zakłady będą mogły go wyświetlać, pobierać i wiązać z własnymi kontrolami, bez możliwości edycji lub usunięcia.",
+        "none_selected": "Nie wybrano zakładu — dowód będzie dostępny tylko dla zakładu będącego właścicielem"
+      },
       "empty": "Brak dowodów",
       "link_controls": {
         "title": "Powiąż dowód z kontrolami",

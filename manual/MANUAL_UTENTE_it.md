@@ -507,6 +507,15 @@ Metodo 2 — dalla scheda dell'evidenza:
 
 Un'evidenza puo' coprire piu' controlli contemporaneamente, anche di framework diversi.
 
+### Condividere documenti ed evidenze con altri siti
+
+Un documento o un'evidenza appartiene a un sito. Per usarlo anche in un altro sito senza ricaricare il file, il sito proprietario lo condivide con il pulsante **🔗** nell'elenco (tab **Documenti** o **Evidenze**) e sceglie i siti.
+
+- I siti scelti lo vedono nei propri elenchi con l'etichetta **condiviso**, lo scaricano e lo collegano ai propri controlli, come un elemento del sito.
+- Resta del sito proprietario: un'evidenza ricevuta in condivisione non si modifica, non si elimina e non si condivide a sua volta.
+- Nella scheda di un controllo si collegano solo documenti ed evidenze del sito del controllo, condivisi con quel sito o di organizzazione. Quelli di un altro sito non condivisi non compaiono nella ricerca.
+- Un utente di sito condivide solo verso i siti a cui ha accesso; la condivisione di un'evidenza è registrata nell'audit trail.
+
 ### Scadenza evidenze e badge colorati
 
 Le evidenze con data di scadenza mostrano un badge colorato nella scheda del controllo e nell'elenco evidenze:

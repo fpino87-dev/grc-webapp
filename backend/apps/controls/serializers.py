@@ -88,15 +88,23 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
     # del serializer e la PATCH lo ignora: l'unica via di scrittura è l'azione
     # link-document, che applica il perimetro plant/org-wide/shared.
     def validate_evidences(self, value):
-        """Le evidenze collegate devono appartenere al plant del controllo o
-        essere org-wide (security review 2026-06-12)."""
+        """Le evidenze collegate devono appartenere al plant del controllo,
+        essere org-wide o essere condivise col plant (security review 2026-06-12)."""
         plant_id = self._plant_id()
         if not (plant_id and value):
             return value
         foreign = [e for e in value if e.plant_id and str(e.plant_id) != str(plant_id)]
         if foreign:
+            from apps.documents.models import Evidence
+            shared = set(
+                Evidence.shared_plants.through.objects.filter(
+                    evidence_id__in=[e.pk for e in foreign], plant_id=plant_id,
+                ).values_list("evidence_id", flat=True)
+            )
+            foreign = [e for e in foreign if e.pk not in shared]
+        if foreign:
             raise serializers.ValidationError(
-                "Le evidenze collegate devono appartenere al plant del controllo."
+                "Le evidenze collegate devono appartenere al plant del controllo o essere condivise con esso."
             )
         return value
 

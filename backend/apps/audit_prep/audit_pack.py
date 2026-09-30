@@ -245,13 +245,18 @@ def _collect_documents(out_dir: Path, plant, frameworks: list[str]) -> dict:
 
 
 def _collect_evidences(out_dir: Path, plant, frameworks: list[str]) -> dict:
-    """Evidenze collegate ai control instance del plant."""
+    """Evidenze del plant e quelle di altri siti condivise con il plant."""
     from apps.documents.models import Evidence
+    from django.db.models import Q
 
     ev_dir = out_dir / "02b_evidences"
     ev_dir.mkdir(parents=True, exist_ok=True)
 
-    qs = Evidence.objects.filter(deleted_at__isnull=True, plant=plant)
+    qs = (
+        Evidence.objects.filter(deleted_at__isnull=True)
+        .filter(Q(plant=plant) | Q(shared_plants=plant))
+        .distinct()
+    )
 
     rows: list[dict] = []
     copied = 0

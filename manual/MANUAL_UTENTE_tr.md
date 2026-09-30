@@ -507,6 +507,15 @@ Yöntem 2 — kanıt kartından:
 
 Bir kanıt, farklı çerçevelerden bile birden fazla kontrolü aynı anda kapsayabilir.
 
+### Belgeleri ve kanıtları diğer tesislerle paylaşma
+
+Bir belge veya kanıt tek bir tesise aittir. Dosyayı yeniden yüklemeden başka bir tesiste kullanmak için, sahibi olan tesis listedeki **🔗** düğmesiyle (**Belgeler** veya **Kanıtlar** sekmesi) paylaşır ve tesisleri seçer.
+
+- Seçilen tesisler onu kendi listelerinde **paylaşıldı** etiketiyle görür, indirir ve kendi kontrollerine bağlar; tesisin kendi öğesi gibi kullanır.
+- Asıl tesisin mülkiyetinde kalır: paylaşımla alınan bir kanıt düzenlenemez, silinemez ve yeniden paylaşılamaz.
+- Bir kontrolün kartında yalnızca kontrolün tesisine ait, o tesisle paylaşılan veya kuruluş genelindeki belgeler ve kanıtlar bağlanır. Başka bir tesisin paylaşılmamış öğeleri aramada görünmez.
+- Tesis kullanıcısı yalnızca erişimi olan tesislerle paylaşabilir; bir kanıtın paylaşılması denetim izine kaydedilir.
+
 ### Kanıt son tarihleri ve renkli rozetler
 
 Son tarihi olan kanıtlar, kontrol kartında ve kanıt listesinde renkli bir rozet gösterir:

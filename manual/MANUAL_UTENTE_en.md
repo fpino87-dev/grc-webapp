@@ -507,6 +507,15 @@ Method 2 — from the evidence record:
 
 Evidence can cover multiple controls simultaneously, even from different frameworks.
 
+### Sharing documents and evidence with other sites
+
+A document or an evidence item belongs to one site. To use it in another site without uploading the file again, the owning site shares it with the **🔗** button in the list (**Documents** or **Evidence** tab) and picks the sites.
+
+- The chosen sites see it in their own lists with the **shared** label, download it and link it to their own controls, like an item of the site.
+- It remains owned by the original site: evidence received through sharing cannot be edited, deleted or shared further.
+- In a control's detail panel you can link only documents and evidence of the control's site, shared with that site or organisation-wide. Items of another site that are not shared do not appear in the search.
+- A site user can share only towards the sites they have access to; sharing an evidence item is recorded in the audit trail.
+
 ### Evidence expiry and coloured badges
 
 Evidence with an expiry date shows a coloured badge on the control record and in the evidence list:

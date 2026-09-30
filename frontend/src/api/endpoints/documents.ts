@@ -72,6 +72,10 @@ export interface Evidence {
   valid_until: string | null;
   plant: string | null;
   plant_name: string | null;
+  shared_plant_names?: Array<{ id: string; name: string; code: string }>;
+  is_shared_with_current?: boolean;
+  /** false se l'evidenza è solo ricevuta in condivisione da un altro sito. */
+  can_manage?: boolean;
   file_path: string;
   file_url?: string | null;
   uploaded_by: string | null;
@@ -160,6 +164,11 @@ export const documentsApi = {
   shareDocument: (id: string, plantIds: string[]) =>
     apiClient.post<{ shared_with: Array<{ id: string; name: string; code: string }> }>(
       `/documents/documents/${id}/share/`, { plant_ids: plantIds }
+    ).then(r => r.data),
+
+  shareEvidence: (id: string, plantIds: string[]) =>
+    apiClient.post<{ shared_with: Array<{ id: string; name: string; code: string }> }>(
+      `/documents/evidences/${id}/share/`, { plant_ids: plantIds }
     ).then(r => r.data),
 
   remove: (id: string) => apiClient.delete(`/documents/documents/${id}/`),

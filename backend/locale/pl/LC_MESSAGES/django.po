@@ -3128,3 +3128,9 @@ msgstr "Problemy dostawców zgłasza się dostawcy: nie tworzą zadań wewnętrz
 
 msgid "Esiste già un utente con questa email: l'email si usa anche per accedere."
 msgstr "Użytkownik z tym adresem e-mail już istnieje: adres e-mail służy także do logowania."
+
+msgid "Un'evidenza di organizzazione è già disponibile per tutti i siti."
+msgstr "Dowód organizacji jest już dostępny dla wszystkich zakładów."
+
+msgid "Elenco dei siti non valido."
+msgstr "Nieprawidłowa lista zakładów."

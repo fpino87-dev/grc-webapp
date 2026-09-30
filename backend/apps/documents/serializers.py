@@ -121,12 +121,16 @@ class EvidenceSerializer(serializers.ModelSerializer):
     control_instances_count = serializers.SerializerMethodField(read_only=True)
     linked_controls = serializers.SerializerMethodField(read_only=True)
     file_url = serializers.SerializerMethodField(read_only=True)
+    shared_plant_names = serializers.SerializerMethodField(read_only=True)
+    is_shared_with_current = serializers.SerializerMethodField(read_only=True)
+    can_manage = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Evidence
         fields = [
             "id", "title", "description", "evidence_type",
             "valid_until", "plant", "plant_name",
+            "shared_plant_names", "is_shared_with_current", "can_manage",
             "file_path", "file_url", "uploaded_by", "uploaded_by_username",
             "control_instances_count", "linked_controls",
             "created_at", "updated_at",
@@ -135,6 +139,36 @@ class EvidenceSerializer(serializers.ModelSerializer):
 
     def get_control_instances_count(self, obj):
         return obj.control_instances.count()
+
+    def get_shared_plant_names(self, obj):
+        return [
+            {"id": str(p.id), "name": p.name, "code": p.code}
+            for p in obj.shared_plants.all()
+        ]
+
+    def get_is_shared_with_current(self, obj):
+        """True se l'evidenza è visibile al sito corrente (`?plant=`) tramite
+        condivisione, cioè non è quello proprietario."""
+        request = self.context.get("request")
+        plant_id = request.query_params.get("plant") if request else None
+        if not plant_id or not obj.plant_id or str(obj.plant_id) == plant_id:
+            return False
+        return any(str(p.id) == plant_id for p in obj.shared_plants.all())
+
+    def get_can_manage(self, obj):
+        """L'utente può modificare, eliminare e condividere l'evidenza: è di un
+        suo sito o di organizzazione (non solo ricevuta in condivisione)."""
+        request = self.context.get("request")
+        if not request:
+            return False
+        if obj.plant_id is None:
+            return True
+        # una sola risoluzione del perimetro per richiesta, non una per riga
+        if not hasattr(request, "_evidence_plant_ids"):
+            from core.scoping import get_user_plant_ids
+            request._evidence_plant_ids = get_user_plant_ids(request.user)
+        plant_ids = request._evidence_plant_ids
+        return plant_ids is None or obj.plant_id in set(plant_ids)
 
     def get_linked_controls(self, obj):
         return [

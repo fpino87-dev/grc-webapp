@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { documentsApi, type Document } from "../../api/endpoints/documents";
+import { documentsApi, type Document, type Evidence } from "../../api/endpoints/documents";
 import { controlsApi, type ControlInstance } from "../../api/endpoints/controls";
 import { plantsApi, type Plant } from "../../api/endpoints/plants";
 import { StatusBadge } from "../../components/ui/StatusBadge";
@@ -72,24 +72,35 @@ export function ChangePlantModal({ doc, onClose }: { doc: Document; onClose: () 
   );
 }
 
-// ─── Modal condivisione documento multi-plant ───────────────────────────────
+// ─── Modal condivisione multi-plant (documenti ed evidenze) ─────────────────
 
-export function ShareDocumentModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+type SharedPlant = { id: string; name: string; code: string };
+
+function SharePlantsModal({
+  title, ownerPlant, sharedWith, hint, noneSelected, queryKey, onSave, onClose,
+}: {
+  title: string;
+  ownerPlant: string | null;
+  sharedWith: SharedPlant[];
+  hint: string;
+  noneSelected: string;
+  queryKey: string;
+  onSave: (plantIds: string[]) => Promise<unknown>;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: plants } = useQuery({ queryKey: ["plants"], queryFn: plantsApi.list, retry: false });
-  const [selected, setSelected] = useState<Set<string>>(
-    new Set((doc.shared_plant_names ?? []).map(p => p.id))
-  );
+  const [selected, setSelected] = useState<Set<string>>(new Set(sharedWith.map(p => p.id)));
   const [error, setError] = useState("");
 
   const mutation = useMutation({
-    mutationFn: () => documentsApi.shareDocument(doc.id, Array.from(selected)),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["documents"] }); onClose(); },
+    mutationFn: () => onSave(Array.from(selected)),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [queryKey] }); onClose(); },
     onError: (e: unknown) => setError((e as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t("common.error")),
   });
 
-  const plantOptions = (plants ?? []).filter(p => p.id !== doc.plant);
+  const plantOptions = (plants ?? []).filter(p => p.id !== ownerPlant);
 
   function toggle(id: string) {
     setSelected(prev => {
@@ -103,10 +114,8 @@ export function ShareDocumentModal({ doc, onClose }: { doc: Document; onClose: (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <h3 className="text-lg font-semibold mb-1">{t("documents.share.title", { defaultValue: "Condividi con altri plant" })}</h3>
-        <p className="text-xs text-gray-500 mb-1 truncate">{doc.title}</p>
-        <p className="text-xs text-gray-400 mb-4">
-          {t("documents.share.hint", { defaultValue: "Il documento resterà di proprietà del plant originale. I plant selezionati potranno vederlo e scaricarlo senza dover ricaricare il file." })}
-        </p>
+        <p className="text-xs text-gray-500 mb-1 truncate">{title}</p>
+        <p className="text-xs text-gray-400 mb-4">{hint}</p>
         <div className="max-h-60 overflow-y-auto border rounded divide-y">
           {plantOptions.length === 0 && (
             <p className="px-3 py-4 text-sm text-gray-400 text-center">{t("documents.share.no_plants", { defaultValue: "Nessun altro plant disponibile" })}</p>
@@ -130,7 +139,7 @@ export function ShareDocumentModal({ doc, onClose }: { doc: Document; onClose: (
         <p className="text-xs text-gray-400 mt-2">
           {selected.size > 0
             ? t("documents.share.selected_count", { count: selected.size, defaultValue: `${selected.size} plant selezionati` })
-            : t("documents.share.none_selected", { defaultValue: "Nessun plant selezionato — il documento sarà visibile solo al plant proprietario" })}
+            : noneSelected}
         </p>
         {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded mt-3">{error}</p>}
         <div className="flex justify-end gap-2 mt-4">
@@ -145,6 +154,38 @@ export function ShareDocumentModal({ doc, onClose }: { doc: Document; onClose: (
         </div>
       </div>
     </div>
+  );
+}
+
+export function ShareDocumentModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <SharePlantsModal
+      title={doc.title}
+      ownerPlant={doc.plant}
+      sharedWith={doc.shared_plant_names ?? []}
+      hint={t("documents.share.hint", { defaultValue: "Il documento resterà di proprietà del plant originale. I plant selezionati potranno vederlo e scaricarlo senza dover ricaricare il file." })}
+      noneSelected={t("documents.share.none_selected", { defaultValue: "Nessun plant selezionato — il documento sarà visibile solo al plant proprietario" })}
+      queryKey="documents"
+      onSave={ids => documentsApi.shareDocument(doc.id, ids)}
+      onClose={onClose}
+    />
+  );
+}
+
+export function ShareEvidenceModal({ ev, onClose }: { ev: Evidence; onClose: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <SharePlantsModal
+      title={ev.title}
+      ownerPlant={ev.plant}
+      sharedWith={ev.shared_plant_names ?? []}
+      hint={t("documents.evidence.share.hint")}
+      noneSelected={t("documents.evidence.share.none_selected")}
+      queryKey="evidences"
+      onSave={ids => documentsApi.shareEvidence(ev.id, ids)}
+      onClose={onClose}
+    />
   );
 }
 

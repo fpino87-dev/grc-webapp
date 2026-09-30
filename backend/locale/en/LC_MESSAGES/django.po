@@ -3106,3 +3106,9 @@ msgstr "Supplier issues are reported to the supplier: they do not create interna
 
 msgid "Esiste già un utente con questa email: l'email si usa anche per accedere."
 msgstr "A user with this email already exists: the email is also used to sign in."
+
+msgid "Un'evidenza di organizzazione è già disponibile per tutti i siti."
+msgstr "An organisation-wide evidence item is already available to all sites."
+
+msgid "Elenco dei siti non valido."
+msgstr "Invalid list of sites."

@@ -635,9 +635,9 @@
         "link_doc": "Belge bağla",
         "link_existing_evidence": "Mevcut kanıtı bağla",
         "no_linkable_docs": "Bağlanabilir belge bulunamadı: bu tesisin, bu tesisle paylaşılan ve kuruluş genelindeki belgeler bağlanabilir.",
-        "no_linkable_evidence": "Bağlanabilir kanıt bulunamadı: yalnızca bu tesisin veya kuruluş genelindeki kanıtlar bağlanabilir.",
+        "no_linkable_evidence": "Bağlanabilir kanıt bulunamadı: bu tesisin, bu tesisle paylaşılan ve kuruluş genelindeki kanıtlar bağlanabilir.",
         "link_doc_failed": "Belge bağlanmadı: bu tesise ait değil ve onunla paylaşılmamış.",
-        "link_evidence_failed": "Kanıt bağlanmadı: başka bir tesise ait.",
+        "link_evidence_failed": "Kanıt bağlanmadı: başka bir tesise ait ve bu tesisle paylaşılmamış.",
         "search_placeholder": "Başlığa göre ara...",
         "upload_new_evidence": "Yeni kanıt yükle",
         "new_evidence_title_placeholder": "Başlık *",
@@ -1910,6 +1910,11 @@
       "result_linked": "{{count}} kontrole bağlandı"
     },
     "evidence": {
+      "share": {
+        "badge": "paylaşıldı",
+        "hint": "Kanıt, asıl tesisin mülkiyetinde kalır. Seçilen tesisler kanıtı görüntüleyebilir, indirebilir ve kendi kontrollerine bağlayabilir; düzenleyemez veya silemez.",
+        "none_selected": "Tesis seçilmedi — kanıt yalnızca sahibi olan tesis tarafından kullanılabilir"
+      },
       "empty": "Kanıt bulunamadı",
       "link_controls": {
         "title": "Kanıtı kontrollere bağla",

@@ -635,9 +635,9 @@
         "link_doc": "Lier un document",
         "link_existing_evidence": "Lier une preuve existante",
         "no_linkable_docs": "Aucun document pouvant être lié : seuls les documents de ce site, ceux partagés avec ce site et ceux de l'organisation peuvent être liés.",
-        "no_linkable_evidence": "Aucune preuve pouvant être liée : seules les preuves de ce site ou de l'organisation peuvent être liées.",
+        "no_linkable_evidence": "Aucune preuve pouvant être liée : seules les preuves de ce site, celles partagées avec ce site et celles de l'organisation peuvent être liées.",
         "link_doc_failed": "Document non lié : il n'appartient pas à ce site et n'est pas partagé avec lui.",
-        "link_evidence_failed": "Preuve non liée : elle appartient à un autre site.",
+        "link_evidence_failed": "Preuve non liée : elle appartient à un autre site et n'est pas partagée avec celui-ci.",
         "search_placeholder": "Rechercher par titre...",
         "upload_new_evidence": "Téléverser une nouvelle preuve",
         "new_evidence_title_placeholder": "Titre *",
@@ -1910,6 +1910,11 @@
       "result_linked": "Lié à {{count}} contrôles"
     },
     "evidence": {
+      "share": {
+        "badge": "partagée",
+        "hint": "La preuve reste la propriété du site d'origine. Les sites sélectionnés pourront la consulter, la télécharger et la lier à leurs propres contrôles, sans pouvoir la modifier ni la supprimer.",
+        "none_selected": "Aucun site sélectionné — la preuve ne sera utilisable que par le site propriétaire"
+      },
       "empty": "Aucune preuve trouvée",
       "link_controls": {
         "title": "Lier la preuve aux contrôles",

@@ -239,6 +239,12 @@ class Evidence(BaseModel):
         blank=True,
         related_name="evidences",
     )
+    shared_plants = models.ManyToManyField(
+        "plants.Plant",
+        blank=True,
+        related_name="shared_evidences",
+        help_text="Plant aggiuntivi che possono vedere e collegare questa evidenza senza esserne il proprietario",
+    )
     file_path = models.CharField(max_length=500, blank=True)
     uploaded_by = models.ForeignKey(
         User,

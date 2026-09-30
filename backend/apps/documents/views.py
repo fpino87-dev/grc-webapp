@@ -352,9 +352,11 @@ class DocumentVersionViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, vie
         )
 
 
-class EvidenceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+class EvidenceViewSet(PlantPayloadWriteGuardMixin, viewsets.ModelViewSet):
+    # Scoping di lettura custom in get_queryset (plant + condivise + org-wide),
+    # come DocumentViewSet; il guard sulle scritture resta quello standard.
     queryset = Evidence.objects.select_related("plant", "uploaded_by").prefetch_related(
-        "control_instances__control__framework"
+        "control_instances__control__framework", "shared_plants"
     )
     serializer_class = EvidenceSerializer
     permission_classes = [DocumentPermission]
@@ -363,17 +365,23 @@ class EvidenceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     search_fields = ["title", "description"]
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser, parsers.FormParser]
     plant_field = "plant"
-    allow_null_plant = True  # evidenze org-wide (plant=null) visibili a tutti
+
+    # Modifica, eliminazione e condivisione restano al sito proprietario: il
+    # sito che riceve l'evidenza in condivisione la vede, la scarica e la collega.
+    OWNER_ONLY_ACTIONS = ("update", "partial_update", "destroy", "share")
 
     def get_queryset(self):
-        from django.db.models import Q
         from django.utils import timezone
         qs = super().get_queryset()
+        if getattr(self, "action", None) in self.OWNER_ONLY_ACTIONS:
+            return services.evidences_manageable_by(self.request.user, qs)
+        qs = services.evidences_visible_to(self.request.user, qs)
 
-        # Filtro sito: include evidenze del sito richiesto + evidenze org-wide (plant=null)
+        # Filtro sito: evidenze del sito richiesto, condivise con esso e di
+        # organizzazione (plant=null)
         plant_id = self.request.query_params.get("plant")
         if plant_id:
-            qs = qs.filter(Q(plant_id=plant_id) | Q(plant__isnull=True))
+            qs = qs.filter(services.evidence_available_to_plant_q(plant_id)).distinct()
 
         expiry = self.request.query_params.get("expiry")
         today = timezone.localdate()
@@ -421,6 +429,26 @@ class EvidenceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
 
         return super().create(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post"], url_path="share")
+    def share(self, request, pk=None):
+        """
+        Aggiorna i siti con cui l'evidenza è condivisa.
+        Body: { "plant_ids": ["uuid1", "uuid2"] } — sostituisce l'elenco corrente.
+        """
+        from django.core.exceptions import ValidationError
+
+        evidence = self.get_object()
+        try:
+            plants = services.share_evidence(evidence, request.data.get("plant_ids", []), request.user)
+        except ValidationError as e:
+            return Response(
+                {"detail": e.messages[0] if getattr(e, "messages", None) else str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({
+            "shared_with": [{"id": str(p.id), "name": p.name, "code": p.code} for p in plants]
+        })
 
     @action(detail=True, methods=["get"], url_path="download")
     def download(self, request, pk=None):

@@ -386,16 +386,18 @@ class ControlInstanceViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="link_evidence")
     def link_evidence(self, request, pk=None):
-        """L'evidenza deve appartenere al plant dell'istanza o essere org-wide
-        (plant null) — mai di un altro sito (security review 2026-06-12)."""
-        from django.db.models import Q
+        """L'evidenza deve appartenere al plant dell'istanza, essere org-wide
+        (plant null) o essere condivisa col plant — mai di un altro sito senza
+        condivisione esplicita (security review 2026-06-12)."""
         from apps.documents.models import Evidence
+        from apps.documents.services import evidence_available_to_plant_q
         from django.utils.translation import gettext as _
         instance = self.get_object()
         evidence_id = request.data.get("evidence_id")
         evidence = (
             Evidence.objects.filter(pk=evidence_id, deleted_at__isnull=True)
-            .filter(Q(plant=instance.plant) | Q(plant__isnull=True))
+            .filter(evidence_available_to_plant_q(instance.plant_id))
+            .distinct()
             .first()
         )
         if not evidence:

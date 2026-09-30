@@ -4,10 +4,36 @@ import { documentsApi, type Evidence } from "../../api/endpoints/documents";
 import { useAuthStore } from "../../store/auth";
 import { evidenceIcon, ExpiryBadge, EVIDENCE_TYPES, expirySort, buildEvidenceGroups } from "./documentUtils";
 import { NewEvidenceModal, LinkEvidenceToControlModal } from "./EvidenceModals";
+import { ShareEvidenceModal } from "./DocumentShareModals";
 import { EvidencePreviewModal, canPreviewEvidence, downloadEvidenceFile } from "../../components/ui/EvidencePreviewModal";
 import { useTranslation } from "react-i18next";
 
 type ExpiryFilter = "tutti" | "valide" | "in_scadenza" | "scadute";
+
+/** Sito proprietario dell'evidenza e stato di condivisione, come per i documenti. */
+function EvidencePlantCell({ ev }: { ev: Evidence }) {
+  const { t } = useTranslation();
+  const shared = ev.shared_plant_names ?? [];
+  const names = shared.map(p => p.code ? `${p.code} — ${p.name}` : p.name).join(", ");
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span>{ev.plant_name || "—"}</span>
+      {ev.is_shared_with_current && (
+        <span
+          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 text-xs font-medium w-fit cursor-help"
+          title={names || undefined}
+        >
+          🔗 {t("documents.evidence.share.badge")}
+        </span>
+      )}
+      {!ev.is_shared_with_current && shared.length > 0 && (
+        <span className="text-gray-400 text-xs cursor-help" title={names}>
+          🔗 {shared.length} {t("documents.shared_with_n_plants")}
+        </span>
+      )}
+    </div>
+  );
+}
 
 export function TabEvidenze() {
   const { t } = useTranslation();
@@ -21,6 +47,7 @@ export function TabEvidenze() {
   const [groupedView, setGroupedView] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [previewEv, setPreviewEv] = useState<Evidence | null>(null);
+  const [shareEv, setShareEv] = useState<Evidence | null>(null);
 
   async function handleDownloadEvidence(ev: Evidence) {
     try {
@@ -161,20 +188,30 @@ export function TabEvidenze() {
                             )}
                           </td>
                           <td className="px-4 py-3 text-center"><ExpiryBadge validUntil={ev.valid_until} /></td>
-                          <td className="px-4 py-3 text-gray-600 text-xs">{ev.plant_name || "—"}</td>
+                          <td className="px-4 py-3 text-gray-600 text-xs"><EvidencePlantCell ev={ev} /></td>
                           <td className="px-4 py-3 text-gray-500 text-xs">{ev.uploaded_by_username || "—"}</td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               <button onClick={() => setLinkControlsEv(ev)} className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded px-1.5 py-0.5 hover:border-indigo-400">
                                 {t("documents.evidence.actions.link_controls")}
                               </button>
-                              <button
-                                type="button"
-                                title={t("documents.evidence.actions.delete_title")}
-                                onClick={() => { if (!window.confirm(t("documents.evidence.actions.delete_confirm", { title: ev.title }))) return; deleteEvidenceMutation.mutate(ev.id); }}
-                                disabled={deleteEvidenceMutation.isPending}
-                                className="text-xs text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50 disabled:opacity-50"
-                              >🗑</button>
+                              {ev.can_manage !== false && ev.plant && (
+                                <button
+                                  type="button"
+                                  onClick={() => setShareEv(ev)}
+                                  title={t("documents.actions.share_hint")}
+                                  className="text-xs text-indigo-600 border border-indigo-200 rounded px-1.5 py-0.5 hover:border-indigo-400"
+                                >🔗</button>
+                              )}
+                              {ev.can_manage !== false && (
+                                <button
+                                  type="button"
+                                  title={t("documents.evidence.actions.delete_title")}
+                                  onClick={() => { if (!window.confirm(t("documents.evidence.actions.delete_confirm", { title: ev.title }))) return; deleteEvidenceMutation.mutate(ev.id); }}
+                                  disabled={deleteEvidenceMutation.isPending}
+                                  className="text-xs text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50 disabled:opacity-50"
+                                >🗑</button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -227,7 +264,7 @@ export function TabEvidenze() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-center"><ExpiryBadge validUntil={ev.valid_until} /></td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{ev.plant_name || "—"}</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs"><EvidencePlantCell ev={ev} /></td>
                   <td className="px-4 py-3 text-center">
                     <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${ev.control_instances_count > 0 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"}`}>
                       {ev.control_instances_count}
@@ -239,13 +276,23 @@ export function TabEvidenze() {
                       <button onClick={() => setLinkControlsEv(ev)} className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 rounded px-1.5 py-0.5 hover:border-indigo-400">
                         {t("documents.evidence.actions.link_controls")}
                       </button>
-                      <button
-                        type="button"
-                        title={t("documents.evidence.actions.delete_title")}
-                        onClick={() => { if (!window.confirm(t("documents.evidence.actions.delete_confirm", { title: ev.title }))) return; deleteEvidenceMutation.mutate(ev.id); }}
-                        disabled={deleteEvidenceMutation.isPending}
-                        className="text-xs text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50 disabled:opacity-50"
-                      >🗑</button>
+                      {ev.can_manage !== false && ev.plant && (
+                        <button
+                          type="button"
+                          onClick={() => setShareEv(ev)}
+                          title={t("documents.actions.share_hint")}
+                          className="text-xs text-indigo-600 border border-indigo-200 rounded px-1.5 py-0.5 hover:border-indigo-400"
+                        >🔗</button>
+                      )}
+                      {ev.can_manage !== false && (
+                        <button
+                          type="button"
+                          title={t("documents.evidence.actions.delete_title")}
+                          onClick={() => { if (!window.confirm(t("documents.evidence.actions.delete_confirm", { title: ev.title }))) return; deleteEvidenceMutation.mutate(ev.id); }}
+                          disabled={deleteEvidenceMutation.isPending}
+                          className="text-xs text-red-600 border border-red-200 rounded px-1.5 py-0.5 hover:bg-red-50 disabled:opacity-50"
+                        >🗑</button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -258,6 +305,7 @@ export function TabEvidenze() {
       {showNew && <NewEvidenceModal onClose={() => setShowNew(false)} />}
       {linkControlsEv && <LinkEvidenceToControlModal ev={linkControlsEv} onClose={() => setLinkControlsEv(null)} />}
       {previewEv && <EvidencePreviewModal evidence={previewEv} onClose={() => setPreviewEv(null)} />}
+      {shareEv && <ShareEvidenceModal ev={shareEv} onClose={() => setShareEv(null)} />}
     </div>
   );
 }

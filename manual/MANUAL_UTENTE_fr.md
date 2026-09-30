@@ -507,6 +507,15 @@ Méthode 2 — depuis la fiche de la preuve :
 
 Une preuve peut couvrir plusieurs contrôles simultanément, même de frameworks différents.
 
+### Partager des documents et des preuves avec d'autres sites
+
+Un document ou une preuve appartient à un site. Pour l'utiliser dans un autre site sans recharger le fichier, le site propriétaire le partage avec le bouton **🔗** dans la liste (onglet **Documents** ou **Preuves**) et choisit les sites.
+
+- Les sites choisis le voient dans leurs listes avec l'étiquette **partagé**, le téléchargent et le lient à leurs propres contrôles, comme un élément du site.
+- Il reste la propriété du site d'origine : une preuve reçue en partage ne peut être ni modifiée, ni supprimée, ni partagée à son tour.
+- Dans la fiche d'un contrôle, on ne lie que les documents et preuves du site du contrôle, partagés avec ce site ou de l'organisation. Ceux d'un autre site non partagés n'apparaissent pas dans la recherche.
+- Un utilisateur de site ne partage que vers les sites auxquels il a accès ; le partage d'une preuve est enregistré dans la piste d'audit.
+
 ### Expiration des preuves et badges colorés
 
 Les preuves avec une date d'expiration affichent un badge coloré dans la fiche du contrôle et dans la liste des preuves :
