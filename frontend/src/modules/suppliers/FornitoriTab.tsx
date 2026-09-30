@@ -30,7 +30,11 @@ export function FornitoriTab() {
 
   const params: Record<string, string> = {};
   // Il filtro segue la colonna "Rischio Adj" (non il livello manuale dell'anagrafica).
+  // Le voci "da sistemare" (mai valutati, senza valutazione interna, senza NDA)
+  // stanno nello stesso menù per non dover passare dalle altre schede.
   if (filterRisk === "none") params.risk_adj_missing = "true";
+  else if (filterRisk === "no_internal") params.internal_eval_missing = "true";
+  else if (filterRisk === "no_nda") params.nda_missing = "true";
   else if (filterRisk) params.risk_adj = filterRisk;
   if (filterStatus) params.status = filterStatus;
   if (filterNis2) params.nis2_relevant = filterNis2;
@@ -87,6 +91,8 @@ export function FornitoriTab() {
             <option value="">{t("suppliers.list.all_risks")}</option>
             {["basso","medio","alto","critico"].map(r => <option key={r} value={r}>{t(`suppliers.risk.${r}`)}</option>)}
             <option value="none">{t("suppliers.list.not_evaluated_filter")}</option>
+            <option value="no_internal">{t("suppliers.list.not_evaluated_internal_filter")}</option>
+            <option value="no_nda">{t("suppliers.list.without_nda_filter")}</option>
           </select>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="border rounded px-3 py-1.5 text-sm">
             <option value="">{t("suppliers.list.all_statuses")}</option>

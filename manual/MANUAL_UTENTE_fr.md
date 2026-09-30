@@ -1024,7 +1024,7 @@ L'icône de modification permet de changer les données et le **Statut** du four
 
 ### Liste des fournisseurs
 
-Pour chaque fournisseur, la liste affiche le n° fiscal/TVA, le pays, la concentration, le **Risque Adj**, le statut, la date et l'échéance de la dernière évaluation. Vous pouvez rechercher par dénomination, n° fiscal/TVA ou email et filtrer par risque, statut, pertinence NIS2 et pertinence TISAX ; le filtre **Risque** porte sur le Risque Adj et l'option **Non évalués** liste les fournisseurs sans aucune évaluation.
+Pour chaque fournisseur, la liste affiche le n° fiscal/TVA, le pays, la concentration, le **Risque Adj**, le statut, la date et l'échéance de la dernière évaluation. Vous pouvez rechercher par dénomination, n° fiscal/TVA ou email et filtrer par risque, statut, pertinence NIS2 et pertinence TISAX ; le filtre **Risque** porte sur le Risque Adj et l'option **Non évalués** liste les fournisseurs sans aucune évaluation. Dans le même menu, **Non évalués (interne)** liste les fournisseurs sans évaluation interne en cours et **Sans NDA** ceux qui n'ont aucun NDA ou contrat associé.
 
 **↓ Exporter CSV** télécharge tous les fournisseurs, seulement les pertinents NIS2 ou seulement les pertinents TISAX, avec codes CPV, critère NIS2, concentration et dates d'évaluation.
 

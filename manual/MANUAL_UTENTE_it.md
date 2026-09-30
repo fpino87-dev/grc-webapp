@@ -1024,7 +1024,7 @@ Con l'icona di modifica cambi i dati e lo **Stato** del fornitore (attivo, sospe
 
 ### Elenco fornitori
 
-L'elenco mostra per ogni fornitore CF/P.IVA, paese, concentrazione, **Rischio Adj**, stato, data e scadenza dell'ultima valutazione. Puoi cercare per denominazione, CF/P.IVA o email e filtrare per rischio, stato, rilevanza NIS2 e rilevanza TISAX; il filtro **Rischio** lavora sul Rischio Adj e l'opzione **Non valutati** elenca i fornitori senza alcuna valutazione.
+L'elenco mostra per ogni fornitore CF/P.IVA, paese, concentrazione, **Rischio Adj**, stato, data e scadenza dell'ultima valutazione. Puoi cercare per denominazione, CF/P.IVA o email e filtrare per rischio, stato, rilevanza NIS2 e rilevanza TISAX; il filtro **Rischio** lavora sul Rischio Adj e l'opzione **Non valutati** elenca i fornitori senza alcuna valutazione. Nello stesso menù, **Non valutati (interna)** elenca i fornitori senza valutazione interna corrente e **Senza NDA** quelli senza alcun NDA o contratto collegato.
 
 **↓ Esporta CSV** scarica tutti i fornitori, solo i NIS2 rilevanti o solo i TISAX rilevanti, con codici CPV, criterio NIS2, concentrazione e date di valutazione.
 

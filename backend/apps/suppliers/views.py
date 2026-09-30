@@ -53,6 +53,21 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         # (la colonna "Rischio" dell'elenco li mostra come "Non valutato").
         if self.request.query_params.get("risk_adj_missing", "").lower() == "true":
             qs = qs.filter(risk_adj="")
+        # ?internal_eval_missing=true → nessuna valutazione interna corrente.
+        if self.request.query_params.get("internal_eval_missing", "").lower() == "true":
+            qs = qs.filter(internal_risk_level="")
+        # ?nda_missing=true → nessun NDA/contratto collegato, nemmeno in bozza
+        # (lo stato "Mancante" della scheda NDA).
+        if self.request.query_params.get("nda_missing", "").lower() == "true":
+            from django.db.models import Exists, OuterRef
+
+            from apps.documents.models import Document
+
+            qs = qs.filter(~Exists(Document.objects.filter(
+                supplier=OuterRef("pk"),
+                document_type="contratto",
+                deleted_at__isnull=True,
+            )))
         return qs
 
     @action(detail=False, methods=["post"], url_path="check-duplicates")

@@ -4156,6 +4156,8 @@
       "status_terminato": "terminato",
       "status_attivo": "attivo",
       "not_evaluated_filter": "Non valutati",
+      "not_evaluated_internal_filter": "Non valutati (interna)",
+      "without_nda_filter": "Senza NDA",
       "expired_short": "scaduta",
       "days_short": "{{days}}gg"
     },

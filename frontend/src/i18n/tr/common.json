@@ -4156,6 +4156,8 @@
       "status_terminato": "sonlandırıldı",
       "status_attivo": "aktif",
       "not_evaluated_filter": "Değerlendirilmemiş",
+      "not_evaluated_internal_filter": "Değerlendirilmemiş (iç)",
+      "without_nda_filter": "NDA'sız",
       "expired_short": "süresi doldu",
       "days_short": "{{days}} gün"
     },

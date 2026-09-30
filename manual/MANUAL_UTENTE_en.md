@@ -1024,7 +1024,7 @@ The edit icon lets you change the data and the supplier **Status** (active, susp
 
 ### Supplier list
 
-For each supplier the list shows tax/VAT number, country, concentration, **Adj risk**, status, and date and expiry of the latest evaluation. You can search by name, tax/VAT number or email and filter by risk, status, NIS2 relevance and TISAX relevance; the **Risk** filter works on the Adj risk and the **Not evaluated** option lists suppliers with no evaluation at all.
+For each supplier the list shows tax/VAT number, country, concentration, **Adj risk**, status, and date and expiry of the latest evaluation. You can search by name, tax/VAT number or email and filter by risk, status, NIS2 relevance and TISAX relevance; the **Risk** filter works on the Adj risk and the **Not evaluated** option lists suppliers with no evaluation at all. In the same menu, **Not evaluated (internal)** lists suppliers with no current internal evaluation and **Without NDA** those with no NDA or contract linked.
 
 **↓ Export CSV** downloads all suppliers, only NIS2 relevant ones or only TISAX relevant ones, with CPV codes, NIS2 criterion, concentration and evaluation dates.
 

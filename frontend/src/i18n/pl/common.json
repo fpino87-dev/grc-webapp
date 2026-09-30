@@ -4156,6 +4156,8 @@
       "status_terminato": "zakończony",
       "status_attivo": "aktywny",
       "not_evaluated_filter": "Nieocenieni",
+      "not_evaluated_internal_filter": "Nieocenieni (wewnętrznie)",
+      "without_nda_filter": "Bez NDA",
       "expired_short": "wygasła",
       "days_short": "{{days}} dni"
     },

@@ -166,6 +166,10 @@ describe("SuppliersPage", () => {
     await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ risk_adj: "alto" }));
     fireEvent.change(riskSelect, { target: { value: "none" } });
     await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ risk_adj_missing: "true" }));
+    fireEvent.change(riskSelect, { target: { value: "no_internal" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ internal_eval_missing: "true" }));
+    fireEvent.change(riskSelect, { target: { value: "no_nda" } });
+    await vi.waitFor(() => expect(mockList).toHaveBeenLastCalledWith({ nda_missing: "true" }));
   });
 
   it("la scadenza in elenco è quella calcolata dal backend", async () => {

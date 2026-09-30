@@ -292,3 +292,40 @@ def test_migration_converts_unbacked_manual_dates(user):
     assert contract.evaluation_date is None
     assert contract.notes.startswith("Nota esistente\n[Migrazione]")
     assert future.isoformat() in contract.notes
+
+
+@pytest.mark.django_db
+def test_api_filter_without_internal_evaluation(client, supplier, user):
+    Supplier.objects.create(
+        name="Con interna", vat_number="2", status="attivo", created_by=user,
+        internal_risk_level="medio",
+    )
+    names = {
+        s["name"]
+        for s in client.get(URL_SUPPLIERS, {"internal_eval_missing": "true"}).data["results"]
+    }
+    assert "Eval Co" in names
+    assert "Con interna" not in names
+
+
+@pytest.mark.django_db
+def test_api_filter_without_nda(client, supplier, user):
+    """Senza NDA = nessun contratto collegato, nemmeno in bozza (come lo stato
+    "Mancante" della scheda NDA); un contratto eliminato non conta."""
+    from apps.documents.models import Document
+
+    def _nda(target, **extra):
+        return Document.objects.create(
+            title=f"NDA {target.name}", category="contratto", document_type="contratto",
+            supplier=target, created_by=user, **extra,
+        )
+
+    with_nda = Supplier.objects.create(name="Con NDA", vat_number="3", status="attivo", created_by=user)
+    deleted_nda = Supplier.objects.create(name="NDA eliminato", vat_number="4", status="attivo", created_by=user)
+    _nda(with_nda, status="bozza")
+    _nda(deleted_nda, status="approvato").soft_delete()
+
+    names = {s["name"] for s in client.get(URL_SUPPLIERS, {"nda_missing": "true"}).data["results"]}
+    assert "Eval Co" in names
+    assert "NDA eliminato" in names
+    assert "Con NDA" not in names

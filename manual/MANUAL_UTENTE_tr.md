@@ -1024,7 +1024,7 @@ Düzenleme simgesiyle verileri ve tedarikçinin **Durumunu** (aktif, askıda, so
 
 ### Tedarikçi listesi
 
-Liste her tedarikçi için vergi/KDV no, ülke, yoğunlaşma, **Adj risk**, durum ve son değerlendirmenin tarihi ile geçerlilik sonunu gösterir. Unvan, vergi/KDV no veya e-posta ile arama yapabilir, risk, durum, NIS2 önemi ve TISAX önemine göre filtreleyebilirsiniz; **Risk** filtresi Adj risk üzerinde çalışır ve **Değerlendirilmemiş** seçeneği hiçbir değerlendirmesi olmayan tedarikçileri listeler.
+Liste her tedarikçi için vergi/KDV no, ülke, yoğunlaşma, **Adj risk**, durum ve son değerlendirmenin tarihi ile geçerlilik sonunu gösterir. Unvan, vergi/KDV no veya e-posta ile arama yapabilir, risk, durum, NIS2 önemi ve TISAX önemine göre filtreleyebilirsiniz; **Risk** filtresi Adj risk üzerinde çalışır ve **Değerlendirilmemiş** seçeneği hiçbir değerlendirmesi olmayan tedarikçileri listeler. Aynı menüde **Değerlendirilmemiş (iç)** güncel iç değerlendirmesi olmayan tedarikçileri, **NDA'sız** ise bağlı hiçbir NDA veya sözleşmesi olmayanları listeler.
 
 **↓ CSV dışa aktar**, tüm tedarikçileri, yalnızca NIS2 kapsamındakileri veya yalnızca TISAX kapsamındakileri CPV kodları, NIS2 kriteri, yoğunlaşma ve değerlendirme tarihleriyle indirir.
 

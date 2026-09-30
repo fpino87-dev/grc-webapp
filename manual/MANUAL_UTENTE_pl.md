@@ -1024,7 +1024,7 @@ Ikoną edycji zmieniasz dane i **Status** dostawcy (aktywny, zawieszony, zakońc
 
 ### Lista dostawców
 
-Dla każdego dostawcy lista pokazuje NIP/VAT, kraj, koncentrację, **Ryzyko Adj**, status oraz datę i termin ważności ostatniej oceny. Możesz szukać po nazwie, NIP/VAT lub adresie e-mail i filtrować według ryzyka, statusu, istotności NIS2 i istotności TISAX; filtr **Ryzyko** działa na Ryzyku Adj, a opcja **Nieocenieni** pokazuje dostawców bez żadnej oceny.
+Dla każdego dostawcy lista pokazuje NIP/VAT, kraj, koncentrację, **Ryzyko Adj**, status oraz datę i termin ważności ostatniej oceny. Możesz szukać po nazwie, NIP/VAT lub adresie e-mail i filtrować według ryzyka, statusu, istotności NIS2 i istotności TISAX; filtr **Ryzyko** działa na Ryzyku Adj, a opcja **Nieocenieni** pokazuje dostawców bez żadnej oceny. W tym samym menu **Nieocenieni (wewnętrznie)** pokazuje dostawców bez bieżącej oceny wewnętrznej, a **Bez NDA** tych, którzy nie mają powiązanej żadnej umowy NDA ani kontraktu.
 
 **↓ Eksport CSV** pobiera wszystkich dostawców, tylko istotnych dla NIS2 lub tylko istotnych dla TISAX, z kodami CPV, kryterium NIS2, koncentracją i datami oceny.
 
