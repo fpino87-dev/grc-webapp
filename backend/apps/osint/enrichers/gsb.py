@@ -20,14 +20,14 @@ THREAT_TYPES = ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE"]
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
-    from apps.osint.validators import assert_public_or_log
+    from apps.osint.validators import assert_public_name_or_log
 
     api_key = settings.gsb_api_key
     if not api_key:
         return True  # saltato silenziosamente
 
     domain = entity.domain
-    if not assert_public_or_log(domain, "gsb"):
+    if not assert_public_name_or_log(domain, "gsb"):
         scan.enricher_errors["gsb"] = "non_public_target"
         return False
     url = f"https://{domain}"

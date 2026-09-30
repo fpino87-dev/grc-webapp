@@ -42,6 +42,8 @@ export interface OsintEntity {
   is_active: boolean;
   scan_frequency: ScanFrequency;
   last_scan: OsintScanBrief | null;
+  /** Ultimo tentativo di scansione, qualunque esito (last_scan è l'ultimo riuscito). */
+  last_attempt?: OsintScanAttempt | null;
   delta: number | null;
   active_alerts_count: number;
   /** Sicurezza 0–100 (100 − rischio: più alto = meglio) e voto A–F. */
@@ -54,6 +56,21 @@ export interface OsintEntity {
   trend?: number[];
   created_at: string;
   updated_at: string;
+}
+
+export interface OsintScanAttempt {
+  scan_date: string;
+  status: "running" | "completed" | "failed";
+  /** Solo in scheda: motivo per enricher. */
+  errors?: Record<string, string>;
+}
+
+/** L'ultimo tentativo è fallito dopo l'ultima scansione riuscita: i dati mostrati sono fermi. */
+export function staleAttempt(e: { last_scan: { scan_date: string } | null; last_attempt?: OsintScanAttempt | null }): OsintScanAttempt | null {
+  const a = e.last_attempt;
+  if (!a || a.status !== "failed") return null;
+  if (e.last_scan && new Date(e.last_scan.scan_date) >= new Date(a.scan_date)) return null;
+  return a;
 }
 
 export type Grade = "A" | "B" | "C" | "D" | "F";

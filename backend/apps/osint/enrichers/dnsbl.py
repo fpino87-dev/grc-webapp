@@ -65,10 +65,10 @@ def _query(name: str) -> list[str]:
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
-    from apps.osint.validators import assert_public_or_log, safe_resolve_public_ip
+    from apps.osint.validators import assert_public_name_or_log, safe_resolve_public_ip
 
     domain = entity.domain
-    if not assert_public_or_log(domain, "dnsbl"):
+    if not assert_public_name_or_log(domain, "dnsbl"):
         scan.enricher_errors["dnsbl"] = "non_public_target"
         return False
 

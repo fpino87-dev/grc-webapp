@@ -55,10 +55,10 @@ def _has_mx(domain: str) -> bool:
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
-    from apps.osint.validators import assert_public_or_log
+    from apps.osint.validators import assert_public_name_or_log
 
     domain = entity.domain
-    if not assert_public_or_log(domain, "dnstwist"):
+    if not assert_public_name_or_log(domain, "dnstwist"):
         scan.enricher_errors["dnstwist"] = "non_public_target"
         return False
 

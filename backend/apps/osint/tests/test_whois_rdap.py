@@ -107,7 +107,7 @@ class TestRun:
             "events": [{"eventAction": "expiration", "eventDate": "2028-01-01T00:00:00Z"}],
             "entities": [{"roles": ["registrar"], "vcardArray": ["vcard", [["fn", {}, "text", "Reg X"]]]}],
         }
-        with patch("apps.osint.validators.assert_public_or_log", return_value=True), \
+        with patch("apps.osint.validators.assert_public_name_or_log", return_value=True), \
              patch.object(whois_enr, "_query_rdap", return_value=registry), \
              patch.object(whois_enr, "_referral_url", return_value=None):
             assert whois_enr.run(entity, scan, None) is True
@@ -126,7 +126,7 @@ class TestRun:
             "events": [{"eventAction": "expiration", "eventDate": "2029-06-30T00:00:00Z"}],
             "entities": [{"roles": ["registrar"], "vcardArray": ["vcard", [["fn", {}, "text", "Registrar Y"]]]}],
         }
-        with patch("apps.osint.validators.assert_public_or_log", return_value=True), \
+        with patch("apps.osint.validators.assert_public_name_or_log", return_value=True), \
              patch.object(whois_enr, "_query_rdap", return_value=registry), \
              patch.object(whois_enr, "_rdap_get", return_value=registrar):
             assert whois_enr.run(entity, scan, None) is True
@@ -140,7 +140,7 @@ class TestRun:
         def _fill(domain, sc):
             sc.domain_registrar = "Legacy Reg"
             return True
-        with patch("apps.osint.validators.assert_public_or_log", return_value=True), \
+        with patch("apps.osint.validators.assert_public_name_or_log", return_value=True), \
              patch.object(whois_enr, "_query_rdap", return_value=None), \
              patch.object(whois_enr, "_python_whois_fill", side_effect=_fill):
             assert whois_enr.run(entity, scan, None) is True

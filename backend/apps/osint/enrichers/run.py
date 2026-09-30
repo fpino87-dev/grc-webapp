@@ -94,13 +94,29 @@ def run_enrichment(entity: "OsintEntity", settings: "OsintSettings") -> "OsintSc
     Ritorna l'oggetto OsintScan creato (status completed o failed).
     """
     from apps.osint.models import OsintScan, ScanStatus
+
+    scan = OsintScan.objects.create(entity=entity, status=ScanStatus.RUNNING)
+    try:
+        return _run_enrichers(entity, scan, settings)
+    except Exception as exc:
+        # Un errore imprevisto non deve lasciare lo scan «in corso» per sempre:
+        # resterebbe invisibile, con i dati dell'entità fermi all'ultimo scan
+        # riuscito. Si registra il fallimento e si rilancia (retry del task).
+        logger.exception("OSINT scan interrotto per %s", entity.domain)
+        OsintScan.objects.filter(pk=scan.pk).update(
+            status=ScanStatus.FAILED,
+            enricher_errors={**(scan.enricher_errors or {}), "scan": f"{type(exc).__name__}: {exc}"[:300]},
+        )
+        raise
+
+
+def _run_enrichers(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> "OsintScan":
+    from apps.osint.models import ScanStatus
     from apps.osint.enrichers import (
         ssl, dns, whois_enr, virustotal, abuseipdb, otx, gsb, hibp,
         http_headers, dnsbl, takeover, abusech, supplychain,
     )
     from apps.osint.scoring import compute_scores
-
-    scan = OsintScan.objects.create(entity=entity, status=ScanStatus.RUNNING)
 
     # Esiti per nome enricher: niente liste posizionali (riordinare gli enricher
     # non deve più poter falsare status/logging — vedi review).

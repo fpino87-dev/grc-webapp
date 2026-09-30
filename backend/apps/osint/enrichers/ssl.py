@@ -259,20 +259,31 @@ def _serves_over_http(domain: str) -> bool | None:
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
-    from apps.osint.validators import assert_public_or_log
+    from apps.osint.validators import assert_public_name_or_log, target_reachability
 
     domain = entity.domain
-    if not assert_public_or_log(domain, "ssl"):
+    if not assert_public_name_or_log(domain, "ssl"):
         scan.enricher_errors["ssl"] = "non_public_target"
         return False
     try:
+        # Al target ci si collega solo se risolve a IP pubblici. Un nome che dal
+        # server risolve su IP interni (DNS split-horizon) non è verificabile da
+        # qui: il certificato resta «non rilevato» con l'errore in chiaro, invece
+        # di passare per «nessun HTTPS». I log dei certificati (crt.sh) si
+        # leggono comunque: non toccano il target.
+        probeable = target_reachability(domain) != "private"
+        if not probeable:
+            scan.enricher_errors["ssl"] = "non_public_target"
+
         # Solo il dominio stesso: il certificato di «www.<dominio>» appartiene a
         # un altro host (monitorato come entità propria se serve). Attribuirlo
         # al dominio dava «certificato scaduto» su un dominio che non serve
         # nulla sul web (nessun record A).
-        cert, trusted, reason = _tls_probe(domain)
+        cert, trusted, reason = _tls_probe(domain) if probeable else (None, None, "")
 
-        if cert:
+        if not probeable:
+            pass
+        elif cert:
             ssl_valid, expiry, days, issuer, wildcard = _parse_cert(cert)
             scan.ssl_valid = ssl_valid
             scan.ssl_trusted = trusted

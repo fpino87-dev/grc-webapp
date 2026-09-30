@@ -6,7 +6,7 @@ import {
   ResponsiveContainer, ReferenceArea,
 } from "recharts";
 import {
-  osintApi, classifyScore,
+  osintApi, classifyScore, staleAttempt,
   EXPECTED_POSTURES,
   type ExpectedPosture, type OsintEntityDetail, type HistoryPoint,
   type OsintScanDetail, type OsintFinding, type OsintAlert,
@@ -345,7 +345,8 @@ function HistoryChart({ data }: { data: HistoryPoint[] }) {
 export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onClose: () => void }) {
   const { t } = useTranslation();
   const [isScanning, setIsScanning] = useState(false);
-  const pollingRef = useRef<{ initialScanDate: string | null; attempts: number } | null>(null);
+  const pollingRef = useRef<{ initialAttemptDate: string | null; attempts: number } | null>(null);
+  const qc = useQueryClient();
 
   const { data: entity, isLoading } = useQuery({
     queryKey: ["osint-entity", entityId],
@@ -353,15 +354,21 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
     refetchInterval: isScanning ? 4000 : false,
   });
 
-  // Quando arriva un nuovo scan_date diverso da quello iniziale → fine polling.
-  if (isScanning && pollingRef.current && entity?.last_scan?.scan_date) {
-    const currentDate = entity.last_scan.scan_date;
-    const initial = pollingRef.current.initialScanDate;
+  // Fine polling quando c'è un nuovo tentativo concluso, riuscito o fallito.
+  // Guardare solo l'ultimo scan riuscito lasciava il pulsante in attesa per due
+  // minuti e poi in silenzio, se lo scan falliva.
+  if (isScanning && pollingRef.current && entity) {
+    const attempt = entity.last_attempt ?? null;
+    const initial = pollingRef.current.initialAttemptDate;
     pollingRef.current.attempts += 1;
     const elapsedAttempts = pollingRef.current.attempts;
-    if (currentDate !== initial || elapsedAttempts > 30 /* ~2min */) {
+    const finished = !!attempt && attempt.scan_date !== initial && attempt.status !== "running";
+    if (finished || elapsedAttempts > 45 /* ~3min */) {
       pollingRef.current = null;
       setIsScanning(false);
+      // Elenco e storico riflettono subito l'esito del nuovo tentativo.
+      qc.invalidateQueries({ queryKey: ["osint-entities"] });
+      qc.invalidateQueries({ queryKey: ["osint-entity-history", entityId] });
     }
   }
 
@@ -369,8 +376,6 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
     queryKey: ["osint-entity-history", entityId],
     queryFn: () => osintApi.entityHistory(entityId),
   });
-
-  const qc = useQueryClient();
 
   // Postura attesa: senza dichiararla, ogni assenza (DMARC, HTTPS) resta
   // ambigua e il modulo la segnala per prudenza.
@@ -387,7 +392,7 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
     mutationFn: () => osintApi.forceScan(entityId),
     onSuccess: () => {
       pollingRef.current = {
-        initialScanDate: entity?.last_scan?.scan_date ?? null,
+        initialAttemptDate: entity?.last_attempt?.scan_date ?? null,
         attempts: 0,
       };
       setIsScanning(true);
@@ -408,6 +413,9 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
   }
 
   const scan = entity.last_scan;
+  const failedAttempt = staleAttempt(entity);
+  const failedErrors = Object.entries(failedAttempt?.errors ?? {});
+  const failedNonPublic = failedErrors.length > 0 && failedErrors.every(([, err]) => err === "non_public_target");
   const isSupplier = entity.entity_type === "supplier";
   const findings = entity.findings ?? [];
   const openFindings = findings.filter(f => OPEN.includes(f.status));
@@ -454,6 +462,20 @@ export function OsintEntityDrawer({ entityId, onClose }: { entityId: string; onC
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           {tab === "overview" && (
             <>
+              {failedAttempt && (
+                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                  ⚠ {scan
+                    ? t("osint.drawer.attempt_failed", {
+                        date: new Date(failedAttempt.scan_date).toLocaleDateString(),
+                        data_date: new Date(scan.scan_date).toLocaleDateString(),
+                      })
+                    : t("osint.drawer.attempt_failed_no_data", { date: new Date(failedAttempt.scan_date).toLocaleDateString() })}
+                  {" "}
+                  {failedNonPublic
+                    ? t("osint.drawer.attempt_failed_non_public")
+                    : failedErrors.map(([name, err]) => `${name}: ${err}`).join(" · ")}
+                </p>
+              )}
               {scan ? (
                 <>
                   {isSupplier ? (

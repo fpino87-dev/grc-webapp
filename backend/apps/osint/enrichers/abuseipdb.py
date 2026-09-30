@@ -19,14 +19,14 @@ TIMEOUT = 10
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
-    from apps.osint.validators import assert_public_or_log, safe_resolve_public_ip
+    from apps.osint.validators import assert_public_name_or_log, safe_resolve_public_ip
 
     api_key = settings.abuseipdb_api_key
     if not api_key:
         return True  # saltato silenziosamente
 
     domain = entity.domain
-    if not assert_public_or_log(domain, "abuseipdb"):
+    if not assert_public_name_or_log(domain, "abuseipdb"):
         scan.enricher_errors["abuseipdb"] = "non_public_target"
         return False
     try:

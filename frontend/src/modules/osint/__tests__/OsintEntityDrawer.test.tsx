@@ -83,4 +83,25 @@ describe("OSINT — scheda entità", () => {
     expect(screen.getByText("osint.chain.cert_expired")).toBeInTheDocument();
     expect(screen.getByText("x-it.com")).toBeInTheDocument();
   });
+  it("ultimo tentativo fallito: avviso che i dati sono fermi e motivo", async () => {
+    api.entity.mockResolvedValue(entity({
+      last_scan: null,
+      last_attempt: { scan_date: "2026-09-28T02:00:00Z", status: "failed", errors: { dns: "non_public_target", ssl: "non_public_target" } },
+    }) as never);
+    renderDrawer();
+    expect(await screen.findByText(/osint\.drawer\.attempt_failed_no_data/)).toBeInTheDocument();
+    expect(screen.getByText(/osint\.drawer\.attempt_failed_non_public/)).toBeInTheDocument();
+  });
+
+  it("forza rescan: l'attesa finisce anche quando il nuovo tentativo fallisce", async () => {
+    api.entity.mockResolvedValue(entity({ last_attempt: { scan_date: "2026-09-21T02:00:00Z", status: "failed", errors: {} } }) as never);
+    api.forceScan.mockResolvedValue({ job_id: "j", status: "queued" } as never);
+    renderDrawer();
+    const button = await screen.findByRole("button", { name: /osint\.detail\.force_scan/ });
+    api.entity.mockResolvedValue(entity({ last_attempt: { scan_date: "2026-09-30T10:00:00Z", status: "failed", errors: { dns: "timeout" } } }) as never);
+    fireEvent.click(button);
+    await vi.waitFor(() => expect(api.forceScan).toHaveBeenCalled());
+    await vi.waitFor(() => expect(screen.getByRole("button", { name: /osint\.detail\.force_scan/ })).not.toBeDisabled(), { timeout: 8000 });
+    expect(screen.getByText(/dns: timeout/)).toBeInTheDocument();
+  }, 12000);
 });

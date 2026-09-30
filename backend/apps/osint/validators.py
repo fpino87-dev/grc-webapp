@@ -122,11 +122,46 @@ def safe_resolve_public_ip(hostname: str) -> str | None:
     return ips[0]
 
 
-def assert_public_or_log(domain: str, enricher_name: str) -> bool:
-    """Wrapper che logga in DEBUG quando l'enricher salta un dominio non pubblico."""
-    if is_public_internet_target(domain):
+def target_reachability(domain_or_ip: str) -> str:
+    """Si può aprire una connessione verso questo target?
+
+    - ``"public"``: risolve solo a IP pubblici → gli enricher che si collegano
+      al target (TLS, HTTP) possono farlo;
+    - ``"no_address"``: nome pubblico senza record A/AAAA (dominio di sola
+      posta, dominio parcheggiato): non c'è nulla a cui collegarsi, ma non è
+      un errore — DNS, WHOIS e reputazione si leggono comunque;
+    - ``"private"``: risolve a IP privati/riservati, è un hostname interno o un
+      IP non pubblico → nessuna connessione (anti-SSRF). Capita anche ai domini
+      propri quando il server usa un DNS interno (split-horizon).
+    """
+    target = (domain_or_ip or "").strip().lower().rstrip(".")
+    if not hostname_is_scannable(target)[0]:
+        return "private"
+    try:
+        ipaddress.ip_address(target)
+        return "public"  # IP literal: hostname_is_scannable ne ha già verificato la natura pubblica
+    except ValueError:
+        pass
+    ips = _resolve_all(target)
+    if not ips:
+        return "no_address"
+    return "public" if all(_ip_is_public(ip) for ip in ips) else "private"
+
+
+def assert_public_name_or_log(domain: str, enricher_name: str) -> bool:
+    """Guardia per gli enricher PASSIVI: quelli che non si collegano mai al
+    target ma interrogano terzi sul suo nome (resolver DNS, RDAP/WHOIS, crt.sh,
+    VirusTotal, OTX, blocklist…).
+
+    Basta che il nome sia un nome pubblico — controllo sintattico, senza DNS.
+    Pretendere anche un record A pubblico (come per chi si collega) faceva
+    fallire ogni settimana l'intero scan dei domini di sola posta e dei domini
+    che il server risolve su IP interni, lasciando in vista dati vecchi di mesi.
+    """
+    ok, reason = hostname_is_scannable(domain)
+    if ok:
         return True
-    logger.debug("OSINT enricher %s skipped: %s is not a public internet target", enricher_name, domain)
+    logger.debug("OSINT enricher %s skipped: %s is not a public name (%s)", enricher_name, domain, reason)
     return False
 
 # Provider di posta pubblici e domini PEC: se il contatto di un fornitore è su

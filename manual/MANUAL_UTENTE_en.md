@@ -1662,6 +1662,8 @@ OSINT Monitor is the transversal module that monitors your organisation's **exte
 
 The basic scans (SSL, DNS, WHOIS) are **free and always active**. Additional enrichments (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) are enabled by entering the respective **API keys** in **OSINT → Settings** (all optional; use the `?` button on the settings page for the registration links). The keys are encrypted and never shown in clear text.
 
+If the latest scan of an entity fails, the ⚠ symbol appears next to the date in the list: the data shown is from the last successful scan. The entity panel shows the date of the attempt and the reason. Mail-only domains (with no website) are still scanned for DNS, WHOIS and reputation.
+
 ### Dashboard, grade and issues
 
 The dashboard reads top-down: **your external posture** (A–F grade with a 0–100 security score, higher = better, and the trend over the last 12 weeks), then two separate work queues and the **Last 7 days** summary (new issues, resolved, new supplier criticals, grade changes, subdomains to classify). Below, entities split into **My domains**, **Suppliers** and **Assets**, with grade, trend and open issues. The organization grade only considers your own domains and assets.

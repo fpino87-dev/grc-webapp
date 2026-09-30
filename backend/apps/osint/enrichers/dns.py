@@ -269,10 +269,10 @@ def _check_dnssec(domain: str) -> bool | None:
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
-    from apps.osint.validators import assert_public_or_log
+    from apps.osint.validators import assert_public_name_or_log
 
     domain = entity.domain
-    if not assert_public_or_log(domain, "dns"):
+    if not assert_public_name_or_log(domain, "dns"):
         scan.enricher_errors["dns"] = "non_public_target"
         return False
     try:

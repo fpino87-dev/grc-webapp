@@ -87,9 +87,13 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
         # Solo gli ultimi 2 scan servono per last_scan + delta — taglia la N+1.
         # Il limit per-entità non è esprimibile in una sola query Postgres con Prefetch:
         # accettiamo `prefetch_related("scans")` con order, e gli adattatori prendono [:2].
-        from django.db.models import Count, Q
+        from django.db.models import Count, OuterRef, Q, Subquery
 
         from apps.osint.findings import OPEN_STATUSES
+
+        # Ultimo tentativo (anche fallito): in elenco serve per segnalare che i
+        # dati mostrati sono fermi all'ultima scansione riuscita.
+        latest_attempt = OsintScan.objects.filter(entity=OuterRef("pk")).order_by("-scan_date")
 
         def _open(sev):
             return Count("findings", filter=Q(findings__severity=sev, findings__status__in=OPEN_STATUSES,
@@ -97,6 +101,10 @@ class OsintEntityViewSet(viewsets.ReadOnlyModelViewSet):
         return (
             OsintEntity.objects.filter(is_active=True, deleted_at__isnull=True)
             .annotate(open_critical=_open("critical"), open_warning=_open("warning"), open_info=_open("info"))
+            .annotate(
+                _last_attempt_date=Subquery(latest_attempt.values("scan_date")[:1]),
+                _last_attempt_status=Subquery(latest_attempt.values("status")[:1]),
+            )
             .prefetch_related(
                 Prefetch("scans", queryset=last_completed, to_attr="_recent_completed_scans"),
             )

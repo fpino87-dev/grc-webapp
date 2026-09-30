@@ -1662,6 +1662,8 @@ OSINT Monitor, kuruluşunuzun **dış maruziyetini** — alan adlarınızı ve t
 
 Temel taramalar (SSL, DNS, WHOIS) **ücretsiz ve her zaman aktiftir**. Ek zenginleştirmeler (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch), ilgili **API anahtarlarını** **OSINT → Ayarlar**'a girerek etkinleştirilir (tümü isteğe bağlı; kayıt bağlantıları için ayarlar sayfasındaki `?` düğmesini kullanın). Anahtarlar şifrelenir ve asla açık metin olarak gösterilmez.
 
+Bir varlığın son taraması başarısız olursa listede tarihin yanında ⚠ simgesi görünür: gösterilen veriler son başarılı taramaya aittir. Varlık paneli denemenin tarihini ve nedenini gösterir. Yalnızca e-posta için kullanılan (web sitesi olmayan) alan adları yine de DNS, WHOIS ve itibar açısından taranır.
+
 ### Pano, not ve sorunlar
 
 Pano yukarıdan aşağı okunur: **dış güvenlik duruşunuz** (0–100 güvenlik puanıyla A–F notu, yüksek = daha iyi, ve son 12 haftanın eğilimi), ardından iki ayrı iş kuyruğu ve **Son 7 gün** özeti (yeni sorunlar, çözülenler, yeni tedarikçi kritikleri, not değişiklikleri, sınıflandırılacak alt alan adları). Altında varlıklar **Alan adlarım**, **Tedarikçiler** ve **Varlıklar** olarak not, eğilim ve açık sorunlarla ayrılır. Kuruluş notu yalnızca kendi alan adlarınızı ve varlıklarınızı dikkate alır.

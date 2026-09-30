@@ -24,7 +24,7 @@ TIMEOUT = 15
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
     from apps.osint.models import EntityType
-    from apps.osint.validators import assert_public_or_log
+    from apps.osint.validators import assert_public_name_or_log
 
     if entity.entity_type != EntityType.MY_DOMAIN:
         return True  # MAI per fornitori
@@ -34,7 +34,7 @@ def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> 
         return True  # saltato silenziosamente
 
     domain = entity.domain
-    if not assert_public_or_log(domain, "hibp"):
+    if not assert_public_name_or_log(domain, "hibp"):
         scan.enricher_errors["hibp"] = "non_public_target"
         return False
     try:

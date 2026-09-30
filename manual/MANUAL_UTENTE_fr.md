@@ -1662,6 +1662,8 @@ OSINT Monitor est le module transversal qui surveille l'**exposition externe** d
 
 Les scans de base (SSL, DNS, WHOIS) sont **gratuits et toujours actifs**. Les enrichissements supplémentaires (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) s'activent en saisissant les **clés API** correspondantes dans **OSINT → Paramètres** (toutes optionnelles ; utilisez le bouton `?` de la page des paramètres pour les liens d'inscription). Les clés sont chiffrées et jamais affichées en clair.
 
+Si la dernière analyse d'une entité échoue, le symbole ⚠ apparaît à côté de la date dans la liste : les données affichées sont celles de la dernière analyse réussie. La fiche de l'entité indique la date de la tentative et le motif. Les domaines utilisés uniquement pour la messagerie (sans site) sont tout de même analysés pour le DNS, le WHOIS et la réputation.
+
 ### Tableau de bord, note et problèmes
 
 Le tableau de bord se lit de haut en bas : **votre posture externe** (note A–F avec un score de sécurité 0–100, plus haut = mieux, et la tendance des 12 dernières semaines), puis deux files de travail séparées et le résumé **7 derniers jours** (nouveaux problèmes, résolus, nouveaux critiques fournisseurs, variations de note, sous-domaines à classer). En dessous, les entités réparties en **Mes domaines**, **Fournisseurs** et **Actifs**, avec note, tendance et problèmes ouverts. La note de l'organisation ne tient compte que de vos domaines et actifs.

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { osintApi, type OsintEntity, type OsintFinding } from "../../api/endpoints/osint";
+import { osintApi, staleAttempt, type OsintEntity, type OsintFinding } from "../../api/endpoints/osint";
 import { OsintEntityDrawer } from "./OsintEntityDrawer";
 import { OsintAiPanel } from "./OsintAiPanel";
 import { GradeBadge, ReportToSupplierDialog, Sparkline, findingTitle } from "./shared";
@@ -259,6 +259,7 @@ export function OsintDashboard() {
               {rows.map(e => {
                 const of = e.open_findings ?? { critical: 0, warning: 0, info: 0 };
                 const sup = tab === "supplier" ? supplierStatus(e) : null;
+                const failed = staleAttempt(e);
                 return (
                   <tr key={e.id} onClick={() => setSelectedEntityId(e.id)} className="hover:bg-gray-50 cursor-pointer">
                     <td className="px-4 py-2.5">
@@ -292,7 +293,11 @@ export function OsintDashboard() {
                         {sup ? <span className={`text-xs px-2 py-0.5 rounded-full ${sup.tone}`}>{sup.text}</span> : <span className="text-xs text-green-700">✓</span>}
                       </td>
                     )}
-                    <td className="px-4 py-2.5 text-right text-xs text-gray-500">
+                    <td className="px-4 py-2.5 text-right text-xs text-gray-500 whitespace-nowrap">
+                      {failed && (
+                        <span className="mr-1 text-amber-600" role="img" aria-label={t("osint.dash.last_attempt_failed", { date: new Date(failed.scan_date).toLocaleDateString(i18n.language) })}
+                          title={t("osint.dash.last_attempt_failed", { date: new Date(failed.scan_date).toLocaleDateString(i18n.language) })}>⚠</span>
+                      )}
                       {e.last_scan?.scan_date ? new Date(e.last_scan.scan_date).toLocaleDateString(i18n.language) : "—"}
                     </td>
                   </tr>

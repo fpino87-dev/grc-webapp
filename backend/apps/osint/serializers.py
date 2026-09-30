@@ -34,6 +34,17 @@ class _GradeMixin(serializers.Serializer):
             self.context["osint_settings"] = OsintSettings.load()
         return self.context["osint_settings"]
 
+    def get_last_attempt(self, obj):
+        """Ultimo tentativo di scansione, qualunque esito. `last_scan` è l'ultimo
+        RIUSCITO: se i tentativi successivi falliscono resta fermo, e senza
+        questo dato l'interfaccia mostra dati vecchi senza dire perché."""
+        if hasattr(obj, "_last_attempt_date"):  # annotato dal viewset: zero query
+            date, status = obj._last_attempt_date, obj._last_attempt_status
+        else:
+            scan = obj.scans.order_by("-scan_date").first()
+            date, status = (scan.scan_date, scan.status) if scan else (None, None)
+        return {"scan_date": date, "status": status} if date else None
+
     def get_security(self, obj):
         from apps.osint.scoring import security_score
         return security_score(obj.last_score_total)
@@ -45,6 +56,7 @@ class _GradeMixin(serializers.Serializer):
 
 class OsintEntityListSerializer(_GradeMixin, serializers.ModelSerializer):
     last_scan = serializers.SerializerMethodField()
+    last_attempt = serializers.SerializerMethodField()
     delta = serializers.SerializerMethodField()
     active_alerts_count = serializers.IntegerField(source="active_alerts_count_cached", read_only=True)
     # Problemi aperti per gravità (annotati nel queryset) e tendenza (sicurezza)
@@ -58,7 +70,7 @@ class OsintEntityListSerializer(_GradeMixin, serializers.ModelSerializer):
             "is_nis2_critical", "is_active", "scan_frequency",
             "expected_mail", "expected_web",
             "duplicate_candidate_of", "duplicate_verified",
-            "last_scan", "delta", "active_alerts_count",
+            "last_scan", "last_attempt", "delta", "active_alerts_count",
             "security", "grade", "open_findings", "trend", "deep_monitoring",
             "created_at", "updated_at",
         ]
@@ -99,6 +111,7 @@ class OsintScanDetailSerializer(serializers.ModelSerializer):
 
 class OsintEntityDetailSerializer(_GradeMixin, serializers.ModelSerializer):
     last_scan = serializers.SerializerMethodField()
+    last_attempt = serializers.SerializerMethodField()
     delta = serializers.SerializerMethodField()
     active_alerts = serializers.SerializerMethodField()
     pending_subdomains_count = serializers.SerializerMethodField()
@@ -114,7 +127,7 @@ class OsintEntityDetailSerializer(_GradeMixin, serializers.ModelSerializer):
             "domain", "display_name", "is_nis2_critical", "is_active", "scan_frequency",
             "expected_mail", "expected_web",
             "duplicate_candidate_of", "duplicate_verified",
-            "last_scan", "delta", "active_alerts", "pending_subdomains_count",
+            "last_scan", "last_attempt", "delta", "active_alerts", "pending_subdomains_count",
             "security", "grade", "findings", "events", "deep_monitoring", "service_hosts",
             "created_at", "updated_at",
         ]
@@ -139,6 +152,13 @@ class OsintEntityDetailSerializer(_GradeMixin, serializers.ModelSerializer):
     def get_last_scan(self, obj):
         scan = obj.scans.filter(status="completed").order_by("-scan_date").first()
         return OsintScanDetailSerializer(scan).data if scan else None
+
+    def get_last_attempt(self, obj):
+        # In scheda servono anche i motivi del fallimento.
+        scan = obj.scans.order_by("-scan_date").first()
+        if scan is None:
+            return None
+        return {"scan_date": scan.scan_date, "status": scan.status, "errors": scan.enricher_errors or {}}
 
     def get_delta(self, obj):
         scan = obj.scans.filter(status="completed").order_by("-scan_date").first()

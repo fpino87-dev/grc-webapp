@@ -56,7 +56,8 @@ def _run_ssl(monkeypatch, probe):
     monkeypatch.setattr(ssl_enr, "_tls_probe", fake_probe)
     monkeypatch.setattr(ssl_enr, "_serves_over_http", lambda d: False)
     monkeypatch.setattr(ssl_enr, "_fetch_crtsh_entries", lambda d: [])
-    monkeypatch.setattr("apps.osint.validators.assert_public_or_log", lambda d, n: True)
+    monkeypatch.setattr("apps.osint.validators.assert_public_name_or_log", lambda d, n: True)
+    monkeypatch.setattr("apps.osint.validators.target_reachability", lambda d: "public")
     scan = SimpleNamespace(ssl_valid=None, ssl_trusted=None, ssl_verify_error="", https_available=None,
                            http_only=None, enricher_errors={})
     assert ssl_enr.run(SimpleNamespace(domain="azienda.com"), scan, None) is True

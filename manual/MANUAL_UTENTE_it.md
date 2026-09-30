@@ -1662,6 +1662,8 @@ OSINT Monitor è il modulo trasversale che monitora l'**esposizione esterna** de
 
 Le scansioni di base (SSL, DNS, WHOIS) sono **gratuite e sempre attive**. Gli arricchimenti aggiuntivi (HaveIBeenPwned, VirusTotal, AbuseIPDB, Google Safe Browsing, AlienVault OTX, abuse.ch) si abilitano inserendo le rispettive **chiavi API** in **OSINT → Impostazioni** (tutte opzionali; usa il pulsante `?` della pagina impostazioni per i link di registrazione). Le chiavi sono cifrate e mai mostrate in chiaro.
 
+Se l'ultima scansione di un'entità non riesce, in elenco accanto alla data compare il simbolo ⚠: i dati mostrati sono quelli dell'ultima scansione riuscita. La scheda dell'entità indica la data del tentativo e il motivo. I domini di sola posta (senza sito) vengono comunque scansionati per DNS, WHOIS e reputazione.
+
 ### Dashboard, voto e problemi
 
 La dashboard si legge dall'alto: la **tua postura esterna** (voto A–F con punteggio di sicurezza 0–100, più alto = meglio, e tendenza delle ultime 12 settimane), poi due code di lavoro separate e il riepilogo **Ultimi 7 giorni** (nuovi problemi, risolti, nuovi critici dei fornitori, variazioni di voto, sottodomini da classificare). Sotto, le entità divise in **I miei domini**, **Fornitori** e **Asset**, con voto, tendenza e problemi aperti. Il voto dell'organizzazione considera solo i tuoi domini e asset.

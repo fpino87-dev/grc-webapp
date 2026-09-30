@@ -100,8 +100,12 @@ def _follow_validated(method: str, url: str) -> dict[str, str] | None:
 def _fetch_headers(domain: str) -> dict[str, str] | None:
     """HEAD su https://{domain}/ con fallback a GET, redirect seguiti e validati.
     Headers lowercase. None se irraggiungibile."""
+    from apps.osint.validators import is_public_internet_target
+
+    # Anche «www.<dominio>» va validato: può risolvere altrove rispetto al dominio.
+    hosts = [h for h in (domain, f"www.{domain}") if is_public_internet_target(h)]
     for method in ("HEAD", "GET"):
-        for host in (domain, f"www.{domain}"):
+        for host in hosts:
             headers = _follow_validated(method, f"https://{host}/")
             if headers is not None:
                 return headers
@@ -129,14 +133,16 @@ def _evaluate(headers: dict[str, str]) -> dict:
 
 
 def run(entity: "OsintEntity", scan: "OsintScan", settings: "OsintSettings") -> bool:
-    from apps.osint.validators import assert_public_or_log
+    from apps.osint.validators import target_reachability
 
     domain = entity.domain
-    if not assert_public_or_log(domain, "http_headers"):
+    reach = target_reachability(domain)
+    if reach == "private":
         scan.enricher_errors["http_headers"] = "non_public_target"
         return False
 
-    headers = _fetch_headers(domain)
+    # Senza indirizzo (dominio di sola posta) non c'è un sito da interrogare.
+    headers = _fetch_headers(domain) if reach == "public" else None
     if headers is None:
         # Non raggiungibile via HTTPS: non è un errore in sé per OSINT passivo.
         # Lasciamo security_headers vuoto, il finding non scatterà.
