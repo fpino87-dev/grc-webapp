@@ -213,6 +213,8 @@ Every interactive element on the dashboard is clickable:
 | **N/A** | The control does not apply to your plant's context. Requires a written justification of at least 20 characters. The justification is saved and visible whenever you reopen the control. In the VDA ISA TISAX it appears in the "Note / Justification" column and the maturity level is set to 0. For TISAX L3 it requires the signature of two roles and expires after 12 months |
 
 > A control with expired evidence automatically reverts to "Partial" even if you set it as Compliant. Keep your evidence up to date.
+>
+> The same happens when a document required by the control is no longer approved (for example it went back into review for a new version). In this case the downgrade is temporary: once the document is approved again the control returns to Compliant on its own and the task opened for the owner is closed, with no need to re-evaluate it. The status is not restored if the control was manually re-evaluated in the meantime or if evidence has expired.
 
 ### How to upload evidence
 

@@ -107,6 +107,11 @@ def evaluate_control(instance, new_status, user, note=""):
         instance.needs_revaluation = False
         instance.needs_revaluation_since = None
         update_fields += ["needs_revaluation", "needs_revaluation_since"]
+    # Chi valuta decide lo stato: il degrado automatico per documento non più
+    # approvato non è più "in sospeso" e non va ripristinato da solo.
+    if instance.document_degraded_at is not None:
+        instance.document_degraded_at = None
+        update_fields.append("document_degraded_at")
     # La valutazione fa ripartire il conteggio della riverifica periodica.
     if apply_review_schedule(instance, save=False) is not None:
         update_fields.append("next_review_date")
@@ -125,6 +130,116 @@ def evaluate_control(instance, new_status, user, note=""):
         },
     )
     return instance
+
+
+# Titolo del task aperto quando un controllo scende a Parziale perché un
+# documento collegato non è più approvato: è anche la chiave con cui il
+# ripristino lo ritrova per chiuderlo.
+DOCUMENT_DEGRADED_TASK_PREFIX = "Documento non più approvato — "
+
+
+def degraded_only_by_documents(req_check: dict) -> bool:
+    """True se i requisiti non sono soddisfatti solo per i documenti (mancanti
+    o non approvati) e le evidenze sono a posto."""
+    return (
+        not req_check["satisfied"]
+        and bool(req_check["missing_documents"])
+        and not req_check["missing_evidences"]
+        and not req_check["expired_evidences"]
+    )
+
+
+def restore_document_degraded(instance, user) -> bool:
+    """Riporta a Compliant un controllo degradato in automatico a Parziale
+    perché un documento collegato non era più approvato (es. in revisione).
+
+    Non è una nuova valutazione: torna valida quella che c'era prima del
+    degrado, perché la causa è venuta meno. Per questo non tocca
+    `last_evaluated_at` né la scadenza di riverifica, e vale solo se:
+    - il degrado è stato automatico e dovuto ai soli documenti
+      (`document_degraded_at` valorizzato);
+    - da allora nessuno ha rivalutato il controllo (lo stato è ancora Parziale
+      e il segnale non è stato azzerato);
+    - tutti i requisiti — documenti ed evidenze — sono di nuovo soddisfatti.
+
+    Restituisce True se lo stato è stato ripristinato.
+    """
+    from core.audit import log_action
+
+    if instance.document_degraded_at is None or instance.status != "parziale":
+        return False
+    if instance.deleted_at is not None:
+        return False
+    if (
+        instance.last_evaluated_at is not None
+        and instance.last_evaluated_at > instance.document_degraded_at
+    ):
+        return False
+    if not check_evidence_requirements(instance)["satisfied"]:
+        return False
+
+    degraded_at = instance.document_degraded_at
+    instance.status = "compliant"
+    instance.document_degraded_at = None
+    instance.save(update_fields=["status", "document_degraded_at", "updated_at"])
+
+    log_action(
+        user=user,
+        action_code="control.restored_compliant",
+        level="L2",
+        entity=instance,
+        payload={
+            "restored_from": "parziale",
+            "reason": "documents_approved_again",
+            "degraded_at": degraded_at.isoformat(),
+        },
+    )
+    _close_document_degraded_tasks(instance, user)
+    return True
+
+
+def _close_document_degraded_tasks(instance, user) -> int:
+    """Chiude i task aperti dal degrado: non c'è più nulla da fare. Best-effort,
+    un errore qui non deve annullare il ripristino dello stato."""
+    import logging
+
+    from apps.tasks.models import Task
+    from apps.tasks.services import complete_task
+
+    closed = 0
+    try:
+        for task in Task.objects.filter(
+            source_module="M03",
+            source_id=instance.pk,
+            status__in=("aperto", "in_corso"),
+            title__startswith=DOCUMENT_DEGRADED_TASK_PREFIX,
+        ):
+            complete_task(
+                task, user,
+                notes="Documento di nuovo approvato: stato Compliant ripristinato in automatico.",
+            )
+            closed += 1
+    except Exception as exc:
+        logging.getLogger(__name__).warning(
+            "Controllo %s: chiusura task di degrado non riuscita: %s", instance.pk, exc,
+        )
+    return closed
+
+
+def restore_controls_for_document(document, user) -> int:
+    """Dopo l'approvazione di un documento: ripristina i controlli collegati
+    che erano scesi a Parziale per causa sua. Restituisce quanti ne ha
+    ripristinati."""
+    candidates = (
+        document.control_refs.filter(
+            status="parziale",
+            document_degraded_at__isnull=False,
+            deleted_at__isnull=True,
+        )
+        .select_related("control", "plant")
+        .prefetch_related("evidences", "documents")
+    )
+    return sum(1 for instance in candidates if restore_document_degraded(instance, user))
 
 
 IMPLEMENTATION_DESCRIPTION_MAX = 5000
@@ -203,9 +318,10 @@ def validate_exclusion(instance, applicability: str,
     if applicability == "escluso":
         instance.status = "na"
         instance.na_justification = justification
+        instance.document_degraded_at = None
     instance.save(update_fields=[
         "applicability", "exclusion_justification",
-        "status", "na_justification", "updated_at",
+        "status", "na_justification", "document_degraded_at", "updated_at",
     ])
 
     log_action(
@@ -368,7 +484,11 @@ def propagate_control(instance, user) -> dict:
         target.status = instance.status
         target.last_evaluated_at = timezone.now()
         target.last_evaluated_note = note_for_target
-        update_fields = ["status", "last_evaluated_at", "last_evaluated_note", "updated_at"]
+        target.document_degraded_at = None
+        update_fields = [
+            "status", "last_evaluated_at", "last_evaluated_note",
+            "document_degraded_at", "updated_at",
+        ]
         if instance.status == "na":
             target.na_justification = note_for_target
             update_fields.append("na_justification")

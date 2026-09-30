@@ -294,6 +294,18 @@ def approve_document(
     # servono più (stesso schema dei promemoria del piano formativo, M15).
     close_document_reminders(document, user, _("Documento approvato."))
 
+    # I controlli scesi a Parziale mentre il documento era in revisione tornano
+    # Compliant. Best-effort: se fallisce ci ripensa il task notturno.
+    try:
+        from apps.controls.services import restore_controls_for_document
+
+        with transaction.atomic():
+            restore_controls_for_document(document, user)
+    except Exception as exc:
+        logging.getLogger(__name__).warning(
+            "Documento %s: ripristino controlli collegati non riuscito: %s", document.pk, exc,
+        )
+
     # notifica approvatori / stakeholder definiti in governance
     try:
         from apps.governance.services import resolve_document_recipients

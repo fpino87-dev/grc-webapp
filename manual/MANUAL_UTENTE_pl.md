@@ -213,6 +213,8 @@ Każdy interaktywny element na pulpicie jest klikalny:
 | **N/A** | Kontrola nie ma zastosowania w kontekście Twojego plant. Wymaga pisemnego uzasadnienia o długości co najmniej 20 znaków. Uzasadnienie jest zapisywane i widoczne przy każdym ponownym otwarciu kontroli. W VDA ISA TISAX pojawia się w kolumnie "Note / Justification", a poziom dojrzałości jest ustawiany na 0. Dla TISAX L3 wymaga podpisu dwóch ról i wygasa po 12 miesiącach |
 
 > Kontrola z przeterminowanym dowodem automatycznie wraca do stanu „Częściowy", nawet jeśli ustawiłeś ją jako Zgodna. Aktualizuj dowody na bieżąco.
+>
+> To samo dzieje się, gdy dokument wymagany przez kontrolę przestaje być zatwierdzony (na przykład wrócił do przeglądu z powodu nowej wersji). W takim przypadku obniżenie stanu jest tymczasowe: po ponownym zatwierdzeniu dokumentu kontrola sama wraca do stanu Zgodny, a zadanie otwarte dla właściciela zostaje zamknięte, bez potrzeby ponownej oceny. Stan nie jest przywracany, jeśli w międzyczasie kontrola została oceniona ręcznie lub wygasł dowód.
 
 ### Jak wgrać dowód
 

@@ -29,12 +29,16 @@ from .frameworks import (
 from .instances import (
     EVALUATED_STATUSES,
     apply_review_schedule,
+    DOCUMENT_DEGRADED_TASK_PREFIX,
     can_delete_instance,
+    degraded_only_by_documents,
     delete_control,
     delete_control_instance,
     evaluate_control,
     propagate_control,
     resolve_review_due_date,
+    restore_controls_for_document,
+    restore_document_degraded,
     set_implementation_description,
     validate_exclusion,
 )
@@ -49,6 +53,7 @@ from .reporting import (
 )
 
 __all__ = [
+    "DOCUMENT_DEGRADED_TASK_PREFIX",
     "EVALUATED_STATUSES",
     "apply_review_schedule",
     "archive_framework",
@@ -62,7 +67,10 @@ __all__ = [
     "delete_control_instance",
     "delete_framework",
     "effective_control_rows",
+    "degraded_only_by_documents",
     "evaluate_control",
+    "restore_controls_for_document",
+    "restore_document_degraded",
     "generate_procedure_document",
     "get_compliance_summary",
     "summarize_compliance",

@@ -169,6 +169,14 @@ class ControlInstance(BaseModel):
     )
     needs_revaluation_since = models.DateField(null=True, blank=True)
 
+    # Valorizzato dal task notturno quando un controllo Compliant scende a
+    # Parziale SOLO perché un documento collegato non è più approvato (es. è
+    # tornato in revisione) — evidenze a posto. È il segnale che il degrado è
+    # temporaneo: quando il documento torna approvato lo stato Compliant viene
+    # ripristinato (`restore_document_degraded`). Qualsiasi valutazione o cambio
+    # di stato deciso da una persona lo azzera: da lì in poi decide lei.
+    document_degraded_at = models.DateTimeField(null=True, blank=True)
+
     # Riverifica periodica del controllo (semestrale, annuale, …). La cadenza
     # è quella della policy del sito (regola `control_review`, default 1 anno)
     # se qui non è indicato nulla: un valore esplicito è un'eccezione motivata

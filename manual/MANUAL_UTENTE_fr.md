@@ -213,6 +213,8 @@ Chaque élément interactif du tableau de bord est cliquable :
 | **N/A** | Le contrôle ne s'applique pas au contexte de votre plant. Requiert une justification écrite d'au moins 20 caractères. La justification est sauvegardée et visible à chaque réouverture du contrôle. Dans le VDA ISA TISAX, elle apparaît dans la colonne "Note / Justification" et le niveau de maturité est défini à 0. Pour TISAX L3, nécessite la signature de deux rôles et expire après 12 mois |
 
 > Un contrôle avec une preuve expirée revient automatiquement à "Partiel" même si vous l'aviez défini comme Conforme. Maintenez les preuves à jour.
+>
+> Il en va de même lorsqu'un document requis par le contrôle n'est plus approuvé (par exemple s'il est repassé en révision pour une nouvelle version). Dans ce cas la dégradation est temporaire : dès que le document est de nouveau approuvé, le contrôle revient de lui-même à Conforme et la tâche ouverte pour le responsable est clôturée, sans qu'il soit nécessaire de le réévaluer. L'état n'est pas rétabli si le contrôle a été réévalué manuellement entre-temps ou si une preuve a expiré.
 
 ### Comment charger une preuve
 

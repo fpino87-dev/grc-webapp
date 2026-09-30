@@ -213,6 +213,8 @@ Kontrol panelindeki her etkileşimli öğe tıklanabilir:
 | **N/A** | Kontrol tesisinizin bağlamında geçerli değil. En az 20 karakter içeren yazılı bir gerekçe gerektirir. Gerekçe kaydedilir ve kontrol her yeniden açıldığında görünür. VDA ISA TISAX'ta "Note / Justification" sütununda görünür ve olgunluk düzeyi 0 olarak ayarlanır. TISAX L3 için iki rolün imzasını gerektirir ve 12 ay sonra sona erer |
 
 > Süresi dolmuş kanıta sahip bir kontrol, Uyumlu olarak ayarlamış olsanız bile otomatik olarak "Kısmi"ye döner. Kanıtları güncel tutun.
+>
+> Kontrolün gerektirdiği bir belge artık onaylı değilse de (örneğin yeni bir sürüm için yeniden incelemeye alındıysa) aynı şey olur. Bu durumda düşüş geçicidir: belge yeniden onaylandığında kontrol kendiliğinden Uyumlu durumuna döner ve sahibine açılan görev kapanır; kontrolü yeniden değerlendirmek gerekmez. Bu arada kontrol elle yeniden değerlendirildiyse veya bir kanıtın süresi dolduysa durum geri yüklenmez.
 
 ### Kanıt nasıl yüklenir
 

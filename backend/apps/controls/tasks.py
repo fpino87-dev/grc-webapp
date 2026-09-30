@@ -19,11 +19,23 @@ def check_expired_evidences():
     - crea task al control owner con titolo appropriato:
         * "Evidenza scaduta" se ci sono evidenze con valid_until < oggi
         * "Nessuna evidenza valida" se i requisiti non sono soddisfatti ma senza scadute
+        * "Documento non più approvato" se mancano solo i documenti approvati
+          (es. il documento collegato è tornato in revisione)
     I controlli che richiedono solo documenti (policy/procedure) non vengono
     degradati se i documenti obbligatori sono presenti.
+
+    Il degrado dovuto ai soli documenti è temporaneo: viene segnato su
+    `document_degraded_at` e lo stato Compliant torna da solo quando il
+    documento è di nuovo approvato — subito all'approvazione, oppure qui al
+    giro successivo se i requisiti sono tornati soddisfatti per altra via.
     """
     from .models import ControlInstance
-    from .services import check_evidence_requirements
+    from .services import (
+        DOCUMENT_DEGRADED_TASK_PREFIX,
+        check_evidence_requirements,
+        degraded_only_by_documents,
+        restore_document_degraded,
+    )
     from apps.tasks.services import create_task
     from core.audit import log_action
     from django.contrib.auth import get_user_model
@@ -57,9 +69,19 @@ def check_expired_evidences():
         if req_check["satisfied"]:
             continue
 
-        # Distingui: evidenze scadute vs requisiti mai soddisfatti
+        # Distingui: evidenze scadute, solo documenti non più approvati,
+        # requisiti mai soddisfatti
         has_expired = bool(req_check["expired_evidences"])
-        if has_expired:
+        only_documents = degraded_only_by_documents(req_check)
+        if only_documents:
+            task_title = f"{DOCUMENT_DEGRADED_TASK_PREFIX}{instance.control.external_id}"
+            task_description = (
+                f"Il controllo {instance.control.external_id} era Compliant "
+                f"ma un documento collegato non è più approvato (es. è in revisione). "
+                f"Lo stato torna Compliant in automatico quando il documento viene "
+                f"approvato di nuovo: non serve rivalutare il controllo."
+            )
+        elif has_expired:
             task_title = f"Evidenza scaduta — {instance.control.external_id}"
             task_description = (
                 f"Il controllo {instance.control.external_id} era Compliant "
@@ -75,7 +97,8 @@ def check_expired_evidences():
             )
 
         instance.status = "parziale"
-        instance.save(update_fields=["status", "updated_at"])
+        instance.document_degraded_at = timezone.now() if only_documents else None
+        instance.save(update_fields=["status", "document_degraded_at", "updated_at"])
         degraded += 1
 
         if instance.owner:
@@ -102,6 +125,7 @@ def check_expired_evidences():
                     "degraded_to": "parziale",
                     "date": str(today),
                     "has_expired_evidences": has_expired,
+                    "only_documents": only_documents,
                 },
             )
 
@@ -116,7 +140,24 @@ def check_expired_evidences():
         except Exception as exc:
             logging.getLogger(__name__).warning("controls: notifica evidenza scaduta non inviata: %s", exc)
 
-    return f"check_expired_evidences: {degraded} controlli degradati"
+    # Ripristino: controlli scesi a Parziale per un documento non più approvato
+    # i cui requisiti sono tornati soddisfatti senza passare dall'approvazione
+    # in applicazione (es. collegato un altro documento approvato).
+    restored = 0
+    if system_user:
+        pending = ControlInstance.objects.filter(
+            status="parziale",
+            document_degraded_at__isnull=False,
+            deleted_at__isnull=True,
+        ).select_related("control", "plant").prefetch_related("evidences", "documents")
+        for instance in pending:
+            if restore_document_degraded(instance, system_user):
+                restored += 1
+
+    return (
+        f"check_expired_evidences: {degraded} controlli degradati, "
+        f"{restored} ripristinati"
+    )
 
 
 @shared_task(

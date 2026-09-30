@@ -213,6 +213,8 @@ Ogni elemento interattivo nella dashboard è cliccabile:
 | **N/A** | Il controllo non si applica al contesto del tuo plant. Richiede una giustificazione scritta di almeno 20 caratteri. La giustificazione è salvata e visibile ogni volta che si riapre il controllo. Nel VDA ISA TISAX viene riportata nella colonna "Note / Justification" e il maturity level è impostato a 0. Per TISAX L3 richiede la firma di due ruoli e scade dopo 12 mesi |
 
 > Un controllo con evidenza scaduta torna automaticamente a "Parziale" anche se lo hai impostato come Compliant. Mantieni le evidenze aggiornate.
+>
+> Lo stesso accade se un documento richiesto dal controllo non è più approvato (ad esempio è tornato in revisione per una nuova versione). In questo caso il degrado è temporaneo: quando il documento viene approvato di nuovo il controllo torna da solo a Compliant e il task aperto all'owner si chiude, senza bisogno di rivalutarlo. Il ripristino non avviene se nel frattempo il controllo è stato rivalutato a mano o se un'evidenza è scaduta.
 
 ### Come caricare un'evidenza
 

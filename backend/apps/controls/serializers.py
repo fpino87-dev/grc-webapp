@@ -69,6 +69,8 @@ class ControlInstanceSerializer(serializers.ModelSerializer):
             "soa_approved_by",
             "needs_revaluation",
             "needs_revaluation_since",
+            #   document_degraded_at → task notturno + ripristino automatico
+            "document_degraded_at",
             #   next_review_date → ricalcolata dal service a ogni valutazione
             #   (review_frequency_months resta scrivibile: è configurazione)
             "next_review_date",
