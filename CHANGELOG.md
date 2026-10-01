@@ -105,6 +105,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 - **Audit Prep — copertura dell'audit singolo**: un audit creato singolarmente, cioè non lanciato da un programma annuale a più step, copre sempre tutti i controlli e non mostra più la copertura "Campione 25%". Anche gli audit singoli già esistenti passano a copertura completa; le voci di checklist già generate restano invariate.
 
 ### Security
+- **Libreria HTTP del frontend (axios) aggiornata alla 1.20.0**: la versione precedente era soggetta a nuove vulnerabilità di livello alto pubblicate a fine settembre 2026 (blocco del browser con indirizzi costruiti ad arte, manipolazione delle richieste in uscita, redirect non controllati). Il controllo di sicurezza notturno delle dipendenze era bloccato da queste segnalazioni; dopo l'aggiornamento non risultano vulnerabilità nelle dipendenze di produzione del frontend. Nessun impatto funzionale.
 - **Audit Prep — relazione dell'audit**: titolo, descrizione e note dei finding sono ora codificati nella relazione HTML, così un testo inserito in un finding non può alterare la pagina generata.
 
 ### Fixed
