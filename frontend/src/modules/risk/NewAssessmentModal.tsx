@@ -5,6 +5,7 @@ import { biaApi } from "../../api/endpoints/bia";
 import { usersApi } from "../../api/endpoints/users";
 import { useAuthStore } from "../../store/auth";
 import { ProbImpactSelector } from "./ProbImpactSelector";
+import { MixedOwnerField } from "./MixedOwnerField";
 import { matrixColor } from "./riskUtils";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
@@ -159,6 +160,19 @@ export function NewAssessmentModal({ plants, onClose }: { plants: { id: string; 
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Responsabile del trattamento */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("risk.treatment_owner_label")}</label>
+            <MixedOwnerField
+              users={users}
+              userId={form.treatment_owner}
+              external={form.treatment_owner_external}
+              onChange={(uid, ext) => setForm(f => ({ ...f, treatment_owner: uid, treatment_owner_external: ext }))}
+              noneLabel={t("risk.no_treatment_owner")}
+            />
+            <p className="text-xs text-gray-500 mt-1">{t("risk.treatment_owner_help")}</p>
           </div>
 
           {/* Processo BIA collegato */}

@@ -419,6 +419,15 @@ Bağımlılık çift yönlüdür: varlık kendi kartında ona bağımlı olan s�
 
 Değerlendirme formunda önce doğal riski doldurursunuz, ardından sistem bağlantılı kontrollerin durumuna göre kalıntı riski otomatik olarak hesaplar. Kontroller henüz yeterli değilse kalıntı risk yüksek kalır.
 
+### Risk sahibi ve risk işleme sorumlusu
+
+Yeni senaryo formunda, düzenleme formunda ve risk → süreklilik sihirbazında iki ayrı sorumlu vardır:
+
+- **Risk sahibi**: riskten hesap veren ve kalıntı risk hakkında karar veren kişi (örneğin kabulü)
+- **Risk işleme sorumlusu**: işleme önlemlerini uygulayan kişi, genellikle BT/OT. Bir portal kullanıcısı seçin ya da **Diğer (portal kullanıcısı değil)** seçeneğini seçip ad, görev veya tedarikçi yazın (ör. bir MSP veya OT entegratörü)
+
+İkisi aynı kişi olabilir. Listede işleme sorumlusu risk sahibinin altında gösterilir; Excel risk kaydında ayrı bir sütunu vardır. Bir azaltım eylemi eklerken **Eylem sorumlusu** olarak önerilir ve her eylem için aynı iki seçenekle değiştirilebilir. Otomatik görevler önceden olduğu gibi rollere atanmaya devam eder.
+
 ### BT ve OT boyutları nasıl doldurulur
 
 **BT risk değerlendirmesi boyutları (4 eksen):**

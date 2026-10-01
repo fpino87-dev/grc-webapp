@@ -30,6 +30,30 @@ def mark_needs_revaluation_if_risk_changed(assessment: RiskAssessment, changed_f
     assessment.save(update_fields=["needs_revaluation", "needs_revaluation_since", "updated_at"])
 
 
+def normalize_mixed_owner(attrs: dict, user_field: str, text_field: str) -> dict:
+    """
+    Responsabile "misto" (utente del portale OPPURE testo libero): i due valori
+    sono alternativi. Se nel payload c'è un utente il testo viene svuotato; il
+    testo viene ripulito dagli spazi. Si toccano solo i campi presenti nel
+    payload, così un PATCH parziale non cancella l'altro valore.
+    """
+    if text_field in attrs:
+        attrs[text_field] = (attrs[text_field] or "").strip()
+    if attrs.get(user_field) is not None:
+        attrs[text_field] = ""
+    elif attrs.get(text_field):
+        # Testo inviato (anche da solo, su un record che aveva un utente): vince il testo.
+        attrs[user_field] = None
+    return attrs
+
+
+def mixed_owner_name(user, external: str) -> str | None:
+    """Nome visualizzato del responsabile misto (utente o testo libero)."""
+    if user is not None:
+        return f"{user.first_name} {user.last_name}".strip() or user.email
+    return external or None
+
+
 IT_WEIGHTS = {
     "esposizione": 0.30,
     "cve": 0.25,
@@ -572,7 +596,7 @@ def generate_risk_excel(plant_id=None, include_draft: bool = False) -> bytes:
     )
     qs = (
         RiskAssessment.objects
-        .select_related("plant", "owner", "risk_accepted_by", "critical_process")
+        .select_related("plant", "owner", "treatment_owner", "risk_accepted_by", "critical_process")
         .prefetch_related(plans_prefetch)
         .filter(deleted_at__isnull=True)
     )
@@ -593,7 +617,7 @@ def generate_risk_excel(plant_id=None, include_draft: bool = False) -> bytes:
 
     headers = [
         "Nome / Scenario", "Causa", "Conseguenza",
-        "Tipo (IT/OT)", "Categoria minaccia", "Owner",
+        "Tipo (IT/OT)", "Categoria minaccia", "Owner", "Responsabile trattamento",
         "Prob. inerente", "Impatto inerente", "Score inerente",
         "Probabilità residua", "Impatto residuo", "Score residuo", "Livello rischio",
         "ALE (€)",
@@ -636,7 +660,7 @@ def generate_risk_excel(plant_id=None, include_draft: bool = False) -> bytes:
 
         plans_text = "\n".join(
             f"• {p.action}"
-            + (f" [{_name(p.owner)}]" if p.owner else "")
+            + (f" [{mixed_owner_name(p.owner, p.owner_external)}]" if (p.owner or p.owner_external) else "")
             + f" — Scad: {p.due_date} — {'✓ Completato' if p.completed_at else 'In corso'}"
             for p in risk.mitigation_plans.all()
         )
@@ -649,6 +673,7 @@ def generate_risk_excel(plant_id=None, include_draft: bool = False) -> bytes:
             risk.assessment_type,
             risk.get_threat_category_display() if risk.threat_category else "",
             _name(risk.owner),
+            mixed_owner_name(risk.treatment_owner, risk.treatment_owner_external) or "",
             prob_labels.get(risk.inherent_probability, ""),
             impact_labels.get(risk.inherent_impact, ""),
             risk.inherent_score or "",
@@ -685,7 +710,7 @@ def generate_risk_excel(plant_id=None, include_draft: bool = False) -> bytes:
             ws.cell(row=row_idx, column=level_col).fill = PatternFill("solid", fgColor=color)
 
     col_widths = [
-        35, 40, 40, 10, 22, 20, 16, 16, 12, 16, 16, 12, 14, 14,
+        35, 40, 40, 10, 22, 20, 22, 16, 16, 12, 16, 16, 12, 14, 14,
         12, 14, 50, 18, 20, 18, 16, 40, 35, 35, 22, 22, 20, 12,
     ]
     for col_idx, width in enumerate(col_widths, 1):

@@ -419,6 +419,15 @@ La dépendance est bidirectionnelle : l'asset affichera dans sa fiche les proces
 
 Dans le formulaire d'évaluation, vous renseignez d'abord le risque inhérent, puis le système calcule automatiquement le résiduel en fonction du statut des contrôles associés. Si les contrôles ne sont pas encore suffisants, le résiduel reste élevé.
 
+### Propriétaire du risque et responsable du traitement
+
+Dans le nouveau scénario, dans la modification et dans l'assistant risque → continuité, il y a deux responsables distincts :
+
+- **Propriétaire du risque** : celui qui répond du risque et décide du risque résiduel (par exemple son acceptation)
+- **Responsable du traitement** : celui qui met en œuvre les mesures de traitement, généralement IT/OT. Choisissez un utilisateur du portail ou **Autre (non utilisateur du portail)** et saisissez un nom, une fonction ou un fournisseur (ex. un MSP ou l'intégrateur OT)
+
+Les deux peuvent être la même personne. Dans la liste, le responsable du traitement apparaît sous le propriétaire ; le registre des risques Excel a une colonne dédiée. En ajoutant une action d'atténuation, il est proposé comme **Responsable de l'action**, modifiable pour chaque action avec les mêmes deux possibilités. Les tâches automatiques restent attribuées aux rôles, comme avant.
+
 ### Comment renseigner les dimensions IT et OT
 
 **Dimensions du risk assessment IT (4 axes) :**

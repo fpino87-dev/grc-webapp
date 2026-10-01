@@ -419,6 +419,15 @@ La dipendenza è bidirezionale: l'asset mostrerà nella propria scheda i process
 
 Nel form di valutazione compili prima il rischio inerente, poi il sistema calcola automaticamente il residuo in base allo stato dei controlli collegati. Se i controlli non sono ancora sufficienti il residuo rimane alto.
 
+### Owner del rischio e responsabile del trattamento
+
+Nel nuovo scenario, nella modifica e nel wizard rischio → continuità ci sono due responsabili distinti:
+
+- **Owner rischio**: chi risponde del rischio e decide sul rischio residuo (ad esempio la sua accettazione)
+- **Responsabile del trattamento**: chi realizza le misure di trattamento, di solito IT/OT. Scegli un utente del portale oppure **Altro (non utente del portale)** e scrivi nome, funzione o fornitore (es. un MSP o l'integratore OT)
+
+Le due figure possono coincidere. Nell'elenco il responsabile del trattamento compare sotto l'owner; nel registro rischi Excel ha una colonna dedicata. Aggiungendo un'azione di mitigazione viene proposto come **Responsabile dell'azione**, che si può cambiare per singola azione con le stesse due possibilità. I task automatici restano assegnati ai ruoli, come oggi.
+
 ### Come compilare le dimensioni IT e OT
 
 **Dimensioni risk assessment IT (4 assi):**

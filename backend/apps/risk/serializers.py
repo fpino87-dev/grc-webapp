@@ -11,6 +11,7 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
     accepted_by_username = serializers.CharField(source="accepted_by.username", read_only=True)
     risk_level = serializers.SerializerMethodField(read_only=True)
     owner_name = serializers.SerializerMethodField(read_only=True)
+    treatment_owner_name = serializers.SerializerMethodField(read_only=True)
     critical_process_name = serializers.CharField(source="critical_process.name", read_only=True)
     ale_calcolato = serializers.SerializerMethodField(read_only=True)
     weighted_score = serializers.SerializerMethodField(read_only=True)
@@ -36,6 +37,7 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
             "assessed_by", "assessed_by_username",
             "assessed_at",
             "owner", "owner_name",
+            "treatment_owner", "treatment_owner_external", "treatment_owner_name",
             "critical_process", "critical_process_name",
             "score",
             "ale_annuo",
@@ -59,7 +61,7 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
             "assessed_by_username", "accepted_by_username",
             "risk_level", "inherent_risk_level", "risk_reduction_pct",
             "score", "inherent_score",
-            "owner_name", "critical_process_name",
+            "owner_name", "treatment_owner_name", "critical_process_name",
             "ale_calcolato", "weighted_score", "accepted_by_name",
             "mitigation_plans_count", "mitigation_plans_completed", "last_plan_completed_at",
         ]
@@ -83,6 +85,14 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
         if not obj.owner:
             return None
         return f"{obj.owner.first_name} {obj.owner.last_name}".strip() or obj.owner.email
+
+    def get_treatment_owner_name(self, obj):
+        from .services import mixed_owner_name
+        return mixed_owner_name(obj.treatment_owner, obj.treatment_owner_external)
+
+    def validate(self, attrs):
+        from .services import normalize_mixed_owner
+        return normalize_mixed_owner(attrs, "treatment_owner", "treatment_owner_external")
 
     def get_ale_calcolato(self, obj):
         from .services import calc_ale
@@ -128,6 +138,7 @@ class RiskDimensionSerializer(serializers.ModelSerializer):
 
 class RiskMitigationPlanSerializer(serializers.ModelSerializer):
     owner_username = serializers.CharField(source="owner.username", read_only=True)
+    owner_name = serializers.SerializerMethodField(read_only=True)
     bcp_plan = serializers.PrimaryKeyRelatedField(
         queryset=BcpPlan.objects.all(),
         required=False,
@@ -147,6 +158,8 @@ class RiskMitigationPlanSerializer(serializers.ModelSerializer):
             "action",
             "owner",
             "owner_username",
+            "owner_external",
+            "owner_name",
             "due_date",
             "bcp_plan",
             "bcp_plan_title",
@@ -158,7 +171,15 @@ class RiskMitigationPlanSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "owner_username", "bcp_plan_title", "bcp_plan_status", "bcp_plan_last_test_date", "bcp_plan_next_test_date"]
+        read_only_fields = ["id", "created_at", "updated_at", "owner_username", "owner_name", "bcp_plan_title", "bcp_plan_status", "bcp_plan_last_test_date", "bcp_plan_next_test_date"]
+
+    def get_owner_name(self, obj):
+        from .services import mixed_owner_name
+        return mixed_owner_name(obj.owner, obj.owner_external)
+
+    def validate(self, attrs):
+        from .services import normalize_mixed_owner
+        return normalize_mixed_owner(attrs, "owner", "owner_external")
 
     def get_bcp_plan_title(self, obj):
         if not obj.bcp_plan:

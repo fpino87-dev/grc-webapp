@@ -4,6 +4,7 @@ import { riskApi, type RiskAssessment, THREAT_CATEGORIES, NIS2_ART21_CHOICES, NI
 import { biaApi } from "../../api/endpoints/bia";
 import { usersApi } from "../../api/endpoints/users";
 import { ProbImpactSelector } from "./ProbImpactSelector";
+import { MixedOwnerField } from "./MixedOwnerField";
 import { useTranslation } from "react-i18next";
 
 export function EditAssessmentModal({
@@ -22,6 +23,8 @@ export function EditAssessmentModal({
     threat_category: assessment.threat_category,
     assessment_type: assessment.assessment_type,
     owner: assessment.owner,
+    treatment_owner: assessment.treatment_owner,
+    treatment_owner_external: assessment.treatment_owner_external,
     critical_process: assessment.critical_process,
     treatment: assessment.treatment,
     plan_due_date: assessment.plan_due_date,
@@ -58,6 +61,8 @@ export function EditAssessmentModal({
         threat_category: form.threat_category,
         assessment_type: form.assessment_type,
         owner: form.owner ?? null,
+        treatment_owner: form.treatment_owner ?? null,
+        treatment_owner_external: (form.treatment_owner_external ?? "").trim(),
         critical_process: form.critical_process ?? null,
         treatment: form.treatment ?? "",
         plan_due_date: form.plan_due_date ?? null,
@@ -193,6 +198,18 @@ export function EditAssessmentModal({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("risk.treatment_owner_label")}</label>
+            <MixedOwnerField
+              users={users}
+              userId={form.treatment_owner}
+              external={form.treatment_owner_external}
+              onChange={(uid, ext) => setForm(f => ({ ...f, treatment_owner: uid, treatment_owner_external: ext }))}
+              noneLabel={t("risk.no_treatment_owner")}
+            />
+            <p className="text-xs text-gray-500 mt-1">{t("risk.treatment_owner_help")}</p>
           </div>
 
           <div>

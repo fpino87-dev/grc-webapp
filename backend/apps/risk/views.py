@@ -19,7 +19,8 @@ from .services import delete_risk_assessment
 
 class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     queryset = RiskAssessment.objects.select_related(
-        "plant", "asset", "assessed_by", "accepted_by", "owner", "critical_process"
+        "plant", "asset", "assessed_by", "accepted_by", "owner", "treatment_owner",
+        "critical_process"
     ).prefetch_related("mitigation_plans")
     serializer_class = RiskAssessmentSerializer
     permission_classes = [RiskPermission]

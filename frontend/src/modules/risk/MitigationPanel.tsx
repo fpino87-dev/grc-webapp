@@ -6,8 +6,20 @@ import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 import { usePlantToday } from "../../utils/dates";
+import { usersApi } from "../../api/endpoints/users";
+import { MixedOwnerField } from "./MixedOwnerField";
 
-export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
+type OwnerDefault = { userId: string | null; external: string };
+
+export function MitigationPanel({
+  assessmentId,
+  defaultOwner,
+}: {
+  assessmentId: string;
+  // Responsabile del trattamento dello scenario: proposto come responsabile di
+  // ogni nuova azione, modificabile per singola azione.
+  defaultOwner?: OwnerDefault;
+}) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -27,6 +39,20 @@ export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
   });
 
   const todayStr = usePlantToday();
+
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => usersApi.list(),
+    retry: false,
+  });
+
+  function openCreateForm() {
+    setForm(f => (showForm ? f : {
+      owner: defaultOwner?.userId ?? null,
+      owner_external: defaultOwner?.external ?? "",
+    }));
+    setShowForm(s => !s);
+  }
 
   // Preferiamo i BCP "coerenti" trovati dal contesto (cioè legati al processo BIA del risk).
   // Se sono vuoti (es. risk senza critical_process collegato o BCP non legato al processo),
@@ -88,7 +114,7 @@ export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
     <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-sm font-semibold text-gray-700">{t("risk.mitigation_progress", { completed: plans.filter(p => p.completed_at != null).length, total: plans.length })}</h4>
-        <button onClick={() => setShowForm(s => !s)} className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700">
+        <button onClick={openCreateForm} className="text-xs px-2 py-1 bg-primary-600 text-white rounded hover:bg-primary-700">
           + {t("risk.add_plan")}
         </button>
       </div>
@@ -101,6 +127,17 @@ export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
             onChange={e => setForm(p => ({ ...p, action: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm" rows={2}
           />
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t("risk.plan_owner_label")}</label>
+            <MixedOwnerField
+              users={users}
+              userId={form.owner}
+              external={form.owner_external}
+              onChange={(uid, ext) => setForm(p => ({ ...p, owner: uid, owner_external: ext }))}
+              noneLabel={t("risk.no_plan_owner")}
+              small
+            />
+          </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">{t("risk.bcp_link_label")}</label>
             <select
@@ -149,6 +186,18 @@ export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
             onChange={e => setEditForm(p => ({ ...p, action: e.target.value }))}
             className="w-full border rounded px-2 py-1.5 text-sm" rows={2}
           />
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">{t("risk.plan_owner_label")}</label>
+            <MixedOwnerField
+              key={editPlan.id}
+              users={users}
+              userId={editForm.owner}
+              external={editForm.owner_external}
+              onChange={(uid, ext) => setEditForm(p => ({ ...p, owner: uid, owner_external: ext }))}
+              noneLabel={t("risk.no_plan_owner")}
+              small
+            />
+          </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">{t("risk.bcp_link_label")}</label>
             <select
@@ -209,7 +258,10 @@ export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
             return (
             <div key={plan.id} className="flex items-center gap-3 bg-white rounded border border-gray-200 px-3 py-2 text-sm">
               <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
-              <span className="flex-1 text-gray-700">{plan.action}</span>
+              <span className="flex-1 text-gray-700">
+                {plan.action}
+                {plan.owner_name && <span className="block text-xs text-gray-400">👤 {plan.owner_name}</span>}
+              </span>
               <span className="text-xs text-gray-400 shrink-0">
                 <div className="space-y-1">
                   <div>
@@ -228,6 +280,8 @@ export function MitigationPanel({ assessmentId }: { assessmentId: string }) {
                     setEditPlan(plan);
                     setEditForm({
                       action: plan.action,
+                      owner: plan.owner,
+                      owner_external: plan.owner_external ?? "",
                       due_date: plan.due_date,
                       bcp_plan: plan.bcp_plan ?? null,
                     });

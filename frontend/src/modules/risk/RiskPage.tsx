@@ -239,7 +239,14 @@ export function RiskPage() {
                     <td className="px-4 py-3 text-gray-600 text-xs">
                       {(() => { const cat = THREAT_CATEGORIES.find(c => c.value === a.threat_category); return cat ? t(cat.label) : "—"; })()}
                     </td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{a.owner_name ?? <span className="text-gray-300">—</span>}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">
+                      <div>{a.owner_name ?? <span className="text-gray-300">—</span>}</div>
+                      {a.treatment_owner_name && (
+                        <div className="text-gray-400 truncate max-w-[10rem]" title={`${t("risk.treatment_owner_label")}: ${a.treatment_owner_name}`}>
+                          {t("risk.treatment_owner_short")}: {a.treatment_owner_name}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-gray-600">
                       <div className="space-y-1">
                         <div>
@@ -372,7 +379,10 @@ export function RiskPage() {
                         <RiskInherentResidualBadges assessment={a} />
                         <SuggestResidualPanel assessment={a} />
                         <FormalAcceptancePanel assessment={a} />
-                        <MitigationPanel assessmentId={a.id} />
+                        <MitigationPanel
+                          assessmentId={a.id}
+                          defaultOwner={{ userId: a.treatment_owner, external: a.treatment_owner_external }}
+                        />
                       </td>
                     </tr>
                   )}

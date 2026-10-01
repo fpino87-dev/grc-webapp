@@ -6,6 +6,7 @@ import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { riskApi, type RiskAssessment } from "../../api/endpoints/risk";
 import { bcpApi } from "../../api/endpoints/bcp";
 import { usersApi, type GrcUser } from "../../api/endpoints/users";
+import { MixedOwnerField } from "./MixedOwnerField";
 import { useAuthStore } from "../../store/auth";
 
 type Step = 1 | 2 | 3 | 4;
@@ -549,6 +550,18 @@ export function RiskContinuityWizard({ onClose }: { onClose: () => void }) {
                       ))}
                     </select>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t("risk.treatment_owner_label")}</label>
+                  <MixedOwnerField
+                    users={users as GrcUser[] | undefined}
+                    userId={riskForm.treatment_owner}
+                    external={riskForm.treatment_owner_external}
+                    onChange={(uid, ext) => setRiskForm(f => ({ ...f, treatment_owner: uid, treatment_owner_external: ext }))}
+                    noneLabel={t("risk.no_treatment_owner")}
+                    small
+                  />
                 </div>
 
                 <div className="border border-orange-200 rounded-lg p-3 bg-orange-50/30">

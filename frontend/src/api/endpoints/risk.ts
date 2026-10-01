@@ -6,6 +6,8 @@ export interface RiskMitigationPlan {
   assessment: string;
   action: string;
   owner: string | null;
+  owner_external?: string;
+  owner_name?: string | null;
   due_date: string;
   completed_at: string | null;
   bcp_plan?: string | null;
@@ -59,6 +61,9 @@ export interface RiskAssessment {
   weighted_score: number | null;
   owner: string | null;
   owner_name: string | null;
+  treatment_owner: string | null;
+  treatment_owner_external: string;
+  treatment_owner_name: string | null;
   critical_process: string | null;
   critical_process_name: string | null;
   risk_accepted: boolean;

@@ -419,6 +419,15 @@ The dependency is bidirectional: the asset will show in its own record the proce
 
 In the assessment form you first fill in the inherent risk, then the system automatically calculates the residual based on the status of the linked controls. If the controls are not yet sufficient, the residual remains high.
 
+### Risk owner and treatment owner
+
+In the new scenario form, in the edit form and in the risk → continuity wizard there are two distinct owners:
+
+- **Risk owner**: who is accountable for the risk and decides on the residual risk (for example its acceptance)
+- **Treatment owner**: who implements the treatment measures, usually IT/OT. Choose a portal user or **Other (not a portal user)** and type a name, function or supplier (e.g. an MSP or the OT integrator)
+
+The two can be the same person. In the list the treatment owner is shown below the risk owner; the Excel risk register has a dedicated column. When you add a mitigation action it is proposed as the **Action owner**, which can be changed for each action with the same two options. Automatic tasks are still assigned to roles, as before.
+
 ### How to fill in the IT and OT dimensions
 
 **IT risk assessment dimensions (4 axes):**

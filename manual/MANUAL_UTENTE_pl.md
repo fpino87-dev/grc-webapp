@@ -419,6 +419,15 @@ Zależność jest dwukierunkowa: aktywo pokaże na swojej karcie procesy, które
 
 W formularzu oceny najpierw wypełniasz ryzyko wrodzone, a następnie system automatycznie oblicza ryzyko rezydualne na podstawie statusu powiązanych kontroli. Jeśli kontrole nie są jeszcze wystarczające, ryzyko rezydualne pozostaje wysokie.
 
+### Właściciel ryzyka i odpowiedzialny za postępowanie z ryzykiem
+
+W nowym scenariuszu, w edycji i w kreatorze ryzyko → ciągłość są dwie odrębne osoby odpowiedzialne:
+
+- **Właściciel ryzyka**: odpowiada za ryzyko i decyduje o ryzyku rezydualnym (np. o jego akceptacji)
+- **Odpowiedzialny za postępowanie z ryzykiem**: wdraża środki postępowania, zwykle IT/OT. Wybierz użytkownika portalu lub **Inny (nie użytkownik portalu)** i wpisz imię i nazwisko, funkcję lub dostawcę (np. MSP lub integratora OT)
+
+Może to być ta sama osoba. Na liście odpowiedzialny za postępowanie jest wyświetlany pod właścicielem; rejestr ryzyk Excel ma osobną kolumnę. Przy dodawaniu działania ograniczającego jest proponowany jako **Odpowiedzialny za działanie**, co można zmienić dla każdego działania z tymi samymi dwiema opcjami. Zadania automatyczne nadal są przypisywane do ról, jak dotąd.
+
 ### Jak wypełnić wymiary IT i OT
 
 **Wymiary oceny ryzyka IT (4 osie):**

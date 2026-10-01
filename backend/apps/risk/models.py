@@ -137,6 +137,23 @@ class RiskAssessment(BaseModel):
         related_name="owned_risks",
         help_text="Responsabile del rischio (diverso da chi lo ha valutato)",
     )
+    # Responsabile del trattamento: chi realizza le misure (spesso IT/OT), distinto
+    # dal risk owner che ne risponde. Campo misto: utente del portale OPPURE testo
+    # libero (es. fornitore esterno/MSP); se c'è l'utente il testo resta vuoto.
+    treatment_owner = models.ForeignKey(
+        "auth.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="treated_risks",
+        help_text="Responsabile del trattamento (utente del portale)",
+    )
+    treatment_owner_external = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        help_text="Responsabile del trattamento non utente del portale (testo libero)",
+    )
     assessed_at = models.DateTimeField(null=True, blank=True)
     score = models.IntegerField(null=True, blank=True, db_index=True)
     ale_annuo = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
@@ -299,6 +316,8 @@ class RiskMitigationPlan(BaseModel):
         blank=True,
         on_delete=models.SET_NULL,
     )
+    # Alternativa a owner per chi non è utente del portale (testo libero).
+    owner_external = models.CharField(max_length=200, blank=True, default="")
     due_date = models.DateField()
     # Collega il piano di mitigazione a un BCP: la mitigazione vale finché il BCP
     # resta "valid" (next_test_date >= oggi) e quindi può perdere valore
