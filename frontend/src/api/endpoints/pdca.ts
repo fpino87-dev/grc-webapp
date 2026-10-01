@@ -85,10 +85,11 @@ export const pdcaApi = {
       const fd = new FormData();
       fd.append("motivo", motivo);
       fd.append("file", proof.file);
-      return apiClient.post(`/pdca/cycles/${id}/archivia/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+      return apiClient.post(`/pdca/cycles/${id}/archivia/`, fd, { headers: { "Content-Type": "multipart/form-data" } })
+        .then((r) => r.data);
     }
     return apiClient.post(`/pdca/cycles/${id}/archivia/`,
-      { motivo, ...(proof?.evidence_id ? { evidence_id: proof.evidence_id } : {}) });
+      { motivo, ...(proof?.evidence_id ? { evidence_id: proof.evidence_id } : {}) }).then((r) => r.data);
   },
   /** `reason` obbligatorio se il finding ha già un PDCA (viene sostituito). */
   linkFinding: (cycleId: string, findingId: string, reason?: string) =>
