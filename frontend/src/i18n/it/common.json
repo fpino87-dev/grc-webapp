@@ -314,29 +314,6 @@
         "acceptable": "Accettabile dal Risk Owner; si possono comunque proporre misure di miglioramento."
       }
     },
-    "risk_module": {
-      "title": "Risk Assessment IT/OT — M06",
-      "description": "Inerente = probabilità×impatto SENZA controlli; Residuo = probabilità×impatto DOPO i controlli e BCP; Weighted = score residuo pesato sulla criticità BIA per dare priorità ai rischi con impatto maggiore sul business. Le policy di Risk Appetite definiscono le soglie (score max accettabile, numero massimo di rischi rossi, score non accettabile) che il management ha approvato.",
-      "steps": {
-        "1": "Crea un nuovo assessment collegando asset e processo BIA (se disponibile)",
-        "2": "Compila il rischio INERENTE inserendo probabilità e impatto prima dei controlli",
-        "3": "Compila il rischio RESIDUO inserendo probabilità e impatto dopo i controlli e le misure BCP",
-        "4": "Completa le dimensioni IT/OT e premi 'Completa assessment' per calcolare score, weighted e ALE",
-        "5": "Confronta score e weighted con le soglie di Risk Appetite per decidere mitigazione, trasferimento o accettazione",
-        "6": "Accetta formalmente i rischi residui (quando consentito dalla policy) indicando nota e scadenza revisione"
-      },
-      "connections": {
-        "assets": "Asset oggetto della valutazione",
-        "bia": "Weighted e ALE usano criticità e costi BIA",
-        "governance": "Risk Appetite definisce le soglie approvate dal management",
-        "pdca": "Rischi sopra soglia possono aprire PDCA automatici",
-        "tasks": "Task di mitigazione generati per i rischi oltre i limiti di appetito"
-      },
-      "config_needed": {
-        "1": "Configura le soglie in Governance → Risk Appetite",
-        "2": "Collega i processi BIA per il calcolo automatico di ALE e weighted"
-      }
-    },
     "connections": {
       "chain_title": "Catena logica dei moduli",
       "realtime_alerts_title": "Alert in tempo reale",
@@ -2670,32 +2647,6 @@
     "rto_warning": "RTO ⚠",
     "rto_critical": "RTO ✗",
     "new_process_title": "Nuovo processo critico",
-    "treatments": {
-      "manage": "Trattamenti",
-      "title": "Trattamenti del rischio — {{process}}",
-      "subtitle": "Opzioni di trattamento con costo e % di riduzione ALE. Alimentano il calcolo del ROSI nel Reporting.",
-      "help_title": "Come funziona",
-      "help_body": "Un trattamento è un controllo che riduce l'esposizione del processo. La «Riduzione ALE %» è la quota di perdita attesa annua che il controllo elimina. Costo una tantum e costo annuo alimentano il ROSI nel Reporting (ALE evitata − costo annualizzato, CapEx ammortizzato su 3 anni).",
-      "help_example": "Es.: processo con ALE 24.000 €/anno, trattamento −50% → evita 12.000 €/anno; se costa 12k una tantum + 2k/anno, ROSI ≈ 100%, rientro ~14 mesi.",
-      "loading": "Caricamento…",
-      "empty": "Nessun trattamento per questo processo.",
-      "col_title": "Trattamento",
-      "col_reduction": "Riduzione ALE",
-      "col_capex": "Costo una tantum (€)",
-      "col_opex": "Costo annuo (€)",
-      "add": "Aggiungi trattamento",
-      "edit": "Modifica",
-      "delete": "Elimina",
-      "delete_confirm": "Eliminare questo trattamento?",
-      "field_title": "Titolo",
-      "field_reduction": "Riduzione ALE (%)",
-      "field_capex": "Costo implementazione una tantum (€)",
-      "field_opex": "Costo annuo ricorrente (€)",
-      "save": "Salva",
-      "cancel": "Annulla",
-      "close": "Chiudi",
-      "save_error": "Errore nel salvataggio"
-    },
     "site_label": "Sito *",
     "process_name_label": "Nome processo *",
     "criticality_label": "Criticità (1-5)",
@@ -2716,21 +2667,20 @@
     "rpo_placeholder": "es. 4",
     "help": {
       "title": "Business Impact Analysis — M05",
-      "description": "Valuta l'impatto economico e operativo del fermo di ogni processo critico. Definisce i target RTO/RPO/MTPD che guidano il BCP e pesano il calcolo dell'ALE nel Risk Assessment.",
+      "description": "Valuta l'impatto economico e operativo del fermo di ogni processo critico. Definisce i target RTO/RPO/MTPD che guidano il BCP; da ogni processo si può aprire un rischio nel Risk Assessment.",
       "steps": {
         "1": "Crea il processo critico con owner responsabile",
         "2": "Inserisci costo orario fermo (€) e fatturato esposto annuo",
         "3": "Definisci MTPD (ore massime tollerabili), RTO e RPO target",
         "4": "Valida il processo (compliance officer)",
         "5": "Approva (management) — da questo momento guida il Risk Assessment",
-        "6": "Il Risk Assessment userà downtime_cost per calcolare l'ALE automaticamente",
-        "7": "Definisci i trattamenti (pulsante «Trattamenti») con costo e % di riduzione ALE → alimentano il ROSI nel Reporting"
+        "6": "Con «Crea rischio» apri dal processo un rischio già collegato, da valutare nel Risk Assessment"
       },
       "connections": {
         "asset": "Asset collegato al processo",
-        "risk": "ALE = downtime_cost × ore × probabilità",
+        "risk": "«Crea rischio» apre un rischio collegato al processo, valutato con i criteri della procedura",
         "bcp": "RTO/RPO della BIA validano e vincolano il piano BCP",
-        "reporting": "ROSI = ALE evitata − costo annualizzato del trattamento"
+        "reporting": "Processi critici senza piano BCP approvato o con test scaduto"
       },
       "config_needed": {
         "1": "Creare prima i Plant (M01) e gli Asset (M04)"
@@ -3450,6 +3400,7 @@
       "probability_method": "Metodo",
       "method_frequency": "Frequenza storica",
       "method_fer": "Fattore di esposizione (FER)",
+      "method_hint": "Frequenza storica se ci sono dati affidabili (eventi interni, di settore o di enti riconosciuti); altrimenti FER: si stima dall'efficacia delle misure in essere rispetto a capacità e motivazione di chi potrebbe causare l'evento.",
       "probability_rationale": "Motivazione della probabilità",
       "impact_dimensions": "Impatto per dimensione",
       "not_relevant": "non pertinente",

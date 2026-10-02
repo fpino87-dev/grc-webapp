@@ -314,29 +314,6 @@
         "acceptable": "Acceptable by the Risk Owner; improvement measures may still be proposed."
       }
     },
-    "risk_module": {
-      "title": "Risk Assessment IT/OT — M06",
-      "description": "Inherent = probability×impact BEFORE controls; Residual = probability×impact AFTER controls and BCP; Weighted = residual score weighted by BIA criticality to prioritise risks with the highest business impact. Risk Appetite policies define the thresholds (max acceptable score, maximum number of red risks, unacceptable score) formally approved by management.",
-      "steps": {
-        "1": "Create a new assessment linking the asset and BIA process (where available)",
-        "2": "Fill in the INHERENT risk by entering probability and impact before controls",
-        "3": "Fill in the RESIDUAL risk by entering probability and impact after controls and BCP measures",
-        "4": "Complete IT/OT dimensions and click 'Complete assessment' to calculate score, weighted score and ALE",
-        "5": "Compare score and weighted score with Risk Appetite thresholds to decide mitigation, transfer or acceptance",
-        "6": "Formally accept residual risks (when allowed by policy), providing a note and review due date"
-      },
-      "connections": {
-        "assets": "Assets being assessed",
-        "bia": "Weighted score and ALE use BIA criticality and cost data",
-        "governance": "Risk Appetite defines the thresholds approved by management",
-        "pdca": "Risks above threshold can open automatic PDCA cycles",
-        "tasks": "Mitigation tasks generated for risks beyond appetite limits"
-      },
-      "config_needed": {
-        "1": "Configure thresholds in Governance → Risk Appetite",
-        "2": "Link BIA processes for automatic ALE and weighted score calculation"
-      }
-    },
     "connections": {
       "chain_title": "Module logic chain",
       "realtime_alerts_title": "Real-time alerts",
@@ -2670,32 +2647,6 @@
     "rto_warning": "RTO ⚠",
     "rto_critical": "RTO ✗",
     "new_process_title": "New critical process",
-    "treatments": {
-      "manage": "Treatments",
-      "title": "Risk treatments — {{process}}",
-      "subtitle": "Treatment options with cost and % of ALE reduction. They feed the ROSI calculation in Reporting.",
-      "help_title": "How it works",
-      "help_body": "A treatment is a control that reduces the process exposure. \"ALE reduction %\" is the share of annual expected loss the control removes. One-off and annual costs feed the ROSI in Reporting (ALE avoided − annualized cost, CapEx amortized over 3 years).",
-      "help_example": "E.g.: a process with ALE €24,000/yr, treatment −50% → avoids €12,000/yr; if it costs 12k one-off + 2k/yr, ROSI ≈ 100%, payback ~14 months.",
-      "loading": "Loading…",
-      "empty": "No treatments for this process.",
-      "col_title": "Treatment",
-      "col_reduction": "ALE reduction",
-      "col_capex": "One-off cost (€)",
-      "col_opex": "Annual cost (€)",
-      "add": "Add treatment",
-      "edit": "Edit",
-      "delete": "Delete",
-      "delete_confirm": "Delete this treatment?",
-      "field_title": "Title",
-      "field_reduction": "ALE reduction (%)",
-      "field_capex": "One-off implementation cost (€)",
-      "field_opex": "Recurring annual cost (€)",
-      "save": "Save",
-      "cancel": "Cancel",
-      "close": "Close",
-      "save_error": "Error while saving"
-    },
     "site_label": "Site *",
     "process_name_label": "Process name *",
     "criticality_label": "Criticality (1-5)",
@@ -2716,21 +2667,20 @@
     "rpo_placeholder": "e.g. 4",
     "help": {
       "title": "Business Impact Analysis — M05",
-      "description": "Assesses the economic and operational impact of each critical process being down. Defines the RTO/RPO/MTPD targets that drive the BCP and weight the ALE calculation in the Risk Assessment.",
+      "description": "Assesses the economic and operational impact of downtime for each critical process. Sets the RTO/RPO/MTPD targets that drive the BCP; from each process you can open a risk in Risk Assessment.",
       "steps": {
         "1": "Create the critical process with a responsible owner",
         "2": "Enter the hourly downtime cost (€) and the annual revenue at risk",
         "3": "Define MTPD (maximum tolerable hours), RTO and RPO targets",
         "4": "Validate the process (compliance officer)",
         "5": "Approve (management) — from now on it drives the Risk Assessment",
-        "6": "The Risk Assessment will use downtime_cost to compute the ALE automatically",
-        "7": "Define treatments («Treatments» button) with cost and % ALE reduction → they feed the ROSI in Reporting"
+        "6": "With «Create risk» open a risk already linked to the process, to be assessed in Risk Assessment"
       },
       "connections": {
         "asset": "Asset linked to the process",
-        "risk": "ALE = downtime_cost × hours × probability",
+        "risk": "«Create risk» opens a risk linked to the process, assessed with the procedure's criteria",
         "bcp": "BIA RTO/RPO validate and constrain the BCP plan",
-        "reporting": "ROSI = avoided ALE − annualised treatment cost"
+        "reporting": "Critical processes without an approved BCP plan or with an expired test"
       },
       "config_needed": {
         "1": "Create the Plants (M01) and Assets (M04) first"
@@ -3450,6 +3400,7 @@
       "probability_method": "Method",
       "method_frequency": "Historical frequency",
       "method_fer": "Exposure factor (FER)",
+      "method_hint": "Historical frequency when reliable data exist (internal, sector or recognised-body events); otherwise FER: estimated from how effective the existing measures are against the capability and motivation of whoever could cause the event.",
       "probability_rationale": "Probability rationale",
       "impact_dimensions": "Impact by dimension",
       "not_relevant": "not relevant",

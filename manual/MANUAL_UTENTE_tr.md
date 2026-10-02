@@ -440,6 +440,19 @@ Yan kartı açmak için bir riske tıklayın:
 
 **Değerlendirmeyi tamamla**, her şeyin doldurulduğunu kontrol eder (gerekçeler, Risk Sahibi, işlem, beklenen risk). High veya Critical bir risk, işlem planı görevini ve bildirimi oluşturur.
 
+### Olasılık: geçmiş sıklık veya FER
+
+Her risk için olasılığın nasıl tahmin edileceği seçilir:
+
+- **Geçmiş sıklık**: olayın kaç kez gerçekleştiğine dair güvenilir veriler olduğunda (iç olaylar, sektör istatistikleri, tanınmış kuruluşların verileri). Örnek: 5 = yılda birden fazla, 1 = 10 yılda birden az
+- **FER — Risk Maruziyet Faktörü**: geçmiş seriler olmadığında veya güvenilir olmadığında. Mevcut koruma önlemlerinin, olaya neden olabilecek kişinin (veya doğal olayın) yeteneği ve motivasyonuna karşı etkinliği değerlendirilerek riskin ne kadar açık olduğu tahmin edilir. Örnek: 5 = korunmayan zafiyetler veya etkisiz kontroller, 1 = birden çok doğrulanmış kontrol, inandırıcı bir etken yok
+
+Kart her seviyenin yanında seçilen yöntemin kriterlerini gösterir. Olasılık gerekçesi her iki durumda da zorunludur.
+
+### Sınıf düzeltmesi
+
+Sınıf matristen okunur. Değerlendirme iki hücre arasındaki sınıra düşerse, değerlendiren kişi gerekçe yazarak sınıfı yukarı veya aşağı **yalnızca bir seviye** kaydırabilir: düzeltme kartta ve kayıtta görünür kalır. Sınır durumlar içindir, değerlendirmenin sonucunu değiştirmek için değil.
+
 ### İşlem planı ve beklenen risk
 
 Plan önlemlerinin bir sorumlusu, son tarihi ve beklenen etkisi vardır. Tamamlanan bir önlem **doğrulanmalıdır** (test, kanıt, denetim). Ancak tüm önlemler tamamlanıp doğrulandığında **Beklenen riski uygula** görünür: yeni bir değerlendirme dışında sınıfı düşürmenin tek yolu budur. Geciken önlemler Risk Yöneticisini uyarır, ardından organizasyon düzeyine iletilir.

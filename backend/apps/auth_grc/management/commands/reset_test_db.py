@@ -19,8 +19,6 @@ TABLES_TO_TRUNCATE = [
     "bcp_bcptest",
     "bcp_bcpplan",
     # Training (M15)
-    "training_phishingsimulation",
-    "training_trainingenrollment",
     "training_trainingcourse",
     # Suppliers (M14)
     "suppliers_supplierassessment",
@@ -47,13 +45,14 @@ TABLES_TO_TRUNCATE = [
     "documents_documentversion",
     "documents_document",
     # Risk (M06)
+    # (catalogo minacce, classi di informazioni e policy di governo restano: configurazione)
+    "risk_riskacceptance",
+    "risk_risklocalimpactreport",
+    "risk_riskexistingmeasure",
     "risk_riskmitigationplan",
-    "risk_riskdimension",
     "risk_riskassessment",
-    "risk_riskappetitepolicy",
+    "risk_riskassessmentcycle",
     # BIA (M05)
-    "bia_treatmentoption",
-    "bia_riskdecision",
     "bia_criticalprocess",
     # Assets (M04)
     "assets_assetdependency",
@@ -131,7 +130,13 @@ class Command(BaseCommand):
                 # Disabilita temporaneamente i trigger per truncate
                 cursor.execute("SET session_replication_role = 'replica';")
 
+                # Una TRUNCATE fallita interrompe l'intera transazione PostgreSQL:
+                # le tabelle non (più) presenti si saltano invece di tentarle.
+                existing = set(connection.introspection.table_names(cursor))
                 for table in TABLES_TO_TRUNCATE:
+                    if table not in existing:
+                        self.stdout.write(self.style.WARNING(f"  ⚠ {table}: tabella assente, saltata"))
+                        continue
                     try:
                         cursor.execute(f'TRUNCATE TABLE "{table}" CASCADE;')
                         self.stdout.write(f"  ✓ {table}")

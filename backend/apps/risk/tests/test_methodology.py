@@ -381,6 +381,20 @@ def test_asset_types_present(plant):
 
 
 @pytest.mark.django_db
+def test_asset_types_suppliers_org_wide(plant):
+    """Un fornitore attivo senza sito vale per tutta l'organizzazione."""
+    from apps.suppliers.models import Supplier
+
+    other = _plant("ALTRO-1")
+    Supplier.objects.create(name="Di un altro sito").plants.add(other)
+    assert "FORNITORI" not in services.asset_types_present(plant)
+    Supplier.objects.create(name="Terminato", status="terminato")
+    assert "FORNITORI" not in services.asset_types_present(plant)
+    Supplier.objects.create(name="Di organizzazione")
+    assert "FORNITORI" in services.asset_types_present(plant)
+
+
+@pytest.mark.django_db
 def test_plant_is_eu():
     assert _plant("EU-1", country="PL").is_eu is True
     assert _plant("TN-1", country="TN", nis2_scope="non_soggetto").is_eu is False

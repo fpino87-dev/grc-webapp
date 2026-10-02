@@ -6,8 +6,6 @@ from rest_framework.test import APIClient
 User = get_user_model()
 
 URL_PROCESSES = "/api/v1/bia/processes/"
-URL_TREATMENTS = "/api/v1/bia/treatment-options/"
-URL_DECISIONS = "/api/v1/bia/risk-decisions/"
 
 
 @pytest.fixture
@@ -43,18 +41,6 @@ def process(db, plant, user):
         name="Produzione assemblaggio",
         criticality=4,
         status="bozza",
-        created_by=user,
-    )
-
-
-@pytest.fixture
-def treatment(db, process, user):
-    from apps.bia.models import TreatmentOption
-    return TreatmentOption.objects.create(
-        process=process,
-        title="Hot standby",
-        cost_implementation=50000,
-        ale_reduction_pct=70,
         created_by=user,
     )
 
@@ -110,85 +96,6 @@ def test_delete_process(client, process):
 def test_filter_processes_by_plant(client, plant, process):
     resp = client.get(f"{URL_PROCESSES}?plant={plant.id}")
     assert resp.status_code == 200
-
-
-# ── Treatment options ─────────────────────────────────────────────────────────
-
-@pytest.mark.django_db
-def test_list_treatments(client):
-    resp = client.get(URL_TREATMENTS)
-    assert resp.status_code == 200
-
-
-@pytest.mark.django_db
-def test_filter_treatments_by_process(client, plant, process, user, treatment):
-    """Il filtro ?process=<id> isola i trattamenti di un processo (usato dalla UI BIA)."""
-    from apps.bia.models import CriticalProcess, TreatmentOption
-    other = CriticalProcess.objects.create(
-        plant=plant, name="Altro processo", criticality=2, status="bozza", created_by=user,
-    )
-    TreatmentOption.objects.create(
-        process=other, title="Backup offsite", cost_implementation=1000,
-        ale_reduction_pct=20, created_by=user,
-    )
-    resp = client.get(f"{URL_TREATMENTS}?process={process.id}")
-    assert resp.status_code == 200
-    ids = [str(r["id"]) for r in resp.data["results"]]
-    assert str(treatment.id) in ids
-    assert all(str(r["process"]) == str(process.id) for r in resp.data["results"])
-
-
-@pytest.mark.django_db
-def test_create_treatment(client, process):
-    payload = {
-        "process": str(process.id),
-        "title": "Warm standby",
-        "cost_implementation": 20000,
-        "ale_reduction_pct": 50,
-    }
-    resp = client.post(URL_TREATMENTS, payload, format="json")
-    assert resp.status_code == 201
-    assert resp.data["title"] == "Warm standby"
-
-
-@pytest.mark.django_db
-def test_retrieve_treatment(client, treatment):
-    resp = client.get(f"{URL_TREATMENTS}{treatment.id}/")
-    assert resp.status_code == 200
-    assert resp.data["title"] == "Hot standby"
-
-
-@pytest.mark.django_db
-def test_update_treatment(client, treatment):
-    resp = client.patch(f"{URL_TREATMENTS}{treatment.id}/", {"ale_reduction_pct": 80}, format="json")
-    assert resp.status_code == 200
-
-
-@pytest.mark.django_db
-def test_delete_treatment(client, treatment):
-    resp = client.delete(f"{URL_TREATMENTS}{treatment.id}/")
-    assert resp.status_code == 204
-
-
-# ── Risk decisions ────────────────────────────────────────────────────────────
-
-@pytest.mark.django_db
-def test_list_risk_decisions(client):
-    resp = client.get(URL_DECISIONS)
-    assert resp.status_code == 200
-
-
-@pytest.mark.django_db
-def test_create_risk_decision(client, process, user):
-    payload = {
-        "process": str(process.id),
-        "decision": "accettare",
-        "rationale": "Costo di mitigazione superiore al rischio residuo",
-        "decided_by": str(user.id),
-        "review_by": "2026-12-31",
-    }
-    resp = client.post(URL_DECISIONS, payload, format="json")
-    assert resp.status_code == 201
 
 
 # ── RBAC plant scoping (S1) ───────────────────────────────────────────────────

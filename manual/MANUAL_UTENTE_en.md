@@ -440,6 +440,19 @@ Click a risk to open the side card:
 
 **Complete the assessment** checks that everything is there (rationales, Risk Owner, treatment, expected risk). A High or Critical risk creates the treatment plan task and the notification.
 
+### Probability: historical frequency or FER
+
+For each risk you choose how to estimate the probability:
+
+- **Historical frequency**: when reliable data exist on how often the event has occurred (internal events, sector statistics, data from recognised bodies). Example: 5 = more than once a year, 1 = less than once every 10 years
+- **FER — Risk Exposure Factor**: when historical series are missing or unreliable. You estimate how exposed the risk is by assessing how effective the existing protection measures are against the capability and motivation of whoever could cause the event (a person or a natural event). Example: 5 = unprotected vulnerabilities or ineffective controls, 1 = multiple verified controls, no credible agent
+
+Next to each level the card shows the criteria of the chosen method. The probability rationale is mandatory in both cases.
+
+### Class correction
+
+The class is read from the matrix. If the assessment falls on the border between two cells, the assessor can move it by **one level only**, up or down, writing the rationale: the correction stays visible in the card and in the register. It is meant for borderline cases, not for changing the result of the assessment.
+
 ### Treatment plan and expected risk
 
 Plan measures have an owner, deadline and expected effect. When a measure is completed it must be **verified** (test, evidence, audit). Only when all measures are completed and verified does **Apply the expected risk** appear: besides a new assessment, it is the only way to lower the class. Overdue measures notify the Risk Manager and then escalate to organisation level.

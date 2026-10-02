@@ -105,8 +105,12 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
   };
   const impactCriteria = (d: ImpactDimension) => (level: number) =>
     d === "economic" ? economicCriteria(level) : t(`risk.scales.impact.${d}.${level}`);
-  const probabilityCriteria = (level: number) =>
-    `${t(`risk.scales.probability.${level}.frequency`)} — ${t(`risk.scales.probability.${level}.fer`)}`;
+  // Criteri del solo metodo scelto (procedura: frequenza storica, oppure FER senza serie storiche).
+  const probabilityCriteria = (level: number) => {
+    if (value.probability_method === "frequenza") return t(`risk.scales.probability.${level}.frequency`);
+    if (value.probability_method === "fer") return t(`risk.scales.probability.${level}.fer`);
+    return `${t(`risk.scales.probability.${level}.frequency`)} — ${t(`risk.scales.probability.${level}.fer`)}`;
+  };
 
   const textarea = (k: keyof EvaluationState, rows = 2, placeholder?: string) => (
     <textarea value={(value[k] as string) ?? ""} onChange={e => set(k, e.target.value as never)} rows={rows}
@@ -224,6 +228,7 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
               <option value="frequenza">{t("risk.drawer.method_frequency")}</option>
               <option value="fer">{t("risk.drawer.method_fer")}</option>
             </select>
+            <p className="text-[11px] text-gray-500 mt-1">{t("risk.drawer.method_hint")}</p>
           </Field>
         </div>
         <Field label={t("risk.drawer.probability_rationale")}>{textarea("probability_rationale")}</Field>

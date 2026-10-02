@@ -223,13 +223,11 @@ def delete_process(process: CriticalProcess, user, cascade: bool = False) -> Non
         has_risks = RiskAssessment.objects.filter(critical_process=process, deleted_at__isnull=True).exists()
         has_bcp_fk = process.bcp_plans.filter(deleted_at__isnull=True).exists()
         has_bcp_m2m = BcpPlan.objects.filter(deleted_at__isnull=True, critical_processes=process).exists()
-        has_treatments = process.treatment_options.filter(deleted_at__isnull=True).exists()
-        has_decisions = process.risk_decisions.filter(deleted_at__isnull=True).exists()
         has_assets = Asset.objects.filter(deleted_at__isnull=True, processes=process).exists()
 
-        if any([has_risks, has_bcp_fk, has_bcp_m2m, has_treatments, has_decisions, has_assets]):
+        if any([has_risks, has_bcp_fk, has_bcp_m2m, has_assets]):
             raise ValidationError(
-                "Impossibile eliminare il processo: esistono valutazioni rischio, BCP, opzioni di trattamento, decisioni o asset collegati."
+                "Impossibile eliminare il processo: esistono valutazioni rischio, BCP o asset collegati."
             )
 
         process.soft_delete()
@@ -266,26 +264,6 @@ def delete_process(process: CriticalProcess, user, cascade: bool = False) -> Non
             level="L2",
             entity=assessment,
             payload={"id": str(assessment.id), "name": assessment.name},
-        )
-
-    for decision in process.risk_decisions.all():
-        decision.soft_delete()
-        log_action(
-            user=user,
-            action_code="bia.risk_decision.deleted",
-            level="L2",
-            entity=decision,
-            payload={"id": str(decision.id)},
-        )
-
-    for option in process.treatment_options.all():
-        option.soft_delete()
-        log_action(
-            user=user,
-            action_code="bia.treatment_option.deleted",
-            level="L2",
-            entity=option,
-            payload={"id": str(option.id), "title": option.title},
         )
 
     bcp_plans = (

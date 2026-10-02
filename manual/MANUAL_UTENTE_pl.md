@@ -440,6 +440,19 @@ Kliknij ryzyko, aby otworzyć kartę boczną:
 
 **Zakończ ocenę** sprawdza, czy wszystko jest uzupełnione (uzasadnienia, Właściciel ryzyka, postępowanie, ryzyko oczekiwane). Ryzyko High lub Critical tworzy zadanie planu postępowania i powiadomienie.
 
+### Prawdopodobieństwo: częstość historyczna lub FER
+
+Dla każdego ryzyka wybiera się sposób szacowania prawdopodobieństwa:
+
+- **Częstość historyczna**: gdy istnieją wiarygodne dane o tym, ile razy zdarzenie wystąpiło (zdarzenia wewnętrzne, statystyki branżowe, dane uznanych instytucji). Przykład: 5 = częściej niż raz w roku, 1 = rzadziej niż raz na 10 lat
+- **FER — Współczynnik Ekspozycji na Ryzyko**: gdy brak serii historycznych lub nie są one wiarygodne. Ekspozycję szacuje się, oceniając skuteczność istniejących środków ochrony wobec możliwości i motywacji tego, kto mógłby spowodować zdarzenie (osoby lub zjawiska naturalnego). Przykład: 5 = niechronione podatności lub nieskuteczne kontrole, 1 = wiele zweryfikowanych kontroli, brak wiarygodnego sprawcy
+
+Przy każdym poziomie karta pokazuje kryteria wybranej metody. Uzasadnienie prawdopodobieństwa jest obowiązkowe w obu przypadkach.
+
+### Korekta klasy
+
+Klasę odczytuje się z macierzy. Jeśli ocena wypada na granicy dwóch komórek, oceniający może przesunąć ją o **jeden poziom**, w górę lub w dół, wpisując uzasadnienie: korekta pozostaje widoczna w karcie i w rejestrze. Służy do przypadków granicznych, a nie do zmiany wyniku oceny.
+
 ### Plan postępowania i ryzyko oczekiwane
 
 Działania planu mają odpowiedzialnego, termin i oczekiwany efekt. Zakończone działanie musi zostać **zweryfikowane** (test, dowód, audyt). Dopiero gdy wszystkie działania są zakończone i zweryfikowane, pojawia się **Zastosuj ryzyko oczekiwane**: poza nową oceną to jedyny sposób obniżenia klasy. Opóźnione działania powiadamiają Risk Managera, a następnie są eskalowane na poziom organizacji.

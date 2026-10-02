@@ -218,29 +218,6 @@
         "evaluate": "1 yıl içinde maliyet/fayda analiziyle işlem değerlendirilmeli; aksi halde gerekli imzalarla kabul.",
         "acceptable": "Risk Sahibi tarafından kabul edilebilir; yine de iyileştirme önlemleri önerilebilir."
       }
-    },
-    "risk_module": {
-      "title": "IT/OT Risk Değerlendirmesi — M06",
-      "description": "Kalıtsal = olasılık×etki kontroller ÖNCESİ; Kalıntı = olasılık×etki kontroller VE BCP SONRASI; Ağırlıklı = en yüksek iş etkili riskleri önceliklendirmek için BIA kritikliğiyle ağırlıklandırılmış kalıntı puan. Risk iştahı politikaları yönetim tarafından onaylanan eşikleri tanımlar.",
-      "steps": {
-        "1": "Varlığı ve BIA sürecini (varsa) bağlayarak yeni değerlendirme oluşturun",
-        "2": "Kontroller öncesi olasılık ve etkiyi girerek KALITSAL riski doldurun",
-        "3": "Kontroller ve BCP sonrası olasılık ve etkiyi girerek KALINTI riski doldurun",
-        "4": "IT/OT boyutlarını tamamlayın ve puan, ağırlıklı puan ve ALE hesaplamak için 'Değerlendirmeyi tamamla'ya tıklayın",
-        "5": "Azaltma, transfer veya kabul kararı için puanı ve ağırlıklı puanı Risk İştahı eşikleriyle karşılaştırın",
-        "6": "Kalıntı riskleri (politika izin veriyorsa) not ve inceleme tarihi ile resmi olarak kabul edin"
-      },
-      "connections": {
-        "assets": "Değerlendirilen varlıklar",
-        "bia": "Ağırlıklı puan ve ALE, BIA kritikliği ve maliyet verilerini kullanır",
-        "governance": "Risk iştahı, yönetim tarafından onaylanan eşikleri tanımlar",
-        "pdca": "Eşik üzerindeki riskler otomatik PDCA döngüleri açabilir",
-        "tasks": "İştah sınırlarını aşan riskler için azaltma görevleri oluşturulur"
-      },
-      "config_needed": {
-        "1": "Yönetişim → Risk İştahı'nda eşikleri yapılandırın",
-        "2": "Otomatik ALE ve ağırlıklı puan hesaplaması için BIA süreçlerini bağlayın"
-      }
     }
   },
   "ai": {
@@ -2670,32 +2647,6 @@
     "rto_warning": "RTO ⚠",
     "rto_critical": "RTO ✗",
     "new_process_title": "Yeni kritik süreç",
-    "treatments": {
-      "manage": "Önlemler",
-      "title": "Risk önlemleri — {{process}}",
-      "subtitle": "Maliyet ve ALE azaltma yüzdesi içeren önlem seçenekleri. Raporlamadaki ROSI hesabını besler.",
-      "help_title": "Nasıl çalışır",
-      "help_body": "Önlem, sürecin maruziyetini azaltan bir kontroldür. «ALE azaltma %», kontrolün ortadan kaldırdığı yıllık beklenen kayıp payıdır. Tek seferlik ve yıllık maliyet, Raporlamadaki ROSI'yi besler (önlenen ALE − yıllık maliyet, CapEx 3 yıla yayılmış).",
-      "help_example": "Örn.: ALE 24.000 €/yıl olan süreç, önlem −%50 → 12.000 €/yıl önler; 12k tek seferlik + 2k/yıl maliyetle ROSI ≈ %100, geri ödeme ~14 ay.",
-      "loading": "Yükleniyor…",
-      "empty": "Bu süreç için önlem yok.",
-      "col_title": "Önlem",
-      "col_reduction": "ALE azaltma",
-      "col_capex": "Tek seferlik maliyet (€)",
-      "col_opex": "Yıllık maliyet (€)",
-      "add": "Önlem ekle",
-      "edit": "Düzenle",
-      "delete": "Sil",
-      "delete_confirm": "Bu önlem silinsin mi?",
-      "field_title": "Başlık",
-      "field_reduction": "ALE azaltma (%)",
-      "field_capex": "Tek seferlik uygulama maliyeti (€)",
-      "field_opex": "Yinelenen yıllık maliyet (€)",
-      "save": "Kaydet",
-      "cancel": "İptal",
-      "close": "Kapat",
-      "save_error": "Kaydederken hata oluştu"
-    },
     "site_label": "Site *",
     "process_name_label": "Süreç adı *",
     "criticality_label": "Kritiklik (1-5)",
@@ -2716,21 +2667,20 @@
     "rpo_placeholder": "örn. 4",
     "help": {
       "title": "Business Impact Analysis — M05",
-      "description": "Her kritik sürecin durmasının ekonomik ve operasyonel etkisini değerlendirir. BCP'yi yönlendiren ve Risk Assessment'taki ALE hesabını ağırlıklandıran RTO/RPO/MTPD hedeflerini tanımlar.",
+      "description": "Her kritik sürecin duruşunun ekonomik ve operasyonel etkisini değerlendirir. BCP'yi yönlendiren RTO/RPO/MTPD hedeflerini belirler; her süreçten Risk Değerlendirmesinde bir risk açabilirsiniz.",
       "steps": {
         "1": "Sorumlu sahibiyle kritik süreci oluşturun",
         "2": "Saatlik kesinti maliyetini (€) ve yıllık riske maruz geliri girin",
         "3": "MTPD (azami tolere edilebilir saat), hedef RTO ve RPO tanımlayın",
         "4": "Süreci doğrulayın (uyum sorumlusu)",
         "5": "Onaylayın (yönetim) — bu andan itibaren Risk Assessment'ı yönlendirir",
-        "6": "Risk Assessment, ALE'yi otomatik hesaplamak için downtime_cost değerini kullanır",
-        "7": "Maliyet ve % ALE azaltımı ile işlemleri tanımlayın («İşlemler» düğmesi) → Reporting'deki ROSI'yi besler"
+        "6": "«Risk oluştur» ile süreçle zaten bağlantılı, Risk Değerlendirmesinde değerlendirilecek bir risk açın"
       },
       "connections": {
         "asset": "Sürece bağlı varlık",
-        "risk": "ALE = downtime_cost × saat × olasılık",
+        "risk": "«Risk oluştur», süreçle bağlantılı ve prosedür kriterleriyle değerlendirilen bir risk açar",
         "bcp": "BIA'nın RTO/RPO değerleri BCP planını doğrular ve sınırlandırır",
-        "reporting": "ROSI = önlenen ALE − yıllıklandırılmış işlem maliyeti"
+        "reporting": "Onaylı BCP planı olmayan veya testi süresi dolmuş kritik süreçler"
       },
       "config_needed": {
         "1": "Önce Tesisleri (M01) ve Varlıkları (M04) oluşturun"
@@ -3450,6 +3400,7 @@
       "probability_method": "Yöntem",
       "method_frequency": "Geçmiş sıklık",
       "method_fer": "Maruziyet faktörü (FER)",
+      "method_hint": "Güvenilir veriler varsa geçmiş sıklık (iç, sektörel veya tanınmış kuruluş olayları); yoksa FER: mevcut önlemlerin, olaya neden olabilecek kişinin yeteneği ve motivasyonuna karşı etkinliğinden tahmin edilir.",
       "probability_rationale": "Olasılık gerekçesi",
       "impact_dimensions": "Boyuta göre etki",
       "not_relevant": "ilgili değil",

@@ -218,29 +218,6 @@
         "evaluate": "Postępowanie do oceny analizą kosztów i korzyści w ciągu roku; w przeciwnym razie akceptacja z wymaganymi podpisami.",
         "acceptable": "Akceptowalne przez właściciela ryzyka; można jednak proponować działania doskonalące."
       }
-    },
-    "risk_module": {
-      "title": "Ocena ryzyka IT/OT — M06",
-      "description": "Nieodłączne = prawdopodobieństwo×wpływ PRZED kontrolami; Rezydualne = prawdopodobieństwo×wpływ PO kontrolach i BCP; Ważone = wynik rezydualny ważony krytycznością BIA dla priorytetyzacji ryzyk o największym wpływie biznesowym. Polityki apetytu na ryzyko definiują progi formalnie zatwierdzone przez zarząd.",
-      "steps": {
-        "1": "Utwórz nową ocenę łącząc zasób i proces BIA (jeśli dostępny)",
-        "2": "Wypełnij ryzyko NIEODŁĄCZNE podając prawdopodobieństwo i wpływ przed kontrolami",
-        "3": "Wypełnij ryzyko REZYDUALNE podając prawdopodobieństwo i wpływ po kontrolach i BCP",
-        "4": "Uzupełnij wymiary IT/OT i kliknij 'Zakończ ocenę' aby wyliczyć wynik, wynik ważony i ALE",
-        "5": "Porównaj wynik i wynik ważony z progami apetytu na ryzyko, aby zdecydować o mitygacji, transferze lub akceptacji",
-        "6": "Formalnie zaakceptuj ryzyka rezydualne (gdy polityka pozwala), podając notatkę i datę przeglądu"
-      },
-      "connections": {
-        "assets": "Zasoby objęte oceną",
-        "bia": "Wynik ważony i ALE używają krytyczności BIA i danych kosztowych",
-        "governance": "Apetyt na ryzyko definiuje progi zatwierdzone przez zarząd",
-        "pdca": "Ryzyka powyżej progu mogą otwierać automatyczne cykle PDCA",
-        "tasks": "Zadania mitygacji generowane dla ryzyk przekraczających limity apetytu"
-      },
-      "config_needed": {
-        "1": "Skonfiguruj progi w Governance → Apetyt na ryzyko",
-        "2": "Połącz procesy BIA dla automatycznego obliczania ALE i wyniku ważonego"
-      }
     }
   },
   "ai": {
@@ -2670,32 +2647,6 @@
     "rto_warning": "RTO ⚠",
     "rto_critical": "RTO ✗",
     "new_process_title": "Nowy proces krytyczny",
-    "treatments": {
-      "manage": "Działania",
-      "title": "Działania na ryzyko — {{process}}",
-      "subtitle": "Opcje działań z kosztem i % redukcji ALE. Zasilają obliczenie ROSI w Raportowaniu.",
-      "help_title": "Jak to działa",
-      "help_body": "Działanie to kontrola zmniejszająca ekspozycję procesu. „Redukcja ALE %” to część rocznej oczekiwanej straty, którą kontrola eliminuje. Koszt jednorazowy i roczny zasilają ROSI w Raportowaniu (uniknięte ALE − koszt roczny, CapEx amortyzowany przez 3 lata).",
-      "help_example": "Np.: proces z ALE 24 000 €/rok, działanie −50% → unika 12 000 €/rok; jeśli kosztuje 12k jednorazowo + 2k/rok, ROSI ≈ 100%, zwrot ~14 miesięcy.",
-      "loading": "Ładowanie…",
-      "empty": "Brak działań dla tego procesu.",
-      "col_title": "Działanie",
-      "col_reduction": "Redukcja ALE",
-      "col_capex": "Koszt jednorazowy (€)",
-      "col_opex": "Koszt roczny (€)",
-      "add": "Dodaj działanie",
-      "edit": "Edytuj",
-      "delete": "Usuń",
-      "delete_confirm": "Usunąć to działanie?",
-      "field_title": "Tytuł",
-      "field_reduction": "Redukcja ALE (%)",
-      "field_capex": "Jednorazowy koszt wdrożenia (€)",
-      "field_opex": "Powtarzalny koszt roczny (€)",
-      "save": "Zapisz",
-      "cancel": "Anuluj",
-      "close": "Zamknij",
-      "save_error": "Błąd podczas zapisu"
-    },
     "site_label": "Zakład *",
     "process_name_label": "Nazwa procesu *",
     "criticality_label": "Krytyczność (1-5)",
@@ -2716,21 +2667,20 @@
     "rpo_placeholder": "np. 4",
     "help": {
       "title": "Business Impact Analysis — M05",
-      "description": "Ocenia ekonomiczny i operacyjny wpływ przestoju każdego procesu krytycznego. Definiuje cele RTO/RPO/MTPD, które sterują BCP i ważą wyliczenie ALE w Risk Assessment.",
+      "description": "Ocenia ekonomiczny i operacyjny wpływ przestoju każdego procesu krytycznego. Określa cele RTO/RPO/MTPD, które kierują BCP; z każdego procesu można otworzyć ryzyko w ocenie ryzyka.",
       "steps": {
         "1": "Utwórz proces krytyczny z odpowiedzialnym właścicielem",
         "2": "Wprowadź godzinowy koszt przestoju (€) i roczny przychód narażony na ryzyko",
         "3": "Zdefiniuj MTPD (maks. tolerowane godziny), docelowe RTO i RPO",
         "4": "Zwaliduj proces (compliance officer)",
         "5": "Zatwierdź (zarząd) — od tej chwili steruje Risk Assessment",
-        "6": "Risk Assessment użyje downtime_cost do automatycznego wyliczenia ALE",
-        "7": "Zdefiniuj sposoby postępowania (przycisk «Postępowanie») z kosztem i % redukcji ALE → zasilają ROSI w Reporting"
+        "6": "Przyciskiem «Utwórz ryzyko» otwórz z procesu ryzyko już z nim powiązane, do oceny w module oceny ryzyka"
       },
       "connections": {
         "asset": "Zasób powiązany z procesem",
-        "risk": "ALE = downtime_cost × godziny × prawdopodobieństwo",
+        "risk": "«Utwórz ryzyko» otwiera ryzyko powiązane z procesem, oceniane według kryteriów procedury",
         "bcp": "RTO/RPO z BIA walidują i ograniczają plan BCP",
-        "reporting": "ROSI = uniknięte ALE − zannualizowany koszt postępowania"
+        "reporting": "Procesy krytyczne bez zatwierdzonego planu BCP lub z przeterminowanym testem"
       },
       "config_needed": {
         "1": "Najpierw utwórz Zakłady (M01) i Zasoby (M04)"
@@ -3450,6 +3400,7 @@
       "probability_method": "Metoda",
       "method_frequency": "Częstość historyczna",
       "method_fer": "Współczynnik ekspozycji (FER)",
+      "method_hint": "Częstość historyczna, jeśli istnieją wiarygodne dane (zdarzenia wewnętrzne, branżowe lub uznanych instytucji); w przeciwnym razie FER: szacunek na podstawie skuteczności istniejących środków wobec możliwości i motywacji tego, kto mógłby spowodować zdarzenie.",
       "probability_rationale": "Uzasadnienie prawdopodobieństwa",
       "impact_dimensions": "Wpływ według wymiaru",
       "not_relevant": "nie dotyczy",

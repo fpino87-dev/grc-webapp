@@ -440,6 +440,19 @@ Cliquez sur un risque pour ouvrir la fiche latérale :
 
 **Terminer l'évaluation** vérifie que tout est renseigné (justifications, Risk Owner, traitement, risque attendu). Un risque High ou Critical crée la tâche du plan de traitement et la notification.
 
+### Probabilité : fréquence historique ou FER
+
+Pour chaque risque, on choisit comment estimer la probabilité :
+
+- **Fréquence historique** : lorsqu'il existe des données fiables sur le nombre de fois où l'événement s'est produit (événements internes, statistiques du secteur, données d'organismes reconnus). Exemple : 5 = plus d'une fois par an, 1 = moins d'une fois tous les 10 ans
+- **FER — Facteur d'Exposition au Risque** : lorsque les séries historiques manquent ou ne sont pas fiables. On estime l'exposition du risque en évaluant l'efficacité des mesures de protection en place face à la capacité et à la motivation de qui pourrait causer l'événement (une personne ou un événement naturel). Exemple : 5 = vulnérabilités non maîtrisées ou contrôles inefficaces, 1 = contrôles multiples et vérifiés, aucun agent crédible
+
+À côté de chaque niveau, la fiche affiche les critères de la méthode choisie. La justification de la probabilité reste obligatoire dans les deux cas.
+
+### Correction de la classe
+
+La classe se lit dans la matrice. Si l'évaluation se situe à la limite entre deux cellules, l'évaluateur peut la déplacer d'**un seul niveau**, vers le haut ou vers le bas, en rédigeant une justification : la correction reste visible dans la fiche et dans le registre. Elle sert aux cas limites, pas à modifier le résultat de l'évaluation.
+
 ### Plan de traitement et risque attendu
 
 Les mesures du plan ont un responsable, une échéance et un effet attendu. Une mesure terminée doit être **vérifiée** (test, preuve, audit). Ce n'est que lorsque toutes les mesures sont terminées et vérifiées qu'apparaît **Appliquer le risque attendu** : en dehors d'une nouvelle évaluation, c'est le seul moyen de baisser la classe. Les mesures en retard alertent le Risk Manager puis font l'objet d'une escalade au niveau de l'organisation.

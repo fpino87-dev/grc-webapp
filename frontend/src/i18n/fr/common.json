@@ -218,29 +218,6 @@
         "evaluate": "Traitement à évaluer par une analyse coûts/bénéfices sous 1 an ; sinon acceptation avec les signatures prévues.",
         "acceptable": "Acceptable par le Risk Owner ; des mesures d'amélioration peuvent toutefois être proposées."
       }
-    },
-    "risk_module": {
-      "title": "Évaluation des risques IT/OT — M06",
-      "description": "Inhérent = probabilité×impact AVANT contrôles ; Résiduel = probabilité×impact APRÈS contrôles et PCA ; Pondéré = score résiduel pondéré par la criticité BIA pour prioriser les risques à fort impact métier. Les politiques d'appétit au risque définissent les seuils (score max acceptable, nombre max de risques rouges, score inacceptable) formellement approuvés par la direction.",
-      "steps": {
-        "1": "Créer une nouvelle évaluation en liant l'actif et le processus BIA (si disponible)",
-        "2": "Remplir le risque INHÉRENT en saisissant la probabilité et l'impact avant contrôles",
-        "3": "Remplir le risque RÉSIDUEL en saisissant la probabilité et l'impact après contrôles et PCA",
-        "4": "Compléter les dimensions IT/OT et cliquer sur 'Terminer l'évaluation' pour calculer score, score pondéré et ALE",
-        "5": "Comparer score et score pondéré avec les seuils d'appétit au risque pour décider mitigation, transfert ou acceptation",
-        "6": "Accepter formellement les risques résiduels (si la politique le permet), avec une note et une date de révision"
-      },
-      "connections": {
-        "assets": "Actifs faisant l'objet de l'évaluation",
-        "bia": "Le score pondéré et l'ALE utilisent la criticité BIA et les données de coût",
-        "governance": "L'appétit au risque définit les seuils approuvés par la direction",
-        "pdca": "Les risques au-dessus du seuil peuvent ouvrir des cycles PDCA automatiques",
-        "tasks": "Tâches de mitigation générées pour les risques dépassant les limites d'appétit"
-      },
-      "config_needed": {
-        "1": "Configurer les seuils dans Gouvernance → Appétit au risque",
-        "2": "Lier les processus BIA pour le calcul automatique de l'ALE et du score pondéré"
-      }
     }
   },
   "ai": {
@@ -2670,32 +2647,6 @@
     "rto_warning": "RTO ⚠",
     "rto_critical": "RTO ✗",
     "new_process_title": "Nouveau processus critique",
-    "treatments": {
-      "manage": "Traitements",
-      "title": "Traitements du risque — {{process}}",
-      "subtitle": "Options de traitement avec coût et % de réduction de l'ALE. Elles alimentent le calcul du ROSI dans le Reporting.",
-      "help_title": "Comment ça marche",
-      "help_body": "Un traitement est un contrôle qui réduit l'exposition du processus. La « Réduction ALE % » est la part de perte annuelle attendue que le contrôle élimine. Le coût ponctuel et le coût annuel alimentent le ROSI dans le Reporting (ALE évité − coût annualisé, CapEx amorti sur 3 ans).",
-      "help_example": "Ex. : processus avec ALE 24 000 €/an, traitement −50 % → évite 12 000 €/an ; s'il coûte 12k ponctuel + 2k/an, ROSI ≈ 100 %, retour ~14 mois.",
-      "loading": "Chargement…",
-      "empty": "Aucun traitement pour ce processus.",
-      "col_title": "Traitement",
-      "col_reduction": "Réduction ALE",
-      "col_capex": "Coût ponctuel (€)",
-      "col_opex": "Coût annuel (€)",
-      "add": "Ajouter un traitement",
-      "edit": "Modifier",
-      "delete": "Supprimer",
-      "delete_confirm": "Supprimer ce traitement ?",
-      "field_title": "Titre",
-      "field_reduction": "Réduction ALE (%)",
-      "field_capex": "Coût de mise en œuvre ponctuel (€)",
-      "field_opex": "Coût annuel récurrent (€)",
-      "save": "Enregistrer",
-      "cancel": "Annuler",
-      "close": "Fermer",
-      "save_error": "Erreur lors de l'enregistrement"
-    },
     "site_label": "Site *",
     "process_name_label": "Nom du processus *",
     "criticality_label": "Criticité (1-5)",
@@ -2716,21 +2667,20 @@
     "rpo_placeholder": "ex. 4",
     "help": {
       "title": "Business Impact Analysis — M05",
-      "description": "Évalue l'impact économique et opérationnel de l'arrêt de chaque processus critique. Définit les cibles RTO/RPO/MTPD qui guident le PCA et pondèrent le calcul de l'ALE dans le Risk Assessment.",
+      "description": "Évalue l'impact économique et opérationnel de l'arrêt de chaque processus critique. Définit les objectifs RTO/RPO/MTPD qui guident le BCP ; depuis chaque processus, vous pouvez ouvrir un risque dans l'appréciation des risques.",
       "steps": {
         "1": "Créez le processus critique avec un responsable",
         "2": "Saisissez le coût horaire d'arrêt (€) et le chiffre d'affaires annuel exposé",
         "3": "Définissez le MTPD (heures maximales tolérables), le RTO et le RPO cibles",
         "4": "Validez le processus (responsable conformité)",
         "5": "Approuvez (direction) — dès lors il guide le Risk Assessment",
-        "6": "Le Risk Assessment utilisera downtime_cost pour calculer l'ALE automatiquement",
-        "7": "Définissez les traitements (bouton « Traitements ») avec coût et % de réduction de l'ALE → ils alimentent le ROSI dans le Reporting"
+        "6": "Avec « Créer un risque », ouvrez depuis le processus un risque déjà lié, à évaluer dans l'appréciation des risques"
       },
       "connections": {
         "asset": "Actif lié au processus",
-        "risk": "ALE = downtime_cost × heures × probabilité",
+        "risk": "« Créer un risque » ouvre un risque lié au processus, évalué selon les critères de la procédure",
         "bcp": "Les RTO/RPO de la BIA valident et contraignent le plan PCA",
-        "reporting": "ROSI = ALE évitée − coût annualisé du traitement"
+        "reporting": "Processus critiques sans plan BCP approuvé ou avec un test expiré"
       },
       "config_needed": {
         "1": "Créer d'abord les Sites (M01) et les Actifs (M04)"
@@ -3450,6 +3400,7 @@
       "probability_method": "Méthode",
       "method_frequency": "Fréquence historique",
       "method_fer": "Facteur d'exposition (FER)",
+      "method_hint": "Fréquence historique s'il existe des données fiables (événements internes, du secteur ou d'organismes reconnus) ; sinon FER : estimation fondée sur l'efficacité des mesures en place face à la capacité et à la motivation de qui pourrait causer l'événement.",
       "probability_rationale": "Justification de la probabilité",
       "impact_dimensions": "Impact par dimension",
       "not_relevant": "non pertinent",

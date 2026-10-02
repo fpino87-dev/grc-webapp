@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CriticalProcess, RiskDecision, TreatmentOption
+from .models import CriticalProcess
 
 
 class CriticalProcessSerializer(serializers.ModelSerializer):
@@ -49,45 +49,3 @@ class CriticalProcessSerializer(serializers.ModelSerializer):
             "approved_by_username",
             "validated_by_username",
         ]
-
-
-class TreatmentOptionSerializer(serializers.ModelSerializer):
-    process_name = serializers.CharField(source="process.name", read_only=True)
-
-    class Meta:
-        model = TreatmentOption
-        fields = [
-            "id",
-            "process",
-            "process_name",
-            "title",
-            "cost_implementation",
-            "cost_annual",
-            "ale_reduction_pct",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "created_at", "updated_at", "process_name"]
-
-
-class RiskDecisionSerializer(serializers.ModelSerializer):
-    process_name = serializers.CharField(source="process.name", read_only=True)
-    decided_by_username = serializers.CharField(source="decided_by.username", read_only=True)
-
-    class Meta:
-        model = RiskDecision
-        fields = [
-            "id",
-            "process",
-            "process_name",
-            "decision",
-            "rationale",
-            "decided_by",
-            "decided_by_username",
-            "decided_at",
-            "review_by",
-            "treatment",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "created_at", "updated_at", "process_name", "decided_by_username", "decided_at"]

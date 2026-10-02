@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { biaApi, treatmentOptionsApi, type CriticalProcess } from "../../api/endpoints/bia";
+import { biaApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { plantsApi } from "../../api/endpoints/plants";
 import { useAuthStore } from "../../store/auth";
 import { StatusBadge } from "../../components/ui/StatusBadge";
@@ -222,150 +222,12 @@ function NewProcessModal({
   );
 }
 
-function TreatmentsModal({ process, onClose }: { process: CriticalProcess; onClose: () => void }) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const emptyForm = { id: "", title: "", ale_reduction_pct: "", cost_implementation: "", cost_annual: "" };
-  const [form, setForm] = useState(emptyForm);
-
-  const { data: treatments = [], isLoading } = useQuery({
-    queryKey: ["treatment-options", process.id],
-    queryFn: () => treatmentOptionsApi.listByProcess(process.id),
-  });
-
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["treatment-options", process.id] });
-    qc.invalidateQueries({ queryKey: ["reporting-risk-bia-bcp"] });
-  };
-
-  const saveMutation = useMutation({
-    mutationFn: () => {
-      const payload = {
-        process: process.id,
-        title: form.title.trim(),
-        ale_reduction_pct: Number(form.ale_reduction_pct),
-        cost_implementation: form.cost_implementation || "0",
-        cost_annual: form.cost_annual || "0",
-      };
-      return form.id ? treatmentOptionsApi.update(form.id, payload) : treatmentOptionsApi.create(payload);
-    },
-    onSuccess: () => { invalidate(); setForm(emptyForm); },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => treatmentOptionsApi.delete(id),
-    onSuccess: invalidate,
-  });
-
-  const canSave = form.title.trim() !== "" && form.ale_reduction_pct !== "" && !saveMutation.isPending;
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 max-h-screen overflow-y-auto">
-        <h3 className="text-lg font-semibold">{t("bia.treatments.title", { process: process.name })}</h3>
-        <p className="text-xs text-gray-400 mt-0.5 mb-3">{t("bia.treatments.subtitle")}</p>
-
-        <div className="bg-purple-50 border border-purple-100 rounded-md px-3 py-2 mb-4">
-          <p className="text-xs font-semibold text-purple-800">{t("bia.treatments.help_title")}</p>
-          <p className="text-xs text-purple-900/80 mt-0.5">{t("bia.treatments.help_body")}</p>
-          <p className="text-xs text-purple-900/70 mt-1 italic">{t("bia.treatments.help_example")}</p>
-        </div>
-
-        {isLoading ? (
-          <div className="py-6 text-center text-gray-400 text-sm">{t("bia.treatments.loading")}</div>
-        ) : treatments.length === 0 ? (
-          <p className="text-sm text-gray-400 mb-4">{t("bia.treatments.empty")}</p>
-        ) : (
-          <table className="w-full text-sm mb-4">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-3 py-2 font-medium text-gray-600">{t("bia.treatments.col_title")}</th>
-                <th className="text-right px-3 py-2 font-medium text-gray-600">{t("bia.treatments.col_reduction")}</th>
-                <th className="text-right px-3 py-2 font-medium text-gray-600">{t("bia.treatments.col_capex")}</th>
-                <th className="text-right px-3 py-2 font-medium text-gray-600">{t("bia.treatments.col_opex")}</th>
-                <th className="px-3 py-2"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {treatments.map(tr => (
-                <tr key={tr.id} className="hover:bg-gray-50">
-                  <td className="px-3 py-2 font-medium text-gray-800">{tr.title}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-gray-600">{tr.ale_reduction_pct}%</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-gray-600">{tr.cost_implementation}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-gray-600">{tr.cost_annual}</td>
-                  <td className="px-3 py-2 text-right whitespace-nowrap">
-                    <button
-                      onClick={() => setForm({ id: tr.id, title: tr.title, ale_reduction_pct: String(tr.ale_reduction_pct), cost_implementation: tr.cost_implementation, cost_annual: tr.cost_annual })}
-                      className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50 mr-1"
-                    >
-                      {t("bia.treatments.edit")}
-                    </button>
-                    <button
-                      onClick={() => { if (window.confirm(t("bia.treatments.delete_confirm"))) deleteMutation.mutate(tr.id); }}
-                      disabled={deleteMutation.isPending}
-                      className="text-xs text-red-700 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50 disabled:opacity-50"
-                    >
-                      {t("bia.treatments.delete")}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        <div className="border-t border-gray-100 pt-4">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-            {form.id ? t("bia.treatments.edit") : t("bia.treatments.add")}
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.treatments.field_title")}</label>
-              <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="w-full border rounded px-3 py-1.5 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.treatments.field_reduction")}</label>
-              <input type="number" min={0} max={100} value={form.ale_reduction_pct} onChange={e => setForm(p => ({ ...p, ale_reduction_pct: e.target.value }))} className="w-full border rounded px-3 py-1.5 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.treatments.field_capex")}</label>
-              <input type="number" min={0} step="0.01" value={form.cost_implementation} onChange={e => setForm(p => ({ ...p, cost_implementation: e.target.value }))} className="w-full border rounded px-3 py-1.5 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t("bia.treatments.field_opex")}</label>
-              <input type="number" min={0} step="0.01" value={form.cost_annual} onChange={e => setForm(p => ({ ...p, cost_annual: e.target.value }))} className="w-full border rounded px-3 py-1.5 text-sm" />
-            </div>
-          </div>
-          {saveMutation.isError && <p className="text-sm text-red-600 mt-2">{t("bia.treatments.save_error")}</p>}
-          <div className="flex gap-2 mt-3">
-            <button onClick={() => saveMutation.mutate()} disabled={!canSave} className="px-4 py-1.5 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50">
-              {saveMutation.isPending ? t("governance.workflow.saving") : t("bia.treatments.save")}
-            </button>
-            {form.id && (
-              <button onClick={() => setForm(emptyForm)} className="px-4 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">
-                {t("bia.treatments.cancel")}
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="flex justify-end mt-5 border-t border-gray-100 pt-4">
-          <button onClick={onClose} className="px-4 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">
-            {t("bia.treatments.close")}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function BiaPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [showNew, setShowNew] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("");
-  const [selectedProcessId, setSelectedProcessId] = useState<string | null>(null);
   const [editProcess, setEditProcess] = useState<CriticalProcess | null>(null);
   const qc = useQueryClient();
 
@@ -420,7 +282,6 @@ export function BiaPage() {
               t("bia.help.steps.4"),
               t("bia.help.steps.5"),
               t("bia.help.steps.6"),
-              t("bia.help.steps.7"),
             ]}
             connections={[
               { module: "M04 Asset", relation: t("bia.help.connections.asset") },
@@ -481,7 +342,7 @@ export function BiaPage() {
                 <tr
                   key={p.id}
                   className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => setSelectedProcessId(p.id)}
+                  onClick={() => setEditProcess(p)}
                 >
                   <td className="px-4 py-3 font-medium text-gray-800">{p.name}</td>
                   <td className="px-4 py-3"><CriticalityBar value={p.criticality} /></td>
@@ -498,12 +359,6 @@ export function BiaPage() {
                         className="text-xs text-blue-700 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
                       >
                         Modifica
-                      </button>
-                      <button
-                        onClick={() => setSelectedProcessId(p.id)}
-                        className="text-xs text-purple-700 border border-purple-300 rounded px-2 py-0.5 hover:bg-purple-50"
-                      >
-                        {t("bia.treatments.manage")}
                       </button>
                       <button
                         onClick={() => navigate("/risk", { state: { newRiskFromProcess: { process: p.id, plant: p.plant } } })}
@@ -560,10 +415,6 @@ export function BiaPage() {
           onClose={() => setEditProcess(null)}
         />
       )}
-      {selectedProcessId && (() => {
-        const proc = processes.find(p => p.id === selectedProcessId);
-        return proc ? <TreatmentsModal process={proc} onClose={() => setSelectedProcessId(null)} /> : null;
-      })()}
       <AssistenteValutazione open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );

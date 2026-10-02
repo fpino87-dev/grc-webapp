@@ -440,6 +440,19 @@ Clicca un rischio per aprire la scheda laterale:
 
 **Completa la valutazione** controlla che ci sia tutto (motivazioni, Risk Owner, trattamento, rischio atteso). Un rischio High o Critical crea il task del piano di trattamento e la notifica.
 
+### Probabilità: frequenza storica o FER
+
+Per ogni rischio si sceglie come stimare la probabilità:
+
+- **Frequenza storica**: quando ci sono dati affidabili su quante volte l'evento si è verificato (eventi interni, statistiche di settore, dati di enti riconosciuti). Esempio: 5 = più di una volta l'anno, 1 = meno di una volta ogni 10 anni
+- **FER — Fattore di Esposizione al Rischio**: quando le serie storiche non ci sono o non sono affidabili. Si stima quanto il rischio è esposto valutando l'efficacia delle misure di protezione in essere rispetto alla capacità e alla motivazione di chi potrebbe causare l'evento (una persona o un evento naturale). Esempio: 5 = vulnerabilità non presidiate o controlli non efficaci, 1 = controlli multipli e verificati, nessun agente credibile
+
+Accanto a ogni livello la scheda mostra i criteri del metodo scelto. La motivazione della probabilità resta obbligatoria in entrambi i casi.
+
+### Correzione della classe
+
+La classe si legge dalla matrice. Se la valutazione cade al limite fra due celle, chi valuta può spostarla di **un solo livello**, in su o in giù, scrivendo la motivazione: la correzione resta visibile nella scheda e nel registro. Serve per i casi limite, non per cambiare il risultato della valutazione.
+
 ### Piano di trattamento e rischio atteso
 
 Le misure del piano hanno responsabile, scadenza ed effetto atteso. Quando una misura è completata va **verificata** (test, evidenza, audit). Solo con tutte le misure completate e verificate compare **Applica il rischio atteso**: è l'unico modo, oltre a una nuova valutazione, per abbassare la classe. Le misure in ritardo generano un avviso al Risk Manager e poi l'escalation al livello di organizzazione.

@@ -4,11 +4,10 @@ from rest_framework.response import Response
 
 from core.audit import log_action
 from core.scoping import PlantScopedQuerysetMixin
-from core.viewsets import SoftDeleteAuditMixin
 
-from .models import CriticalProcess, RiskDecision, TreatmentOption
+from .models import CriticalProcess
 from .permissions import BiaPermission
-from .serializers import CriticalProcessSerializer, RiskDecisionSerializer, TreatmentOptionSerializer
+from .serializers import CriticalProcessSerializer
 from .services import approve_process, get_process_risk_bcp_snapshot, validate_process, delete_process
 
 
@@ -110,60 +109,3 @@ class CriticalProcessViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         process = self.get_object()
         data = get_process_risk_bcp_snapshot(process)
         return Response(data)
-
-
-class TreatmentOptionViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = TreatmentOption.objects.select_related("process")
-    serializer_class = TreatmentOptionSerializer
-    permission_classes = [BiaPermission]
-    filterset_fields = []
-    plant_field = "process__plant"
-    audit_action = "bia.treatment_option"
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        plant = self.request.query_params.get("plant")
-        if plant:
-            qs = qs.filter(process__plant_id=plant)
-        process = self.request.query_params.get("process")
-        if process:
-            qs = qs.filter(process_id=process)
-        return qs.order_by("-created_at")
-
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        log_action(
-            user=self.request.user,
-            action_code="bia.treatment_option.create",
-            level="L2",
-            entity=instance,
-            payload={"id": str(instance.id), "title": instance.title},
-        )
-
-
-class RiskDecisionViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
-    queryset = RiskDecision.objects.select_related("process", "decided_by", "treatment")
-    serializer_class = RiskDecisionSerializer
-    permission_classes = [BiaPermission]
-    filterset_fields = []
-    plant_field = "process__plant"
-    # Decisione di rischio = record governance L3: soft delete + audit, mai
-    # hard delete (l'auditor deve poter ricostruire chi ha deciso cosa).
-    audit_action = "bia.risk_decision"
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        plant = self.request.query_params.get("plant")
-        if plant:
-            qs = qs.filter(process__plant_id=plant)
-        return qs
-
-    def perform_create(self, serializer):
-        instance = serializer.save(decided_by=self.request.user)
-        log_action(
-            user=self.request.user,
-            action_code="bia.risk_decision.create",
-            level="L3",
-            entity=instance,
-            payload={"id": str(instance.id), "decision": instance.decision},
-        )

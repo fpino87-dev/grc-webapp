@@ -515,9 +515,12 @@ def asset_types_present(plant) -> list:
     """Tipologie di asset da coprire nel registro (procedura §6.5).
 
     Sito: IT, Sede e Personale sempre; OT se il sito ha OT; Fornitori se ha
-    fornitori attivi; Prototipi se gestisce prototipi. Gruppo: IT, Personale e
+    fornitori attivi propri o di organizzazione (senza sito: valgono per tutti
+    i siti); Prototipi se gestisce prototipi. Gruppo: IT, Personale e
     Fornitori (servizi condivisi, strutture e contratti della capogruppo).
     """
+    from django.db.models import Q
+
     from apps.assets.models import Asset
     from apps.suppliers.models import Supplier
 
@@ -527,7 +530,9 @@ def asset_types_present(plant) -> list:
     if plant.has_ot or Asset.objects.filter(plant=plant, asset_type="OT").exists():
         types.append("OT")
     types += ["SEDE", "PERSONALE"]
-    if Supplier.objects.filter(plants=plant, status="attivo").exists():
+    if Supplier.objects.filter(
+        Q(plants=plant) | Q(plants__isnull=True), status="attivo",
+    ).exists():
         types.append("FORNITORI")
     if plant_handles_prototypes(plant):
         types.append("PROTOTIPI")
