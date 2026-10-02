@@ -411,7 +411,7 @@ The dependency is bidirectional: the asset will show in its own record the proce
 
 [Screenshot: risk assessment — register, risk card]
 
-The module applies the risk management procedure (D-ITA-INF-23). Each site has its own **register**; if the policy provides for it there is also a **group register** for shared services (central ERP, Active Directory, framework contracts). Choose the register at the top right.
+The module applies the risk management procedure. Each site has its own **register**; if the policy provides for it there is also a **group register** for shared services (central ERP, Active Directory, framework contracts). Choose the register at the top right.
 
 ### What requires action
 

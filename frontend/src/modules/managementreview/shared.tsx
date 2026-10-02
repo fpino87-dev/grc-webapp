@@ -44,7 +44,7 @@ export type SnapPendingDoc = {
 };
 export type SnapRisk = {
   id: string; name: string; asset: string | null; process: string | null;
-  // snapshot precedenti alla procedura D-ITA-INF-23 (punteggi)
+  // snapshot precedenti alla procedura di risk management (punteggi)
   inherent_score?: number | null; score?: number | null; accepted_by?: string | null;
   // snapshot con le classi della procedura (metodo "classi")
   current_class?: string; expected_class?: string; signatures?: string[]; body?: string | null;

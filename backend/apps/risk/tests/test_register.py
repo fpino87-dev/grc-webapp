@@ -1,4 +1,4 @@
-"""Registro dei rischi secondo la procedura D-ITA-INF-23: valutazione nel
+"""Registro dei rischi secondo la procedura di risk management: valutazione nel
 ciclo, copertura, approvazione, accettazione con autorità e pareri, piani e
 verifica, rischi ereditati, export ed escalation."""
 import datetime

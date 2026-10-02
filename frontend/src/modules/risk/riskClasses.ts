@@ -1,4 +1,4 @@
-// Classi di rischio della procedura D-ITA-INF-23: la classe si legge solo
+// Classi di rischio della procedura di risk management: la classe si legge solo
 // dalla matrice probabilità × impatto (stessa tabella di risk.services.risk_class).
 export type RiskClass = "very_low" | "low" | "medium" | "high" | "critical";
 

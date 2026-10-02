@@ -520,7 +520,7 @@ Odpowiedź: { "propagated_to": 3, "skipped_no_instance": 0 }
 
 ### RiskAssessment
 
-- Metodologia D-ITA-INF-23: rejestr zakładu (`plant`) i grupy (`plant` pusty, `affected_plants` = zakłady dziedziczące)
+- Metodologia zarządzania ryzykiem: rejestr zakładu (`plant`) i grupy (`plant` pusty, `affected_plants` = zakłady dziedziczące)
 - Klasa wyłącznie z macierzy (`risk.services.risk_class`), wpływ = maksimum z 6 wymiarów z progiem poufności z `InformationClass`
 - Ryzyko bieżące (`current_class`) i oczekiwane (`expected_class`); „zastosuj oczekiwane” tylko przy zakończonych i zweryfikowanych działaniach
 - `RiskAssessmentCycle` (pierwsza / okresowa / nadzwyczajna / legacy) ze `snapshot` zamrożonym przy zatwierdzeniu

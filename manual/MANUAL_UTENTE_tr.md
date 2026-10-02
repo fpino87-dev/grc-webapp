@@ -411,7 +411,7 @@ Bağımlılık çift yönlüdür: varlık kendi kartında ona bağımlı olan s�
 
 [Ekran görüntüsü: risk değerlendirmesi — kayıt, risk kartı]
 
-Modül, risk yönetimi prosedürünü (D-ITA-INF-23) uygular. Her tesisin kendi **kaydı** vardır; politika öngörüyorsa paylaşılan hizmetler (merkezi ERP, Active Directory, çerçeve sözleşmeler) için bir **grup kaydı** da bulunur. Kaydı sağ üstten seçin.
+Modül, risk yönetimi prosedürünü uygular. Her tesisin kendi **kaydı** vardır; politika öngörüyorsa paylaşılan hizmetler (merkezi ERP, Active Directory, çerçeve sözleşmeler) için bir **grup kaydı** da bulunur. Kaydı sağ üstten seçin.
 
 ### Eylem gerektirenler
 

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "description": "Catalogo minacce di gruppo (procedura D-ITA-INF-23 §6.3). Base: catalogo aziendale + BSI Elementary threats. Approccio all-hazards (NIS2 art. 21).",
+  "description": "Catalogo minacce di gruppo (procedura di risk management §6.3). Base: catalogo aziendale + BSI Elementary threats. Approccio all-hazards (NIS2 art. 21).",
   "asset_types": [
     "IT",
     "OT",

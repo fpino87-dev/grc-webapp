@@ -26,14 +26,14 @@ const snap = {
   },
   compliance_rule: 3,
   siti: [
-    { plant_id: "p1", code: "IT-CH-01", name: "Chivasso", pct_compliant: 80, rischi_critici: 1, rischi_oltre_soglia: 1,
+    { plant_id: "p1", code: "IT-A-01", name: "Sito A", pct_compliant: 80, rischi_critici: 1, rischi_oltre_soglia: 1,
       rischi_ereditati_gruppo: 1, incidenti_aperti: 0, task_scaduti: 2 },
     { plant_id: null, code: "GRUPPO", name: null, is_group: true, pct_compliant: null, rischi_critici: 1,
       rischi_oltre_soglia: 1, rischi_ereditati_gruppo: null, incidenti_aperti: null, task_scaduti: null },
   ],
   obiettivi: {
     totale: 1, attivi: 1, a_rischio: 0, mancati: 0, raggiunti: 0,
-    elenco: [{ id: "o1", code: "OBJ-VER", title: "Test di ripristino MES", plant_code: "IT-CH-01", owner_role: "",
+    elenco: [{ id: "o1", code: "OBJ-VER", title: "Test di ripristino MES", plant_code: "IT-A-01", owner_role: "",
       status: "attivo", baseline_value: 0, target_value: 100, target_date: "2026-12-31", current_value: null,
       unit: "%", progress_pct: null, track: "senza_misure",
       rischi: [{ name: "Malware e ransomware", current_class: "critical", obiettivi_aziendali: ["Continuity of supply to OEM customers"] }] }],

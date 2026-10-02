@@ -411,7 +411,7 @@ La dépendance est bidirectionnelle : l'asset affichera dans sa fiche les proces
 
 [Capture : appréciation des risques — registre, fiche du risque]
 
-Le module applique la procédure de gestion des risques (D-ITA-INF-23). Chaque site a son propre **registre** ; si la politique le prévoit, il existe aussi un **registre de groupe** pour les services partagés (ERP central, Active Directory, contrats-cadres). Choisissez le registre en haut à droite.
+Le module applique la procédure de gestion des risques. Chaque site a son propre **registre** ; si la politique le prévoit, il existe aussi un **registre de groupe** pour les services partagés (ERP central, Active Directory, contrats-cadres). Choisissez le registre en haut à droite.
 
 ### Ce qui exige d'agir
 

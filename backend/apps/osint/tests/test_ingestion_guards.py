@@ -34,10 +34,10 @@ class TestHostnameGuard:
         assert reason
 
     @pytest.mark.parametrize("domain", [
-        "sumiriko.it",
-        "www.it.sumiriko.com",
-        "zucchetti.it",
-        "emac.to.it",
+        "azienda-esempio.it",
+        "www.it.azienda-esempio.com",
+        "fornitore-esempio.it",
+        "officina.to.it",
     ])
     def test_public_domains_pass(self, domain):
         assert hostname_is_scannable(domain)[0] is True
@@ -51,7 +51,7 @@ class TestPublicMailDomains:
         assert is_public_mail_domain(domain) is True
 
     def test_a_company_domain_is_not_a_provider(self):
-        assert is_public_mail_domain("zucchetti.it") is False
+        assert is_public_mail_domain("fornitore-esempio.it") is False
 
 
 class TestSupplierFallback:

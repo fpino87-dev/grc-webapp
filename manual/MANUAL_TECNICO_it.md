@@ -521,7 +521,7 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 
 ### RiskAssessment
 
-- Metodologia D-ITA-INF-23: registro per sito (`plant`) e di gruppo (`plant` nullo, `affected_plants` = siti che lo ereditano)
+- Metodologia di risk management: registro per sito (`plant`) e di gruppo (`plant` nullo, `affected_plants` = siti che lo ereditano)
 - Classe solo dalla matrice (`risk.services.risk_class`), impatto = max delle 6 dimensioni con soglia di riservatezza dalle `InformationClass`
 - Rischio attuale (`current_class`) e atteso (`expected_class`); "applica atteso" solo con misure completate e verificate
 - `RiskAssessmentCycle` (primo / periodico / straordinario / legacy) con `snapshot` congelato all'approvazione

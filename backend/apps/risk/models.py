@@ -84,7 +84,7 @@ class RiskAssessment(BaseModel):
         on_delete=models.SET_NULL,
         related_name="risk_assessments",
     )
-    # Ciclo di valutazione a cui appartiene il rischio (metodologia D-ITA-INF-23).
+    # Ciclo di valutazione a cui appartiene il rischio (metodologia di risk management).
     # I rischi precedenti alla revisione stanno nel ciclo `legacy` del loro sito.
     cycle = models.ForeignKey(
         "risk.RiskAssessmentCycle",
@@ -333,7 +333,7 @@ class RiskLocalImpactReport(BaseModel):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Metodologia D-ITA-INF-23 (revisione post audit TISAX): catalogo minacce,
+# Metodologia di risk management (revisione post audit TISAX): catalogo minacce,
 # classi di informazioni, policy di governo del rischio e cicli di valutazione.
 # Le regole di calcolo stanno in services.py (risk_class, resolve_policy, …).
 # ─────────────────────────────────────────────────────────────────────────────

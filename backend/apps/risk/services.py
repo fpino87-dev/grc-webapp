@@ -78,7 +78,7 @@ def get_risk_bia_bcp_context(assessment: RiskAssessment) -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Metodologia D-ITA-INF-23 — regole uniche di calcolo, governo e cicli.
+# Metodologia di risk management — regole uniche di calcolo, governo e cicli.
 # Ogni modulo che mostra o usa classi di rischio passa da queste funzioni.
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -2311,7 +2311,7 @@ def legacy_register_rows(plant) -> list:
 # applicata senza conferma dell'utente (regola 9).
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Criteri della procedura D-ITA-INF-23 (§7) usati nei prompt: stessi testi
+# Criteri della procedura di risk management (§7) usati nei prompt: stessi testi
 # delle scale mostrate nella scheda del rischio.
 PROCEDURE_CRITERIA = {
     "probability": {

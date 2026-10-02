@@ -521,7 +521,7 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 
 ### RiskAssessment
 
-- D-ITA-INF-23 methodology: site register (`plant`) and group register (`plant` null, `affected_plants` = inheriting sites)
+- Risk management methodology: site register (`plant`) and group register (`plant` null, `affected_plants` = inheriting sites)
 - Class only from the matrix (`risk.services.risk_class`), impact = max of 6 dimensions with confidentiality floor from `InformationClass`
 - Current risk (`current_class`) and expected risk (`expected_class`); "apply expected" only with completed and verified measures
 - `RiskAssessmentCycle` (first / periodic / extraordinary / legacy) with a `snapshot` frozen on approval

@@ -12,7 +12,7 @@ SNAPSHOT_LIST_LIMIT = 10
 # 2 = regole uniche condivise con il Reporting (controls.services.
 # effective_control_rows, soglia di accettabilità a punteggio,
 # bcp.services.critical_processes_without_bcp);
-# 3 = rischi per classe della matrice della procedura D-ITA-INF-23
+# 3 = rischi per classe della matrice della procedura di risk management
 # (risk.services: evaluated_risks, class_counts, untreated_high_risks).
 # Gli snapshot precedenti restano come sono stati congelati.
 COMPLIANCE_RULE = 3
@@ -670,7 +670,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     ).count()
 
     # ── 3. Rischi ──
-    # Regole uniche di risk.services (procedura D-ITA-INF-23): classi della
+    # Regole uniche di risk.services (procedura di risk management): classi della
     # matrice, High/Critical non accettati = oltre la soglia di accettazione.
     from apps.risk.models import RiskAcceptance, RiskAssessmentCycle, RiskMitigationPlan
     from apps.risk.services import class_counts, class_rank, evaluated_risks, risk_label, untreated_high_risks

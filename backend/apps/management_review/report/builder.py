@@ -375,7 +375,7 @@ CYCLE_STATUS = {"in_corso": _("In corso"), "in_approvazione": _("In approvazione
 
 
 def _risk_class_blocks(r) -> list:
-    """Snapshot con le classi della procedura D-ITA-INF-23 (regola 3)."""
+    """Snapshot con le classi della procedura di risk management (regola 3)."""
     by_class = r.get("by_class") or {}
     blocks = [
         _kpis((_("High/Critical non accettati"), r.get("oltre_soglia", 0), "red"),
@@ -437,7 +437,7 @@ def _risk_blocks(snap) -> list:
     r = snap.get("rischi") or {}
     if r.get("metodo") == "classi":
         return _risk_class_blocks(r) + _bcp_blocks(snap)
-    # Snapshot precedenti alla metodologia D-ITA-INF-23: si rendono come
+    # Snapshot precedenti alla metodologia di risk management: si rendono come
     # sono stati congelati (punteggi e soglia di accettabilità).
     # Snapshot con la soglia di accettabilità (regole condivise con il
     # Reporting): "senza piano" e l'elenco riguardano i rischi oltre soglia.

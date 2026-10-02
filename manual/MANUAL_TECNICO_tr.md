@@ -520,7 +520,7 @@ Yanıt: { "propagated_to": 3, "skipped_no_instance": 0 }
 
 ### RiskAssessment
 
-- D-ITA-INF-23 metodolojisi: tesis kaydı (`plant`) ve grup kaydı (`plant` boş, `affected_plants` = devralan tesisler)
+- Risk yönetimi metodolojisi: tesis kaydı (`plant`) ve grup kaydı (`plant` boş, `affected_plants` = devralan tesisler)
 - Sınıf yalnızca matristen (`risk.services.risk_class`), etki = `InformationClass` kaynaklı gizlilik tabanıyla 6 boyutun en yükseği
 - Mevcut risk (`current_class`) ve beklenen risk (`expected_class`); "beklenen riski uygula" yalnızca tamamlanmış ve doğrulanmış önlemlerle
 - Onayda dondurulan `snapshot` ile `RiskAssessmentCycle` (ilk / dönemsel / olağanüstü / legacy)

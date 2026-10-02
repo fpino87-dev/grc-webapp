@@ -1,6 +1,6 @@
 {
   "version": "2026.10",
-  "note": "Obiettivi aziendali proposti (procedura D-ITA-INF-23 §2). Creati una sola volta per codice: modifiche ed eliminazioni fatte da Impostazioni non vengono sovrascritte.",
+  "note": "Obiettivi aziendali proposti (procedura di risk management §2). Creati una sola volta per codice: modifiche ed eliminazioni fatte da Impostazioni non vengono sovrascritte.",
   "objectives": [
     {"code": "BO-01", "name": "Continuity of supply to OEM customers", "description": "Deliveries to OEM customers on the agreed dates and quantities. Threatened by production, system or logistics downtime beyond the BIA tolerance.", "impact_dimensions": ["operational", "customer"]},
     {"code": "BO-02", "name": "Protection of customer information and TISAX label", "description": "Drawings, specifications and prototypes entrusted by customers; keeping the TISAX label. Threatened by disclosure, theft or alteration of information.", "impact_dimensions": ["customer", "legal", "reputational"]},

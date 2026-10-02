@@ -1,4 +1,4 @@
-"""Metodologia D-ITA-INF-23: matrice, policy di governo, catalogo minacce,
+"""Metodologia di risk management: matrice, policy di governo, catalogo minacce,
 classi di informazioni, cicli di valutazione e archiviazione del registro
 precedente."""
 import datetime

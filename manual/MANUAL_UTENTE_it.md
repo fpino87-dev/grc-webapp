@@ -411,7 +411,7 @@ La dipendenza è bidirezionale: l'asset mostrerà nella propria scheda i process
 
 [Schermata: risk assessment — registro, scheda del rischio]
 
-Il modulo applica la procedura di risk management (D-ITA-INF-23). Ogni sito ha il proprio **registro**; se la policy lo prevede esiste anche il **registro di gruppo** per i servizi condivisi (ERP centrale, Active Directory, contratti quadro). Scegli il registro in alto a destra.
+Il modulo applica la procedura di risk management. Ogni sito ha il proprio **registro**; se la policy lo prevede esiste anche il **registro di gruppo** per i servizi condivisi (ERP centrale, Active Directory, contratti quadro). Scegli il registro in alto a destra.
 
 ### Cosa richiede di agire
 

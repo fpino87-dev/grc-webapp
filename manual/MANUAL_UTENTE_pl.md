@@ -411,7 +411,7 @@ Zależność jest dwukierunkowa: aktywo pokaże na swojej karcie procesy, które
 
 [Zrzut ekranu: ocena ryzyka — rejestr, karta ryzyka]
 
-Moduł stosuje procedurę zarządzania ryzykiem (D-ITA-INF-23). Każdy zakład ma własny **rejestr**; jeśli przewiduje to polityka, istnieje też **rejestr grupy** dla usług wspólnych (centralny ERP, Active Directory, umowy ramowe). Rejestr wybiera się w prawym górnym rogu.
+Moduł stosuje procedurę zarządzania ryzykiem. Każdy zakład ma własny **rejestr**; jeśli przewiduje to polityka, istnieje też **rejestr grupy** dla usług wspólnych (centralny ERP, Active Directory, umowy ramowe). Rejestr wybiera się w prawym górnym rogu.
 
 ### Co wymaga działania
 

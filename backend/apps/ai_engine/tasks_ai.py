@@ -490,7 +490,7 @@ Reply ONLY with valid JSON: {{"draft_en": "...", "draft_local": "..."}}"""
 _LANG_NAMES = {"it": "italiano", "en": "English", "fr": "français", "pl": "polski", "tr": "Türkçe"}
 _RISK_SYSTEM = (
     "Sei un risk manager esperto di sicurezza delle informazioni nel settore automotive (TISAX/VDA ISA, NIS2). "
-    "Applichi la procedura aziendale D-ITA-INF-23: il rischio è la minaccia a un obiettivo aziendale; "
+    "Applichi la procedura aziendale di risk management: il rischio è la minaccia a un obiettivo aziendale; "
     "probabilità e impatto si scelgono SOLO con i criteri forniti; l'impatto è il caso peggiore fra le dimensioni. "
     "Non inventi fatti non presenti nei dati: se un dato manca, lo dici nella motivazione. Rispondi SOLO in JSON valido."
 )
