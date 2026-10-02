@@ -3506,7 +3506,7 @@
       "all_asset_types": "Tüm türler",
       "all_classes": "Tüm sınıflar",
       "all_treatments": "Tüm işlemler",
-      "only_open": "Tamamlanacak veya kabul edilmemiş",
+      "only_open": "Yalnızca tamamlanacak taslaklar",
       "show_na": "Uygulanamazları göster",
       "show_inherited": "Gruptan devralınanları göster",
       "count": "Riskler: {{count}}",
@@ -3524,6 +3524,17 @@
       "accepted": "kabul edildi",
       "acceptance_pending": "kabul sürüyor",
       "inherited_hint": "Saha tarafından devralınan grup riski"
+    },
+    "attention": {
+      "label": "Eylem gerektirenler",
+      "critical_untreated": "İşlenecek Critical (zorunlu)",
+      "critical_untreated_hint": "Aktif kabulü olmayan Critical riskler: işlem zorunludur",
+      "high_untreated": "Karar bekleyen High",
+      "high_untreated_hint": "Aktif kabulü olmayan High riskler: maliyet/fayda analiziyle işleyin veya resmi olarak kabul edin",
+      "acceptances_expiring": "Süresi dolmak üzere olan kabuller",
+      "acceptances_expiring_hint": "30 gün içinde sona eren aktif kabuller: yenileyin veya riski işleyin",
+      "overdue_measures": "Geciken önlemli riskler",
+      "overdue_measures_hint": "Plan önlemlerinden en az biri süresi geçmiş ve tamamlanmamış riskler"
     },
     "plan": {
       "filters": {
@@ -3614,7 +3625,10 @@
       "col_scope": "Seviye",
       "col_body": "Organ kararı",
       "col_opinion": "CISO görüşü",
-      "col_months": "Geçerlilik (ay)",
+      "col_months": "Kabul geçerliliği (ay)",
+      "col_treatment_months": "Önlemler için süre",
+      "col_treatment_months_hint": "İşlem planı önlemlerini tamamlama süresi: prosedürle belirlenir, değiştirilemez",
+      "months_value": "{{count}} ay",
       "scope_plant": "Saha",
       "scope_org": "Kuruluş",
       "opinion": {

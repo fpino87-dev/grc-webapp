@@ -3506,7 +3506,7 @@
       "all_asset_types": "Wszystkie typy",
       "all_classes": "Wszystkie klasy",
       "all_treatments": "Wszystkie sposoby postępowania",
-      "only_open": "Do zakończenia lub niezaakceptowane",
+      "only_open": "Tylko wersje robocze do uzupełnienia",
       "show_na": "Pokaż niemające zastosowania",
       "show_inherited": "Pokaż dziedziczone z grupy",
       "count": "Ryzyka: {{count}}",
@@ -3524,6 +3524,17 @@
       "accepted": "zaakceptowane",
       "acceptance_pending": "akceptacja w toku",
       "inherited_hint": "Ryzyko grupy dziedziczone przez zakład"
+    },
+    "attention": {
+      "label": "Co wymaga działania",
+      "critical_untreated": "Critical do postępowania (obowiązkowe)",
+      "critical_untreated_hint": "Ryzyka Critical bez aktywnej akceptacji: postępowanie jest obowiązkowe",
+      "high_untreated": "High do decyzji",
+      "high_untreated_hint": "Ryzyka High bez aktywnej akceptacji: postępować z analizą kosztów i korzyści lub formalnie zaakceptować",
+      "acceptances_expiring": "Wygasające akceptacje",
+      "acceptances_expiring_hint": "Aktywne akceptacje wygasające w ciągu 30 dni: odnowić lub potraktować ryzyko",
+      "overdue_measures": "Ryzyka z opóźnionymi działaniami",
+      "overdue_measures_hint": "Ryzyka z co najmniej jednym działaniem planu po terminie i niezakończonym"
     },
     "plan": {
       "filters": {
@@ -3614,7 +3625,10 @@
       "col_scope": "Poziom",
       "col_body": "Uchwała organu",
       "col_opinion": "Opinia CISO",
-      "col_months": "Ważność (mies.)",
+      "col_months": "Ważność akceptacji (miesiące)",
+      "col_treatment_months": "Działania w ciągu",
+      "col_treatment_months_hint": "Termin zakończenia działań planu postępowania: ustalony w procedurze, nie podlega zmianie",
+      "months_value": "Miesiące: {{count}}",
       "scope_plant": "Zakład",
       "scope_org": "Organizacja",
       "opinion": {

@@ -413,6 +413,10 @@ Bağımlılık çift yönlüdür: varlık kendi kartında ona bağımlı olan s�
 
 Modül, risk yönetimi prosedürünü (D-ITA-INF-23) uygular. Her tesisin kendi **kaydı** vardır; politika öngörüyorsa paylaşılan hizmetler (merkezi ERP, Active Directory, çerçeve sözleşmeler) için bir **grup kaydı** da bulunur. Kaydı sağ üstten seçin.
 
+### Eylem gerektirenler
+
+Kaydın üstündeki dört sayaç nerede müdahale edilmesi gerektiğini gösterir: **İşlenecek Critical** (zorunlu işlem), **Karar bekleyen High** (maliyet/fayda analiziyle işleyin veya resmi olarak kabul edin), 30 gün içinde **süresi dolmak üzere olan kabuller** ve **geciken önlemli riskler**. Bir sayaca tıklamak kaydı bu risklere göre filtreler, ikinci tıklama filtreyi kaldırır. Süreler prosedürü izler: önlemler Critical için 3 ay, High için 1 yıl, Medium için 2 yıl, Low ve Very Low için 5 yıl içinde tamamlanmalıdır; Critical bir riskin kabulü en fazla 6 ay, High bir riskinki 12 ay geçerlidir.
+
 ### Değerlendirmeler (döngüler)
 
 Başlığın altındaki çubuk, kaydın değerlendirme durumunu gösterir:
@@ -467,7 +471,7 @@ Bir tesis kaydında, o tesisi ilgilendiren grup riskleri ⇩ ile ve salt okunur 
 
 ### Matris ve Ayarlar
 
-**Matris** sekmesi hücre başına mevcut veya beklenen sayıları gösterir; risklerini görmek için bir hücreye tıklayın. **Ayarlar**'da tüm organizasyona erişimi olan kullanıcılar yönetişim modelini (merkezi, federe, tek tesis), her sınıfı kimin kabul ettiğini, ekonomik eşikleri (isteğe bağlı tesis istisnalarıyla), tehdit kataloğunu (özel kayıtlar) ve bilgi sınıflarını yönetir.
+**Matris** sekmesi hücre başına mevcut veya beklenen sayıları gösterir; risklerini görmek için bir hücreye tıklayın. **Ayarlar**'da tüm organizasyona erişimi olan kullanıcılar yönetişim modelini (merkezi, federe, tek tesis), her sınıfı kimin kabul ettiğini ve kabulün kaç ay geçerli olduğunu (yanında, salt okunur, prosedürün belirlediği önlem süresi), ekonomik eşikleri (isteğe bağlı tesis istisnalarıyla), tehdit kataloğunu (özel kayıtlar) ve bilgi sınıflarını yönetir.
 
 ---
 

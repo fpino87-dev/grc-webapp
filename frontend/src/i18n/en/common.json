@@ -3506,7 +3506,7 @@
       "all_asset_types": "All asset types",
       "all_classes": "All classes",
       "all_treatments": "All treatments",
-      "only_open": "To complete or not accepted",
+      "only_open": "Only drafts to complete",
       "show_na": "Show not applicable",
       "show_inherited": "Show inherited from group",
       "count": "Risks: {{count}}",
@@ -3524,6 +3524,17 @@
       "accepted": "accepted",
       "acceptance_pending": "acceptance in progress",
       "inherited_hint": "Group risk inherited by the site"
+    },
+    "attention": {
+      "label": "What requires action",
+      "critical_untreated": "Critical to treat (mandatory)",
+      "critical_untreated_hint": "Critical risks without an active acceptance: treatment is mandatory",
+      "high_untreated": "High to decide",
+      "high_untreated_hint": "High risks without an active acceptance: treat with a cost/benefit analysis or accept formally",
+      "acceptances_expiring": "Expiring acceptances",
+      "acceptances_expiring_hint": "Active acceptances expiring within 30 days: renew or treat the risk",
+      "overdue_measures": "Risks with overdue measures",
+      "overdue_measures_hint": "Risks with at least one plan measure past its deadline and not completed"
     },
     "plan": {
       "filters": {
@@ -3614,7 +3625,10 @@
       "col_scope": "Level",
       "col_body": "Body resolution",
       "col_opinion": "CISO opinion",
-      "col_months": "Validity (months)",
+      "col_months": "Acceptance validity (months)",
+      "col_treatment_months": "Measures within",
+      "col_treatment_months_hint": "Deadline to complete the treatment plan measures: set by the procedure, not editable",
+      "months_value": "{{count}} months",
       "scope_plant": "Site",
       "scope_org": "Organisation",
       "opinion": {

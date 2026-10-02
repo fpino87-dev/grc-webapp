@@ -662,3 +662,33 @@ def test_cycle_export_and_audit_pack_history(org_user, plant, threats, cycle, tm
     files = {p.name for p in (tmp_path / "03_risk").iterdir()}
     assert "valutazione_precedente_metodo_superato.csv" in files
     assert any(f.startswith("valutazione_approvata_") for f in files)
+
+
+# ── cosa richiede di agire ───────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_register_attention(org_user, plant, threats, cycle):
+    today = datetime.date(2030, 6, 1)
+    critical = _completed_risk(org_user, plant, threats["malware"])  # P4 × I4
+    high = _completed_risk(org_user, plant, threats["fire"], asset_type="SEDE", impact_operational=3)
+    accepted = _completed_risk(org_user, plant, threats["staff"], asset_type="PERSONALE", impact_operational=3)
+    RiskAcceptance.objects.create(risk=accepted, risk_class="high", status="active", rationale="Costi",
+                                  expires_on=today + datetime.timedelta(days=10))
+    RiskMitigationPlan.objects.create(assessment=high, action="Sprinkler", due_date=today - datetime.timedelta(days=1))
+    RiskMitigationPlan.objects.create(assessment=high, action="Fatto", due_date=today - datetime.timedelta(days=5),
+                                      completed_at=timezone.now())
+
+    data = services.register_attention(plant, today=today)
+    assert critical.current_class == "critical" and high.current_class == "high"
+    assert data["critical_untreated"]["risk_ids"] == [str(critical.pk)]
+    assert data["high_untreated"]["risk_ids"] == [str(high.pk)]
+    assert data["acceptances_expiring"]["risk_ids"] == [str(accepted.pk)]
+    assert data["overdue_measures"] == {"count": 1, "risk_ids": [str(high.pk)], "measures": 1}
+    assert services.register_attention(None, today=today)["critical_untreated"]["count"] == 0
+
+
+@pytest.mark.django_db
+def test_register_attention_endpoint(org_user, plant):
+    resp = _client(org_user).get(f"/api/v1/risk/assessments/attention/?plant={plant.pk}")
+    assert resp.status_code == 200
+    assert set(resp.data) == {"critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"}

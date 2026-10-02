@@ -234,9 +234,16 @@ export interface ResolvedPolicy {
   review_frequency_months: number;
   org_policy_id: string | null;
   plant_policy_id: string | null;
+  /** Scadenza delle misure per classe (mesi), fissa nella procedura. */
+  treatment_months: Record<RiskClass, number>;
   /** L'utente ha scope di organizzazione (governo del rischio, registro di gruppo). */
   user_org_scope: boolean;
 }
+
+export type AttentionKey = "critical_untreated" | "high_untreated" | "acceptances_expiring" | "overdue_measures";
+export const ATTENTION_KEYS: AttentionKey[] = ["critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"];
+/** Cosa richiede di agire nel registro (backend: risk.services.register_attention). */
+export type Attention = Record<AttentionKey, { count: number; risk_ids: string[]; measures?: number }>;
 
 export type CycleKind = "primo" | "periodico" | "straordinario" | "legacy";
 export type CycleStatus = "in_corso" | "in_approvazione" | "approvato" | "archiviato";
@@ -312,6 +319,8 @@ export const riskApi = {
     })),
   coverage: (plantId: string | null) =>
     data(apiClient.get<Coverage>("/risk/assessments/coverage/", { params: { plant: registerParam(plantId) } })),
+  attention: (plantId: string | null) =>
+    data(apiClient.get<Attention>("/risk/assessments/attention/", { params: { plant: registerParam(plantId) } })),
   triggers: (plantId: string | null) =>
     data(apiClient.get<Trigger[]>("/risk/assessments/triggers/", { params: { plant: registerParam(plantId) } })),
   matrix: (plantId: string | null, view: "current" | "expected") =>

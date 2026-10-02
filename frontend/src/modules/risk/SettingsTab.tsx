@@ -110,6 +110,7 @@ function GovernanceSettings({ registerId, policy, plants }: {
                 <th className="text-left px-2 py-1.5">{t("risk.settings.col_body")}</th>
                 <th className="text-left px-2 py-1.5">{t("risk.settings.col_opinion")}</th>
                 <th className="text-left px-2 py-1.5">{t("risk.settings.col_months")}</th>
+                <th className="text-left px-2 py-1.5" title={t("risk.settings.col_treatment_months_hint")}>{t("risk.settings.col_treatment_months")}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -149,6 +150,9 @@ function GovernanceSettings({ registerId, policy, plants }: {
                     <td className="px-2 py-1.5">
                       <input type="number" min={1} value={d.acceptance_max_months[cls]} disabled={!canEdit} className="border rounded px-1 py-0.5 w-16"
                         onChange={e => setD({ acceptance_max_months: { ...d.acceptance_max_months, [cls]: Number(e.target.value) } })} />
+                    </td>
+                    <td className="px-2 py-1.5 text-gray-600">
+                      {policy.treatment_months?.[cls] ? t("risk.settings.months_value", { count: policy.treatment_months[cls] }) : "—"}
                     </td>
                   </tr>
                 );

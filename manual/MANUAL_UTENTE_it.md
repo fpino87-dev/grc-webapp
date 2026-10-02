@@ -413,6 +413,10 @@ La dipendenza è bidirezionale: l'asset mostrerà nella propria scheda i process
 
 Il modulo applica la procedura di risk management (D-ITA-INF-23). Ogni sito ha il proprio **registro**; se la policy lo prevede esiste anche il **registro di gruppo** per i servizi condivisi (ERP centrale, Active Directory, contratti quadro). Scegli il registro in alto a destra.
 
+### Cosa richiede di agire
+
+In cima al registro quattro contatori mostrano dove bisogna intervenire: **Critical da trattare** (trattamento obbligatorio), **High da decidere** (trattare con analisi costi/benefici oppure accettare formalmente), **Accettazioni in scadenza** entro 30 giorni e **Rischi con misure in ritardo**. Un clic su un contatore filtra il registro su quei rischi, un secondo clic toglie il filtro. Le scadenze seguono la procedura: le misure vanno completate entro 3 mesi per i Critical, 1 anno per gli High, 2 anni per i Medium e 5 anni per Low e Very Low; l'accettazione di un Critical vale al massimo 6 mesi, quella di un High 12 mesi.
+
 ### Valutazioni (cicli)
 
 La barra sotto il titolo mostra lo stato della valutazione del registro:
@@ -467,7 +471,7 @@ Nel registro di un sito i rischi di gruppo che lo riguardano compaiono con ⇩, 
 
 ### Matrice e Impostazioni
 
-La scheda **Matrice** mostra i conteggi per cella, attuali o attesi; clic su una cella per vedere i rischi. In **Impostazioni** chi ha accesso a tutta l'organizzazione gestisce il modello di governo (centralizzato, federato, sito singolo), chi accetta per classe, le soglie economiche (con eventuali eccezioni per sito), il catalogo minacce (voci personalizzate) e le classi di informazioni.
+La scheda **Matrice** mostra i conteggi per cella, attuali o attesi; clic su una cella per vedere i rischi. In **Impostazioni** chi ha accesso a tutta l'organizzazione gestisce il modello di governo (centralizzato, federato, sito singolo), chi accetta per classe e per quanti mesi vale l'accettazione (accanto, in sola lettura, la scadenza delle misure fissata dalla procedura), le soglie economiche (con eventuali eccezioni per sito), il catalogo minacce (voci personalizzate) e le classi di informazioni.
 
 ---
 

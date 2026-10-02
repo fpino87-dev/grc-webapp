@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ASSET_TYPES, riskApi, type Risk } from "../../api/endpoints/risk";
+import { ASSET_TYPES, ATTENTION_KEYS, riskApi, type Attention, type AttentionKey, type Risk } from "../../api/endpoints/risk";
 import { RISK_CLASSES, classRank } from "./riskClasses";
 import { ClassTransition } from "./RiskUi";
 import type { RegisterId } from "./RiskPage";
@@ -23,6 +23,37 @@ function StatusLine({ r }: { r: Risk }) {
   return <span className="text-xs text-gray-500">{parts.join(" · ")}</span>;
 }
 
+const ATTENTION_STYLE: Record<AttentionKey, string> = {
+  critical_untreated: "border-red-300 bg-red-50 text-red-800",
+  high_untreated: "border-orange-300 bg-orange-50 text-orange-800",
+  acceptances_expiring: "border-amber-300 bg-amber-50 text-amber-800",
+  overdue_measures: "border-rose-300 bg-rose-50 text-rose-800",
+};
+
+/** Contatori di cosa richiede di agire: clic = filtra il registro su quei rischi. */
+function AttentionBar({ data, active, onSelect }: {
+  data?: Attention; active: AttentionKey | null; onSelect: (key: AttentionKey | null) => void;
+}) {
+  const { t } = useTranslation();
+  if (!data) return null;
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3" role="group" aria-label={t("risk.attention.label")}>
+      {ATTENTION_KEYS.map(key => {
+        const { count } = data[key];
+        const selected = active === key;
+        return (
+          <button key={key} type="button" disabled={!count && !selected} aria-pressed={selected}
+            onClick={() => onSelect(selected ? null : key)} title={t(`risk.attention.${key}_hint`)}
+            className={`text-left border rounded-lg px-3 py-2 transition ${count ? ATTENTION_STYLE[key] : "border-gray-200 bg-white text-gray-400"} ${selected ? "ring-2 ring-offset-1 ring-primary-500" : ""}`}>
+            <span className="block text-xl font-semibold leading-tight">{count}</span>
+            <span className="block text-xs">{t(`risk.attention.${key}`)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; onOpen: (id: string) => void }) {
   const { t } = useTranslation();
   const [assetType, setAssetType] = useState("");
@@ -32,29 +63,37 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
   const [showNa, setShowNa] = useState(false);
   const [inherited, setInherited] = useState(true);
   const [q, setQ] = useState("");
+  const [attentionKey, setAttentionKey] = useState<AttentionKey | null>(null);
 
   const { data: risks = [], isLoading } = useQuery({
     queryKey: ["risk-register", registerId, inherited],
     queryFn: () => riskApi.list(registerId, registerId && inherited ? { include_inherited: "1" } : {}),
     retry: false,
   });
+  const { data: attention } = useQuery({
+    queryKey: ["risk-register", registerId, "attention"],
+    queryFn: () => riskApi.attention(registerId),
+    retry: false,
+  });
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
+    const focus = attentionKey && attention ? new Set(attention[attentionKey].risk_ids) : null;
     return risks
+      .filter(r => !focus || focus.has(r.id))
       .filter(r => showNa || r.applicable)
       .filter(r => !assetType || r.asset_type === assetType)
       .filter(r => !cls || r.current_class === cls)
       .filter(r => !treatment || r.treatment === treatment)
-      .filter(r => !onlyOpen || r.status !== "completato"
-        || (r.current_class && ["high", "critical"].includes(r.current_class) && r.active_acceptance?.status !== "active"))
+      .filter(r => !onlyOpen || r.status !== "completato")
       .filter(r => !needle || [r.name, r.threat_code, r.threat_title, r.asset_name, r.owner_name]
         .some(v => (v ?? "").toLowerCase().includes(needle)))
       .sort((a, b) => classRank(b.current_class) - classRank(a.current_class) || a.name.localeCompare(b.name));
-  }, [risks, assetType, cls, treatment, onlyOpen, showNa, q]);
+  }, [risks, assetType, cls, treatment, onlyOpen, showNa, q, attentionKey, attention]);
 
   return (
     <div>
+      <AttentionBar data={attention} active={attentionKey} onSelect={setAttentionKey} />
       <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
         <input value={q} onChange={e => setQ(e.target.value)} placeholder={t("risk.register.search")}
           className="border rounded px-2 py-1.5 w-56" />

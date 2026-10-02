@@ -188,6 +188,11 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         return Response(services.register_coverage(self._register_plant(request)))
 
     @action(detail=False, methods=["get"])
+    def attention(self, request):
+        """Contatori di cosa richiede di agire nel registro, con i rischi coinvolti."""
+        return Response(services.register_attention(self._register_plant(request)))
+
+    @action(detail=False, methods=["get"])
     def triggers(self, request):
         return Response(services.revaluation_triggers(self._register_plant(request)))
 
@@ -588,16 +593,21 @@ class RiskGovernancePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ReadOnlyMod
         """Policy effettiva per `?plant=<id>` (assente = organizzazione/gruppo)."""
         from core.scoping import require_plant_access
 
-        from .services import resolve_policy
-
         from core.scoping import user_has_org_scope
+
+        from .services import TREATMENT_RULES, resolve_policy
 
         plant = _plant_from_param(request, request.query_params.get("plant"))
         if plant is not None:
             require_plant_access(request.user, plant)
         # `user_org_scope`: la UI mostra le modifiche di governo e il registro
         # di gruppo solo a chi può farle (il backend le verifica comunque).
-        return Response({**resolve_policy(plant), "user_org_scope": user_has_org_scope(request.user)})
+        # `treatment_months`: scadenze delle misure per classe, fisse nella procedura (§9.2).
+        return Response({
+            **resolve_policy(plant),
+            "treatment_months": {cls: rule["months"] for cls, rule in TREATMENT_RULES.items()},
+            "user_org_scope": user_has_org_scope(request.user),
+        })
 
     @action(detail=False, methods=["get"])
     def presets(self, request):

@@ -3506,7 +3506,7 @@
       "all_asset_types": "Tutte le tipologie",
       "all_classes": "Tutte le classi",
       "all_treatments": "Tutti i trattamenti",
-      "only_open": "Da completare o non accettati",
+      "only_open": "Solo bozze da completare",
       "show_na": "Mostra non applicabili",
       "show_inherited": "Mostra ereditati dal gruppo",
       "count": "Rischi: {{count}}",
@@ -3524,6 +3524,17 @@
       "accepted": "accettato",
       "acceptance_pending": "accettazione in corso",
       "inherited_hint": "Rischio di gruppo ereditato dal sito"
+    },
+    "attention": {
+      "label": "Cosa richiede di agire",
+      "critical_untreated": "Critical da trattare (obbligatorio)",
+      "critical_untreated_hint": "Rischi Critical senza accettazione attiva: il trattamento è obbligatorio",
+      "high_untreated": "High da decidere",
+      "high_untreated_hint": "Rischi High senza accettazione attiva: trattare con analisi costi/benefici oppure accettare formalmente",
+      "acceptances_expiring": "Accettazioni in scadenza",
+      "acceptances_expiring_hint": "Accettazioni attive che scadono entro 30 giorni: rinnovare o trattare il rischio",
+      "overdue_measures": "Rischi con misure in ritardo",
+      "overdue_measures_hint": "Rischi con almeno una misura del piano oltre la scadenza e non completata"
     },
     "plan": {
       "filters": {
@@ -3614,7 +3625,10 @@
       "col_scope": "Livello",
       "col_body": "Delibera organo",
       "col_opinion": "Parere CISO",
-      "col_months": "Validità (mesi)",
+      "col_months": "Validità accettazione (mesi)",
+      "col_treatment_months": "Misure entro",
+      "col_treatment_months_hint": "Scadenza per completare le misure del piano di trattamento: fissata dalla procedura, non si modifica",
+      "months_value": "{{count}} mesi",
       "scope_plant": "Sito",
       "scope_org": "Organizzazione",
       "opinion": {

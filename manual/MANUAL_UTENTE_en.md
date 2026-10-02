@@ -413,6 +413,10 @@ The dependency is bidirectional: the asset will show in its own record the proce
 
 The module applies the risk management procedure (D-ITA-INF-23). Each site has its own **register**; if the policy provides for it there is also a **group register** for shared services (central ERP, Active Directory, framework contracts). Choose the register at the top right.
 
+### What requires action
+
+At the top of the register four counters show where action is needed: **Critical to treat** (mandatory treatment), **High to decide** (treat with a cost/benefit analysis or accept formally), **Expiring acceptances** within 30 days and **Risks with overdue measures**. Clicking a counter filters the register on those risks; a second click removes the filter. Deadlines follow the procedure: measures must be completed within 3 months for Critical, 1 year for High, 2 years for Medium and 5 years for Low and Very Low; acceptance of a Critical risk lasts at most 6 months, of a High risk 12 months.
+
 ### Assessments (cycles)
 
 The bar under the title shows the status of the register assessment:
@@ -467,7 +471,7 @@ In a site register, the group risks that concern it appear with ⇩, read-only. 
 
 ### Matrix and Settings
 
-The **Matrix** tab shows counts per cell, current or expected; click a cell to see its risks. In **Settings**, users with access to the whole organisation manage the governance model (centralised, federated, single site), who accepts per class, economic thresholds (with optional site exceptions), the threat catalogue (custom entries) and information classes.
+The **Matrix** tab shows counts per cell, current or expected; click a cell to see its risks. In **Settings**, users with access to the whole organisation manage the governance model (centralised, federated, single site), who accepts per class and how many months the acceptance lasts (next to it, read-only, the measures deadline set by the procedure), economic thresholds (with optional site exceptions), the threat catalogue (custom entries) and information classes.
 
 ---
 

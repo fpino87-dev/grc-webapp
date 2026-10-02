@@ -23,6 +23,7 @@ const policy = {
   acceptance_matrix: Object.fromEntries(CLASSES.map(c => [c, rule])),
   upper_opinion: Object.fromEntries(CLASSES.map(c => [c, "none"])),
   acceptance_max_months: Object.fromEntries(CLASSES.map(c => [c, 12])),
+  treatment_months: { critical: 3, high: 12, medium: 24, low: 60, very_low: 60 },
   economic_thresholds: { "2": 10000, "3": 50000, "4": 250000, "5": 500000 },
   overdue_escalation_days: 30, review_frequency_months: 12, org_policy_id: null, plant_policy_id: null,
 };
@@ -54,10 +55,12 @@ vi.mock("../../../api/endpoints/risk", () => {
   const ok = <T,>(v: T) => vi.fn(() => Promise.resolve(v));
   return {
     ASSET_TYPES: ["IT", "OT", "SEDE", "PERSONALE", "FORNITORI", "PROTOTIPI"],
+    ATTENTION_KEYS: ["critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"],
     IMPACT_DIMENSIONS: ["economic", "legal", "customer", "reputational", "people", "operational"],
     apiError: (_e: unknown, f: string) => f,
     riskApi: {
       resolvedPolicy: ok(policy), presets: ok({ centralizzato: policy }), cycles: ok([cycle]), triggers: ok([]),
+      attention: ok({ critical_untreated: { count: 1, risk_ids: ["r1"] }, high_untreated: { count: 0, risk_ids: [] }, acceptances_expiring: { count: 0, risk_ids: [] }, overdue_measures: { count: 1, risk_ids: ["r1"], measures: 1 } }),
       list: ok([risk]), get: ok(risk), legacy: ok([]),
       coverage: ok({ asset_types: ["IT"], pairs: [{ asset_type: "IT", threat_id: "t1", threat_code: "IN_MAL", state: "evaluated", risk_ids: ["r1"], worst_class: "critical" }], total: 1, closed: 1, missing: 0, pct: 100 }),
       matrix: ok([5, 4, 3, 2, 1].flatMap(p => [1, 2, 3, 4, 5].map(i => ({ probability: p, impact: i, count: p === 4 && i === 4 ? 1 : 0, class: "medium" })))),

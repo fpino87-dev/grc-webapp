@@ -413,6 +413,10 @@ La dépendance est bidirectionnelle : l'asset affichera dans sa fiche les proces
 
 Le module applique la procédure de gestion des risques (D-ITA-INF-23). Chaque site a son propre **registre** ; si la politique le prévoit, il existe aussi un **registre de groupe** pour les services partagés (ERP central, Active Directory, contrats-cadres). Choisissez le registre en haut à droite.
 
+### Ce qui exige d'agir
+
+En haut du registre, quatre compteurs indiquent où agir : **Critical à traiter** (traitement obligatoire), **High à décider** (traiter avec une analyse coûts/bénéfices ou accepter formellement), **Acceptations arrivant à échéance** sous 30 jours et **Risques avec mesures en retard**. Un clic sur un compteur filtre le registre sur ces risques, un second clic retire le filtre. Les délais suivent la procédure : les mesures doivent être terminées sous 3 mois pour les Critical, 1 an pour les High, 2 ans pour les Medium et 5 ans pour les Low et Very Low ; l'acceptation d'un Critical vaut au maximum 6 mois, celle d'un High 12 mois.
+
 ### Appréciations (cycles)
 
 La barre sous le titre indique l'état de l'appréciation du registre :
@@ -467,7 +471,7 @@ Dans le registre d'un site, les risques de groupe qui le concernent apparaissent
 
 ### Matrice et Paramètres
 
-L'onglet **Matrice** affiche les comptes par cellule, actuels ou attendus ; cliquez sur une cellule pour voir ses risques. Dans **Paramètres**, les utilisateurs ayant accès à toute l'organisation gèrent le modèle de gouvernance (centralisé, fédéré, site unique), qui accepte par classe, les seuils économiques (avec exceptions éventuelles par site), le catalogue des menaces (entrées personnalisées) et les classes d'informations.
+L'onglet **Matrice** affiche les comptes par cellule, actuels ou attendus ; cliquez sur une cellule pour voir ses risques. Dans **Paramètres**, les utilisateurs ayant accès à toute l'organisation gèrent le modèle de gouvernance (centralisé, fédéré, site unique), qui accepte par classe et pendant combien de mois l'acceptation est valable (à côté, en lecture seule, le délai des mesures fixé par la procédure), les seuils économiques (avec exceptions éventuelles par site), le catalogue des menaces (entrées personnalisées) et les classes d'informations.
 
 ---
 

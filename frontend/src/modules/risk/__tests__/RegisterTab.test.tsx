@@ -14,10 +14,13 @@ const base = {
   mitigation_plans_verified: 0, active_acceptance: null, threat_title: "",
 };
 const list = vi.hoisted(() => vi.fn());
+const attention = vi.hoisted(() => vi.fn());
 vi.mock("../../../api/endpoints/risk", () => ({
   ASSET_TYPES: ["IT", "OT", "SEDE", "PERSONALE", "FORNITORI", "PROTOTIPI"],
-  riskApi: { list: (...a: unknown[]) => list(...a) },
+  ATTENTION_KEYS: ["critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"],
+  riskApi: { list: (...a: unknown[]) => list(...a), attention: (...a: unknown[]) => attention(...a) },
 }));
+const none = { count: 0, risk_ids: [] };
 
 function renderTab(onOpen = vi.fn()) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -26,12 +29,34 @@ function renderTab(onOpen = vi.fn()) {
 }
 
 describe("RegisterTab", () => {
+  it("i contatori filtrano il registro sui rischi da trattare", async () => {
+    list.mockResolvedValue([
+      { ...base, id: "a", name: "Basso", threat_code: "LO_ALE", asset_type: "SEDE", applicable: true, current_class: "low", expected_class: "" },
+      { ...base, id: "b", name: "Critico", threat_code: "IN_MAL", asset_type: "IT", applicable: true, current_class: "critical", expected_class: "" },
+    ]);
+    attention.mockResolvedValue({
+      critical_untreated: { count: 1, risk_ids: ["b"] }, high_untreated: none,
+      acceptances_expiring: none, overdue_measures: { ...none, measures: 0 },
+    });
+    renderTab();
+    expect(await screen.findAllByRole("row")).toHaveLength(3);
+    const counter = (await screen.findByText("risk.attention.critical_untreated")).closest("button")!;
+    expect(screen.getByText("risk.attention.high_untreated").closest("button")!.hasAttribute("disabled")).toBe(true);
+    fireEvent.click(counter);
+    const rows = screen.getAllByRole("row");
+    expect(rows).toHaveLength(2);
+    expect(rows[1].textContent).toContain("Critico");
+    fireEvent.click(counter);
+    expect(screen.getAllByRole("row")).toHaveLength(3);
+  });
+
   it("ordina per classe, nasconde i non applicabili e apre la scheda", async () => {
     list.mockResolvedValue([
       { ...base, id: "a", name: "Basso", threat_code: "LO_ALE", asset_type: "SEDE", applicable: true, current_class: "low", expected_class: "" },
       { ...base, id: "b", name: "Critico", threat_code: "IN_MAL", asset_type: "IT", applicable: true, current_class: "critical", expected_class: "medium" },
       { ...base, id: "c", name: "Fuori", threat_code: "LO_AST", asset_type: "SEDE", applicable: false, current_class: "", expected_class: "" },
     ]);
+    attention.mockResolvedValue({ critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: none });
     const onOpen = renderTab();
     const rows = await screen.findAllByRole("row");
     expect(rows[1].textContent).toContain("Critico");

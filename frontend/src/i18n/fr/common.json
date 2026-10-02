@@ -3506,7 +3506,7 @@
       "all_asset_types": "Tous les types",
       "all_classes": "Toutes les classes",
       "all_treatments": "Tous les traitements",
-      "only_open": "À terminer ou non acceptés",
+      "only_open": "Seulement les brouillons à terminer",
       "show_na": "Afficher les non applicables",
       "show_inherited": "Afficher les hérités du groupe",
       "count": "Risques : {{count}}",
@@ -3524,6 +3524,17 @@
       "accepted": "accepté",
       "acceptance_pending": "acceptation en cours",
       "inherited_hint": "Risque de groupe hérité par le site"
+    },
+    "attention": {
+      "label": "Ce qui exige d'agir",
+      "critical_untreated": "Critical à traiter (obligatoire)",
+      "critical_untreated_hint": "Risques Critical sans acceptation active : le traitement est obligatoire",
+      "high_untreated": "High à décider",
+      "high_untreated_hint": "Risques High sans acceptation active : traiter avec une analyse coûts/bénéfices ou accepter formellement",
+      "acceptances_expiring": "Acceptations arrivant à échéance",
+      "acceptances_expiring_hint": "Acceptations actives expirant dans les 30 jours : renouveler ou traiter le risque",
+      "overdue_measures": "Risques avec mesures en retard",
+      "overdue_measures_hint": "Risques avec au moins une mesure du plan dépassant l'échéance et non terminée"
     },
     "plan": {
       "filters": {
@@ -3614,7 +3625,10 @@
       "col_scope": "Niveau",
       "col_body": "Délibération organe",
       "col_opinion": "Avis RSSI",
-      "col_months": "Validité (mois)",
+      "col_months": "Validité de l'acceptation (mois)",
+      "col_treatment_months": "Mesures sous",
+      "col_treatment_months_hint": "Délai pour terminer les mesures du plan de traitement : fixé par la procédure, non modifiable",
+      "months_value": "{{count}} mois",
       "scope_plant": "Site",
       "scope_org": "Organisation",
       "opinion": {

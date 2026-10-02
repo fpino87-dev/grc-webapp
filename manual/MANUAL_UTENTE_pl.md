@@ -413,6 +413,10 @@ Zależność jest dwukierunkowa: aktywo pokaże na swojej karcie procesy, które
 
 Moduł stosuje procedurę zarządzania ryzykiem (D-ITA-INF-23). Każdy zakład ma własny **rejestr**; jeśli przewiduje to polityka, istnieje też **rejestr grupy** dla usług wspólnych (centralny ERP, Active Directory, umowy ramowe). Rejestr wybiera się w prawym górnym rogu.
 
+### Co wymaga działania
+
+U góry rejestru cztery liczniki pokazują, gdzie trzeba działać: **Critical do postępowania** (postępowanie obowiązkowe), **High do decyzji** (postępować z analizą kosztów i korzyści lub formalnie zaakceptować), **Wygasające akceptacje** w ciągu 30 dni oraz **Ryzyka z opóźnionymi działaniami**. Kliknięcie licznika filtruje rejestr do tych ryzyk, drugie kliknięcie usuwa filtr. Terminy wynikają z procedury: działania należy zakończyć w ciągu 3 miesięcy dla Critical, 1 roku dla High, 2 lat dla Medium i 5 lat dla Low i Very Low; akceptacja ryzyka Critical jest ważna maksymalnie 6 miesięcy, High 12 miesięcy.
+
 ### Oceny (cykle)
 
 Pasek pod tytułem pokazuje stan oceny rejestru:
@@ -467,7 +471,7 @@ W rejestrze zakładu ryzyka grupy, które go dotyczą, są oznaczone ⇩ i dost�
 
 ### Macierz i Ustawienia
 
-Zakładka **Macierz** pokazuje liczby w komórkach, bieżące lub oczekiwane; kliknij komórkę, aby zobaczyć jej ryzyka. W **Ustawieniach** użytkownicy z dostępem do całej organizacji zarządzają modelem zarządzania (scentralizowany, sfederowany, jeden zakład), tym, kto akceptuje każdą klasę, progami ekonomicznymi (z ewentualnymi wyjątkami dla zakładów), katalogiem zagrożeń (pozycje własne) i klasami informacji.
+Zakładka **Macierz** pokazuje liczby w komórkach, bieżące lub oczekiwane; kliknij komórkę, aby zobaczyć jej ryzyka. W **Ustawieniach** użytkownicy z dostępem do całej organizacji zarządzają modelem zarządzania (scentralizowany, sfederowany, jeden zakład), tym, kto akceptuje każdą klasę i ile miesięcy ważna jest akceptacja (obok, tylko do odczytu, termin działań ustalony w procedurze), progami ekonomicznymi (z ewentualnymi wyjątkami dla zakładów), katalogiem zagrożeń (pozycje własne) i klasami informacji.
 
 ---
 

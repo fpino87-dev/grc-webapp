@@ -1386,7 +1386,8 @@ def expire_acceptances(today=None) -> dict:
                 assign_type="role", assign_value=GrcRole.RISK_MANAGER,
             )
         counts["expired"] += 1
-    for acc in active.filter(expires_on__gte=today, expires_on__lte=today + datetime.timedelta(days=30),
+    for acc in active.filter(expires_on__gte=today,
+                             expires_on__lte=today + datetime.timedelta(days=ACCEPTANCE_WARN_DAYS),
                              expiry_warned_at__isnull=True):
         with transaction.atomic():
             create_task(
@@ -1783,6 +1784,43 @@ def untreated_high_risks(qs):
     e non ancora ricondotti (procedura §9.2, §10)."""
     high = qs.filter(current_class__in=HIGH_CLASSES)
     return high.exclude(pk__in=active_acceptance_risk_ids(high))
+
+
+ACCEPTANCE_WARN_DAYS = 30
+
+
+def register_attention(plant=None, today=None) -> dict:
+    """Cosa richiede di agire nel registro (procedura §9.2, §10, §11.3):
+    Critical non accettati (trattamento obbligatorio), High non accettati
+    (da trattare o accettare), accettazioni in scadenza, misure in ritardo.
+    Solo il registro proprio: i rischi di gruppo ereditati li gestisce il gruppo."""
+    import datetime
+
+    from .models import RiskAcceptance, RiskMitigationPlan
+
+    today = today or timezone.localdate()
+    risks = register_queryset(plant).filter(applicable=True, status="completato")
+    untreated = untreated_high_risks(risks)
+
+    def _ids(qs, field="pk"):
+        return sorted({str(x) for x in qs.values_list(field, flat=True)})
+
+    overdue = RiskMitigationPlan.objects.filter(
+        assessment__in=register_queryset(plant), completed_at__isnull=True, due_date__lt=today,
+    )
+    expiring = RiskAcceptance.objects.filter(
+        risk__in=risks, status="active",
+        expires_on__gte=today, expires_on__lte=today + datetime.timedelta(days=ACCEPTANCE_WARN_DAYS),
+    )
+    groups = {
+        "critical_untreated": _ids(untreated.filter(current_class="critical")),
+        "high_untreated": _ids(untreated.filter(current_class="high")),
+        "acceptances_expiring": _ids(expiring, "risk_id"),
+        "overdue_measures": _ids(overdue, "assessment_id"),
+    }
+    result = {key: {"count": len(ids), "risk_ids": ids} for key, ids in groups.items()}
+    result["overdue_measures"]["measures"] = overdue.count()
+    return result
 
 
 def worst_class(classes) -> str:
