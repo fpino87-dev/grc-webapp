@@ -86,9 +86,9 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
       .filter(r => !cls || r.current_class === cls)
       .filter(r => !treatment || r.treatment === treatment)
       .filter(r => !onlyOpen || r.status !== "completato")
-      .filter(r => !needle || [r.name, r.threat_code, r.threat_title, r.asset_name, r.owner_name]
+      .filter(r => !needle || [r.display_name, r.threat_code, r.threat_title, r.asset_name, r.owner_name]
         .some(v => (v ?? "").toLowerCase().includes(needle)))
-      .sort((a, b) => classRank(b.current_class) - classRank(a.current_class) || a.name.localeCompare(b.name));
+      .sort((a, b) => classRank(b.current_class) - classRank(a.current_class) || a.display_name.localeCompare(b.display_name));
   }, [risks, assetType, cls, treatment, onlyOpen, showNa, q, attentionKey, attention]);
 
   return (
@@ -149,9 +149,9 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
                     <div className="text-[11px] text-gray-400">{r.asset_type ? t(`risk.asset_types.${r.asset_type}`) : ""}</div>
                   </td>
                   <td className="px-3 py-2 align-top">
-                    <div className="font-medium text-gray-800 truncate max-w-md" title={r.name}>
+                    <div className="font-medium text-gray-800 truncate max-w-md" title={r.display_name}>
                       {r.is_inherited && <span className="mr-1" title={t("risk.register.inherited_hint")}>⇩</span>}
-                      {r.name}
+                      {r.display_name}
                     </div>
                     <div className="text-xs text-gray-400 truncate max-w-md">
                       {[r.asset_name || r.asset_group_label, r.supplier_name, r.critical_process_name].filter(Boolean).join(" · ")}

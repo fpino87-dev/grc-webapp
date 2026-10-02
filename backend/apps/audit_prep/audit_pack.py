@@ -306,7 +306,7 @@ def _collect_risk(out_dir: Path, plant) -> dict:
     risk_dir.mkdir(parents=True, exist_ok=True)
 
     from apps.risk.models import RiskAcceptance
-    from apps.risk.services import register_queryset
+    from apps.risk.services import register_queryset, risk_label
 
     qs = (
         register_queryset(plant, include_inherited=True)
@@ -317,7 +317,7 @@ def _collect_risk(out_dir: Path, plant) -> dict:
     accepted = dict(RiskAcceptance.objects.filter(risk__in=qs, status="active").values_list("risk_id", "expires_on"))
     rows = [{
         "register": "gruppo" if r.plant_id is None else "sito",
-        "name": r.name,
+        "name": risk_label(r),
         "asset_type": r.asset_type,
         "threat": r.threat.code if r.threat else "",
         "applicable": r.applicable,

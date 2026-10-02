@@ -178,12 +178,12 @@ def notify_finding_major(finding, recipients: list[str]):
 
 
 def notify_risk_red(assessment, recipients: list[str]):
-    from apps.risk.services import CLASS_LABELS, treatment_rule
+    from apps.risk.services import CLASS_LABELS, risk_label, treatment_rule
 
     rule = treatment_rule(assessment.current_class) or {}
     register = assessment.plant.name if assessment.plant else "Gruppo"
     send_grc_email(
-        subject=f"[GRC] 🔴 Rischio {CLASS_LABELS.get(assessment.current_class, '')}: {assessment.name}",
+        subject=f"[GRC] 🔴 Rischio {CLASS_LABELS.get(assessment.current_class, '')}: {risk_label(assessment)}",
         body=(
             "Valutazione completata con un rischio High o Critical.\n\n"
             f"Registro: {register}\n"

@@ -31,8 +31,8 @@ function renderTab(onOpen = vi.fn()) {
 describe("RegisterTab", () => {
   it("i contatori filtrano il registro sui rischi da trattare", async () => {
     list.mockResolvedValue([
-      { ...base, id: "a", name: "Basso", threat_code: "LO_ALE", asset_type: "SEDE", applicable: true, current_class: "low", expected_class: "" },
-      { ...base, id: "b", name: "Critico", threat_code: "IN_MAL", asset_type: "IT", applicable: true, current_class: "critical", expected_class: "" },
+      { ...base, id: "a", name: "Basso", display_name: "Basso", threat_code: "LO_ALE", asset_type: "SEDE", applicable: true, current_class: "low", expected_class: "" },
+      { ...base, id: "b", name: "Critico", display_name: "Critico", threat_code: "IN_MAL", asset_type: "IT", applicable: true, current_class: "critical", expected_class: "" },
     ]);
     attention.mockResolvedValue({
       critical_untreated: { count: 1, risk_ids: ["b"] }, high_untreated: none,
@@ -52,9 +52,9 @@ describe("RegisterTab", () => {
 
   it("ordina per classe, nasconde i non applicabili e apre la scheda", async () => {
     list.mockResolvedValue([
-      { ...base, id: "a", name: "Basso", threat_code: "LO_ALE", asset_type: "SEDE", applicable: true, current_class: "low", expected_class: "" },
-      { ...base, id: "b", name: "Critico", threat_code: "IN_MAL", asset_type: "IT", applicable: true, current_class: "critical", expected_class: "medium" },
-      { ...base, id: "c", name: "Fuori", threat_code: "LO_AST", asset_type: "SEDE", applicable: false, current_class: "", expected_class: "" },
+      { ...base, id: "a", name: "Basso", display_name: "Basso", threat_code: "LO_ALE", asset_type: "SEDE", applicable: true, current_class: "low", expected_class: "" },
+      { ...base, id: "b", name: "Critico", display_name: "Critico", threat_code: "IN_MAL", asset_type: "IT", applicable: true, current_class: "critical", expected_class: "medium" },
+      { ...base, id: "c", name: "Fuori", display_name: "Fuori", threat_code: "LO_AST", asset_type: "SEDE", applicable: false, current_class: "", expected_class: "" },
     ]);
     attention.mockResolvedValue({ critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: none });
     const onOpen = renderTab();

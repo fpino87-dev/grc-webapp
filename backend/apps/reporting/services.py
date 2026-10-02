@@ -172,7 +172,7 @@ def risk_bia_bcp(plant_id) -> dict:
     from apps.risk.models import NIS2_ART21_CHOICES
     from apps.risk.services import (
         CLASS_LABELS, active_acceptance_risk_ids, class_counts, class_rank, evaluated_risks,
-        risk_class, risk_level_bucket, untreated_high_risks,
+        risk_class, risk_label, risk_level_bucket, untreated_high_risks,
     )
 
     today = timezone.localdate()
@@ -225,7 +225,7 @@ def risk_bia_bcp(plant_id) -> dict:
     top_risks = [
         {
             "id": str(r.id),
-            "name": r.name,
+            "name": risk_label(r),
             "plant_name": r.plant.name if r.plant else None,
             "asset_type": r.asset_type,
             "threat_code": r.threat.code if r.threat else None,

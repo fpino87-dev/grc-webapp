@@ -20,7 +20,7 @@ export function NewRiskModal({ registerId, plants, prefill, onClose, onCreated }
   onClose: () => void;
   onCreated: (id: string) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [assetType, setAssetType] = useState<AssetType | "">(prefill.asset_type ?? "");
   const [threat, setThreat] = useState(prefill.threat ?? "");
   const [name, setName] = useState("");
@@ -34,7 +34,7 @@ export function NewRiskModal({ registerId, plants, prefill, onClose, onCreated }
     retry: false,
   });
   const { data: threats = [] } = useQuery({
-    queryKey: ["risk-threats", assetType],
+    queryKey: ["risk-threats", assetType, i18n.language],
     queryFn: () => riskApi.threats({ asset_type: assetType }),
     enabled: !!assetType,
     retry: false,

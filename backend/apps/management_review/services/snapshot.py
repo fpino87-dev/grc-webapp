@@ -643,7 +643,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     # Regole uniche di risk.services (procedura D-ITA-INF-23): classi della
     # matrice, High/Critical non accettati = oltre la soglia di accettazione.
     from apps.risk.models import RiskAcceptance, RiskAssessmentCycle, RiskMitigationPlan
-    from apps.risk.services import class_counts, class_rank, evaluated_risks, untreated_high_risks
+    from apps.risk.services import class_counts, class_rank, evaluated_risks, risk_label, untreated_high_risks
 
     risks_qs = evaluated_risks(plant_id)
     counts = class_counts(risks_qs)
@@ -685,7 +685,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         return [
             {
                 "id": str(r.pk),
-                "name": r.name or "—",
+                "name": risk_label(r),
                 "threat": r.threat.code if r.threat else None,
                 "asset": r.asset.name if r.asset else (r.asset_group_label or None),
                 "process": r.critical_process.name if r.critical_process else None,
@@ -702,13 +702,13 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     risk_summary["elenco_accettati"] = [
         {
             "id": str(a.risk_id),
-            "name": a.risk.name,
+            "name": risk_label(a.risk),
             "current_class": a.risk_class,
             "signatures": [s["role"] for s in a.signatures],
             "body": a.body.name if a.body else None,
             "acceptance_expiry": _iso(a.expires_on),
         }
-        for a in acceptances.select_related("risk", "body").order_by("expires_on")[:SNAPSHOT_LIST_LIMIT]
+        for a in acceptances.select_related("risk", "risk__threat", "body").order_by("expires_on")[:SNAPSHOT_LIST_LIMIT]
     ]
 
     # ── 4. Incidenti ──

@@ -62,12 +62,13 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
     mitigation_plans_completed = serializers.SerializerMethodField()
     mitigation_plans_verified = serializers.SerializerMethodField()
     active_acceptance = serializers.SerializerMethodField()
+    display_name = serializers.SerializerMethodField()
 
     class Meta:
         model = RiskAssessment
         fields = [
             "id", "plant", "plant_name", "cycle", "evaluated_in_cycle", "is_legacy", "is_inherited",
-            "affected_plants", "name", "status",
+            "affected_plants", "name", "display_name", "status",
             "asset_type", "asset", "asset_name", "asset_group_label", "supplier", "supplier_name",
             "threat", "threat_code", "threat_title", "information_classes",
             "critical_process", "critical_process_name", "vulnerability", "consequence",
@@ -92,6 +93,11 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
 
     def get_threat_title(self, obj):
         return obj.threat.get_title(_request_lang(self)) if obj.threat else None
+
+    def get_display_name(self, obj):
+        from .services import risk_label
+
+        return risk_label(obj, _request_lang(self))
 
     def get_owner_name(self, obj):
         return _user_name(obj.owner)
@@ -250,7 +256,7 @@ class RiskMitigationPlanSerializer(serializers.ModelSerializer):
 
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
-    risk_name = serializers.CharField(source="risk.name", read_only=True)
+    risk_name = serializers.SerializerMethodField()
     plant = serializers.UUIDField(source="risk.plant_id", read_only=True)
     body_name = serializers.CharField(source="body.name", read_only=True)
     opinion_by_name = serializers.SerializerMethodField()
@@ -294,16 +300,26 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         user = self._user()
         return bool(user and obj.status == "pending" and obj.upper_opinion == "pending" and can_give_opinion(user))
 
+    def get_risk_name(self, obj):
+        from .services import risk_label
+
+        return risk_label(obj.risk, _request_lang(self))
+
 
 class RiskLocalImpactReportSerializer(serializers.ModelSerializer):
     plant_name = serializers.CharField(source="plant.name", read_only=True)
-    risk_name = serializers.CharField(source="risk.name", read_only=True)
+    risk_name = serializers.SerializerMethodField()
 
     class Meta:
         model = RiskLocalImpactReport
         fields = ["id", "risk", "risk_name", "plant", "plant_name", "local_impact", "note", "status",
                   "acknowledged_at", "created_at"]
         read_only_fields = ["id", "status", "acknowledged_at", "created_at", "plant_name", "risk_name"]
+
+    def get_risk_name(self, obj):
+        from .services import risk_label
+
+        return risk_label(obj.risk, _request_lang(self))
 
 
 # ── Metodologia: catalogo, classi, policy, cicli ─────────────────────────────

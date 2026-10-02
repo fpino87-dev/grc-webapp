@@ -132,7 +132,7 @@ def get_expired_risk_assessments(user, plant_id, today=None) -> list[dict]:
     from apps.compliance_schedule.services import _add_duration, _get_rule
     from apps.plants.models import Plant
     from apps.risk.models import RiskAcceptance
-    from apps.risk.services import approved_cycle, open_cycle
+    from apps.risk.services import approved_cycle, open_cycle, risk_label
 
     today = today or timezone.localdate()
     if not _verify_plant_access(user, plant_id):
@@ -166,10 +166,10 @@ def get_expired_risk_assessments(user, plant_id, today=None) -> list[dict]:
             })
     for acc in RiskAcceptance.objects.filter(
         risk__plant=plant, status="active", expires_on__lte=today + timezone.timedelta(days=30),
-    ).select_related("risk"):
+    ).select_related("risk", "risk__threat"):
         out.append({
             "id": str(acc.risk_id),
-            "name": acc.risk.name,
+            "name": risk_label(acc.risk),
             "reason": "acceptance_expired" if acc.expires_on < today else "acceptance_expiring",
             "next_due": str(acc.expires_on),
             "days_overdue": (today - acc.expires_on).days if acc.expires_on < today else None,

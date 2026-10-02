@@ -3176,8 +3176,8 @@ msgstr "The code must be 2 to 30 characters long, using capital letters, digits 
 msgid "Esiste già una minaccia con questo codice."
 msgstr "A threat with this code already exists."
 
-msgid "Indica almeno il titolo della minaccia."
-msgstr "Enter at least the threat title."
+msgid "Indica almeno il titolo della minaccia in inglese."
+msgstr "Enter at least the threat title in English."
 
 msgid "Le voci del catalogo di gruppo non si modificano da qui."
 msgstr "Group catalogue entries cannot be edited here."

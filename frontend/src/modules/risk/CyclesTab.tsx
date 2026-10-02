@@ -111,7 +111,7 @@ function LegacyTable({ risks, onOpen }: { risks: Risk[]; onOpen: (riskId: string
             const s = r.legacy_snapshot as Record<string, string | number | boolean | null>;
             return (
               <tr key={r.id} onClick={() => onOpen(r.id)} className="cursor-pointer hover:bg-amber-50">
-                <td className="px-3 py-2">{r.name}</td>
+                <td className="px-3 py-2">{r.display_name}</td>
                 <td className="px-3 py-2 text-xs">{`${s.probability ?? "—"} × ${s.impact ?? "—"}`}</td>
                 <td className="px-3 py-2 text-xs">{s.inherent_score ?? "—"}</td>
                 <td className="px-3 py-2 text-xs">{s.score ?? "—"}</td>

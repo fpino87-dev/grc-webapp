@@ -131,7 +131,8 @@ def test_create_computes_classes_and_defaults(org_user, plant, threats, cycle):
     assert risk.cycle == cycle and risk.evaluated_in_cycle == cycle
     assert risk.impact == 4 and risk.matrix_class == "critical" and risk.current_class == "critical"
     assert risk.expected_class == "high"
-    assert risk.name == "Minaccia IN_MAL"
+    # nome vuoto: si mostra il titolo della minaccia nella lingua di chi guarda
+    assert risk.name == "" and services.risk_label(risk, "it") == "Minaccia IN_MAL"
     assert risk.nis2_in_scope is True
 
 
@@ -707,3 +708,19 @@ def test_legacy_risk_readable_not_writable(org_user, plant):
     assert c.patch(f"/api/v1/risk/assessments/{risk.pk}/", {"name": "X"}, format="json").status_code == 404
     listed = c.get(f"/api/v1/risk/assessments/?plant={plant.pk}").data["results"]
     assert str(risk.pk) not in [r["id"] for r in listed]
+
+
+@pytest.mark.django_db
+def test_display_name_follows_viewer_language(org_user, plant, cycle):
+    threat = ThreatCatalogEntry.objects.create(
+        code="IN_PHI", asset_types=["IT"], cia=["C"], source="catalog",
+        translations={"it": {"title": "Phishing mirato"}, "en": {"title": "Targeted phishing"},
+                      "pl": {"title": "Ukierunkowany phishing"}},
+    )
+    risk = services.create_risk(org_user, plant, {**_eval(org_user), "threat": threat})
+    c = _client(org_user)
+    url = f"/api/v1/risk/assessments/{risk.pk}/"
+    assert c.get(url, HTTP_ACCEPT_LANGUAGE="pl").data["display_name"] == "Ukierunkowany phishing"
+    assert c.get(url, HTTP_ACCEPT_LANGUAGE="tr").data["display_name"] == "Targeted phishing"
+    services.update_risk(org_user, risk, {"name": "Phishing ufficio acquisti"})
+    assert c.get(url, HTTP_ACCEPT_LANGUAGE="pl").data["display_name"] == "Phishing ufficio acquisti"

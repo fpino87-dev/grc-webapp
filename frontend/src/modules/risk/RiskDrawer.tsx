@@ -78,7 +78,7 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
     && risk.evaluated_in_cycle !== null && risk.applicable;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={risk?.name ?? t("risk.drawer.title")}>
+    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={risk?.display_name ?? t("risk.drawer.title")}>
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <aside className="relative h-full w-full max-w-3xl bg-white shadow-2xl flex flex-col">
         <header className="px-6 pt-5 pb-3 border-b border-gray-100">
@@ -88,7 +88,7 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
                 {risk?.threat_code} · {risk?.asset_type ? t(`risk.asset_types.${risk.asset_type}`) : ""}
                 {risk?.plant_name ? ` · ${risk.plant_name}` : risk ? ` · ${t("risk.page.group_register")}` : ""}
               </p>
-              <h2 className="text-lg font-semibold text-gray-900 truncate">{risk?.name ?? "…"}</h2>
+              <h2 className="text-lg font-semibold text-gray-900 truncate">{risk?.display_name ?? "…"}</h2>
               {risk && (
                 <div className="flex flex-wrap items-center gap-2 mt-1">
                   <ClassTransition current={risk.current_class} expected={risk.expected_class} />

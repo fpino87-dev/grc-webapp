@@ -54,7 +54,7 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
   const [showCriteria, setShowCriteria] = useState(true);
 
   const { data: threats = [] } = useQuery({
-    queryKey: ["risk-threats", value.asset_type],
+    queryKey: ["risk-threats", value.asset_type, i18n.language],
     queryFn: () => riskApi.threats({ asset_type: value.asset_type ?? "" }),
     enabled: !!value.asset_type, retry: false,
   });
@@ -122,7 +122,8 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
       <Section title={t("risk.drawer.identification")}>
         <div className="grid grid-cols-2 gap-x-3">
           <Field label={t("risk.drawer.name")}>
-            <input value={value.name ?? ""} onChange={e => set("name", e.target.value)} disabled={!editable} className={inputCls} />
+            <input value={value.name ?? ""} onChange={e => set("name", e.target.value)} disabled={!editable} className={inputCls}
+              placeholder={risk.threat_title ?? ""} />
           </Field>
           <Field label={t("risk.drawer.threat")}>
             <select value={value.threat ?? ""} onChange={e => set("threat", e.target.value)} disabled={!editable} className={inputCls}>

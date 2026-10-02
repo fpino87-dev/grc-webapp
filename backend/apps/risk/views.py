@@ -359,7 +359,7 @@ class RiskAcceptanceViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         from core.scoping import scope_queryset_by_plant
 
-        qs = RiskAcceptance.objects.select_related("risk", "risk__plant", "body", "opinion_by")
+        qs = RiskAcceptance.objects.select_related("risk", "risk__plant", "risk__threat", "body", "opinion_by")
         qs = scope_queryset_by_plant(qs, self.request.user, plant_field="risk__plant", allow_null_plant=True)
         params = self.request.query_params
         if params.get("risk"):
@@ -453,7 +453,7 @@ class RiskLocalImpactReportViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         from core.scoping import scope_queryset_by_plant
 
-        qs = RiskLocalImpactReport.objects.select_related("risk", "plant")
+        qs = RiskLocalImpactReport.objects.select_related("risk", "risk__threat", "plant")
         qs = scope_queryset_by_plant(qs, self.request.user, plant_field="plant")
         params = self.request.query_params
         if params.get("risk"):

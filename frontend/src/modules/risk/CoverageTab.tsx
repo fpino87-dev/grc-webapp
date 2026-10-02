@@ -21,7 +21,7 @@ export function CoverageTab({ registerId, evaluating, onOpen, onEvaluate }: {
   onOpen: (id: string) => void;
   onEvaluate: (assetType: AssetType, threat: string) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [naPair, setNaPair] = useState<CoveragePair | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export function CoverageTab({ registerId, evaluating, onOpen, onEvaluate }: {
   const { data: coverage } = useQuery({
     queryKey: ["risk-coverage", registerId], queryFn: () => riskApi.coverage(registerId), retry: false,
   });
-  const { data: threats = [] } = useQuery({ queryKey: ["risk-threats", "all"], queryFn: () => riskApi.threats(), retry: false });
+  const { data: threats = [] } = useQuery({ queryKey: ["risk-threats", "all", i18n.language], queryFn: () => riskApi.threats(), retry: false });
   const titles = new Map(threats.map(th => [th.id, th.title]));
   const markNa = useMutation({
     mutationFn: (reason: string) => riskApi.notApplicable(registerId, naPair!.asset_type, naPair!.threat_id, reason),

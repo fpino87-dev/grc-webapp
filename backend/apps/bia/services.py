@@ -129,7 +129,7 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
 
     # Rischi collegati (via FK RiskAssessment.critical_process), registro corrente
     from apps.risk.models import RiskAcceptance
-    from apps.risk.services import register_queryset
+    from apps.risk.services import register_queryset, risk_label
 
     risk_qs = register_queryset(process.plant).filter(critical_process=process).select_related("threat")
     expiry = dict(
@@ -138,7 +138,7 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
     risks = [
         {
             "id": str(r.pk),
-            "name": r.name,
+            "name": risk_label(r),
             "asset_type": r.asset_type,
             "threat_code": r.threat.code if r.threat else None,
             "asset_id": str(r.asset_id) if r.asset_id else None,

@@ -253,13 +253,25 @@ def test_custom_threat_api(org_user, site_user):
     c = _client(org_user)
     payload = {"code": "cu_test", "asset_types": ["SEDE"], "cia": ["A"],
                "translations": {"it": {"title": "Allagamento del magazzino"}}}
+    # l'inglese è obbligatorio (lingua di ripiego)
+    assert c.post("/api/v1/risk/threats/", payload, format="json").status_code == 400
+    payload["translations"]["en"] = {"title": "Warehouse flooding"}
+    payload["translations"]["xx"] = {"title": "ignorata"}
     res = c.post("/api/v1/risk/threats/", payload, format="json")
     assert res.status_code == 201, res.content
+    entry = ThreatCatalogEntry.objects.get(pk=res.json()["id"])
+    assert set(entry.translations) == {"it", "en"}
+    assert entry.get_title("pl") == "Warehouse flooding"  # ripiego sull'inglese
     entry_id = res.json()["id"]
     assert res.json()["code"] == "CU_TEST" and res.json()["source"] == "custom"
     assert c.post("/api/v1/risk/threats/", payload, format="json").status_code == 400
     res = c.patch(f"/api/v1/risk/threats/{entry_id}/", {"cia": ["A", "I"]}, format="json")
     assert res.status_code == 200 and res.json()["cia"] == ["A", "I"]
+    assert c.patch(f"/api/v1/risk/threats/{entry_id}/", {"translations": {"it": {"title": "Solo IT"}}},
+                   format="json").status_code == 400
+    res = c.patch(f"/api/v1/risk/threats/{entry_id}/",
+                  {"translations": {"en": {"title": "Flooding"}, "pl": {"title": "Zalanie"}}}, format="json")
+    assert res.status_code == 200 and set(res.json()["translations"]) == {"en", "pl"}
     assert c.delete(f"/api/v1/risk/threats/{entry_id}/").status_code == 204
     assert ThreatCatalogEntry.objects.get(pk=entry_id).active is False
     # chi ha un solo sito non gestisce il catalogo

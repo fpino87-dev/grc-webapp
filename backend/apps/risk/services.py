@@ -36,7 +36,7 @@ def get_risk_bia_bcp_context(assessment: RiskAssessment) -> dict:
 
     risk_data = {
         "id": str(assessment.pk),
-        "name": assessment.name,
+        "name": risk_label(assessment),
         "asset_type": assessment.asset_type,
         "asset_id": str(assessment.asset_id) if assessment.asset_id else None,
         "probability": assessment.probability,
@@ -446,8 +446,7 @@ def create_custom_threat(user, *, code, asset_types, cia, translations):
     if ThreatCatalogEntry.objects.filter(code=code).exists():
         raise ValidationError(_("Esiste già una minaccia con questo codice."))
     _validate_threat_fields(asset_types, cia)
-    if not any((v or {}).get("title") for v in (translations or {}).values()):
-        raise ValidationError(_("Indica almeno il titolo della minaccia."))
+    translations = _clean_threat_translations(translations)
     with transaction.atomic():
         entry = ThreatCatalogEntry.objects.create(
             code=code, asset_types=asset_types, cia=cia or [], translations=translations,
@@ -456,6 +455,25 @@ def create_custom_threat(user, *, code, asset_types, cia, translations):
         log_action(user=user, action_code="risk.catalog.custom_created", level="L2",
                    entity=entry, payload={"code": code})
     return entry
+
+
+THREAT_LANGS = ("it", "en", "fr", "pl", "tr")
+
+
+def _clean_threat_translations(translations) -> dict:
+    """Titoli per lingua di una voce personalizzata: l'inglese è obbligatorio
+    (lingua di ripiego per i siti che usano una lingua non compilata)."""
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    clean = {}
+    for lang in THREAT_LANGS:
+        title = ((translations or {}).get(lang) or {}).get("title", "")
+        if isinstance(title, str) and title.strip():
+            clean[lang] = {"title": title.strip()}
+    if "en" not in clean:
+        raise ValidationError(_("Indica almeno il titolo della minaccia in inglese."))
+    return clean
 
 
 def update_custom_threat(user, entry, **fields):
@@ -470,6 +488,8 @@ def update_custom_threat(user, entry, **fields):
     asset_types = fields.get("asset_types", entry.asset_types)
     cia = fields.get("cia", entry.cia)
     _validate_threat_fields(asset_types, cia)
+    if "translations" in fields:
+        fields["translations"] = _clean_threat_translations(fields["translations"])
     with transaction.atomic():
         for key in ("asset_types", "cia", "translations", "active"):
             if key in fields:
@@ -633,6 +653,18 @@ def _err(message, **params):
     return ValidationError(message % params if params else message)
 
 
+def risk_label(risk, lang: str | None = None) -> str:
+    """Nome del rischio da mostrare: quello scritto dall'utente oppure il titolo
+    della minaccia nella lingua di chi guarda (default: lingua attiva)."""
+    if risk.name:
+        return risk.name
+    if risk.threat_id:
+        from django.utils.translation import get_language
+
+        return risk.threat.get_title((lang or get_language() or "en")[:2])
+    return "—"
+
+
 def is_legacy(risk) -> bool:
     return risk.cycle_id is not None and risk.cycle.kind == "legacy"
 
@@ -771,8 +803,6 @@ def create_risk(user, plant, data: dict):
     if not risk.asset_type or not risk.threat_id:
         raise _err(_("Indica la tipologia di asset e la minaccia del catalogo."))
     _validate_risk_links(risk, m2m.get("information_classes"), m2m.get("affected_plants"))
-    if not risk.name:
-        risk.name = risk.threat.get_title()
     if "nis2_in_scope" not in data:
         risk.nis2_in_scope = _default_nis2_scope(risk, m2m.get("affected_plants"))
     with transaction.atomic():
@@ -923,7 +953,7 @@ def mark_not_applicable(user, plant, asset_type: str, threat, reason: str):
     cycle = _require_evaluation_cycle(plant)
     risk = RiskAssessment(
         plant=plant, cycle=cycle, evaluated_in_cycle=cycle, asset_type=asset_type, threat=threat,
-        name=threat.get_title(), applicable=False, not_applicable_reason=reason.strip(),
+        applicable=False, not_applicable_reason=reason.strip(),
         status="completato", assessed_by=user, assessed_at=timezone.now(), created_by=user,
     )
     _validate_risk_links(risk, [], [])
@@ -968,7 +998,7 @@ def _escalate_high_risk(risk) -> None:
         create_task(
             plant=risk.plant,
             title=_("Piano di trattamento rischio %(cls)s — %(name)s") % {
-                "cls": risk.current_class, "name": risk.name},
+                "cls": risk.current_class, "name": risk_label(risk)},
             priority="critica" if risk.current_class == "critical" else "alta",
             source_module="M06",
             source_id=risk.pk,
@@ -1227,7 +1257,7 @@ def request_acceptance(user, risk, *, rationale: str, expires_on=None, body=None
             create_task(
                 plant=risk.plant,
                 title=(_("Parere sull'accettazione del rischio — %(name)s") if req["upper_opinion"] == "binding"
-                       else _("Informativa: accettazione del rischio — %(name)s")) % {"name": risk.name},
+                       else _("Informativa: accettazione del rischio — %(name)s")) % {"name": risk_label(risk)},
                 priority="alta" if req["upper_opinion"] == "binding" else "bassa",
                 source_module="M06", source_id=risk.pk,
                 due_date=today + datetime.timedelta(days=14),
@@ -1236,7 +1266,7 @@ def request_acceptance(user, risk, *, rationale: str, expires_on=None, body=None
         if req["notify"]:
             create_task(
                 plant=risk.plant,
-                title=_("Informativa: accettazione del rischio — %(name)s") % {"name": risk.name},
+                title=_("Informativa: accettazione del rischio — %(name)s") % {"name": risk_label(risk)},
                 priority="bassa", source_module="M06", source_id=risk.pk,
                 due_date=today + datetime.timedelta(days=14),
                 assign_type="role", assign_value=GrcRole.RISK_MANAGER,
@@ -1370,7 +1400,7 @@ def expire_acceptances(today=None) -> dict:
     today = today or timezone.localdate()
     system_user = get_user_model().objects.filter(is_superuser=True).first()
     counts = {"warned": 0, "expired": 0}
-    active = RiskAcceptance.objects.filter(status="active").select_related("risk", "risk__plant")
+    active = RiskAcceptance.objects.filter(status="active").select_related("risk", "risk__plant", "risk__threat")
     for acc in active.filter(expires_on__lt=today):
         with transaction.atomic():
             if system_user:
@@ -1380,7 +1410,7 @@ def expire_acceptances(today=None) -> dict:
                 acc.save(update_fields=["status", "closed_at", "updated_at"])
             create_task(
                 plant=acc.risk.plant,
-                title=_("Accettazione scaduta: trattare o riaccettare il rischio — %(name)s") % {"name": acc.risk.name},
+                title=_("Accettazione scaduta: trattare o riaccettare il rischio — %(name)s") % {"name": risk_label(acc.risk)},
                 priority="alta", source_module="M06", source_id=acc.risk_id,
                 due_date=today + datetime.timedelta(days=7),
                 assign_type="role", assign_value=GrcRole.RISK_MANAGER,
@@ -1393,7 +1423,7 @@ def expire_acceptances(today=None) -> dict:
             create_task(
                 plant=acc.risk.plant,
                 title=_("Accettazione del rischio in scadenza il %(date)s — %(name)s") % {
-                    "date": acc.expires_on.isoformat(), "name": acc.risk.name},
+                    "date": acc.expires_on.isoformat(), "name": risk_label(acc.risk)},
                 priority="media", source_module="M06", source_id=acc.risk_id,
                 due_date=acc.expires_on,
                 assign_type="role", assign_value=GrcRole.RISK_MANAGER,
@@ -1420,7 +1450,7 @@ def escalate_overdue_plans(today=None) -> dict:
         RiskMitigationPlan.objects.filter(completed_at__isnull=True, due_date__lt=today)
         .exclude(assessment__cycle__kind="legacy")
         .filter(assessment__deleted_at__isnull=True)
-        .select_related("assessment", "assessment__plant")
+        .select_related("assessment", "assessment__plant", "assessment__threat")
     )
     for plan in overdue:
         risk = plan.assessment
@@ -1431,7 +1461,7 @@ def escalate_overdue_plans(today=None) -> dict:
             create_task(
                 plant=risk.plant,
                 title=_("Escalation: misura in ritardo di %(days)s giorni — %(name)s") % {
-                    "days": days_late, "name": risk.name},
+                    "days": days_late, "name": risk_label(risk)},
                 priority="critica" if critical else "alta",
                 source_module="M06", source_id=risk.pk, due_date=today + timezone.timedelta(days=7),
                 assign_type="role", assign_value=GrcRole.COMPLIANCE_OFFICER,
@@ -1442,7 +1472,7 @@ def escalate_overdue_plans(today=None) -> dict:
         elif plan.escalation_level == 0:
             create_task(
                 plant=risk.plant,
-                title=_("Misura del piano di trattamento in ritardo — %(name)s") % {"name": risk.name},
+                title=_("Misura del piano di trattamento in ritardo — %(name)s") % {"name": risk_label(risk)},
                 priority="media", source_module="M06", source_id=risk.pk,
                 due_date=today + timezone.timedelta(days=7),
                 assign_type="role", assign_value=GrcRole.RISK_MANAGER,
@@ -1622,7 +1652,7 @@ def build_register_snapshot(plant, cycle) -> dict:
         acc = active_acc.get(r.pk)
         items.append({
             "id": str(r.pk),
-            "name": r.name,
+            "name": risk_label(r),
             "asset_type": r.asset_type,
             "threat": r.threat.code if r.threat else None,
             "applicable": r.applicable,
@@ -1836,6 +1866,7 @@ def generate_risk_excel(plant=None) -> bytes:
     fogli Registro, Piano di trattamento, Accettazioni, Copertura, Criteri."""
     import io
 
+    from django.utils.translation import get_language
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
 
@@ -1886,7 +1917,7 @@ def generate_risk_excel(plant=None) -> bytes:
         )
         values = [
             r.plant.name if r.plant else "Gruppo", r.asset_type, r.threat.code if r.threat else "",
-            r.threat.get_title() if r.threat else "", r.name,
+            r.threat.get_title((get_language() or "en")[:2]) if r.threat else "", risk_label(r),
             r.asset.name if r.asset else r.asset_group_label, r.supplier.name if r.supplier else "",
             r.critical_process.name if r.critical_process else "",
             ", ".join(ic.name for ic in r.information_classes.all()), r.vulnerability, r.consequence,
@@ -1914,11 +1945,11 @@ def generate_risk_excel(plant=None) -> bytes:
         "Responsabile", "Scadenza", "Completata il", "Verificata il", "Nota verifica",
     ])
     plans = RiskMitigationPlan.objects.filter(assessment__in=risks).select_related(
-        "assessment", "owner", "control_instance__control",
+        "assessment", "assessment__threat", "owner", "control_instance__control",
     ).order_by("due_date")
     for row, p in enumerate(plans, 2):
         for col, value in enumerate([
-            p.assessment.name, CLASS_LABELS.get(p.assessment.current_class, ""),
+            risk_label(p.assessment), CLASS_LABELS.get(p.assessment.current_class, ""),
             CLASS_LABELS.get(p.assessment.expected_class, ""), p.action, p.expected_effect,
             p.control_instance.control.external_id if p.control_instance else "",
             mixed_owner_name(p.owner, p.owner_external) or "", p.due_date,
@@ -1931,10 +1962,10 @@ def generate_risk_excel(plant=None) -> bytes:
         "Rischio", "Classe", "Stato", "Ruoli richiesti", "Firme", "Organo", "Delibera", "Parere",
         "Motivazione", "Scadenza", "Attiva dal",
     ])
-    accs = RiskAcceptance.objects.filter(risk__in=risks).select_related("risk", "body").order_by("-created_at")
+    accs = RiskAcceptance.objects.filter(risk__in=risks).select_related("risk", "risk__threat", "body").order_by("-created_at")
     for row, a in enumerate(accs, 2):
         for col, value in enumerate([
-            a.risk.name, CLASS_LABELS.get(a.risk_class, ""), a.status, ", ".join(a.required_roles),
+            risk_label(a.risk), CLASS_LABELS.get(a.risk_class, ""), a.status, ", ".join(a.required_roles),
             ", ".join(s["role"] for s in a.signatures), a.body.name if a.body else "", a.body_resolution_ref,
             a.upper_opinion, a.rationale, a.expires_on, a.activated_at.date() if a.activated_at else None,
         ], 1):
@@ -2061,7 +2092,7 @@ def legacy_register_rows(plant) -> list:
     for r in risks:
         s = r.legacy_snapshot or {}
         rows.append({
-            "name": r.name,
+            "name": risk_label(r),
             "assessment_type": s.get("assessment_type", ""),
             "threat_category": s.get("threat_category", ""),
             "probability": s.get("probability"),

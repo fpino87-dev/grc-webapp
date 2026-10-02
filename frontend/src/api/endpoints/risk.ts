@@ -32,6 +32,8 @@ export interface Risk {
   is_inherited: boolean;
   affected_plants: string[];
   name: string;
+  /** Nome da mostrare: `name` o il titolo della minaccia nella lingua di chi guarda. */
+  display_name: string;
   status: "bozza" | "completato" | "archiviato";
   asset_type: AssetType | "";
   asset: string | null;

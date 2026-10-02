@@ -430,7 +430,7 @@ Le registre antérieur à la nouvelle procédure reste consultable en lecture se
 
 ### Couverture et nouveau risque
 
-L'onglet **Couverture** croise les types d'actifs présents sur le site (IT, OT, site, personnel, fournisseurs, prototypes) avec le **catalogue des menaces** : chaque couple doit être **évalué** ou déclaré **non applicable** avec le motif. **Nouveau risque** part toujours du catalogue : choisissez le type et la menace, puis terminez l'évaluation dans la fiche du risque. Depuis la BIA, **Créer un risque** ouvre un risque déjà lié au processus.
+L'onglet **Couverture** croise les types d'actifs présents sur le site (IT, OT, site, personnel, fournisseurs, prototypes) avec le **catalogue des menaces** : chaque couple doit être **évalué** ou déclaré **non applicable** avec le motif. **Nouveau risque** part toujours du catalogue : choisissez le type et la menace, puis terminez l'évaluation dans la fiche du risque. Depuis la BIA, **Créer un risque** ouvre un risque déjà lié au processus. Le nom du scénario est facultatif : s'il reste vide, chaque utilisateur voit le titre de la menace dans sa propre langue.
 
 ### Fiche du risque
 
@@ -471,7 +471,7 @@ Dans le registre d'un site, les risques de groupe qui le concernent apparaissent
 
 ### Matrice et Paramètres
 
-L'onglet **Matrice** affiche les comptes par cellule, actuels ou attendus ; cliquez sur une cellule pour voir ses risques. Dans **Paramètres**, les utilisateurs ayant accès à toute l'organisation gèrent le modèle de gouvernance (centralisé, fédéré, site unique), qui accepte par classe et pendant combien de mois l'acceptation est valable (à côté, en lecture seule, le délai des mesures fixé par la procédure), les seuils économiques (avec exceptions éventuelles par site), le catalogue des menaces (entrées personnalisées) et les classes d'informations, la confidentialité étant exprimée en Public, Interne, Confidentiel ou Strictement confidentiel : avec une menace sur la confidentialité, l'impact ne descend pas sous 2, 3, 4 ou 5.
+L'onglet **Matrice** affiche les comptes par cellule, actuels ou attendus ; cliquez sur une cellule pour voir ses risques. Dans **Paramètres**, les utilisateurs ayant accès à toute l'organisation gèrent le modèle de gouvernance (centralisé, fédéré, site unique), qui accepte par classe et pendant combien de mois l'acceptation est valable (à côté, en lecture seule, le délai des mesures fixé par la procédure), les seuils économiques (avec exceptions éventuelles par site), le catalogue des menaces (entrées personnalisées, avec un titre par langue et l'anglais obligatoire) et les classes d'informations, la confidentialité étant exprimée en Public, Interne, Confidentiel ou Strictement confidentiel : avec une menace sur la confidentialité, l'impact ne descend pas sous 2, 3, 4 ou 5.
 
 ---
 

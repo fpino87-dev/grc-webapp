@@ -79,7 +79,7 @@ export function MatrixTab({ registerId, onOpen }: { registerId: RegisterId; onOp
           {inCell.map(r => (
             <li key={r.id} className="py-2 flex items-center justify-between gap-2 cursor-pointer hover:bg-gray-50" onClick={() => onOpen(r.id)}>
               <span className="text-sm">
-                <span className="font-mono text-xs text-gray-500 mr-1">{r.threat_code}</span>{r.name}
+                <span className="font-mono text-xs text-gray-500 mr-1">{r.threat_code}</span>{r.display_name}
               </span>
               <ClassTransition current={r.current_class} expected={r.expected_class} />
             </li>

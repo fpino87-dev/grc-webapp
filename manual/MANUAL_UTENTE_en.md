@@ -430,7 +430,7 @@ The register prior to the new procedure remains available read-only from the Ass
 
 ### Coverage and new risk
 
-The **Coverage** tab crosses the asset types present on the site (IT, OT, site, personnel, suppliers, prototypes) with the **threat catalogue**: each pair must be **assessed** or declared **not applicable** with the reason. **New risk** always starts from the catalogue: choose the type and threat, then complete the assessment in the risk card. From the BIA, **Create risk** opens a risk already linked to the process.
+The **Coverage** tab crosses the asset types present on the site (IT, OT, site, personnel, suppliers, prototypes) with the **threat catalogue**: each pair must be **assessed** or declared **not applicable** with the reason. **New risk** always starts from the catalogue: choose the type and threat, then complete the assessment in the risk card. From the BIA, **Create risk** opens a risk already linked to the process. The scenario name is optional: if left empty, each user sees the threat title in their own language.
 
 ### Risk card
 
@@ -471,7 +471,7 @@ In a site register, the group risks that concern it appear with ⇩, read-only. 
 
 ### Matrix and Settings
 
-The **Matrix** tab shows counts per cell, current or expected; click a cell to see its risks. In **Settings**, users with access to the whole organisation manage the governance model (centralised, federated, single site), who accepts per class and how many months the acceptance lasts (next to it, read-only, the measures deadline set by the procedure), economic thresholds (with optional site exceptions), the threat catalogue (custom entries) and information classes, with confidentiality expressed as Public, Internal, Confidential or Strictly confidential: with a confidentiality threat the impact does not fall below 2, 3, 4 or 5.
+The **Matrix** tab shows counts per cell, current or expected; click a cell to see its risks. In **Settings**, users with access to the whole organisation manage the governance model (centralised, federated, single site), who accepts per class and how many months the acceptance lasts (next to it, read-only, the measures deadline set by the procedure), economic thresholds (with optional site exceptions), the threat catalogue (custom entries, with one title per language and English mandatory) and information classes, with confidentiality expressed as Public, Internal, Confidential or Strictly confidential: with a confidentiality threat the impact does not fall below 2, 3, 4 or 5.
 
 ---
 

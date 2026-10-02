@@ -60,7 +60,7 @@ export function PlanTab({ registerId, onOpen }: { registerId: RegisterId; onOpen
                   <tr key={p.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => onOpen(p.assessment)}>
                     <td className="px-3 py-2"><span className="truncate block max-w-sm" title={p.action}>{p.action}</span>
                       {p.control_title && <span className="text-[11px] text-gray-400">{p.control_title}</span>}</td>
-                    <td className="px-3 py-2 text-xs text-gray-600">{risk ? `${risk.threat_code ?? ""} ${risk.name}` : "—"}</td>
+                    <td className="px-3 py-2 text-xs text-gray-600">{risk ? `${risk.threat_code ?? ""} ${risk.display_name}` : "—"}</td>
                     <td className="px-3 py-2 text-xs text-gray-600">{p.owner_name ?? "—"}</td>
                     <td className={`px-3 py-2 text-xs ${overdue ? "text-red-700 font-medium" : "text-gray-600"}`}>{fmt(p.due_date)}</td>
                     <td className="px-3 py-2 text-xs">

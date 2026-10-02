@@ -3657,6 +3657,8 @@
       "deactivate": "Devre dışı bırak",
       "reactivate": "Yeniden etkinleştir",
       "new_threat": "Yeni özel tehdit",
+      "edit_threat": "Tehdidi düzenle",
+      "titles_hint": "Her dil için bir başlık: İngilizce zorunludur ve doldurulmamış diller için kullanılır.",
       "code_hint": "Büyük harf, rakam ve alt çizgi, benzersiz",
       "add_threat": "Kataloğa ekle",
       "information_hint": "Gizlilik, bütünlük ve erişilebilirlik için gerekli seviyeyle korunacak bilgiler (VDA ISA 1.3.1, 1.3.2). Sahasız olanlar grup için geçerlidir. Gizlilik tehdidinde etki şunların altına düşmez: Çok gizli 5, Gizli 4, Dahili 3, Genel 2.",

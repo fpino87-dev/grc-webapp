@@ -430,7 +430,7 @@ Yeni prosedürden önceki kayıt, Değerlendirmeler sekmesinden salt okunur olar
 
 ### Kapsam ve yeni risk
 
-**Kapsam** sekmesi, tesiste bulunan varlık türlerini (BT, OT, tesis, personel, tedarikçiler, prototipler) **tehdit kataloğu** ile eşleştirir: her çift ya **değerlendirilmeli** ya da gerekçesiyle **uygulanamaz** olarak işaretlenmelidir. **Yeni risk** her zaman katalogdan başlar: türü ve tehdidi seçin, ardından değerlendirmeyi risk kartında tamamlayın. BIA'dan **Risk oluştur**, süreçle zaten bağlantılı bir risk açar.
+**Kapsam** sekmesi, tesiste bulunan varlık türlerini (BT, OT, tesis, personel, tedarikçiler, prototipler) **tehdit kataloğu** ile eşleştirir: her çift ya **değerlendirilmeli** ya da gerekçesiyle **uygulanamaz** olarak işaretlenmelidir. **Yeni risk** her zaman katalogdan başlar: türü ve tehdidi seçin, ardından değerlendirmeyi risk kartında tamamlayın. BIA'dan **Risk oluştur**, süreçle zaten bağlantılı bir risk açar. Senaryo adı isteğe bağlıdır: boş bırakılırsa her kullanıcı tehdit başlığını kendi dilinde görür.
 
 ### Risk kartı
 
@@ -471,7 +471,7 @@ Bir tesis kaydında, o tesisi ilgilendiren grup riskleri ⇩ ile ve salt okunur 
 
 ### Matris ve Ayarlar
 
-**Matris** sekmesi hücre başına mevcut veya beklenen sayıları gösterir; risklerini görmek için bir hücreye tıklayın. **Ayarlar**'da tüm organizasyona erişimi olan kullanıcılar yönetişim modelini (merkezi, federe, tek tesis), her sınıfı kimin kabul ettiğini ve kabulün kaç ay geçerli olduğunu (yanında, salt okunur, prosedürün belirlediği önlem süresi), ekonomik eşikleri (isteğe bağlı tesis istisnalarıyla), tehdit kataloğunu (özel kayıtlar) ve gizliliği Genel, Dahili, Gizli veya Çok gizli olarak ifade edilen bilgi sınıflarını yönetir: gizlilik tehdidinde etki 2, 3, 4 veya 5'in altına düşmez.
+**Matris** sekmesi hücre başına mevcut veya beklenen sayıları gösterir; risklerini görmek için bir hücreye tıklayın. **Ayarlar**'da tüm organizasyona erişimi olan kullanıcılar yönetişim modelini (merkezi, federe, tek tesis), her sınıfı kimin kabul ettiğini ve kabulün kaç ay geçerli olduğunu (yanında, salt okunur, prosedürün belirlediği önlem süresi), ekonomik eşikleri (isteğe bağlı tesis istisnalarıyla), tehdit kataloğunu (her dil için bir başlık ve zorunlu İngilizce ile özel kayıtlar) ve gizliliği Genel, Dahili, Gizli veya Çok gizli olarak ifade edilen bilgi sınıflarını yönetir: gizlilik tehdidinde etki 2, 3, 4 veya 5'in altına düşmez.
 
 ---
 

@@ -3198,8 +3198,8 @@ msgstr "Kod musi mieć od 2 do 30 znaków: wielkie litery, cyfry i podkreślenia
 msgid "Esiste già una minaccia con questo codice."
 msgstr "Zagrożenie o tym kodzie już istnieje."
 
-msgid "Indica almeno il titolo della minaccia."
-msgstr "Podaj co najmniej tytuł zagrożenia."
+msgid "Indica almeno il titolo della minaccia in inglese."
+msgstr "Podaj co najmniej tytuł zagrożenia w języku angielskim."
 
 msgid "Le voci del catalogo di gruppo non si modificano da qui."
 msgstr "Pozycji katalogu grupy nie można tu edytować."

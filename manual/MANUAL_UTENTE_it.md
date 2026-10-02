@@ -430,7 +430,7 @@ Il registro precedente alla nuova procedura resta consultabile in sola lettura d
 
 ### Copertura e nuovo rischio
 
-La scheda **Copertura** incrocia le tipologie presenti nel sito (IT, OT, sede, personale, fornitori, prototipi) con il **catalogo minacce**: ogni coppia va **valutata** o dichiarata **non applicabile** con il motivo. **Nuovo rischio** parte sempre dal catalogo: scegli tipologia e minaccia, poi completi la valutazione nella scheda del rischio. Dalla BIA, **Crea rischio** apre un rischio già collegato al processo.
+La scheda **Copertura** incrocia le tipologie presenti nel sito (IT, OT, sede, personale, fornitori, prototipi) con il **catalogo minacce**: ogni coppia va **valutata** o dichiarata **non applicabile** con il motivo. **Nuovo rischio** parte sempre dal catalogo: scegli tipologia e minaccia, poi completi la valutazione nella scheda del rischio. Dalla BIA, **Crea rischio** apre un rischio già collegato al processo. Il nome dello scenario è facoltativo: se resta vuoto, ogni utente vede il titolo della minaccia nella propria lingua.
 
 ### Scheda del rischio
 
@@ -471,7 +471,7 @@ Nel registro di un sito i rischi di gruppo che lo riguardano compaiono con ⇩, 
 
 ### Matrice e Impostazioni
 
-La scheda **Matrice** mostra i conteggi per cella, attuali o attesi; clic su una cella per vedere i rischi. In **Impostazioni** chi ha accesso a tutta l'organizzazione gestisce il modello di governo (centralizzato, federato, sito singolo), chi accetta per classe e per quanti mesi vale l'accettazione (accanto, in sola lettura, la scadenza delle misure fissata dalla procedura), le soglie economiche (con eventuali eccezioni per sito), il catalogo minacce (voci personalizzate) e le classi di informazioni, con la riservatezza espressa come Pubblico, Interno, Confidenziale o Segreto: con una minaccia alla riservatezza l'impatto non scende sotto 2, 3, 4 o 5.
+La scheda **Matrice** mostra i conteggi per cella, attuali o attesi; clic su una cella per vedere i rischi. In **Impostazioni** chi ha accesso a tutta l'organizzazione gestisce il modello di governo (centralizzato, federato, sito singolo), chi accetta per classe e per quanti mesi vale l'accettazione (accanto, in sola lettura, la scadenza delle misure fissata dalla procedura), le soglie economiche (con eventuali eccezioni per sito), il catalogo minacce (voci personalizzate, con un titolo per lingua e l'inglese obbligatorio) e le classi di informazioni, con la riservatezza espressa come Pubblico, Interno, Confidenziale o Segreto: con una minaccia alla riservatezza l'impatto non scende sotto 2, 3, 4 o 5.
 
 ---
 

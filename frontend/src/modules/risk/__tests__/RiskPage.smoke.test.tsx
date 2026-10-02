@@ -29,7 +29,7 @@ const policy = {
 };
 const risk = {
   id: "r1", plant: "p1", plant_name: "Sito 1", cycle: "c1", evaluated_in_cycle: "c1", is_legacy: false,
-  is_inherited: false, affected_plants: [], name: "Ransomware MES", status: "completato", asset_type: "IT",
+  is_inherited: false, affected_plants: [], name: "Ransomware MES", display_name: "Ransomware MES", status: "completato", asset_type: "IT",
   asset: null, asset_name: null, asset_group_label: "Server", supplier: null, supplier_name: null,
   threat: "t1", threat_code: "IN_MAL", threat_title: "Malware", information_classes: [],
   critical_process: null, critical_process_name: null, vulnerability: "", consequence: "", applicable: true,

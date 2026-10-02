@@ -382,7 +382,8 @@ class ThreatCatalogEntry(BaseModel):
         ]
 
     def tr(self, field: str, lang: str = "it", default: str = "") -> str:
-        for cand in (lang, "it", "en"):
+        # Ripiego sull'inglese (gruppo multi-paese), poi sull'italiano.
+        for cand in (lang, "en", "it"):
             val = (self.translations.get(cand) or {}).get(field)
             if val:
                 return val

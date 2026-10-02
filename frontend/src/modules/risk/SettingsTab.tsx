@@ -226,27 +226,51 @@ function SiteThresholds({ plantId, plantName, policy, canEdit, onSave }: {
 
 // ── Catalogo minacce ─────────────────────────────────────────────────────────
 
+// Lingue dei titoli delle minacce personalizzate (inglese per primo: obbligatorio).
+const THREAT_LANGS = ["en", "it", "fr", "pl", "tr"] as const;
+type ThreatLang = typeof THREAT_LANGS[number];
+const emptyThreat = {
+  code: "", asset_types: [] as AssetType[], cia: [] as string[],
+  titles: { en: "", it: "", fr: "", pl: "", tr: "" } as Record<ThreatLang, string>,
+};
+
 function CatalogSettings({ canEdit }: { canEdit: boolean }) {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [type, setType] = useState<AssetType | "">("");
   const [q, setQ] = useState("");
-  const [form, setForm] = useState({ code: "", title: "", asset_types: [] as AssetType[], cia: [] as string[] });
+  const [form, setForm] = useState(emptyThreat);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { data: threats = [] } = useQuery({
-    queryKey: ["risk-threats-admin", type],
+    queryKey: ["risk-threats-admin", type, i18n.language],
     queryFn: () => riskApi.threats({ active: "all", ...(type ? { asset_type: type } : {}) }),
     retry: false,
   });
-  const refresh = () => qc.invalidateQueries({ queryKey: ["risk-threats-admin"] });
-  const create = useMutation({
-    mutationFn: () => riskApi.createThreat({
-      code: form.code, asset_types: form.asset_types, cia: form.cia as ThreatEntry["cia"],
-      translations: { [i18n.language.slice(0, 2)]: { title: form.title } },
-    }),
-    onSuccess: () => { setForm({ code: "", title: "", asset_types: [], cia: [] }); setError(null); refresh(); },
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["risk-threats-admin"] });
+    qc.invalidateQueries({ queryKey: ["risk-threats"] });
+  };
+  const reset = () => { setForm(emptyThreat); setEditingId(null); setError(null); };
+  const save = useMutation({
+    mutationFn: () => {
+      // Un titolo per lingua; l'inglese è obbligatorio (lingua di ripiego).
+      const translations = Object.fromEntries(
+        THREAT_LANGS.filter(l => form.titles[l].trim()).map(l => [l, { title: form.titles[l].trim() }]),
+      );
+      const payload = { asset_types: form.asset_types, cia: form.cia as ThreatEntry["cia"], translations };
+      return editingId ? riskApi.updateThreat(editingId, payload) : riskApi.createThreat({ ...payload, code: form.code });
+    },
+    onSuccess: () => { reset(); refresh(); },
     onError: e => setError(apiError(e, t("risk.errors.generic"))),
   });
+  const startEdit = (th: ThreatEntry) => {
+    setEditingId(th.id);
+    setForm({
+      code: th.code, asset_types: th.asset_types, cia: th.cia,
+      titles: Object.fromEntries(THREAT_LANGS.map(l => [l, th.translations[l]?.title ?? ""])) as Record<ThreatLang, string>,
+    });
+  };
   const toggleActive = useMutation({
     mutationFn: async (th: ThreatEntry) => {
       if (th.active) await riskApi.deactivateThreat(th.id);
@@ -287,7 +311,10 @@ function CatalogSettings({ canEdit }: { canEdit: boolean }) {
                 <td className="px-3 py-1.5 text-xs text-gray-600">{th.asset_types.map(a => t(`risk.asset_types.${a}`)).join(", ")}</td>
                 <td className="px-3 py-1.5 text-xs">{th.cia.join("")}</td>
                 <td className="px-3 py-1.5 text-xs text-gray-500">{t(`risk.settings.source.${th.source}`)}</td>
-                <td className="px-3 py-1.5 text-right">
+                <td className="px-3 py-1.5 text-right whitespace-nowrap">
+                  {canEdit && th.source === "custom" && (
+                    <button onClick={() => startEdit(th)} className="text-xs text-primary-600 hover:underline mr-3">{t("common.edit")}</button>
+                  )}
                   {canEdit && th.source === "custom" && (
                     <button onClick={() => toggleActive.mutate(th)} className="text-xs text-primary-600 hover:underline">
                       {t(th.active ? "risk.settings.deactivate" : "risk.settings.reactivate")}
@@ -301,16 +328,19 @@ function CatalogSettings({ canEdit }: { canEdit: boolean }) {
       </div>
       {canEdit && (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">{t("risk.settings.new_threat")}</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">{t(editingId ? "risk.settings.edit_threat" : "risk.settings.new_threat")}</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <Field label={t("risk.settings.col_code")} hint={t("risk.settings.code_hint")}>
-              <input value={form.code} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })} className={inputCls} />
+              <input value={form.code} disabled={!!editingId} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })} className={inputCls} />
             </Field>
-            <div className="md:col-span-2">
-              <Field label={t("risk.settings.col_title")}>
-                <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className={inputCls} />
+          </div>
+          <p className="text-xs text-gray-500 mb-1">{t("risk.settings.titles_hint")}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3">
+            {THREAT_LANGS.map(l => (
+              <Field key={l} label={`${t("risk.settings.col_title")} · ${l.toUpperCase()}${l === "en" ? " *" : ""}`}>
+                <input value={form.titles[l]} onChange={e => setForm({ ...form, titles: { ...form.titles, [l]: e.target.value } })} className={inputCls} />
               </Field>
-            </div>
+            ))}
           </div>
           <div className="flex flex-wrap gap-3 text-xs mb-3">
             {ASSET_TYPES.map(a => (
@@ -329,8 +359,13 @@ function CatalogSettings({ canEdit }: { canEdit: boolean }) {
               </label>
             ))}
           </div>
-          <button onClick={() => create.mutate()} disabled={!form.code || !form.title || !form.asset_types.length}
-            className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm disabled:opacity-50">{t("risk.settings.add_threat")}</button>
+          <div className="flex gap-2">
+            <button onClick={() => save.mutate()} disabled={!form.code || !form.titles.en.trim() || !form.asset_types.length || save.isPending}
+              className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm disabled:opacity-50">
+              {t(editingId ? "common.save" : "risk.settings.add_threat")}
+            </button>
+            {editingId && <button onClick={reset} className="px-3 py-1.5 border rounded text-sm">{t("common.cancel")}</button>}
+          </div>
           <ErrorBox message={error} />
         </div>
       )}

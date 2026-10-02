@@ -3243,8 +3243,8 @@ msgstr "Le code doit comporter de 2 à 30 caractères parmi lettres majuscules, 
 msgid "Esiste già una minaccia con questo codice."
 msgstr "Une menace avec ce code existe déjà."
 
-msgid "Indica almeno il titolo della minaccia."
-msgstr "Indiquez au moins le titre de la menace."
+msgid "Indica almeno il titolo della minaccia in inglese."
+msgstr "Indiquez au moins le titre de la menace en anglais."
 
 msgid "Le voci del catalogo di gruppo non si modificano da qui."
 msgstr "Les entrées du catalogue de groupe ne se modifient pas ici."
