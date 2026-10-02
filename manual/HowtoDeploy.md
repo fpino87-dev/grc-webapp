@@ -237,6 +237,7 @@ docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec ba
 docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_notification_profiles
 docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_competency_requirements
 docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_required_documents
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_risk_catalog
 docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py createsuperuser
 ```
 

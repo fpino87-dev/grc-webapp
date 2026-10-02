@@ -146,7 +146,7 @@ En haut du tableau de bord, vous trouverez 4 blocs avec les KPI principaux :
 | KPI | Ce qu'il mesure |
 |-----|----------------|
 | **Conformité %** | Pourcentage de contrôles en état "conforme" ou "partiel avec preuve valide" par rapport au total des contrôles actifs pour le framework sélectionné |
-| **Risques ouverts** | Nombre d'évaluations de risques avec le statut "ouvert" (non acceptés et non fermés). Le nombre est accompagné du décompte des risques critiques (score > 14) en rouge |
+| **Risques ouverts** | Nombre de risques évalués du registre actuel. Le nombre est accompagné du décompte des risques High et Critical en rouge |
 | **Incidents** | Incidents ouverts dans le plant sélectionné. Les chiffres en rouge indiquent les incidents avec des minuteries NIS2 actives |
 | **Tâches en retard** | Tâches assignées à votre rôle (ou à toute votre organisation si vous êtes CO) dont la date d'échéance est déjà dépassée |
 
@@ -156,7 +156,7 @@ La plateforme utilise une convention de couleurs cohérente sur toute l'interfac
 
 - **Vert** : tout est en ordre — conforme, terminé, valide, dans les délais
 - **Jaune** : attention requise — partiel, échéance dans 30 jours, en cours
-- **Rouge** : critique — écart, en retard, risque élevé (score > 14), minuterie NIS2 qui expire
+- **Rouge** : critique — écart, en retard, risque High ou Critical, minuterie NIS2 qui expire
 - **Gris** : non évalué, N/A, archivé
 - **Orange** : alerte ou avertissement — nécessite de l'attention mais n'est pas encore critique
 
@@ -354,7 +354,6 @@ Le badge orange **"À réévaluer"** apparaît sur la fiche de l'asset lorsque :
 
 - Un changement externe a été enregistré
 - La date de révision périodique prévue par la politique est échue
-- Un risque lié à l'asset a changé de score de manière significative
 - L'asset a atteint la date EOL du système d'exploitation
 
 Que faire : ouvrez la fiche de l'asset, vérifiez que les informations sont toujours exactes (en particulier la criticité, l'exposition et les processus critiques liés), puis cliquez sur **Marquer comme réévalué**. Si nécessaire, mettez à jour les champs avant de confirmer.
@@ -404,78 +403,58 @@ Pour avancer d'une phase : depuis la fiche du processus, cliquez sur **Envoyer p
 4. Indiquez le type de dépendance : **Critique** (le processus s'arrête sans cet asset) ou **Support** (dégradation des performances)
 5. Enregistrez
 
-La dépendance est bidirectionnelle : l'asset affichera dans sa fiche les processus qui en dépendent, et la criticité du processus influence le calcul du risque sur l'asset.
+La dépendance est bidirectionnelle : l'asset affichera dans sa fiche les processus qui en dépendent. Depuis chaque processus, **Créer un risque** ouvre un risque déjà lié au processus, à compléter dans l'appréciation des risques (M06).
 
 ---
 
 ## 6. Risk Assessment (M06)
 
-[Écran : liste des risk assessments]
+[Capture : appréciation des risques — registre, fiche du risque]
 
-### Différence entre risque inhérent et risque résiduel
+Le module applique la procédure de gestion des risques (D-ITA-INF-23). Chaque site a son propre **registre** ; si la politique le prévoit, il existe aussi un **registre de groupe** pour les services partagés (ERP central, Active Directory, contrats-cadres). Choisissez le registre en haut à droite.
 
-- **Risque inhérent** : le niveau de risque en l'absence de tout contrôle. Il représente la menace "brute" sur l'asset ou le domaine
-- **Risque résiduel** : le niveau de risque après application des contrôles existants. C'est la valeur sur laquelle se base la décision d'accepter ou de traiter le risque
+### Appréciations (cycles)
 
-Dans le formulaire d'évaluation, vous renseignez d'abord le risque inhérent, puis le système calcule automatiquement le résiduel en fonction du statut des contrôles associés. Si les contrôles ne sont pas encore suffisants, le résiduel reste élevé.
+La barre sous le titre indique l'état de l'appréciation du registre :
 
-### Propriétaire du risque et responsable du traitement
+1. **Lancez la première appréciation des risques** (ou, après une approbation, une **révision périodique** ou **extraordinaire** avec le motif)
+2. Évaluez les risques ; les champs d'évaluation ne se modifient que pendant une appréciation **en cours**
+3. **Soumettez à l'approbation** : le système vérifie la couverture complète et les risques évalués (ou confirmés, en révision périodique)
+4. **Approuvez** : indiquez l'organe qui a délibéré et, si vous le souhaitez, la revue de direction avec le procès-verbal. L'approbation fige une photographie du registre (onglet **Appréciations**, exportable en Excel)
 
-Dans le nouveau scénario, dans la modification et dans l'assistant risque → continuité, il y a deux responsables distincts :
+Le registre antérieur à la nouvelle procédure reste consultable en lecture seule depuis l'onglet Appréciations (**méthode remplacée**). Si des événements importants surviennent après l'approbation (incidents importants, nouveaux actifs critiques, changements, non-conformités majeures, contrôles en écart, mesures en retard), la barre les signale pour envisager une révision extraordinaire.
 
-- **Propriétaire du risque** : celui qui répond du risque et décide du risque résiduel (par exemple son acceptation)
-- **Responsable du traitement** : celui qui met en œuvre les mesures de traitement, généralement IT/OT. Choisissez un utilisateur du portail ou **Autre (non utilisateur du portail)** et saisissez un nom, une fonction ou un fournisseur (ex. un MSP ou l'intégrateur OT)
+### Couverture et nouveau risque
 
-Les deux peuvent être la même personne. Dans la liste, le responsable du traitement apparaît sous le propriétaire ; le registre des risques Excel a une colonne dédiée. En ajoutant une action d'atténuation, il est proposé comme **Responsable de l'action**, modifiable pour chaque action avec les mêmes deux possibilités. Les tâches automatiques restent attribuées aux rôles, comme avant.
+L'onglet **Couverture** croise les types d'actifs présents sur le site (IT, OT, site, personnel, fournisseurs, prototypes) avec le **catalogue des menaces** : chaque couple doit être **évalué** ou déclaré **non applicable** avec le motif. **Nouveau risque** part toujours du catalogue : choisissez le type et la menace, puis terminez l'évaluation dans la fiche du risque. Depuis la BIA, **Créer un risque** ouvre un risque déjà lié au processus.
 
-### Comment renseigner les dimensions IT et OT
+### Fiche du risque
 
-**Dimensions du risk assessment IT (4 axes) :**
+Cliquez sur un risque pour ouvrir la fiche latérale :
 
-1. **Exposition** : l'asset est-il sur Internet ? En DMZ ? Isolé ? (1 = complètement isolé, 5 = exposé sur Internet sans protections)
-2. **CVE** : quel est le score CVE maximum des assets concernés ? (1 = aucune vulnérabilité connue, 5 = CVE critique non patchée)
-3. **Menaces sectorielles** : y a-t-il des menaces actives connues pour le secteur automobile ? (1 = aucune, 5 = campagne active documentée)
-4. **Écarts de contrôles** : combien de contrôles pertinents sont en état d'écart ou non évalués ? (1 = tous conformes, 5 = majorité en écart)
+- **Identification** : menace, actif ou groupe d'actifs, fournisseur, processus BIA, **informations touchées** (classes d'informations), vulnérabilité et conséquence sur les objectifs de l'entreprise
+- **Évaluation** : probabilité (fréquence historique ou facteur d'exposition) et impact sur six dimensions — économique, juridique, client et contractuel, réputation, sécurité des personnes, opérationnel — avec les **critères de la procédure à côté de chaque niveau**. L'impact est le pire cas ; pour une menace sur la confidentialité il ne descend pas sous la classe de protection des informations touchées. La **classe** (Very Low, Low, Medium, High, Critical) se lit dans la matrice et non dans le produit P × I ; vous pouvez la déplacer d'un niveau uniquement avec une justification
+- **Mesures existantes** avec leur efficacité, éventuellement liées aux contrôles
+- **Traitement** : éviter, atténuer, transférer ou accepter, avec justification et **risque attendu** ; Risk Owner (responsable métier) et responsable du traitement (utilisateur du portail ou texte libre)
+- **NIS2** : périmètre, domaine art. 21(2), systèmes impactés, incident important possible
 
-**Dimensions du risk assessment OT (5 axes) :**
+**Terminer l'évaluation** vérifie que tout est renseigné (justifications, Risk Owner, traitement, risque attendu). Un risque High ou Critical crée la tâche du plan de traitement et la notification.
 
-1. **Purdue + connectivité** : le système est-il connecté à des réseaux IT ou à Internet ? (1 = niveau 0 isolé, 5 = connecté à Internet)
-2. **Patchabilité** : le système peut-il être mis à jour ? Avec quelle fréquence ? (1 = patches réguliers, 5 = jamais patchable)
-3. **Impact physique / sécurité** : une interruption ou altération peut-elle causer des dommages physiques ou des risques pour la sécurité au travail ? (1 = aucun impact physique, 5 = risque pour l'intégrité des personnes)
-4. **Segmentation** : la zone OT est-elle correctement séparée de l'IT et d'Internet ? (1 = complètement ségrégée, 5 = réseau plat)
-5. **Détectabilité des anomalies** : existe-t-il un système de détection pour les comportements anormaux ? (1 = IDS/ICS dédié actif, 5 = aucune visibilité)
+### Plan de traitement et risque attendu
 
-### Seuil critique (score > 14) et tâches automatiques générées
+Les mesures du plan ont un responsable, une échéance et un effet attendu. Une mesure terminée doit être **vérifiée** (test, preuve, audit). Ce n'est que lorsque toutes les mesures sont terminées et vérifiées qu'apparaît **Appliquer le risque attendu** : en dehors d'une nouvelle évaluation, c'est le seul moyen de baisser la classe. Les mesures en retard alertent le Risk Manager puis font l'objet d'une escalade au niveau de l'organisation.
 
-Lorsque le **risque résiduel dépasse 14** (quadrants rouges de la carte de chaleur 5x5) :
+### Acceptation
 
-- Le Risk Manager et le Plant Manager reçoivent une notification immédiate
-- Une tâche de planification du traitement du risque est automatiquement créée avec une échéance de 15 jours
-- Si la tâche n'est pas complétée dans les 15 jours, une escalade est envoyée au Compliance Officer
-- Le risque est mis en évidence en rouge dans le tableau de bord et dans la carte de chaleur
+Qui peut accepter dépend de la classe et de la **politique de gouvernance des risques** (Paramètres) : signatures des rôles requis, avis du RSSI (contraignant ou informatif) et, pour les Critical, délibération de l'organe. La validité maximale dépend de la classe. Les risques impliquant une violation de la loi, des exigences VDA ISA ou des obligations de confidentialité ne sont jamais acceptables ; si le Risk Owner a évalué et traité seul le risque, la signature du Plant Manager est aussi requise. Si la classe change, l'acceptation tombe. Les acceptations arrivant à échéance créent une tâche 30 jours avant.
 
-### Acceptation formelle du risque
+### Risques de groupe hérités
 
-Si le risque résiduel est connu mais que l'on décide de l'accepter (ex. coût du traitement supérieur à l'impact attendu) :
+Dans le registre d'un site, les risques de groupe qui le concernent apparaissent avec ⇩, en lecture seule. Si l'impact sur le site est plus élevé, signalez-le depuis la fiche (**Impact local**) : le groupe prend en compte le signalement et met à jour l'évaluation.
 
-1. Depuis la fiche du risque, cliquez sur **Accepter le risque**
-2. Remplissez le formulaire d'acceptation formelle :
-   - Justification (obligatoire, minimum 50 caractères)
-   - Date de révision (obligatoire — le risque doit être réévalué périodiquement)
-   - Signature numérique du responsable autorisé
-3. Enregistrez — le risque passe à l'état "Accepté" et ne génère plus d'alertes jusqu'à la date de révision
+### Matrice et Paramètres
 
-### Carte de chaleur et interprétation
-
-[Écran : carte de chaleur 5x5]
-
-La carte de chaleur affiche les risques sur une grille Probabilité x Impact 5x5 :
-
-- **Vert** (score 1-7) : risque acceptable — surveillance périodique
-- **Jaune** (score 8-14) : risque modéré — plan de mitigation dans les 90 jours
-- **Rouge** (score 15-25) : risque élevé — escalade automatique, plan dans les 15 jours
-
-Cliquez sur un quadrant pour voir la liste des risques qui le composent. Utilisez le filtre plant pour comparer la distribution des risques entre différents établissements.
+L'onglet **Matrice** affiche les comptes par cellule, actuels ou attendus ; cliquez sur une cellule pour voir ses risques. Dans **Paramètres**, les utilisateurs ayant accès à toute l'organisation gèrent le modèle de gouvernance (centralisé, fédéré, site unique), qui accepte par classe, les seuils économiques (avec exceptions éventuelles par site), le catalogue des menaces (entrées personnalisées) et les classes d'informations.
 
 ---
 
@@ -658,7 +637,7 @@ Les cycles PDCA sont créés manuellement ou automatiquement par :
 
 - **Incidents clos (M09)** : lorsque les actions correctives de la RCA sont structurelles — phase de départ PLAN
 - **Findings d'audit (M17)** : pour Major NC et Minor NC — phase de départ PLAN avec échéance déterminée par la sévérité
-- **Risques avec score > 14 (M06)** : lorsque le plan de traitement requiert des actions structurelles — phase PLAN urgente
+- **Risques High ou Critical (M06)** : lorsque le traitement exige une action structurelle, le cycle s'ouvre avec l'origine « Risque » — phase PLAN
 - **Délibérations de la revue de direction (M13)** : pour chaque action approuvée par la revue — phase PLAN
 
 Dans tous les cas de création automatique, le cycle PDCA mentionne la référence à l'entité d'origine (ex. "Incident #INC-2026-042") et l'éventuelle échéance découlant de la politique.
@@ -750,7 +729,7 @@ Cliquez sur **Générer l'instantané des données** pour figer les données GRC
 
 - **a)** actions des revues précédentes : toutes celles de la revue précédente, plus les plus anciennes encore ouvertes ou clôturées sur la période, les actions en retard étant mises en évidence
 - **d)** conformité par référentiel avec les contrôles en écart ; KPI opérationnels hors seuil ; audits des 12 derniers mois avec préparation et non-conformités ouvertes (majeures d'abord) ; incidents ouverts et notifiés NIS2 ; cycles PDCA bloqués et tâches en retard ; documents expirés, à réviser et approuvés depuis la dernière revue
-- **f)** risques **au-delà du seuil d'acceptabilité** approuvé par la direction (inhérent → résiduel, traitement, responsable, présence d'un plan) avec le seuil utilisé, risques acceptés formellement, processus critiques sans PCA approuvé
+- **f)** **risques High et Critical non acceptés** (au-delà du seuil d'acceptation de la procédure : classe actuelle → attendue, traitement, responsable, existence du plan), risques par classe, acceptations actives, mesures en retard et état des appréciations des risques ; processus critiques sans plan BCP approuvé
 - **g)** opportunités d'amélioration issues des audits
 
 L'instantané peut être régénéré jusqu'à l'approbation ; ensuite il reste figé car il constitue le contenu du procès-verbal.
@@ -1356,7 +1335,7 @@ La plateforme envoie des notifications email automatiques en fonction des évén
 | Audit imminent (7 jours) | Auditeur + Compliance Officer |
 | Incident NIS2 — minuterie T+24h | RSSI + Compliance Officer |
 | Incident NIS2 — minuterie T+72h | RSSI + Compliance Officer + Plant Manager |
-| Risque avec score > 14 | Risk Manager + Plant Manager |
+| Risque High ou Critical évalué | Risk Manager + Plant Manager |
 | Document qui expire (30 jours) | Propriétaire du document |
 | Preuve expirée | Propriétaire du contrôle associé |
 | Rôle obligatoire vacant | Compliance Officer + Plant Manager |
@@ -1532,7 +1511,7 @@ Vous avez un accès complet aux modules de risk. Vous êtes responsable de :
 - Superviser le risk assessment IT et OT (M06)
 - Valider la BIA et les valeurs MTPD/RTO/RPO (M05)
 - Lancer et surveiller les cycles PDCA (M11)
-- Recevoir des alertes sur les risques avec score > 14
+- Recevoir les tâches sur les risques High et Critical, les acceptations arrivant à échéance et les mesures en retard
 
 ### Plant Manager
 
@@ -1608,11 +1587,10 @@ L'onglet est conçu d'abord pour la direction, puis pour ceux qui traitent les �
 
 #### Onglet Risque / BIA / BCP
 
-Divisé en trois sous-sections, sélectionnables en haut de l'onglet :
+Divisé en deux sous-sections, sélectionnables en haut de l'onglet :
 
-- **Risques** : risques **au-delà du seuil d'acceptabilité** approuvé par la direction (appétence au risque du module Risques ; sans politique, 14 est utilisé), avec le nombre maximal toléré ; heatmap avec les cellules au-delà du seuil mises en évidence ; les 10 risques au score le plus élevé (cliquez pour les ouvrir) ; répartition NIS2 art. 21 et par catégorie de menace.
+- **Risques** : risques **High et Critical non acceptés** (au-delà du seuil d'acceptation de la procédure), risques par classe et acceptations actives ; matrice avec la classe de chaque cellule ; les 10 risques de classe la plus élevée (clic pour les ouvrir) ; répartition par domaine NIS2 art. 21 et par type d'actif.
 - **Continuité** : processus critiques (criticité ≥ 4) sans PCA **approuvé**, processus avec plan approuvé mais test échu ou jamais réalisé (*non couverts : test échu*) et plans approuvés avec test à refaire ; tableau processus · risques · PCA · dernier test. Les brouillons et les plans archivés ne couvrent pas un processus.
-- **Valeur économique** : perte annuelle attendue (ALE) inhérente et résiduelle, risque réduit par les contrôles et retour sur investissement (ROSI) des traitements planifiés.
 
 #### Onglet Indicateurs de processus
 
@@ -1742,8 +1720,8 @@ Le module IA a peut-être été désactivé par l'administrateur pour votre plan
 **J'ai annulé un audit par erreur. Puis-je le restaurer ?**
 Non, l'annulation est irréversible. Vous pouvez cependant créer un nouvel audit pour le même trimestre et recréer les findings éventuellement perdus. Contactez le Compliance Officer qui peut consulter les findings annulés dans l'archive pour récupérer les informations.
 
-**Le score de mon risque a changé sans que j'aie fait quoi que ce soit.**
-Le score résiduel est recalculé automatiquement lorsque l'état des contrôles associés change. Si une preuve a expiré, le contrôle revient à "partiel" et cela peut augmenter le risque résiduel. Vérifiez les contrôles associés au risque et mettez à jour les preuves.
+**La classe de mon risque a changé sans que j'aie fait quoi que ce soit.**
+Cela n'arrive pas automatiquement : la classe ne change qu'avec une nouvelle évaluation ou avec **Appliquer le risque attendu**, lorsque toutes les mesures du plan sont terminées et vérifiées. Si un contrôle lié passe en écart, si une preuve expire ou si une mesure est en retard, la barre de l'appréciation le signale parmi les événements à considérer pour une révision extraordinaire.
 
 **Je ne reçois pas les notifications email.**
 Vérifiez d'abord le dossier spam. Si les emails n'arrivent pas du tout, contactez l'administrateur système pour vérifier la configuration SMTP et le profil de notification attribué à votre rôle.

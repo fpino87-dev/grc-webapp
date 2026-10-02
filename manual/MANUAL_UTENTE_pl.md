@@ -146,7 +146,7 @@ Na górze pulpitu znajdują się 4 kafelki z głównymi KPI:
 | KPI | Co mierzy |
 |-----|-----------|
 | **Compliance %** | Procent kontroli w stanie „zgodny" lub „częściowy z ważnym dowodem" w stosunku do wszystkich aktywnych kontroli dla wybranego frameworku |
-| **Otwarte ryzyka** | Liczba ocen ryzyka ze statusem „otwarte" (nieakceptowane i niezamknięte). Liczba ta zawiera zliczenie ryzyk krytycznych (wynik > 14) w kolorze czerwonym |
+| **Otwarte ryzyka** | Liczba ocenionych ryzyk bieżącego rejestru. Liczbie towarzyszy wyróżniona na czerwono liczba ryzyk High i Critical |
 | **Incydenty** | Otwarte incydenty w wybranym plant. Liczby czerwone oznaczają incydenty z aktywnymi timerami NIS2 |
 | **Przeterminowane zadania** | Zadania przypisane do Twojej roli (lub całej organizacji, jeśli jesteś CO) z przekroczoną datą realizacji |
 
@@ -156,7 +156,7 @@ Platforma stosuje spójną konwencję kolorystyczną w całym interfejsie:
 
 - **Zielony**: wszystko w porządku — zgodny, ukończony, ważny, w terminie
 - **Żółty**: wymagana uwaga — częściowy, wygasający w ciągu 30 dni, w toku
-- **Czerwony**: krytyczny — luka, przeterminowany, wysokie ryzyko (wynik > 14), timer NIS2 wygasający
+- **Czerwony**: krytyczny — luka, przeterminowany, ryzyko High lub Critical, timer NIS2 wygasający
 - **Szary**: nieoceniony, N/A, zarchiwizowany
 - **Pomarańczowy**: alert lub ostrzeżenie — wymaga uwagi, ale jeszcze nie jest krytyczny
 
@@ -354,7 +354,6 @@ Pomarańczowa odznaka **„Do ponownej oceny"** pojawia się na karcie aktywa gd
 
 - Zarejestrowano zewnętrzną zmianę
 - Upłynął termin okresowego przeglądu przewidziany w polityce
-- Ryzyko powiązane z aktywem istotnie zmieniło wynik
 - Aktywo osiągnęło datę EOL systemu operacyjnego
 
 Co zrobić: otwórz kartę aktywa, sprawdź czy informacje są nadal aktualne (szczególnie krytyczność, ekspozycja i powiązane procesy krytyczne), a następnie kliknij **Oznacz jako ponownie ocenione**. W razie potrzeby zaktualizuj pola przed potwierdzeniem.
@@ -404,78 +403,58 @@ Aby przejść do następnej fazy: z karty procesu kliknij **Wyślij do walidacji
 4. Wskaż typ zależności: **Krytyczna** (proces zatrzymuje się bez tego aktywa) lub **Pomocnicza** (pogorszenie wydajności)
 5. Zapisz
 
-Zależność jest dwukierunkowa: aktywo pokaże na swojej karcie procesy, które od niego zależą, a krytyczność procesu wpływa na obliczenie ryzyka aktywa.
+Zależność jest dwukierunkowa: aktywo pokaże na swojej karcie procesy, które od niego zależą. Z każdego procesu przycisk **Utwórz ryzyko** otwiera ryzyko już powiązane z procesem, do uzupełnienia w ocenie ryzyka (M06).
 
 ---
 
 ## 6. Ocena ryzyka (M06)
 
-[Zrzut ekranu: lista ocen ryzyka]
+[Zrzut ekranu: ocena ryzyka — rejestr, karta ryzyka]
 
-### Różnica między ryzykiem wrodzonym a rezydualnym
+Moduł stosuje procedurę zarządzania ryzykiem (D-ITA-INF-23). Każdy zakład ma własny **rejestr**; jeśli przewiduje to polityka, istnieje też **rejestr grupy** dla usług wspólnych (centralny ERP, Active Directory, umowy ramowe). Rejestr wybiera się w prawym górnym rogu.
 
-- **Ryzyko wrodzone**: poziom ryzyka w przypadku braku jakichkolwiek kontroli. Reprezentuje „surowe" zagrożenie dla aktywa lub domeny
-- **Ryzyko rezydualne**: poziom ryzyka po zastosowaniu istniejących kontroli. To wartość, na której opiera się decyzja o akceptacji lub leczeniu ryzyka
+### Oceny (cykle)
 
-W formularzu oceny najpierw wypełniasz ryzyko wrodzone, a następnie system automatycznie oblicza ryzyko rezydualne na podstawie statusu powiązanych kontroli. Jeśli kontrole nie są jeszcze wystarczające, ryzyko rezydualne pozostaje wysokie.
+Pasek pod tytułem pokazuje stan oceny rejestru:
 
-### Właściciel ryzyka i odpowiedzialny za postępowanie z ryzykiem
+1. **Rozpocznij pierwszą ocenę ryzyka** (lub, po zatwierdzeniu, **przegląd okresowy** albo **nadzwyczajny** z podaniem powodu)
+2. Oceń ryzyka; pola oceny można edytować tylko podczas oceny **w toku**
+3. **Prześlij do zatwierdzenia**: system sprawdza pełne pokrycie i ocenione ryzyka (lub potwierdzone, w przeglądzie okresowym)
+4. **Zatwierdź**: wskaż organ, który podjął uchwałę, i opcjonalnie przegląd zarządzania z protokołem. Zatwierdzenie zamraża obraz rejestru (zakładka **Oceny**, eksport do Excela)
 
-W nowym scenariuszu, w edycji i w kreatorze ryzyko → ciągłość są dwie odrębne osoby odpowiedzialne:
+Rejestr sprzed nowej procedury pozostaje dostępny tylko do odczytu w zakładce Oceny (**zastąpiona metoda**). Jeśli po zatwierdzeniu wystąpią istotne zdarzenia (poważne incydenty, nowe krytyczne aktywa, zmiany, poważne niezgodności, kontrole z luką, opóźnione działania), pasek je sygnalizuje, aby rozważyć przegląd nadzwyczajny.
 
-- **Właściciel ryzyka**: odpowiada za ryzyko i decyduje o ryzyku rezydualnym (np. o jego akceptacji)
-- **Odpowiedzialny za postępowanie z ryzykiem**: wdraża środki postępowania, zwykle IT/OT. Wybierz użytkownika portalu lub **Inny (nie użytkownik portalu)** i wpisz imię i nazwisko, funkcję lub dostawcę (np. MSP lub integratora OT)
+### Pokrycie i nowe ryzyko
 
-Może to być ta sama osoba. Na liście odpowiedzialny za postępowanie jest wyświetlany pod właścicielem; rejestr ryzyk Excel ma osobną kolumnę. Przy dodawaniu działania ograniczającego jest proponowany jako **Odpowiedzialny za działanie**, co można zmienić dla każdego działania z tymi samymi dwiema opcjami. Zadania automatyczne nadal są przypisywane do ról, jak dotąd.
+Zakładka **Pokrycie** zestawia typy aktywów obecnych w zakładzie (IT, OT, zakład, personel, dostawcy, prototypy) z **katalogiem zagrożeń**: każda para musi być **oceniona** lub oznaczona jako **nie dotyczy** z uzasadnieniem. **Nowe ryzyko** zawsze zaczyna się od katalogu: wybierz typ i zagrożenie, a następnie dokończ ocenę w karcie ryzyka. Z BIA przycisk **Utwórz ryzyko** otwiera ryzyko już powiązane z procesem.
 
-### Jak wypełnić wymiary IT i OT
+### Karta ryzyka
 
-**Wymiary oceny ryzyka IT (4 osie):**
+Kliknij ryzyko, aby otworzyć kartę boczną:
 
-1. **Ekspozycja**: czy aktywo jest w Internecie? W DMZ? Izolowane? (1 = całkowicie izolowane, 5 = dostępne w Internecie bez zabezpieczeń)
-2. **CVE**: jaki jest maksymalny wynik CVE zaangażowanych aktywów? (1 = brak znanych podatności, 5 = krytyczne CVE nienaprawione)
-3. **Zagrożenia sektorowe**: czy istnieją znane aktywne zagrożenia dla sektora automotive? (1 = brak, 5 = udokumentowana aktywna kampania)
-4. **Luki w kontrolach**: ile istotnych kontroli jest w stanie luka lub niezocenionych? (1 = wszystkie zgodne, 5 = większość z lukami)
+- **Identyfikacja**: zagrożenie, aktywo lub grupa aktywów, dostawca, proces BIA, **dotknięte informacje** (klasy informacji), podatność i skutek dla celów biznesowych
+- **Ocena**: prawdopodobieństwo (częstotliwość historyczna lub czynnik ekspozycji) i wpływ w sześciu wymiarach — ekonomicznym, prawnym, klient i umowy, reputacja, bezpieczeństwo osób, operacyjnym — z **kryteriami procedury przy każdym poziomie**. Wpływ to najgorszy przypadek; dla zagrożenia poufności nie spada poniżej klasy ochrony dotkniętych informacji. **Klasę** (Very Low, Low, Medium, High, Critical) odczytuje się z macierzy, a nie z iloczynu P × W; można ją przesunąć o jeden poziom tylko z uzasadnieniem
+- **Istniejące środki** wraz ze skutecznością, opcjonalnie powiązane z kontrolami
+- **Postępowanie**: unikanie, ograniczanie, przeniesienie lub akceptacja, z uzasadnieniem i **ryzykiem oczekiwanym**; Właściciel ryzyka (odpowiedzialny biznesowo) i odpowiedzialny za postępowanie (użytkownik portalu lub tekst dowolny)
+- **NIS2**: zakres, obszar art. 21 ust. 2, systemy, których dotyczy, możliwy poważny incydent
 
-**Wymiary oceny ryzyka OT (5 osi):**
+**Zakończ ocenę** sprawdza, czy wszystko jest uzupełnione (uzasadnienia, Właściciel ryzyka, postępowanie, ryzyko oczekiwane). Ryzyko High lub Critical tworzy zadanie planu postępowania i powiadomienie.
 
-1. **Purdue + łączność**: czy system jest podłączony do sieci IT lub Internetu? (1 = poziom 0 izolowany, 5 = podłączony do Internetu)
-2. **Możliwość aktualizacji**: czy system może być aktualizowany? Jak często? (1 = regularne łatki, 5 = nigdy nieaktualizowany)
-3. **Wpływ fizyczny / bezpieczeństwo**: czy przerwa lub zmiana może spowodować szkody fizyczne lub BHP? (1 = brak wpływu fizycznego, 5 = zagrożenie życia ludzkiego)
-4. **Segmentacja**: czy strefa OT jest odpowiednio oddzielona od IT i Internetu? (1 = całkowita segregacja, 5 = sieć płaska)
-5. **Wykrywalność anomalii**: czy istnieje system wykrywania anomalnych zachowań? (1 = aktywny dedykowany IDS/ICS, 5 = brak widoczności)
+### Plan postępowania i ryzyko oczekiwane
 
-### Próg krytyczny (wynik > 14) i automatycznie generowane zadania
+Działania planu mają odpowiedzialnego, termin i oczekiwany efekt. Zakończone działanie musi zostać **zweryfikowane** (test, dowód, audyt). Dopiero gdy wszystkie działania są zakończone i zweryfikowane, pojawia się **Zastosuj ryzyko oczekiwane**: poza nową oceną to jedyny sposób obniżenia klasy. Opóźnione działania powiadamiają Risk Managera, a następnie są eskalowane na poziom organizacji.
 
-Gdy **ryzyko rezydualne przekracza 14** (czerwone kwadranty mapy ciepła 5x5):
+### Akceptacja
 
-- Risk Manager i Plant Manager otrzymują natychmiastowe powiadomienie
-- Automatycznie tworzone jest zadanie planowania leczenia ryzyka z terminem 15 dni
-- Jeśli zadanie nie zostanie ukończone w ciągu 15 dni, następuje eskalacja do Compliance Officer
-- Ryzyko jest podświetlone na czerwono na pulpicie i mapie ciepła
+Kto może zaakceptować, zależy od klasy i od **polityki zarządzania ryzykiem** (Ustawienia): podpisy wymaganych ról, opinia CISO (wiążąca lub informacyjna) oraz, dla Critical, uchwała organu. Maksymalna ważność zależy od klasy. Ryzyk wiążących się z naruszeniem prawa, wymagań VDA ISA lub zobowiązań do zachowania poufności nigdy nie można zaakceptować; jeśli Właściciel ryzyka sam ocenił i potraktował ryzyko, wymagany jest także podpis Plant Managera. Zmiana klasy unieważnia akceptację. Wygasające akceptacje tworzą zadanie 30 dni wcześniej.
 
-### Formalna akceptacja ryzyka
+### Dziedziczone ryzyka grupy
 
-Jeśli ryzyko rezydualne jest znane, ale decyduje się je zaakceptować (np. koszt leczenia wyższy niż oczekiwany wpływ):
+W rejestrze zakładu ryzyka grupy, które go dotyczą, są oznaczone ⇩ i dostępne tylko do odczytu. Jeśli wpływ na zakład jest większy, zgłoś to z karty (**Wpływ lokalny**): grupa przyjmuje zgłoszenie i aktualizuje ocenę.
 
-1. Z karty ryzyka kliknij **Akceptuj ryzyko**
-2. Wypełnij formularz formalnej akceptacji:
-   - Uzasadnienie (obowiązkowe, minimum 50 znaków)
-   - Data przeglądu (obowiązkowa — ryzyko musi być okresowo ponownie oceniane)
-   - Podpis cyfrowy upoważnionego odpowiedzialnego
-3. Zapisz — ryzyko przechodzi do stanu „Zaakceptowane" i nie generuje alertów do daty przeglądu
+### Macierz i Ustawienia
 
-### Mapa ciepła i interpretacja
-
-[Zrzut ekranu: mapa ciepła 5x5]
-
-Mapa ciepła pokazuje ryzyka na siatce Prawdopodobieństwo x Wpływ 5x5:
-
-- **Zielony** (wynik 1-7): akceptowalne ryzyko — okresowe monitorowanie
-- **Żółty** (wynik 8-14): umiarkowane ryzyko — plan łagodzenia w ciągu 90 dni
-- **Czerwony** (wynik 15-25): wysokie ryzyko — automatyczna eskalacja, plan w ciągu 15 dni
-
-Kliknij kwadrant, aby zobaczyć listę ryzyk w tej strefie. Użyj filtra plant, aby porównać rozkład ryzyk między różnymi zakładami.
+Zakładka **Macierz** pokazuje liczby w komórkach, bieżące lub oczekiwane; kliknij komórkę, aby zobaczyć jej ryzyka. W **Ustawieniach** użytkownicy z dostępem do całej organizacji zarządzają modelem zarządzania (scentralizowany, sfederowany, jeden zakład), tym, kto akceptuje każdą klasę, progami ekonomicznymi (z ewentualnymi wyjątkami dla zakładów), katalogiem zagrożeń (pozycje własne) i klasami informacji.
 
 ---
 
@@ -658,7 +637,7 @@ Cykle PDCA są tworzone ręcznie lub automatycznie przez:
 
 - **Zamknięte incydenty (M09)**: gdy działania naprawcze RCA mają charakter strukturalny — faza startowa PLAN
 - **Wyniki audytu (M17)**: dla Major NC i Minor NC — faza startowa PLAN z terminem określonym przez powagę
-- **Ryzyka z wynikiem > 14 (M06)**: gdy plan leczenia wymaga działań strukturalnych — pilna faza PLAN
+- **Ryzyka High lub Critical (M06)**: gdy postępowanie wymaga działania strukturalnego, cykl otwiera się ze źródłem „Ryzyko” — faza PLAN
 - **Uchwały przeglądu zarządu (M13)**: dla każdego działania zatwierdzonego przez przegląd — faza PLAN
 
 We wszystkich przypadkach automatycznego tworzenia cykl PDCA zawiera odniesienie do encji źródłowej (np. „Incydent #INC-2026-042") i ewentualny termin wynikający z polityki.
@@ -750,7 +729,7 @@ Kliknij **Generuj snapshot danych**, aby zamrozić dane GRC w chwili spotkania. 
 
 - **a)** działania z poprzednich przeglądów: wszystkie z poprzedniego przeglądu oraz starsze, nadal otwarte lub zamknięte w danym okresie, z wyróżnieniem działań po terminie
 - **d)** zgodność dla każdego frameworku z kontrolami z lukami; operacyjne KPI poza progami; audyty z ostatnich 12 miesięcy z gotowością i otwartymi niezgodnościami (najpierw poważne); incydenty otwarte i zgłoszone NIS2; zablokowane cykle PDCA i zadania po terminie; dokumenty po terminie, do przeglądu i zatwierdzone od ostatniego przeglądu
-- **f)** ryzyka **powyżej progu akceptowalności** zatwierdzonego przez kierownictwo (inherentne → rezydualne, postępowanie, właściciel, czy istnieje plan) wraz z użytym progiem, ryzyka formalnie zaakceptowane, procesy krytyczne bez zatwierdzonego planu BCP
+- **f)** **niezaakceptowane ryzyka High i Critical** (powyżej progu akceptacji procedury: klasa bieżąca → oczekiwana, postępowanie, właściciel, istnienie planu), ryzyka według klasy, aktywne akceptacje, opóźnione działania i stan ocen ryzyka; procesy krytyczne bez zatwierdzonego planu BCP
 - **g)** możliwości doskonalenia wskazane w audytach
 
 Snapshot można generować ponownie do momentu zatwierdzenia; potem pozostaje niezmienny, ponieważ stanowi treść protokołu.
@@ -1356,7 +1335,7 @@ Platforma wysyła automatyczne powiadomienia e-mail na podstawie zdarzeń. Głó
 | Nadchodzący audyt (7 dni) | Audytor + Compliance Officer |
 | Incydent NIS2 — timer T+24h | CISO + Compliance Officer |
 | Incydent NIS2 — timer T+72h | CISO + Compliance Officer + Plant Manager |
-| Ryzyko z wynikiem > 14 | Risk Manager + Plant Manager |
+| Ocenione ryzyko High lub Critical | Risk Manager + Plant Manager |
 | Dokument wygasający (30 dni) | Właściciel dokumentu |
 | Wygasły dowód | Właściciel powiązanej kontroli |
 | Wakat obowiązkowej roli | Compliance Officer + Plant Manager |
@@ -1532,7 +1511,7 @@ Masz pełny dostęp do modułów ryzyka. Jesteś odpowiedzialny za:
 - Nadzorowanie oceny ryzyka IT i OT (M06)
 - Walidację BIA i wartości MTPD/RTO/RPO (M05)
 - Uruchamianie i monitorowanie cykli PDCA (M11)
-- Otrzymywanie alertów o ryzykach z wynikiem > 14
+- Otrzymywanie zadań dotyczących ryzyk High i Critical, wygasających akceptacji i opóźnionych działań
 
 ### Plant Manager
 
@@ -1608,11 +1587,10 @@ Zakładka jest przeznaczona najpierw dla kierownictwa, a następnie dla osób pr
 
 #### Zakładka Ryzyko / BIA / BCP
 
-Podzielona na trzy podsekcje, wybierane u góry zakładki:
+Podzielona na dwie podsekcje, wybierane u góry zakładki:
 
-- **Ryzyka**: ryzyka **powyżej progu akceptowalności** zatwierdzonego przez kierownictwo (apetyt na ryzyko z modułu Ryzyka; bez polityki używane jest 14) wraz z maksymalną tolerowaną liczbą; mapa cieplna z wyróżnionymi komórkami powyżej progu; 10 ryzyk o najwyższym wyniku (kliknij, aby je otworzyć); podział według NIS2 art. 21 i kategorii zagrożenia.
+- **Ryzyka**: **niezaakceptowane ryzyka High i Critical** (powyżej progu akceptacji procedury), ryzyka według klasy i aktywne akceptacje; macierz z klasą każdej komórki; 10 ryzyk o najwyższej klasie (kliknij, aby otworzyć); podział według obszaru NIS2 art. 21 i typu aktywa.
 - **Ciągłość**: procesy krytyczne (krytyczność ≥ 4) bez **zatwierdzonego** planu BCP, procesy z zatwierdzonym planem, ale z zaległym lub nigdy nieprzeprowadzonym testem (*niepokryte: test zaległy*) oraz zatwierdzone plany z testem do powtórzenia; tabela proces · ryzyka · BCP · ostatni test. Wersje robocze i plany zarchiwizowane nie obejmują procesu.
-- **Wartość ekonomiczna**: oczekiwana roczna strata (ALE) inherentna i rezydualna, ryzyko ograniczone przez kontrole oraz zwrot z inwestycji (ROSI) planowanych działań.
 
 #### Zakładka Wskaźniki procesów
 
@@ -1742,8 +1720,8 @@ Moduł AI mógł zostać wyłączony przez administratora dla Twojego plant, lub
 **Anulowałem audyt przez pomyłkę. Czy mogę go przywrócić?**
 Nie, anulowanie jest nieodwracalne. Możesz jednak utworzyć nowy audyt dla tego samego kwartału i odtworzyć ewentualnie utracone wyniki. Skontaktuj się z Compliance Officer, który może wyświetlić anulowane wyniki w archiwum, aby odzyskać informacje.
 
-**Wynik mojego ryzyka zmienił się bez mojej interwencji.**
-Wynik rezydualny jest przeliczany automatycznie, gdy zmienia się status powiązanych kontroli. Jeśli dowód wygasł, kontrola wraca do „częściowej" i może to zwiększyć ryzyko rezydualne. Sprawdź kontrole powiązane z ryzykiem i zaktualizuj dowody.
+**Klasa mojego ryzyka zmieniła się bez mojej interwencji.**
+To nie dzieje się automatycznie: klasa zmienia się tylko przy nowej ocenie lub po **Zastosuj ryzyko oczekiwane**, gdy wszystkie działania planu są zakończone i zweryfikowane. Jeśli powiązana kontrola ma lukę, dowód wygasa lub działanie jest opóźnione, pasek oceny sygnalizuje to wśród zdarzeń do rozważenia w przeglądzie nadzwyczajnym.
 
 **Nie otrzymuję powiadomień e-mail.**
 Najpierw sprawdź folder ze spamem. Jeśli e-maile w ogóle nie docierają, skontaktuj się z administratorem systemu, aby sprawdzić konfigurację SMTP i profil powiadomień przypisany do Twojej roli.

@@ -217,8 +217,8 @@ def destroy(self, request, *args, **kwargs):
 ### Główny przepływ danych
 
 ```
-BIA.downtime_cost → RiskAssessment.ale_eur (obliczony)
-RiskAssessment(score > 14) → Zadanie pilne + automatyczny PDCA
+RiskAssessment zakończony High/Critical → Zadanie planu postępowania + powiadomienie risk_red
+Wygasająca RiskAcceptance / opóźnione działanie → Zadanie (check_risk_treatments)
 Incident.close() → automatyczne PDCA + LessonLearned
 AuditFinding.close() → automatyczne PDCA + LessonLearned
 BcpTest(nieudany) → automatyczny PDCA
@@ -250,6 +250,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements/dev.txt
 python manage.py migrate
 python manage.py load_frameworks       # importuje VDA ISA, NIS2, ISO 27001
+python manage.py load_risk_catalog     # katalog zagrożeń oceny ryzyka
 python manage.py seed_demo             # opcjonalne dane demo
 python manage.py createsuperuser
 
@@ -519,10 +520,13 @@ Odpowiedź: { "propagated_to": 3, "skipped_no_instance": 0 }
 
 ### RiskAssessment
 
-- Ryzyko wrodzone vs. resztkowe (6 wymiarów IT + 4 OT)
-- `weighted_score` z mnożnikiem BIA (`downtime_cost`)
-- `risk_level`: zielony ≤7, żółty ≤14, czerwony >14
-- Automatyczne uruchomienie PDCA jeśli score > 14
+- Metodologia D-ITA-INF-23: rejestr zakładu (`plant`) i grupy (`plant` pusty, `affected_plants` = zakłady dziedziczące)
+- Klasa wyłącznie z macierzy (`risk.services.risk_class`), wpływ = maksimum z 6 wymiarów z progiem poufności z `InformationClass`
+- Ryzyko bieżące (`current_class`) i oczekiwane (`expected_class`); „zastosuj oczekiwane” tylko przy zakończonych i zweryfikowanych działaniach
+- `RiskAssessmentCycle` (pierwsza / okresowa / nadzwyczajna / legacy) ze `snapshot` zamrożonym przy zatwierdzeniu
+- `RiskAcceptance` z podpisami ról, opinią CISO i uchwałą organu zgodnie z `RiskGovernancePolicy`
+- Katalog zagrożeń: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (pozycje własne przez API)
+- Wspólne funkcje dla innych modułów: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
 
 ### M00 — Governance
 
@@ -1403,6 +1407,7 @@ Suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`)
 |---------|------|-----------------|
 | `migrate` | Stosuje migracje DB | Po każdym deployu |
 | `load_frameworks` | Importuje frameworki normatywne z JSON | Początkowa konfiguracja + aktualizacja frameworku |
+| `load_risk_catalog` | Importuje katalog zagrożeń (`risk_catalogs/threats.json`); idempotentne, nie zmienia pozycji własnych | Początkowa konfiguracja + aktualizacja katalogu |
 | `load_notification_profiles` | Domyślne profile powiadomień | Początkowa konfiguracja |
 | `load_competency_requirements` | Wymagania kompetencyjne M15 | Początkowa konfiguracja |
 | `load_required_documents` | Obowiązkowe dokumenty | Początkowa konfiguracja |

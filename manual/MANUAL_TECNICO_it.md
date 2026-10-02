@@ -217,8 +217,8 @@ def destroy(self, request, *args, **kwargs):
 ### Flusso dati principale
 
 ```
-BIA.downtime_cost → RiskAssessment.ale_eur (calcolato)
-RiskAssessment(score > 14) → Task urgente + PDCA automatico
+RiskAssessment completato High/Critical → Task piano di trattamento + notifica risk_red
+RiskAcceptance in scadenza / misura in ritardo → Task (check_risk_treatments)
 Incident.close() → PDCA + LessonLearned automatici
 AuditFinding.close() → PDCA + LessonLearned automatici
 BcpTest(fallito) → PDCA automatico
@@ -250,6 +250,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements/dev.txt
 python manage.py migrate
 python manage.py load_frameworks       # importa VDA ISA, NIS2, ISO 27001
+python manage.py load_risk_catalog     # catalogo minacce del risk assessment
 python manage.py seed_demo             # dati demo opzionali
 python manage.py createsuperuser
 
@@ -520,10 +521,13 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 
 ### RiskAssessment
 
-- Rischio inerente vs residuo (6 dimensioni IT + 4 OT)
-- `weighted_score` con moltiplicatore BIA (`downtime_cost`)
-- `risk_level`: verde ≤7, giallo ≤14, rosso >14
-- Trigger PDCA automatico se score > 14
+- Metodologia D-ITA-INF-23: registro per sito (`plant`) e di gruppo (`plant` nullo, `affected_plants` = siti che lo ereditano)
+- Classe solo dalla matrice (`risk.services.risk_class`), impatto = max delle 6 dimensioni con soglia di riservatezza dalle `InformationClass`
+- Rischio attuale (`current_class`) e atteso (`expected_class`); "applica atteso" solo con misure completate e verificate
+- `RiskAssessmentCycle` (primo / periodico / straordinario / legacy) con `snapshot` congelato all'approvazione
+- `RiskAcceptance` con firme dei ruoli, parere del CISO e delibera dell'organo secondo `RiskGovernancePolicy`
+- Catalogo minacce: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (voci personalizzate da API)
+- Funzioni uniche per gli altri moduli: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
 
 ### M00 — Governance
 
@@ -1404,6 +1408,7 @@ La suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=7
 |---------|-------------|-----------------|
 | `migrate` | Applica migrazioni DB | Dopo ogni deploy |
 | `load_frameworks` | Importa JSON framework normativi | Setup iniziale + aggiornamento framework |
+| `load_risk_catalog` | Importa il catalogo minacce (`risk_catalogs/threats.json`); idempotente, non tocca le voci personalizzate | Setup iniziale + aggiornamento del catalogo |
 | `load_notification_profiles` | Profili notifica default | Setup iniziale |
 | `load_competency_requirements` | Requisiti competenze M15 | Setup iniziale |
 | `load_required_documents` | Documenti obbligatori | Setup iniziale |

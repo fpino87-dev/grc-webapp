@@ -146,7 +146,7 @@ Kontrol panelinin üst kısmında 4 ana KPI kutusu bulunur:
 | KPI | Ne ölçer |
 |-----|----------|
 | **Uyum %** | Seçili çerçeve için aktif kontrollerin toplamına oranla "uyumlu" veya "geçerli kanıta sahip kısmi" durumundaki kontrollerin yüzdesi |
-| **Açık Riskler** | "Açık" durumundaki risk değerlendirmelerinin sayısı (kabul edilmemiş ve kapatılmamış). Sayı, kırmızı renkle kritik risklerin (skor > 14) sayısını da içerir |
+| **Açık Riskler** | Mevcut kayıttaki değerlendirilmiş risklerin sayısı. Sayının yanında High ve Critical risklerin sayısı kırmızıyla gösterilir |
 | **Olaylar** | Seçili tesiste açık olaylar. Kırmızı sayılar, aktif NIS2 zamanlayıcılarına sahip olayları gösterir |
 | **Süresi Geçmiş Görevler** | Rolünüze (ya da CO iseniz kuruluşunuzun tamamına) atanmış, son tarihi geçmiş görevler |
 
@@ -156,7 +156,7 @@ Platform, tüm arayüzde tutarlı bir renk kuralı kullanır:
 
 - **Yeşil**: her şey yolunda — uyumlu, tamamlandı, geçerli, zamanında
 - **Sarı**: dikkat gerekiyor — kısmi, 30 gün içinde sona eriyor, devam ediyor
-- **Kırmızı**: kritik — boşluk, süresi geçmiş, yüksek risk (skor > 14), NIS2 zamanlayıcısı sona eriyor
+- **Kırmızı**: kritik — boşluk, süresi geçmiş, High veya Critical risk, NIS2 zamanlayıcısı sona eriyor
 - **Gri**: değerlendirilmedi, Uygulanamaz (N/A), arşivlendi
 - **Turuncu**: uyarı veya ihtar — dikkat gerektiriyor ancak henüz kritik değil
 
@@ -354,7 +354,6 @@ Turuncu **"Yeniden Değerlendirilecek"** rozeti varlık kartında şu durumlarda
 
 - Harici bir değişiklik kaydedildiğinde
 - Politika tarafından öngörülen periyodik gözden geçirme tarihi sona erdiğinde
-- Varlığa bağlı bir riskin skoru önemli ölçüde değiştiğinde
 - Varlık, işletim sisteminin EOL tarihine ulaştığında
 
 Ne yapılır: varlık kartını açın, bilgilerin hâlâ doğru olduğunu doğrulayın (özellikle kritiklik, maruziyet ve bağlantılı kritik süreçler), ardından **Yeniden Değerlendirildi Olarak İşaretle**'ye tıklayın. Onaylamadan önce gerekirse alanları güncelleyin.
@@ -404,78 +403,58 @@ Aşamayı ilerletmek için: süreç kartından **Doğrulama İçin Gönder**'e (
 4. Bağımlılık türünü belirtin: **Kritik** (süreç bu varlık olmadan durur) veya **Destek** (performans düşüşü)
 5. Kaydedin
 
-Bağımlılık çift yönlüdür: varlık kendi kartında ona bağımlı olan süreçleri gösterecek ve sürecin kritikliği varlık üzerindeki risk hesaplamasını etkiler.
+Bağımlılık çift yönlüdür: varlık kendi kartında ona bağımlı olan süreçleri gösterecek. Her süreçten **Risk oluştur**, süreçle zaten bağlantılı ve Risk Değerlendirmesinde (M06) tamamlanacak bir risk açar.
 
 ---
 
 ## 6. Risk Değerlendirmesi (M06)
 
-[Ekran görüntüsü: risk değerlendirmesi listesi]
+[Ekran görüntüsü: risk değerlendirmesi — kayıt, risk kartı]
 
-### Doğal risk ile kalıntı risk arasındaki fark
+Modül, risk yönetimi prosedürünü (D-ITA-INF-23) uygular. Her tesisin kendi **kaydı** vardır; politika öngörüyorsa paylaşılan hizmetler (merkezi ERP, Active Directory, çerçeve sözleşmeler) için bir **grup kaydı** da bulunur. Kaydı sağ üstten seçin.
 
-- **Doğal risk**: herhangi bir kontrol olmaksızın risk düzeyi. Varlık veya alan üzerindeki "ham" tehdidi temsil eder
-- **Kalıntı risk**: mevcut kontroller uygulandıktan sonra risk düzeyi. Riski kabul etme veya işleme kararının dayandığı değerdir
+### Değerlendirmeler (döngüler)
 
-Değerlendirme formunda önce doğal riski doldurursunuz, ardından sistem bağlantılı kontrollerin durumuna göre kalıntı riski otomatik olarak hesaplar. Kontroller henüz yeterli değilse kalıntı risk yüksek kalır.
+Başlığın altındaki çubuk, kaydın değerlendirme durumunu gösterir:
 
-### Risk sahibi ve risk işleme sorumlusu
+1. **İlk risk değerlendirmesini başlatın** (veya bir onaydan sonra, gerekçesiyle birlikte **dönemsel** ya da **olağanüstü** bir gözden geçirme)
+2. Riskleri değerlendirin; değerlendirme alanları yalnızca **devam eden** bir değerlendirme sırasında değiştirilebilir
+3. **Onaya gönderin**: sistem tam kapsamı ve değerlendirilmiş (dönemsel gözden geçirmede onaylanmış) riskleri kontrol eder
+4. **Onaylayın**: karar veren organı ve isterseniz tutanağıyla birlikte yönetim gözden geçirmesini belirtin. Onay, kaydın bir anlık görüntüsünü dondurur (**Değerlendirmeler** sekmesi, Excel'e aktarılabilir)
 
-Yeni senaryo formunda, düzenleme formunda ve risk → süreklilik sihirbazında iki ayrı sorumlu vardır:
+Yeni prosedürden önceki kayıt, Değerlendirmeler sekmesinden salt okunur olarak görüntülenebilir (**eski yöntem**). Onaydan sonra önemli olaylar meydana gelirse (ciddi olaylar, yeni kritik varlıklar, değişiklikler, büyük uygunsuzluklar, boşluklu kontroller, geciken önlemler), çubuk olağanüstü bir gözden geçirmeyi değerlendirmek için bunları bildirir.
 
-- **Risk sahibi**: riskten hesap veren ve kalıntı risk hakkında karar veren kişi (örneğin kabulü)
-- **Risk işleme sorumlusu**: işleme önlemlerini uygulayan kişi, genellikle BT/OT. Bir portal kullanıcısı seçin ya da **Diğer (portal kullanıcısı değil)** seçeneğini seçip ad, görev veya tedarikçi yazın (ör. bir MSP veya OT entegratörü)
+### Kapsam ve yeni risk
 
-İkisi aynı kişi olabilir. Listede işleme sorumlusu risk sahibinin altında gösterilir; Excel risk kaydında ayrı bir sütunu vardır. Bir azaltım eylemi eklerken **Eylem sorumlusu** olarak önerilir ve her eylem için aynı iki seçenekle değiştirilebilir. Otomatik görevler önceden olduğu gibi rollere atanmaya devam eder.
+**Kapsam** sekmesi, tesiste bulunan varlık türlerini (BT, OT, tesis, personel, tedarikçiler, prototipler) **tehdit kataloğu** ile eşleştirir: her çift ya **değerlendirilmeli** ya da gerekçesiyle **uygulanamaz** olarak işaretlenmelidir. **Yeni risk** her zaman katalogdan başlar: türü ve tehdidi seçin, ardından değerlendirmeyi risk kartında tamamlayın. BIA'dan **Risk oluştur**, süreçle zaten bağlantılı bir risk açar.
 
-### BT ve OT boyutları nasıl doldurulur
+### Risk kartı
 
-**BT risk değerlendirmesi boyutları (4 eksen):**
+Yan kartı açmak için bir riske tıklayın:
 
-1. **Maruziyet**: varlık İnternet'te mi? DMZ'de mi? Yalıtılmış mı? (1 = tamamen yalıtılmış, 5 = korumasız İnternet'e maruz)
-2. **CVE**: ilgili varlıkların maksimum CVE puanı nedir? (1 = bilinen güvenlik açığı yok, 5 = yamalanmamış kritik CVE)
-3. **Sektör tehditleri**: otomotiv sektöründe bilinen aktif tehditler var mı? (1 = yok, 5 = belgelenmiş aktif kampanya)
-4. **Kontrol boşlukları**: kaç ilgili kontrol boşluk veya değerlendirilmemiş durumda? (1 = tümü uyumlu, 5 = çoğunluğu boşlukta)
+- **Tanımlama**: tehdit, varlık veya varlık grubu, tedarikçi, BIA süreci, **etkilenen bilgiler** (bilgi sınıfları), zafiyet ve iş hedefleri üzerindeki sonuç
+- **Değerlendirme**: olasılık (geçmiş sıklık veya maruziyet faktörü) ve altı boyutta etki — ekonomik, yasal, müşteri ve sözleşme, itibar, kişilerin güvenliği, operasyonel — **her seviyenin yanında prosedür kriterleriyle**. Etki en kötü durumdur; gizlilik tehdidinde etkilenen bilgilerin koruma sınıfının altına düşmez. **Sınıf** (Very Low, Low, Medium, High, Critical) P × E çarpımından değil matristen okunur; yalnızca gerekçeyle bir seviye kaydırabilirsiniz
+- Etkinlikleriyle birlikte **mevcut önlemler**, isteğe bağlı olarak kontrollere bağlı
+- **İşlem**: kaçınma, azaltma, transfer veya kabul; gerekçe ve **beklenen risk** ile; Risk Sahibi (iş sorumlusu) ve işlem sorumlusu (portal kullanıcısı veya serbest metin)
+- **NIS2**: kapsam, madde 21(2) alanı, etkilenen sistemler, olası ciddi olay
 
-**OT risk değerlendirmesi boyutları (5 eksen):**
+**Değerlendirmeyi tamamla**, her şeyin doldurulduğunu kontrol eder (gerekçeler, Risk Sahibi, işlem, beklenen risk). High veya Critical bir risk, işlem planı görevini ve bildirimi oluşturur.
 
-1. **Purdue + bağlantı**: sistem BT ağlarına veya İnternet'e bağlı mı? (1 = yalıtılmış düzey 0, 5 = İnternet'e bağlı)
-2. **Yamalanabilirlik**: sistem güncellenebilir mi? Ne sıklıkla? (1 = düzenli yamalar, 5 = hiçbir zaman güncellenemiyor)
-3. **Fiziksel / güvenlik etkisi**: bir kesinti veya değişiklik fiziksel hasara ya da iş güvenliği sorunlarına yol açabilir mi? (1 = fiziksel etki yok, 5 = kişilerin güvenliğine risk)
-4. **Segmentasyon**: OT bölgesi BT'den ve İnternet'ten yeterince ayrılmış mı? (1 = tamamen yalıtılmış, 5 = düz ağ)
-5. **Anomali tespiti**: anormal davranışlar için bir tespit sistemi var mı? (1 = aktif özel IDS/ICS, 5 = hiçbir görünürlük yok)
+### İşlem planı ve beklenen risk
 
-### Kritik eşik (skor > 14) ve oluşturulan otomatik görevler
+Plan önlemlerinin bir sorumlusu, son tarihi ve beklenen etkisi vardır. Tamamlanan bir önlem **doğrulanmalıdır** (test, kanıt, denetim). Ancak tüm önlemler tamamlanıp doğrulandığında **Beklenen riski uygula** görünür: yeni bir değerlendirme dışında sınıfı düşürmenin tek yolu budur. Geciken önlemler Risk Yöneticisini uyarır, ardından organizasyon düzeyine iletilir.
 
-**Kalıntı risk 14'ü aştığında** (5x5 ısı haritasının kırmızı kadranları):
+### Kabul
 
-- Risk Yöneticisi ve Tesis Yöneticisi anında bildirim alır
-- 15 günlük son tarihle otomatik olarak risk işlem planlama görevi oluşturulur
-- Görev 15 gün içinde tamamlanmazsa Uyum Yetkilisi'ne eskalasyon başlar
-- Risk, kontrol panelinde ve ısı haritasında kırmızı olarak vurgulanır
+Kimin kabul edebileceği sınıfa ve **risk yönetişimi politikasına** (Ayarlar) bağlıdır: gerekli rollerin imzaları, CISO görüşü (bağlayıcı veya bilgilendirici) ve Critical için organ kararı. Azami geçerlilik süresi sınıfa bağlıdır. Yasa ihlali, VDA ISA gereklilikleri veya gizlilik yükümlülükleri içeren riskler asla kabul edilemez; Risk Sahibi riski tek başına değerlendirip işlediyse Tesis Yöneticisinin imzası da gerekir. Sınıf değişirse kabul düşer. Süresi dolmak üzere olan kabuller 30 gün önceden görev oluşturur.
 
-### Riskin resmi olarak kabul edilmesi
+### Devralınan grup riskleri
 
-Kalıntı risk biliniyorsa ancak kabul edilmesine karar verilirse (ör. işlem maliyeti beklenen etkiden fazla):
+Bir tesis kaydında, o tesisi ilgilendiren grup riskleri ⇩ ile ve salt okunur olarak görünür. Tesis üzerindeki etki daha yüksekse karttan bildirin (**Yerel etki**): grup bildirimi kabul eder ve değerlendirmeyi günceller.
 
-1. Risk kartından **Riski Kabul Et**'e tıklayın
-2. Resmi kabul formunu doldurun:
-   - Gerekçe (zorunlu, en az 50 karakter)
-   - Gözden geçirme tarihi (zorunlu — risk periyodik olarak yeniden değerlendirilmelidir)
-   - Yetkili sorumlunun dijital imzası
-3. Kaydedin — risk "Kabul Edildi" durumuna geçer ve gözden geçirme tarihine kadar uyarı oluşturmaz
+### Matris ve Ayarlar
 
-### Isı haritası ve yorumlama
-
-[Ekran görüntüsü: 5x5 ısı haritası]
-
-Isı haritası, riskleri Olasılık x Etki 5x5 ızgarasında gösterir:
-
-- **Yeşil** (skor 1-7): kabul edilebilir risk — periyodik izleme
-- **Sarı** (skor 8-14): orta risk — 90 gün içinde azaltma planı
-- **Kırmızı** (skor 15-25): yüksek risk — otomatik eskalasyon, 15 gün içinde plan
-
-Onu oluşturan risklerin listesini görmek için bir kadrana tıklayın. Farklı tesisler arasındaki risk dağılımını karşılaştırmak için tesis filtresini kullanın.
+**Matris** sekmesi hücre başına mevcut veya beklenen sayıları gösterir; risklerini görmek için bir hücreye tıklayın. **Ayarlar**'da tüm organizasyona erişimi olan kullanıcılar yönetişim modelini (merkezi, federe, tek tesis), her sınıfı kimin kabul ettiğini, ekonomik eşikleri (isteğe bağlı tesis istisnalarıyla), tehdit kataloğunu (özel kayıtlar) ve bilgi sınıflarını yönetir.
 
 ---
 
@@ -658,7 +637,7 @@ PDCA döngüleri manuel olarak veya otomatik olarak şu kaynaklardan oluşturulu
 
 - **Kapatılan olaylar (M09)**: KNA'nın düzeltici eylemleri yapısal nitelikteyse — başlangıç aşaması PLAN
 - **Denetim bulguları (M17)**: Majör NC ve Minör NC için — ciddiyete göre belirlenen son tarihle PLAN aşamasında başlangıç
-- **Skor > 14 olan riskler (M06)**: işlem planı yapısal eylemler gerektirdiğinde — acil PLAN aşaması
+- **High veya Critical riskler (M06)**: işlem yapısal bir eylem gerektirdiğinde döngü «Risk» kaynağıyla açılır — PLAN aşaması
 - **Yönetim gözden geçirme kararları (M13)**: gözden geçirme tarafından onaylanan her eylem için — PLAN aşaması
 
 Tüm otomatik oluşturma durumlarında PDCA döngüsü, kaynak varlığa (ör. "Olay #OLY-2026-042") ve politikadan kaynaklanan son tarihe atıfta bulunur.
@@ -750,7 +729,7 @@ Toplantı anındaki GRC verilerini dondurmak için **Veri anlık görüntüsü o
 
 - **a)** önceki gözden geçirmelerin eylemleri: bir önceki gözden geçirmenin tüm eylemleri ile dönem içinde hâlâ açık olan veya kapatılan daha eski eylemler; gecikmiş olanlar vurgulanır
 - **d)** çerçeve başına uyum ve açığı olan kontroller; eşik dışı operasyonel KPI'lar; son 12 ayın denetimleri, hazırlık düzeyi ve açık uygunsuzluklar (önce büyükler); açık ve NIS2 bildirilen olaylar; takılı kalmış PDCA döngüleri ve gecikmiş görevler; süresi dolmuş, gözden geçirilecek ve son gözden geçirmeden beri onaylanan belgeler
-- **f)** yönetimin onayladığı **kabul edilebilirlik eşiğinin üzerindeki** riskler (doğal → artık, işlem, sahip, plan olup olmadığı) ve kullanılan eşik, resmi olarak kabul edilen riskler, onaylı BCP planı olmayan kritik süreçler
+- **f)** **kabul edilmemiş High ve Critical riskler** (prosedürün kabul eşiğinin üzerinde: mevcut → beklenen sınıf, işlem, sorumlu, plan olup olmadığı), sınıfa göre riskler, aktif kabuller, geciken önlemler ve risk değerlendirmelerinin durumu; onaylı BCP planı olmayan kritik süreçler
 - **g)** denetimlerden çıkan iyileştirme fırsatları
 
 Anlık görüntü onaya kadar yeniden oluşturulabilir; sonrasında tutanağın içeriği olduğu için sabit kalır.
@@ -1356,7 +1335,7 @@ Platform, olaylara göre otomatik e-posta bildirimleri gönderir. Başlıcaları
 | Yaklaşan denetim (7 gün) | Denetçi + Uyum Yetkilisi |
 | NIS2 olayı — T+24s zamanlayıcısı | BGYS Yöneticisi + Uyum Yetkilisi |
 | NIS2 olayı — T+72s zamanlayıcısı | BGYS Yöneticisi + Uyum Yetkilisi + Tesis Yöneticisi |
-| Skor > 14 olan risk | Risk Yöneticisi + Tesis Yöneticisi |
+| Değerlendirilmiş High veya Critical risk | Risk Yöneticisi + Tesis Yöneticisi |
 | Sona eren belge (30 gün) | Belgenin sahibi |
 | Süresi dolmuş kanıt | Bağlantılı kontrolün sahibi |
 | Zorunlu rol boş | Uyum Yetkilisi + Tesis Yöneticisi |
@@ -1532,7 +1511,7 @@ Risk modüllerine tam erişiminiz vardır. Sorumluluklarınız:
 - BT ve OT risk değerlendirmesini denetlemek (M06)
 - İEA ve MTPD/RTO/RPO değerlerini doğrulamak (M05)
 - PDCA döngülerini başlatmak ve izlemek (M11)
-- Skor > 14 olan riskler için uyarı almak
+- High ve Critical riskler, süresi dolmak üzere olan kabuller ve geciken önlemler için görev almak
 
 ### Tesis Yöneticisi
 
@@ -1608,11 +1587,10 @@ Sekme önce yönetim, ardından açıklar üzerinde çalışanlar için tasarlan
 
 #### Risk / BIA / BCP sekmesi
 
-Sekmenin üstünden seçilebilen üç alt bölüme ayrılmıştır:
+Sekmenin üstünden seçilebilen iki alt bölüme ayrılmıştır:
 
-- **Riskler**: yönetimin onayladığı **kabul edilebilirlik eşiğinin üzerindeki** riskler (Risk modülündeki risk iştahı; politika yoksa 14 kullanılır) ve tolere edilen azami sayı; eşiğin üzerindeki hücreleri vurgulanmış ısı haritası; en yüksek puanlı 10 risk (açmak için tıklayın); NIS2 md. 21'e ve tehdit kategorisine göre dağılım.
+- **Riskler**: **kabul edilmemiş High ve Critical riskler** (prosedürün kabul eşiğinin üzerinde), sınıfa göre riskler ve aktif kabuller; her hücrenin sınıfını gösteren matris; en yüksek sınıflı 10 risk (açmak için tıklayın); NIS2 madde 21 alanına ve varlık türüne göre dağılım.
 - **Süreklilik**: **onaylı** BCP planı olmayan kritik süreçler (kritiklik ≥ 4), onaylı planı olan ancak testi gecikmiş veya hiç yapılmamış süreçler (*kapsam dışı: test gecikmiş*) ve testi yenilenecek onaylı planlar; süreç · riskler · BCP · son test tablosu. Taslaklar ve arşivlenmiş planlar bir süreci kapsamaz.
-- **Ekonomik değer**: doğal ve artık yıllık beklenen kayıp (ALE), kontrollerle azaltılan risk ve planlanan önlemlerin yatırım getirisi (ROSI).
 
 #### Süreç göstergeleri sekmesi
 
@@ -1742,8 +1720,8 @@ AI modülü, yönetici tarafından tesisiniz için devre dışı bırakılmış 
 **Bir denetimi yanlışlıkla iptal ettim. Geri yükleyebilir miyim?**
 Hayır, iptal geri alınamaz. Ancak aynı çeyrek için yeni bir denetim oluşturabilir ve kaybedilen bulguları yeniden oluşturabilirsiniz. İptal edilen bulguları arşivde görüntüleyip bilgileri geri almak için Uyum Yetkilisi ile iletişime geçin.
 
-**Risk skorumuz herhangi bir şey yapmadan değişti.**
-Kalıntı skor, bağlantılı kontrollerin durumu değiştiğinde otomatik olarak yeniden hesaplanır. Bir kanıtın süresi dolduysa kontrol "kısmi"ye döner ve bu kalıntı riski artırabilir. Riske bağlı kontrolleri kontrol edin ve kanıtları güncelleyin.
+**Riskimin sınıfı herhangi bir şey yapmadan değişti.**
+Bu otomatik olarak olmaz: sınıf yalnızca yeni bir değerlendirmeyle veya plandaki tüm önlemler tamamlanıp doğrulandığında **Beklenen riski uygula** ile değişir. Bağlantılı bir kontrol boşluğa düşerse, bir kanıtın süresi dolarsa veya bir önlem gecikirse, değerlendirme çubuğu bunu olağanüstü gözden geçirme için dikkate alınacak olaylar arasında bildirir.
 
 **E-posta bildirimleri almıyorum.**
 Önce spam klasörünü kontrol edin. E-postalar hiç gelmiyorsa SMTP yapılandırmasını ve rolünüze atanan bildirim profilini doğrulamak için sistem yöneticisiyle iletişime geçin.

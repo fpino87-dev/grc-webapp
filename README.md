@@ -114,6 +114,7 @@ docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py load_frameworks
 docker compose exec backend python manage.py load_notification_profiles
 docker compose exec backend python manage.py load_competency_requirements
+docker compose exec backend python manage.py load_risk_catalog
 docker compose exec backend python manage.py createsuperuser
 
 # 4. Apri http://localhost:3001

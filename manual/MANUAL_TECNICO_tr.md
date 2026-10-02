@@ -217,8 +217,8 @@ def destroy(self, request, *args, **kwargs):
 ### Ana veri akışı
 
 ```
-BIA.downtime_cost → RiskAssessment.ale_eur (hesaplanan)
-RiskAssessment(score > 14) → Acil Task + otomatik PDCA
+RiskAssessment tamamlandı High/Critical → işlem planı Task + risk_red bildirimi
+Süresi dolan RiskAcceptance / geciken önlem → Task (check_risk_treatments)
 Incident.close() → otomatik PDCA + LessonLearned
 AuditFinding.close() → otomatik PDCA + LessonLearned
 BcpTest(başarısız) → otomatik PDCA
@@ -250,6 +250,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements/dev.txt
 python manage.py migrate
 python manage.py load_frameworks       # VDA ISA, NIS2, ISO 27001 içe aktarır
+python manage.py load_risk_catalog     # risk değerlendirmesi tehdit kataloğu
 python manage.py seed_demo             # isteğe bağlı demo verileri
 python manage.py createsuperuser
 
@@ -519,10 +520,13 @@ Yanıt: { "propagated_to": 3, "skipped_no_instance": 0 }
 
 ### RiskAssessment
 
-- İçsel vs. kalıntı risk (BT için 6 boyut + OT için 4)
-- BIA çarpanıyla (`downtime_cost`) `weighted_score`
-- `risk_level`: yeşil ≤7, sarı ≤14, kırmızı >14
-- Puan > 14 ise otomatik PDCA tetiklenir
+- D-ITA-INF-23 metodolojisi: tesis kaydı (`plant`) ve grup kaydı (`plant` boş, `affected_plants` = devralan tesisler)
+- Sınıf yalnızca matristen (`risk.services.risk_class`), etki = `InformationClass` kaynaklı gizlilik tabanıyla 6 boyutun en yükseği
+- Mevcut risk (`current_class`) ve beklenen risk (`expected_class`); "beklenen riski uygula" yalnızca tamamlanmış ve doğrulanmış önlemlerle
+- Onayda dondurulan `snapshot` ile `RiskAssessmentCycle` (ilk / dönemsel / olağanüstü / legacy)
+- `RiskGovernancePolicy`'ye göre rol imzaları, CISO görüşü ve organ kararıyla `RiskAcceptance`
+- Tehdit kataloğu: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (API ile özel kayıtlar)
+- Diğer modüller için ortak fonksiyonlar: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
 
 ### M00 — Yönetişim
 
@@ -1403,6 +1407,7 @@ pytest paketi (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`
 |-------|----------|------------------------|
 | `migrate` | DB migrasyonlarını uygular | Her dağıtımdan sonra |
 | `load_frameworks` | Normatif çerçeve JSON'larını içe aktarır | İlk kurulum + çerçeve güncellemesi |
+| `load_risk_catalog` | Tehdit kataloğunu içe aktarır (`risk_catalogs/threats.json`); idempotent, özel kayıtlara dokunmaz | İlk kurulum + katalog güncellemesi |
 | `load_notification_profiles` | Varsayılan bildirim profilleri | İlk kurulum |
 | `load_competency_requirements` | M15 yeterlilik gereksinimleri | İlk kurulum |
 | `load_required_documents` | Zorunlu belgeler | İlk kurulum |

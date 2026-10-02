@@ -221,7 +221,7 @@ load_reference_data() {
   local cmd
   for cmd in load_frameworks load_notification_profiles load_competency_requirements \
              load_role_requirements load_required_documents load_training_evidence_controls \
-             schedule_backup_task; do
+             load_risk_catalog schedule_backup_task; do
     info "  ${cmd}"
     ${COMPOSE} exec -T backend python manage.py "${cmd}" >/dev/null \
       || warn "${cmd} non riuscito — rilanciarlo a mano"

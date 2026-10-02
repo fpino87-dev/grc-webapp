@@ -146,7 +146,7 @@ In cima alla dashboard trovi 4 riquadri con i KPI principali:
 | KPI | Cosa misura |
 |-----|------------|
 | **Compliance %** | Percentuale di controlli in stato "compliant" o "parziale con evidenza valida" rispetto al totale dei controlli attivi per il framework selezionato |
-| **Rischi aperti** | Numero di risk assessment con stato "aperto" (non accettati e non chiusi). Il numero è accompagnato dal conteggio dei rischi critici (score > 14) in rosso |
+| **Rischi aperti** | Numero di rischi valutati del registro corrente. Il numero è accompagnato dal conteggio dei rischi High e Critical in rosso |
 | **Incidenti** | Incidenti aperti nel plant selezionato. I numeri in rosso indicano incidenti con timer NIS2 attivi |
 | **Task scaduti** | Task assegnati al tuo ruolo (o a tutta la tua organizzazione se sei CO) con data di scadenza già superata |
 
@@ -156,7 +156,7 @@ La piattaforma usa una convenzione cromatica coerente su tutta l'interfaccia:
 
 - **Verde**: tutto in ordine — compliant, completato, valido, nei tempi
 - **Giallo**: attenzione richiesta — parziale, in scadenza entro 30 giorni, in corso
-- **Rosso**: critico — gap, scaduto, rischio alto (score > 14), timer NIS2 in scadenza
+- **Rosso**: critico — gap, scaduto, rischio High o Critical, timer NIS2 in scadenza
 - **Grigio**: non valutato, N/A, archiviato
 - **Arancione**: alert o avviso — richiede attenzione ma non è ancora critico
 
@@ -354,7 +354,6 @@ Il badge arancione **"Da rivalutare"** appare sulla scheda dell'asset quando:
 
 - E' stato registrato un change esterno
 - E' scaduta la data di revisione periodica prevista dalla policy
-- Un rischio collegato all'asset è cambiato di score significativamente
 - L'asset ha raggiunto la data EOL del sistema operativo
 
 Cosa fare: apri la scheda dell'asset, verifica che le informazioni siano ancora accurate (in particolare criticità, esposizione e processi critici collegati), poi clicca **Segna come rivalutato**. Se necessario aggiorna i campi prima di confermare.
@@ -404,78 +403,58 @@ Per avanzare di fase: dalla scheda del processo clicca **Invia per validazione**
 4. Indica il tipo di dipendenza: **Critica** (il processo si ferma senza questo asset) o **Supporto** (degrado delle prestazioni)
 5. Salva
 
-La dipendenza è bidirezionale: l'asset mostrerà nella propria scheda i processi che dipendono da lui, e la criticità del processo influenza il calcolo del rischio sull'asset.
+La dipendenza è bidirezionale: l'asset mostrerà nella propria scheda i processi che dipendono da lui. Da ogni processo puoi creare con **Crea rischio** un rischio già collegato al processo, da completare nel Risk Assessment (M06).
 
 ---
 
 ## 6. Risk Assessment (M06)
 
-[Schermata: risk assessment list]
+[Schermata: risk assessment — registro, scheda del rischio]
 
-### Differenza rischio inerente vs residuo
+Il modulo applica la procedura di risk management (D-ITA-INF-23). Ogni sito ha il proprio **registro**; se la policy lo prevede esiste anche il **registro di gruppo** per i servizi condivisi (ERP centrale, Active Directory, contratti quadro). Scegli il registro in alto a destra.
 
-- **Rischio inerente**: il livello di rischio in assenza di qualsiasi controllo. Rappresenta la minaccia "grezza" sull'asset o sul dominio
-- **Rischio residuo**: il livello di rischio dopo aver applicato i controlli esistenti. E' il valore su cui si basa la decisione di accettare o trattare il rischio
+### Valutazioni (cicli)
 
-Nel form di valutazione compili prima il rischio inerente, poi il sistema calcola automaticamente il residuo in base allo stato dei controlli collegati. Se i controlli non sono ancora sufficienti il residuo rimane alto.
+La barra sotto il titolo mostra lo stato della valutazione del registro:
 
-### Owner del rischio e responsabile del trattamento
+1. **Avvia il primo risk assessment** (o, dopo un'approvazione, una **revisione periodica** o **straordinaria** con il motivo)
+2. Valuta i rischi; i campi di valutazione si modificano solo con una valutazione **in corso**
+3. **Invia in approvazione**: il sistema verifica copertura completa e rischi valutati (o confermati, nella revisione periodica)
+4. **Approva**: indica l'organo che ha deliberato e, se vuoi, il riesame di direzione con il verbale. L'approvazione congela una fotografia del registro (scheda **Valutazioni**, esportabile in Excel)
 
-Nel nuovo scenario, nella modifica e nel wizard rischio → continuità ci sono due responsabili distinti:
+Il registro precedente alla nuova procedura resta consultabile in sola lettura dalla scheda Valutazioni (**metodo superato**). Se dopo l'approvazione accadono eventi rilevanti (incidenti significativi, nuovi asset critici, cambiamenti, non conformità maggiori, controlli in gap, misure in ritardo) la barra li segnala per valutare una revisione straordinaria.
 
-- **Owner rischio**: chi risponde del rischio e decide sul rischio residuo (ad esempio la sua accettazione)
-- **Responsabile del trattamento**: chi realizza le misure di trattamento, di solito IT/OT. Scegli un utente del portale oppure **Altro (non utente del portale)** e scrivi nome, funzione o fornitore (es. un MSP o l'integratore OT)
+### Copertura e nuovo rischio
 
-Le due figure possono coincidere. Nell'elenco il responsabile del trattamento compare sotto l'owner; nel registro rischi Excel ha una colonna dedicata. Aggiungendo un'azione di mitigazione viene proposto come **Responsabile dell'azione**, che si può cambiare per singola azione con le stesse due possibilità. I task automatici restano assegnati ai ruoli, come oggi.
+La scheda **Copertura** incrocia le tipologie presenti nel sito (IT, OT, sede, personale, fornitori, prototipi) con il **catalogo minacce**: ogni coppia va **valutata** o dichiarata **non applicabile** con il motivo. **Nuovo rischio** parte sempre dal catalogo: scegli tipologia e minaccia, poi completi la valutazione nella scheda del rischio. Dalla BIA, **Crea rischio** apre un rischio già collegato al processo.
 
-### Come compilare le dimensioni IT e OT
+### Scheda del rischio
 
-**Dimensioni risk assessment IT (4 assi):**
+Clicca un rischio per aprire la scheda laterale:
 
-1. **Esposizione**: l'asset è su Internet? In DMZ? Isolato? (1 = completamente isolato, 5 = esposto su Internet senza protezioni)
-2. **CVE**: qual è il punteggio CVE massimo degli asset coinvolti? (1 = nessuna vulnerabilità nota, 5 = CVE critica non patchata)
-3. **Minacce di settore**: ci sono minacce attive note per il settore automotive? (1 = nessuna, 5 = campagna attiva documentata)
-4. **Gap controlli**: quanti controlli rilevanti sono in stato gap o non valutato? (1 = tutti compliant, 5 = maggioranza in gap)
+- **Identificazione**: minaccia, asset o gruppo di asset, fornitore, processo BIA, **informazioni colpite** (classi di informazioni), vulnerabilità e conseguenza sugli obiettivi aziendali
+- **Valutazione**: probabilità (frequenza storica o fattore di esposizione) e impatto su sei dimensioni — economico, legale, cliente e contrattuale, reputazionale, sicurezza delle persone, operativo — con i **criteri della procedura accanto a ogni livello**. L'impatto è il caso peggiore; con una minaccia alla riservatezza non scende sotto la classe di protezione delle informazioni colpite. La **classe** (Very Low, Low, Medium, High, Critical) si legge dalla matrice, non dal prodotto P × I; puoi spostarla di un livello solo con motivazione
+- **Misure esistenti** con la loro efficacia, anche collegate ai controlli
+- **Trattamento**: evitare, mitigare, trasferire o accettare, con motivazione e **rischio atteso**; Risk Owner (responsabile di business) e responsabile del trattamento (utente del portale o testo libero)
+- **NIS2**: perimetro, area art. 21(2), sistemi impattati, possibile incidente significativo
 
-**Dimensioni risk assessment OT (5 assi):**
+**Completa la valutazione** controlla che ci sia tutto (motivazioni, Risk Owner, trattamento, rischio atteso). Un rischio High o Critical crea il task del piano di trattamento e la notifica.
 
-1. **Purdue + connettività**: il sistema è connesso a reti IT o a Internet? (1 = livello 0 isolato, 5 = connesso a Internet)
-2. **Patchability**: il sistema può essere aggiornato? Con quale frequenza? (1 = patch regolari, 5 = mai aggiornabile)
-3. **Impatto fisico / safety**: un'interruzione o alterazione può causare danni fisici o di sicurezza sul lavoro? (1 = nessun impatto fisico, 5 = rischio per l'incolumità delle persone)
-4. **Segmentazione**: la zona OT è adeguatamente separata da IT e da Internet? (1 = completamente segregata, 5 = flat network)
-5. **Rilevabilità anomalie**: esiste un sistema di detection per comportamenti anomali? (1 = IDS/ICS dedicato attivo, 5 = nessuna visibilità)
+### Piano di trattamento e rischio atteso
 
-### Soglia critica (score > 14) e task automatici generati
+Le misure del piano hanno responsabile, scadenza ed effetto atteso. Quando una misura è completata va **verificata** (test, evidenza, audit). Solo con tutte le misure completate e verificate compare **Applica il rischio atteso**: è l'unico modo, oltre a una nuova valutazione, per abbassare la classe. Le misure in ritardo generano un avviso al Risk Manager e poi l'escalation al livello di organizzazione.
 
-Quando il **rischio residuo supera 14** (quadranti rossi della heat map 5x5):
+### Accettazione
 
-- Il Risk Manager e il Plant Manager ricevono una notifica immediata
-- Viene creato automaticamente un task di pianificazione trattamento rischio con scadenza 15 giorni
-- Se il task non viene completato entro 15 giorni, parte un'escalation al Compliance Officer
-- Il rischio viene evidenziato in rosso nella dashboard e nella heat map
+Chi può accettare dipende dalla classe e dalla **policy di governo del rischio** (Impostazioni): le firme dei ruoli richiesti, il parere del CISO (vincolante o informativo) e, per i Critical, la delibera dell'organo. La validità massima dipende dalla classe. Non sono mai accettabili i rischi che comportano violazioni di legge, dei requisiti VDA ISA o degli obblighi di riservatezza; se il Risk Owner ha valutato e trattato da solo il rischio serve anche la firma del Plant Manager. Se la classe cambia, l'accettazione decade. Le accettazioni in scadenza generano un task 30 giorni prima.
 
-### Accettazione formale del rischio
+### Rischi di gruppo ereditati
 
-Se il rischio residuo è noto ma si decide di accettarlo (es. costo del trattamento superiore all'impatto atteso):
+Nel registro di un sito i rischi di gruppo che lo riguardano compaiono con ⇩, in sola lettura. Se nel sito l'impatto è più alto, segnalalo dalla scheda (**Impatto locale**): il gruppo recepisce la segnalazione e aggiorna la valutazione.
 
-1. Dalla scheda del rischio clicca **Accetta rischio**
-2. Compila il modulo di accettazione formale:
-   - Motivazione (obbligatoria, min 50 caratteri)
-   - Data di revisione (obbligatoria — il rischio deve essere rivalutato periodicamente)
-   - Firma digitale del responsabile autorizzato
-3. Salva — il rischio passa a stato "Accettato" e non genera più alert fino alla data di revisione
+### Matrice e Impostazioni
 
-### Heat map e interpretazione
-
-[Schermata: heat map 5x5]
-
-La heat map mostra i rischi su una griglia Probabilita x Impatto 5x5:
-
-- **Verde** (score 1-7): rischio accettabile — monitoraggio periodico
-- **Giallo** (score 8-14): rischio moderato — piano di mitigazione entro 90 giorni
-- **Rosso** (score 15-25): rischio alto — escalation automatica, piano entro 15 giorni
-
-Clicca su un quadrante per vedere l'elenco dei rischi che lo compongono. Usa il filtro plant per confrontare la distribuzione dei rischi tra stabilimenti diversi.
+La scheda **Matrice** mostra i conteggi per cella, attuali o attesi; clic su una cella per vedere i rischi. In **Impostazioni** chi ha accesso a tutta l'organizzazione gestisce il modello di governo (centralizzato, federato, sito singolo), chi accetta per classe, le soglie economiche (con eventuali eccezioni per sito), il catalogo minacce (voci personalizzate) e le classi di informazioni.
 
 ---
 
@@ -658,7 +637,7 @@ I cicli PDCA vengono creati manualmente o automaticamente da:
 
 - **Incidenti chiusi (M09)**: quando le azioni correttive dell'RCA sono strutturali — fase di partenza PLAN
 - **Finding di audit (M17)**: per Major NC e Minor NC — fase di partenza PLAN con scadenza determinata dalla severita'
-- **Rischi con score > 14 (M06)**: quando il piano di trattamento richiede azioni strutturali — fase PLAN urgente
+- **Rischi High o Critical (M06)**: quando il trattamento richiede un'azione strutturale, il ciclo si apre con origine «Rischio» — fase PLAN
 - **Delibere della revisione di direzione (M13)**: per ogni azione approvata dalla revisione — fase PLAN
 
 In tutti i casi di creazione automatica il ciclo PDCA riporta il riferimento all'entita' di origine (es. "Incidente #INC-2026-042") e l'eventuale scadenza derivante dalla policy.
@@ -750,7 +729,7 @@ Clicca **Genera snapshot dati** per congelare i dati GRC al momento della riunio
 
 - **a)** azioni dei riesami precedenti: tutte quelle del riesame precedente, più quelle più vecchie ancora aperte o chiuse nel periodo, con quelle scadute in evidenza
 - **d)** compliance per framework con i controlli in gap; KPI operativi fuori soglia; audit degli ultimi 12 mesi con readiness e non conformità aperte (maggiori prima); incidenti aperti e notificati NIS2; cicli PDCA fermi e task scaduti; documenti scaduti, in scadenza e approvati dall'ultimo riesame
-- **f)** rischi **oltre la soglia di accettabilità** approvata dalla direzione (inerente → residuo, trattamento, owner, presenza del piano) con la soglia usata, rischi accettati formalmente, processi critici senza un piano BCP approvato
+- **f)** rischi **High e Critical non accettati** (oltre la soglia di accettazione della procedura: classe attuale → attesa, trattamento, owner, presenza del piano), rischi per classe, accettazioni attive, misure in ritardo e stato delle valutazioni dei rischi; processi critici senza un piano BCP approvato
 - **g)** opportunità di miglioramento emerse dagli audit
 
 Lo snapshot si può rigenerare fino all'approvazione; dopo resta fisso perché è il contenuto del verbale.
@@ -1356,7 +1335,7 @@ La piattaforma invia notifiche email automatiche in base agli eventi. Le princip
 | Audit imminente (7 giorni) | Auditor + Compliance Officer |
 | Incidente NIS2 — timer T+24h | CISO + Compliance Officer |
 | Incidente NIS2 — timer T+72h | CISO + Compliance Officer + Plant Manager |
-| Rischio con score > 14 | Risk Manager + Plant Manager |
+| Rischio High o Critical valutato | Risk Manager + Plant Manager |
 | Documento in scadenza (30 giorni) | Owner del documento |
 | Evidenza scaduta | Owner del controllo collegato |
 | Ruolo vacante obbligatorio | Compliance Officer + Plant Manager |
@@ -1532,7 +1511,7 @@ Hai accesso completo ai moduli di risk. Sei responsabile di:
 - Supervisionare il risk assessment IT e OT (M06)
 - Validare la BIA e i valori MTPD/RTO/RPO (M05)
 - Avviare e monitorare i cicli PDCA (M11)
-- Ricevere alert su rischi con score > 14
+- Ricevere i task sui rischi High e Critical, sulle accettazioni in scadenza e sulle misure in ritardo
 
 ### Plant Manager
 
@@ -1608,11 +1587,10 @@ Il tab è pensato prima per la direzione, poi per chi lavora sui gap:
 
 #### Tab Risk / BIA / BCP
 
-Diviso in tre sotto-sezioni, selezionabili in cima al tab:
+Diviso in due sotto-sezioni, selezionabili in cima al tab:
 
-- **Rischi**: rischi **oltre la soglia di accettabilità** approvata dalla direzione (propensione al rischio del modulo Rischi; senza policy si usa 14), con il numero massimo tollerato; heatmap con le celle oltre soglia evidenziate; i 10 rischi con punteggio più alto (clic per aprirli); ripartizione NIS2 art. 21 e per categoria di minaccia.
+- **Rischi**: rischi **High e Critical non accettati** (oltre la soglia di accettazione della procedura), rischi per classe e accettazioni attive; matrice con la classe di ogni cella; i 10 rischi con la classe più alta (clic per aprirli); ripartizione per area NIS2 art. 21 e per tipologia di asset.
 - **Continuità**: processi critici (criticità ≥ 4) senza un piano BCP **approvato**, processi con piano approvato ma test scaduto o mai eseguito (*scoperti per test scaduto*) e piani approvati con il test da rifare; tabella processo · rischi · BCP · ultimo test. Bozze e piani archiviati non coprono un processo.
-- **Valore economico**: perdita attesa annua (ALE) inerente e residua, rischio abbattuto dai controlli e ritorno degli investimenti (ROSI) dei trattamenti pianificati.
 
 #### Tab Indicatori di processo
 
@@ -1742,8 +1720,8 @@ Il modulo AI potrebbe essere stato disabilitato dall'amministratore per il tuo p
 **Ho annullato un audit per errore. Posso ripristinarlo?**
 No, l'annullamento e' irreversibile. Puoi pero' creare un nuovo audit per lo stesso trimestre e ricreare i finding eventualmente persi. Contatta il Compliance Officer che puo' visualizzare i finding annullati nell'archivio per recuperare le informazioni.
 
-**Lo score del mio rischio e' cambiato senza che io abbia fatto nulla.**
-Lo score residuo viene ricalcolato automaticamente quando cambia lo stato dei controlli collegati. Se un'evidenza e' scaduta, il controllo torna a "parziale" e questo puo' aumentare il rischio residuo. Controlla i controlli collegati al rischio e aggiorna le evidenze.
+**La classe del mio rischio e' cambiata senza che io abbia fatto nulla.**
+Non succede in automatico: la classe cambia solo con una nuova valutazione o con **Applica rischio atteso**, quando tutte le misure del piano sono completate e verificate. Se un controllo collegato va in gap, un'evidenza scade o una misura e' in ritardo, la barra della valutazione lo segnala tra gli eventi da considerare per una revisione straordinaria.
 
 **Non ricevo le notifiche email.**
 Verifica innanzitutto la cartella spam. Se le email non arrivano affatto, contatta l'amministratore di sistema per verificare la configurazione SMTP e il profilo notifica assegnato al tuo ruolo.

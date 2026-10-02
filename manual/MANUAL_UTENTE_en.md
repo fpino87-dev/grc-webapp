@@ -146,7 +146,7 @@ At the top of the dashboard you will find 4 panels with the main KPIs:
 | KPI | What it measures |
 |-----|-----------------|
 | **Compliance %** | Percentage of controls in "compliant" or "partial with valid evidence" status relative to the total active controls for the selected framework |
-| **Open risks** | Number of risk assessments with "open" status (not accepted and not closed). The number is accompanied by the count of critical risks (score > 14) in red |
+| **Open risks** | Number of assessed risks in the current register. The number is accompanied by the count of High and Critical risks in red |
 | **Incidents** | Open incidents in the selected plant. Numbers in red indicate incidents with active NIS2 timers |
 | **Overdue tasks** | Tasks assigned to your role (or to your entire organisation if you are CO) with a due date already past |
 
@@ -156,7 +156,7 @@ The platform uses a consistent colour convention throughout the interface:
 
 - **Green**: everything in order — compliant, completed, valid, on time
 - **Yellow**: attention required — partial, expiring within 30 days, in progress
-- **Red**: critical — gap, overdue, high risk (score > 14), NIS2 timer expiring
+- **Red**: critical — gap, overdue, High or Critical risk, NIS2 timer expiring
 - **Grey**: not assessed, N/A, archived
 - **Orange**: alert or warning — requires attention but is not yet critical
 
@@ -354,7 +354,6 @@ The orange **"To be reassessed"** badge appears on the asset record when:
 
 - An external change has been registered
 - The scheduled periodic review date set by policy has expired
-- A risk linked to the asset has changed significantly in score
 - The asset has reached the EOL date of its operating system
 
 What to do: open the asset record, verify that the information is still accurate (in particular criticality, exposure and linked critical processes), then click **Mark as reassessed**. If necessary, update the fields before confirming.
@@ -404,78 +403,58 @@ To advance a phase: from the process record click **Submit for validation** (fro
 4. Indicate the type of dependency: **Critical** (the process stops without this asset) or **Support** (performance degradation)
 5. Save
 
-The dependency is bidirectional: the asset will show in its own record the processes that depend on it, and the criticality of the process influences the risk calculation on the asset.
+The dependency is bidirectional: the asset will show in its own record the processes that depend on it. From each process, **Create risk** opens a risk already linked to the process, to be completed in Risk Assessment (M06).
 
 ---
 
 ## 6. Risk Assessment (M06)
 
-[Screenshot: risk assessment list]
+[Screenshot: risk assessment — register, risk card]
 
-### Difference between inherent and residual risk
+The module applies the risk management procedure (D-ITA-INF-23). Each site has its own **register**; if the policy provides for it there is also a **group register** for shared services (central ERP, Active Directory, framework contracts). Choose the register at the top right.
 
-- **Inherent risk**: the level of risk in the absence of any controls. It represents the "raw" threat to the asset or domain
-- **Residual risk**: the level of risk after applying existing controls. This is the value on which the decision to accept or treat the risk is based
+### Assessments (cycles)
 
-In the assessment form you first fill in the inherent risk, then the system automatically calculates the residual based on the status of the linked controls. If the controls are not yet sufficient, the residual remains high.
+The bar under the title shows the status of the register assessment:
 
-### Risk owner and treatment owner
+1. **Start the first risk assessment** (or, after an approval, a **periodic** or **extraordinary review** with the reason)
+2. Assess the risks; assessment fields can only be edited while an assessment is **in progress**
+3. **Submit for approval**: the system checks full coverage and assessed risks (or confirmed ones, in a periodic review)
+4. **Approve**: select the governing body that decided and, optionally, the management review with the minutes. Approval freezes a snapshot of the register (**Assessments** tab, exportable to Excel)
 
-In the new scenario form, in the edit form and in the risk → continuity wizard there are two distinct owners:
+The register prior to the new procedure remains available read-only from the Assessments tab (**superseded method**). If relevant events occur after approval (significant incidents, new critical assets, changes, major nonconformities, controls in gap, overdue measures) the bar flags them so you can consider an extraordinary review.
 
-- **Risk owner**: who is accountable for the risk and decides on the residual risk (for example its acceptance)
-- **Treatment owner**: who implements the treatment measures, usually IT/OT. Choose a portal user or **Other (not a portal user)** and type a name, function or supplier (e.g. an MSP or the OT integrator)
+### Coverage and new risk
 
-The two can be the same person. In the list the treatment owner is shown below the risk owner; the Excel risk register has a dedicated column. When you add a mitigation action it is proposed as the **Action owner**, which can be changed for each action with the same two options. Automatic tasks are still assigned to roles, as before.
+The **Coverage** tab crosses the asset types present on the site (IT, OT, site, personnel, suppliers, prototypes) with the **threat catalogue**: each pair must be **assessed** or declared **not applicable** with the reason. **New risk** always starts from the catalogue: choose the type and threat, then complete the assessment in the risk card. From the BIA, **Create risk** opens a risk already linked to the process.
 
-### How to fill in the IT and OT dimensions
+### Risk card
 
-**IT risk assessment dimensions (4 axes):**
+Click a risk to open the side card:
 
-1. **Exposure**: is the asset on the Internet? In DMZ? Isolated? (1 = completely isolated, 5 = exposed on the Internet without protections)
-2. **CVE**: what is the maximum CVE score of the assets involved? (1 = no known vulnerabilities, 5 = critical unpatched CVE)
-3. **Sector threats**: are there known active threats for the automotive sector? (1 = none, 5 = documented active campaign)
-4. **Control gaps**: how many relevant controls are in gap or not assessed status? (1 = all compliant, 5 = majority in gap)
+- **Identification**: threat, asset or group of assets, supplier, BIA process, **affected information** (information classes), vulnerability and consequence on business objectives
+- **Assessment**: probability (historical frequency or exposure factor) and impact on six dimensions — economic, legal, customer and contractual, reputational, people safety, operational — with the **procedure criteria next to each level**. Impact is the worst case; with a confidentiality threat it cannot fall below the protection class of the affected information. The **class** (Very Low, Low, Medium, High, Critical) is read from the matrix, not from the P × I product; you can move it by one level only with a rationale
+- **Existing measures** with their effectiveness, also linked to controls
+- **Treatment**: avoid, mitigate, transfer or accept, with rationale and **expected risk**; Risk Owner (business manager) and treatment owner (portal user or free text)
+- **NIS2**: scope, art. 21(2) area, impacted systems, possible significant incident
 
-**OT risk assessment dimensions (5 axes):**
+**Complete the assessment** checks that everything is there (rationales, Risk Owner, treatment, expected risk). A High or Critical risk creates the treatment plan task and the notification.
 
-1. **Purdue + connectivity**: is the system connected to IT networks or to the Internet? (1 = isolated level 0, 5 = connected to the Internet)
-2. **Patchability**: can the system be updated? How frequently? (1 = regular patches, 5 = never updatable)
-3. **Physical / safety impact**: can a disruption or alteration cause physical harm or occupational safety issues? (1 = no physical impact, 5 = risk to people's safety)
-4. **Segmentation**: is the OT zone adequately separated from IT and the Internet? (1 = completely segregated, 5 = flat network)
-5. **Anomaly detectability**: is there a detection system for anomalous behaviour? (1 = active dedicated IDS/ICS, 5 = no visibility)
+### Treatment plan and expected risk
 
-### Critical threshold (score > 14) and automatically generated tasks
+Plan measures have an owner, deadline and expected effect. When a measure is completed it must be **verified** (test, evidence, audit). Only when all measures are completed and verified does **Apply the expected risk** appear: besides a new assessment, it is the only way to lower the class. Overdue measures notify the Risk Manager and then escalate to organisation level.
 
-When **residual risk exceeds 14** (red quadrants of the 5x5 heat map):
+### Acceptance
 
-- The Risk Manager and Plant Manager receive an immediate notification
-- A risk treatment planning task is automatically created with a 15-day deadline
-- If the task is not completed within 15 days, an escalation to the Compliance Officer is triggered
-- The risk is highlighted in red on the dashboard and in the heat map
+Who can accept depends on the class and on the **risk governance policy** (Settings): signatures of the required roles, the CISO's opinion (binding or informative) and, for Critical, the governing body resolution. Maximum validity depends on the class. Risks involving breaches of law, VDA ISA requirements or confidentiality obligations can never be accepted; if the Risk Owner assessed and treated the risk alone, the Plant Manager's signature is also required. If the class changes, the acceptance lapses. Expiring acceptances create a task 30 days in advance.
 
-### Formal risk acceptance
+### Inherited group risks
 
-If the residual risk is known but a decision is made to accept it (e.g. the cost of treatment exceeds the expected impact):
+In a site register, the group risks that concern it appear with ⇩, read-only. If the impact on site is higher, report it from the card (**Local impact**): the group acknowledges the report and updates the assessment.
 
-1. From the risk record click **Accept risk**
-2. Fill in the formal acceptance form:
-   - Justification (mandatory, minimum 50 characters)
-   - Review date (mandatory — the risk must be periodically reassessed)
-   - Digital signature of the authorised responsible
-3. Save — the risk moves to "Accepted" status and no longer generates alerts until the review date
+### Matrix and Settings
 
-### Heat map and interpretation
-
-[Screenshot: 5x5 heat map]
-
-The heat map shows risks on a 5x5 Probability x Impact grid:
-
-- **Green** (score 1–7): acceptable risk — periodic monitoring
-- **Yellow** (score 8–14): moderate risk — mitigation plan within 90 days
-- **Red** (score 15–25): high risk — automatic escalation, plan within 15 days
-
-Click on a quadrant to see the list of risks that compose it. Use the plant filter to compare the risk distribution across different sites.
+The **Matrix** tab shows counts per cell, current or expected; click a cell to see its risks. In **Settings**, users with access to the whole organisation manage the governance model (centralised, federated, single site), who accepts per class, economic thresholds (with optional site exceptions), the threat catalogue (custom entries) and information classes.
 
 ---
 
@@ -658,7 +637,7 @@ PDCA cycles are created manually or automatically from:
 
 - **Closed incidents (M09)**: when the RCA corrective actions are structural — starting phase PLAN
 - **Audit findings (M17)**: for Major NC and Minor NC — starting phase PLAN with deadline determined by severity
-- **Risks with score > 14 (M06)**: when the treatment plan requires structural actions — urgent PLAN phase
+- **High or Critical risks (M06)**: when treatment requires a structural action, the cycle is opened with origin "Risk" — PLAN phase
 - **Management review decisions (M13)**: for each action approved by the review — PLAN phase
 
 In all cases of automatic creation, the PDCA cycle includes a reference to the originating entity (e.g. "Incident #INC-2026-042") and any deadline derived from policy.
@@ -750,7 +729,7 @@ Click **Generate data snapshot** to freeze GRC data at the time of the meeting. 
 
 - **a)** actions from previous reviews: all those of the previous review, plus older ones still open or closed in the period, with overdue ones highlighted
 - **d)** compliance per framework with controls with gaps; operational KPIs outside thresholds; audits of the last 12 months with readiness and open nonconformities (major first); open and NIS2-notified incidents; stuck PDCA cycles and overdue tasks; expired, expiring and recently approved documents
-- **f)** risks **above the acceptance threshold** approved by management (inherent → residual, treatment, owner, whether a plan exists) with the threshold used, formally accepted risks, critical processes without an approved BCP
+- **f)** **High and Critical risks not accepted** (above the procedure's acceptance threshold: current → expected class, treatment, owner, whether a plan exists), risks by class, active acceptances, overdue measures and status of the risk assessments; critical processes without an approved BCP plan
 - **g)** improvement opportunities from audits
 
 The snapshot can be regenerated until approval; afterwards it is fixed because it is the content of the minutes.
@@ -1356,7 +1335,7 @@ The platform sends automatic email notifications based on events. The main ones:
 | Imminent audit (7 days) | Auditor + Compliance Officer |
 | NIS2 incident — T+24h timer | CISO + Compliance Officer |
 | NIS2 incident — T+72h timer | CISO + Compliance Officer + Plant Manager |
-| Risk with score > 14 | Risk Manager + Plant Manager |
+| High or Critical risk assessed | Risk Manager + Plant Manager |
 | Document expiring (30 days) | Document owner |
 | Evidence expired | Owner of the linked control |
 | Mandatory vacant role | Compliance Officer + Plant Manager |
@@ -1532,7 +1511,7 @@ You have full access to risk modules. You are responsible for:
 - Overseeing IT and OT risk assessment (M06)
 - Validating the BIA and MTPD/RTO/RPO values (M05)
 - Starting and monitoring PDCA cycles (M11)
-- Receiving alerts on risks with score > 14
+- Receiving tasks on High and Critical risks, expiring acceptances and overdue measures
 
 ### Plant Manager
 
@@ -1608,11 +1587,10 @@ The tab is designed first for management, then for whoever works on the gaps:
 
 #### Risk / BIA / BCP tab
 
-Split into three sub-sections, selectable at the top of the tab:
+Split into two sub-sections, selectable at the top of the tab:
 
-- **Risks**: risks **above the acceptance threshold** approved by management (risk appetite from the Risk module; 14 is used when no policy exists), with the maximum number tolerated; heatmap with the cells above the threshold highlighted; the 10 highest-scoring risks (click to open them); breakdown by NIS2 Art. 21 and by threat category.
+- **Risks**: **High and Critical risks not accepted** (above the procedure's acceptance threshold), risks by class and active acceptances; matrix with each cell's class; the 10 risks with the highest class (click to open them); breakdown by NIS2 art. 21 area and by asset type.
 - **Continuity**: critical processes (criticality ≥ 4) without an **approved** BCP, processes with an approved plan but an overdue or never-run test (*uncovered: test overdue*) and approved plans with a test due; process · risks · BCP · last test table. Drafts and archived plans do not cover a process.
-- **Economic value**: inherent and residual annualised loss expectancy (ALE), risk reduced by controls and return on investment (ROSI) of planned treatments.
 
 #### Process indicators tab
 
@@ -1742,8 +1720,8 @@ The AI module may have been disabled by the administrator for your plant, or the
 **I cancelled an audit by mistake. Can I restore it?**
 No, the cancellation is irreversible. However, you can create a new audit for the same quarter and recreate any findings that were lost. Contact the Compliance Officer who can view the cancelled findings in the archive to retrieve the information.
 
-**The score of my risk changed without me doing anything.**
-The residual score is automatically recalculated when the status of linked controls changes. If evidence has expired, the control reverts to "partial" and this can increase the residual risk. Check the controls linked to the risk and update the evidence.
+**The class of my risk changed without me doing anything.**
+That does not happen automatically: the class changes only with a new assessment or with **Apply the expected risk**, once all plan measures are completed and verified. If a linked control goes into gap, an evidence expires or a measure is overdue, the assessment bar reports it among the events to consider for an extraordinary review.
 
 **I am not receiving email notifications.**
 First check your spam folder. If emails are not arriving at all, contact the system administrator to verify the SMTP configuration and the notification profile assigned to your role.
