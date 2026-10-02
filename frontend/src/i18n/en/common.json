@@ -3659,7 +3659,7 @@
       "new_threat": "New custom threat",
       "code_hint": "Capital letters, digits and underscore, unique",
       "add_threat": "Add to catalogue",
-      "information_hint": "Information to protect with the required confidentiality, integrity and availability level (VDA ISA 1.3.1, 1.3.2). Those without a site apply to the group.",
+      "information_hint": "Information to protect with the required confidentiality, integrity and availability level (VDA ISA 1.3.1, 1.3.2). Those without a site apply to the group. With a confidentiality threat the impact does not fall below: Strictly confidential 5, Confidential 4, Internal 3, Public 2.",
       "no_classes": "No information classes.",
       "class_name": "Information class",
       "class_description": "Description",
@@ -3676,6 +3676,12 @@
       "normal": "Normal",
       "high": "High",
       "very_high": "Very high"
+    },
+    "confidentiality_levels": {
+      "low": "Public",
+      "normal": "Internal",
+      "high": "Confidential",
+      "very_high": "Strictly confidential"
     },
     "effectiveness": {
       "alta": "High",

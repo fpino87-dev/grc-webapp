@@ -471,7 +471,7 @@ W rejestrze zakładu ryzyka grupy, które go dotyczą, są oznaczone ⇩ i dost�
 
 ### Macierz i Ustawienia
 
-Zakładka **Macierz** pokazuje liczby w komórkach, bieżące lub oczekiwane; kliknij komórkę, aby zobaczyć jej ryzyka. W **Ustawieniach** użytkownicy z dostępem do całej organizacji zarządzają modelem zarządzania (scentralizowany, sfederowany, jeden zakład), tym, kto akceptuje każdą klasę i ile miesięcy ważna jest akceptacja (obok, tylko do odczytu, termin działań ustalony w procedurze), progami ekonomicznymi (z ewentualnymi wyjątkami dla zakładów), katalogiem zagrożeń (pozycje własne) i klasami informacji.
+Zakładka **Macierz** pokazuje liczby w komórkach, bieżące lub oczekiwane; kliknij komórkę, aby zobaczyć jej ryzyka. W **Ustawieniach** użytkownicy z dostępem do całej organizacji zarządzają modelem zarządzania (scentralizowany, sfederowany, jeden zakład), tym, kto akceptuje każdą klasę i ile miesięcy ważna jest akceptacja (obok, tylko do odczytu, termin działań ustalony w procedurze), progami ekonomicznymi (z ewentualnymi wyjątkami dla zakładów), katalogiem zagrożeń (pozycje własne) i klasami informacji, z poufnością wyrażoną jako Publiczne, Wewnętrzne, Poufne lub Ściśle poufne: przy zagrożeniu poufności wpływ nie spada poniżej 2, 3, 4 lub 5.
 
 ---
 

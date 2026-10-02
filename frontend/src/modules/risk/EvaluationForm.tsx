@@ -172,7 +172,7 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
                   onChange={e => set("information_classes", e.target.checked
                     ? [...(value.information_classes ?? []), ic.id]
                     : (value.information_classes ?? []).filter(x => x !== ic.id))} />
-                {ic.name} <span className="text-gray-400">(C: {t(`risk.protection.${ic.confidentiality}`)})</span>
+                {ic.name} <span className="text-gray-400">({t(`risk.confidentiality_levels.${ic.confidentiality}`)})</span>
               </label>
             ))}
           </div>

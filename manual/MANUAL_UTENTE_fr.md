@@ -471,7 +471,7 @@ Dans le registre d'un site, les risques de groupe qui le concernent apparaissent
 
 ### Matrice et Paramètres
 
-L'onglet **Matrice** affiche les comptes par cellule, actuels ou attendus ; cliquez sur une cellule pour voir ses risques. Dans **Paramètres**, les utilisateurs ayant accès à toute l'organisation gèrent le modèle de gouvernance (centralisé, fédéré, site unique), qui accepte par classe et pendant combien de mois l'acceptation est valable (à côté, en lecture seule, le délai des mesures fixé par la procédure), les seuils économiques (avec exceptions éventuelles par site), le catalogue des menaces (entrées personnalisées) et les classes d'informations.
+L'onglet **Matrice** affiche les comptes par cellule, actuels ou attendus ; cliquez sur une cellule pour voir ses risques. Dans **Paramètres**, les utilisateurs ayant accès à toute l'organisation gèrent le modèle de gouvernance (centralisé, fédéré, site unique), qui accepte par classe et pendant combien de mois l'acceptation est valable (à côté, en lecture seule, le délai des mesures fixé par la procédure), les seuils économiques (avec exceptions éventuelles par site), le catalogue des menaces (entrées personnalisées) et les classes d'informations, la confidentialité étant exprimée en Public, Interne, Confidentiel ou Strictement confidentiel : avec une menace sur la confidentialité, l'impact ne descend pas sous 2, 3, 4 ou 5.
 
 ---
 

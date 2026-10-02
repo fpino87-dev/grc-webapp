@@ -471,7 +471,7 @@ Nel registro di un sito i rischi di gruppo che lo riguardano compaiono con ⇩, 
 
 ### Matrice e Impostazioni
 
-La scheda **Matrice** mostra i conteggi per cella, attuali o attesi; clic su una cella per vedere i rischi. In **Impostazioni** chi ha accesso a tutta l'organizzazione gestisce il modello di governo (centralizzato, federato, sito singolo), chi accetta per classe e per quanti mesi vale l'accettazione (accanto, in sola lettura, la scadenza delle misure fissata dalla procedura), le soglie economiche (con eventuali eccezioni per sito), il catalogo minacce (voci personalizzate) e le classi di informazioni.
+La scheda **Matrice** mostra i conteggi per cella, attuali o attesi; clic su una cella per vedere i rischi. In **Impostazioni** chi ha accesso a tutta l'organizzazione gestisce il modello di governo (centralizzato, federato, sito singolo), chi accetta per classe e per quanti mesi vale l'accettazione (accanto, in sola lettura, la scadenza delle misure fissata dalla procedura), le soglie economiche (con eventuali eccezioni per sito), il catalogo minacce (voci personalizzate) e le classi di informazioni, con la riservatezza espressa come Pubblico, Interno, Confidenziale o Segreto: con una minaccia alla riservatezza l'impatto non scende sotto 2, 3, 4 o 5.
 
 ---
 

@@ -471,7 +471,7 @@ Bir tesis kaydında, o tesisi ilgilendiren grup riskleri ⇩ ile ve salt okunur 
 
 ### Matris ve Ayarlar
 
-**Matris** sekmesi hücre başına mevcut veya beklenen sayıları gösterir; risklerini görmek için bir hücreye tıklayın. **Ayarlar**'da tüm organizasyona erişimi olan kullanıcılar yönetişim modelini (merkezi, federe, tek tesis), her sınıfı kimin kabul ettiğini ve kabulün kaç ay geçerli olduğunu (yanında, salt okunur, prosedürün belirlediği önlem süresi), ekonomik eşikleri (isteğe bağlı tesis istisnalarıyla), tehdit kataloğunu (özel kayıtlar) ve bilgi sınıflarını yönetir.
+**Matris** sekmesi hücre başına mevcut veya beklenen sayıları gösterir; risklerini görmek için bir hücreye tıklayın. **Ayarlar**'da tüm organizasyona erişimi olan kullanıcılar yönetişim modelini (merkezi, federe, tek tesis), her sınıfı kimin kabul ettiğini ve kabulün kaç ay geçerli olduğunu (yanında, salt okunur, prosedürün belirlediği önlem süresi), ekonomik eşikleri (isteğe bağlı tesis istisnalarıyla), tehdit kataloğunu (özel kayıtlar) ve gizliliği Genel, Dahili, Gizli veya Çok gizli olarak ifade edilen bilgi sınıflarını yönetir: gizlilik tehdidinde etki 2, 3, 4 veya 5'in altına düşmez.
 
 ---
 

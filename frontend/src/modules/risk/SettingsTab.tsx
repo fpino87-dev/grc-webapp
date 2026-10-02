@@ -363,10 +363,13 @@ function InformationSettings({ registerId, canEditGroup }: { registerId: Registe
   });
   const remove = useMutation({ mutationFn: (id: string) => riskApi.deleteInformationClass(id), onSuccess: refresh, onError: onErr });
   const canEdit = (ic: InformationClass) => ic.plant !== null || canEditGroup;
+  // Riservatezza con le etichette della classificazione (Pubblico … Segreto), I/A con i livelli.
+  const levelLabel = (k: "confidentiality" | "integrity" | "availability", l: string) =>
+    t(k === "confidentiality" ? `risk.confidentiality_levels.${l}` : `risk.protection.${l}`);
   const levelSelect = (k: "confidentiality" | "integrity" | "availability") => (
     <Field label={t(`risk.settings.${k}`)}>
       <select value={form[k]} onChange={e => setForm({ ...form, [k]: e.target.value as ProtectionLevel })} className={inputCls}>
-        {LEVELS.map(l => <option key={l} value={l}>{t(`risk.protection.${l}`)}</option>)}
+        {LEVELS.map(l => <option key={l} value={l}>{levelLabel(k, l)}</option>)}
       </select>
     </Field>
   );
@@ -391,7 +394,7 @@ function InformationSettings({ registerId, canEditGroup }: { registerId: Registe
               {classes.map(ic => (
                 <tr key={ic.id}>
                   <td className="px-3 py-1.5"><span title={ic.description}>{ic.name}</span></td>
-                  <td className="px-3 py-1.5 text-xs">{t(`risk.protection.${ic.confidentiality}`)}</td>
+                  <td className="px-3 py-1.5 text-xs">{levelLabel("confidentiality", ic.confidentiality)}</td>
                   <td className="px-3 py-1.5 text-xs">{t(`risk.protection.${ic.integrity}`)}</td>
                   <td className="px-3 py-1.5 text-xs">{t(`risk.protection.${ic.availability}`)}</td>
                   <td className="px-3 py-1.5 text-xs text-gray-500">{ic.plant_name ?? t("risk.page.group_register")}</td>

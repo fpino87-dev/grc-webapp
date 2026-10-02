@@ -3659,7 +3659,7 @@
       "new_threat": "Nuova minaccia personalizzata",
       "code_hint": "Lettere maiuscole, cifre e trattino basso, unico",
       "add_threat": "Aggiungi al catalogo",
-      "information_hint": "Le informazioni da proteggere con il livello richiesto per riservatezza, integrità e disponibilità (VDA ISA 1.3.1, 1.3.2). Quelle senza sito valgono per il gruppo.",
+      "information_hint": "Le informazioni da proteggere con il livello richiesto per riservatezza, integrità e disponibilità (VDA ISA 1.3.1, 1.3.2). Quelle senza sito valgono per il gruppo. Con una minaccia alla riservatezza l'impatto non scende sotto: Segreto 5, Confidenziale 4, Interno 3, Pubblico 2.",
       "no_classes": "Nessuna classe di informazioni.",
       "class_name": "Classe di informazioni",
       "class_description": "Descrizione",
@@ -3676,6 +3676,12 @@
       "normal": "Normal",
       "high": "High",
       "very_high": "Very high"
+    },
+    "confidentiality_levels": {
+      "low": "Pubblico",
+      "normal": "Interno",
+      "high": "Confidenziale",
+      "very_high": "Segreto"
     },
     "effectiveness": {
       "alta": "Alta",

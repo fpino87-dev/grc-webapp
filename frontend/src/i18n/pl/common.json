@@ -3659,7 +3659,7 @@
       "new_threat": "Nowe zagrożenie własne",
       "code_hint": "Wielkie litery, cyfry i podkreślenie, unikalny",
       "add_threat": "Dodaj do katalogu",
-      "information_hint": "Informacje do ochrony z wymaganym poziomem poufności, integralności i dostępności (VDA ISA 1.3.1, 1.3.2). Te bez zakładu dotyczą grupy.",
+      "information_hint": "Informacje do ochrony z wymaganym poziomem poufności, integralności i dostępności (VDA ISA 1.3.1, 1.3.2). Te bez zakładu dotyczą grupy. Przy zagrożeniu poufności wpływ nie spada poniżej: Ściśle poufne 5, Poufne 4, Wewnętrzne 3, Publiczne 2.",
       "no_classes": "Brak klas informacji.",
       "class_name": "Klasa informacji",
       "class_description": "Opis",
@@ -3676,6 +3676,12 @@
       "normal": "Normal",
       "high": "High",
       "very_high": "Very high"
+    },
+    "confidentiality_levels": {
+      "low": "Publiczne",
+      "normal": "Wewnętrzne",
+      "high": "Poufne",
+      "very_high": "Ściśle poufne"
     },
     "effectiveness": {
       "alta": "Wysoka",

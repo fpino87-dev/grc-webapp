@@ -471,7 +471,7 @@ In a site register, the group risks that concern it appear with ⇩, read-only. 
 
 ### Matrix and Settings
 
-The **Matrix** tab shows counts per cell, current or expected; click a cell to see its risks. In **Settings**, users with access to the whole organisation manage the governance model (centralised, federated, single site), who accepts per class and how many months the acceptance lasts (next to it, read-only, the measures deadline set by the procedure), economic thresholds (with optional site exceptions), the threat catalogue (custom entries) and information classes.
+The **Matrix** tab shows counts per cell, current or expected; click a cell to see its risks. In **Settings**, users with access to the whole organisation manage the governance model (centralised, federated, single site), who accepts per class and how many months the acceptance lasts (next to it, read-only, the measures deadline set by the procedure), economic thresholds (with optional site exceptions), the threat catalogue (custom entries) and information classes, with confidentiality expressed as Public, Internal, Confidential or Strictly confidential: with a confidentiality threat the impact does not fall below 2, 3, 4 or 5.
 
 ---
 
