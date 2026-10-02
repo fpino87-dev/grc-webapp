@@ -3517,3 +3517,7 @@ msgstr "Bir önlem başka bir riske taşınamaz."
 
 msgid "Una misura con efficacia verificata non si modifica: riaprila prima."
 msgstr "Etkinliği doğrulanmış bir önlem değiştirilemez: önce yeniden açın."
+
+#, python-format
+msgid "Rischi High o Critical da trattare senza misure nel piano di trattamento: %(count)s."
+msgstr "İşlem planında önlemi olmayan, işlem görecek High veya Critical riskler: %(count)s."

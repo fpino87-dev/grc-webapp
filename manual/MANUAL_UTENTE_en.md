@@ -433,7 +433,7 @@ The bar under the title shows the status of the register assessment:
 
 1. **Start the first risk assessment** (or, after an approval, a **periodic** or **extraordinary review** with the reason)
 2. Assess the risks; assessment fields can only be edited while an assessment is **in progress**
-3. **Submit for approval**: the system checks full coverage and assessed risks (or confirmed ones, in a periodic review)
+3. **Submit for approval**: the system checks full coverage and assessed risks (or confirmed ones, in a periodic review); High and Critical risks to be mitigated, avoided or transferred must have at least one measure in the treatment plan, because the body approves the assessment and the plan together (ISO 27001 §6.1.3). It is best approved in the management review meeting, linking the minutes
 4. **Approve**: select the governing body that decided and, optionally, the management review with the minutes. Approval freezes a snapshot of the register (**Assessments** tab, exportable to Excel)
 
 The register prior to the new procedure remains available read-only from the Assessments tab (**superseded method**). If relevant events occur after approval (significant incidents, new critical assets, changes, major nonconformities, controls in gap, overdue measures) the bar flags them so you can consider an extraordinary review.

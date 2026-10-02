@@ -114,6 +114,15 @@ def _completed_risk(user, plant, threat, owner=None, **extra):
     return services.complete_risk(user, risk)
 
 
+def _planned_risk(user, plant, threat, owner=None, **extra):
+    """Rischio completato con una misura nel piano: si può inviare in approvazione."""
+    from apps.risk.models import RiskMitigationPlan
+
+    risk = _completed_risk(user, plant, threat, owner, **extra)
+    RiskMitigationPlan.objects.create(assessment=risk, action="EDR", due_date="2030-01-01", owner_external="MSP")
+    return risk
+
+
 def _site_owner(plant, name="owner"):
     return _user(name, scope="single_plant", plants=[plant])
 
@@ -255,7 +264,7 @@ def test_coverage_and_not_applicable(org_user, plant, threats, cycle):
 def test_submit_requires_full_coverage_then_approve_freezes_snapshot(org_user, plant, threats, cycle):
     from apps.governance.models import SecurityCommittee
 
-    _completed_risk(org_user, plant, threats["malware"])
+    _planned_risk(org_user, plant, threats["malware"])
     with pytest.raises(ValidationError):
         services.submit_cycle(org_user, cycle)
     _close_coverage(org_user, plant)
@@ -275,7 +284,7 @@ def test_submit_requires_full_coverage_then_approve_freezes_snapshot(org_user, p
 def test_periodic_review_requires_confirmation(org_user, plant, threats, cycle):
     from apps.governance.models import SecurityCommittee
 
-    risk = _completed_risk(org_user, plant, threats["malware"])
+    risk = _planned_risk(org_user, plant, threats["malware"])
     _close_coverage(org_user, plant)
     services.submit_cycle(org_user, cycle)
     services.approve_cycle(org_user, cycle, body=SecurityCommittee.objects.create(name="CdA"))
@@ -298,7 +307,7 @@ def test_site_approval_in_centralised_model_needs_org_scope(org_user, site_user,
     from apps.governance.models import SecurityCommittee
 
     cycle = services.start_cycle(site_user, plant, "primo")
-    _completed_risk(site_user, plant, threats["malware"])
+    _planned_risk(site_user, plant, threats["malware"])
     _close_coverage(site_user, plant)
     services.submit_cycle(site_user, cycle)
     body = SecurityCommittee.objects.create(name="CdA")
@@ -595,7 +604,7 @@ def test_cycle_api_submit_and_approve(org_user, plant, threats, cycle):
 
     c = _client(org_user)
     assert c.post(f"/api/v1/risk/cycles/{cycle.pk}/submit/").status_code == 400
-    _completed_risk(org_user, plant, threats["malware"])
+    _planned_risk(org_user, plant, threats["malware"])
     _close_coverage(org_user, plant)
     assert c.get(f"/api/v1/risk/cycles/{cycle.pk}/submission-check/").json() == {"errors": []}
     assert c.post(f"/api/v1/risk/cycles/{cycle.pk}/submit/").json()["status"] == "in_approvazione"
@@ -626,7 +635,7 @@ def test_revaluation_triggers_after_approval(org_user, plant, threats, cycle):
     from apps.governance.models import SecurityCommittee
     from apps.incidents.models import Incident
 
-    _completed_risk(org_user, plant, threats["malware"])
+    _planned_risk(org_user, plant, threats["malware"])
     _close_coverage(org_user, plant)
     services.submit_cycle(org_user, cycle)
     services.approve_cycle(org_user, cycle, body=SecurityCommittee.objects.create(name="CdA"))
@@ -701,7 +710,7 @@ def test_cycle_export_and_audit_pack_history(org_user, plant, threats, cycle, tm
                                   legacy_snapshot={"score": 12, "inherent_score": 20, "treatment": "mitigare"})
     c = _client(org_user)
     assert c.get(f"/api/v1/risk/cycles/{cycle.pk}/export/").status_code == 400  # niente fotografia
-    _completed_risk(org_user, plant, threats["malware"])
+    _planned_risk(org_user, plant, threats["malware"])
     _close_coverage(org_user, plant)
     services.submit_cycle(org_user, cycle)
     services.approve_cycle(org_user, cycle, body=SecurityCommittee.objects.create(name="CdA"))
@@ -916,3 +925,21 @@ def test_inherited_group_risks_shown_apart_not_summed(org_user, plant, other_pla
     assert str(group.pk) not in attention["critical_untreated"]["risk_ids"]
     assert attention["inherited"]["untreated_high"] == 1
     assert services.register_attention(None)["inherited"] is None
+
+
+
+@pytest.mark.django_db
+def test_submit_blocked_for_high_risk_without_plan(org_user, plant, threats, cycle):
+    """L'organo approva valutazione e piano (ISO 27001 §6.1.3): un High/Critical
+    da trattare senza misure non va in approvazione; una misura eliminata non conta."""
+    from apps.risk.models import RiskMitigationPlan
+
+    risk = _completed_risk(org_user, plant, threats["malware"])  # Critical da mitigare
+    _close_coverage(org_user, plant)
+    assert any("piano di trattamento" in e for e in services.cycle_submission_errors(cycle))
+    plan = RiskMitigationPlan.objects.create(assessment=risk, action="EDR", due_date="2030-01-01",
+                                             owner_external="MSP")
+    assert services.cycle_submission_errors(cycle) == []
+    plan.soft_delete()
+    with pytest.raises(ValidationError):
+        services.submit_cycle(org_user, cycle)

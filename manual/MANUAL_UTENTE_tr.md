@@ -433,7 +433,7 @@ Başlığın altındaki çubuk, kaydın değerlendirme durumunu gösterir:
 
 1. **İlk risk değerlendirmesini başlatın** (veya bir onaydan sonra, gerekçesiyle birlikte **dönemsel** ya da **olağanüstü** bir gözden geçirme)
 2. Riskleri değerlendirin; değerlendirme alanları yalnızca **devam eden** bir değerlendirme sırasında değiştirilebilir
-3. **Onaya gönderin**: sistem tam kapsamı ve değerlendirilmiş (dönemsel gözden geçirmede onaylanmış) riskleri kontrol eder
+3. **Onaya gönderin**: sistem tam kapsamı ve değerlendirilmiş (dönemsel gözden geçirmede onaylanmış) riskleri kontrol eder; azaltılacak, kaçınılacak veya devredilecek High ve Critical riskler işlem planında en az bir önleme sahip olmalıdır, çünkü organ değerlendirmeyi ve planı birlikte onaylar (ISO 27001 §6.1.3). Onayın, tutanak bağlanarak yönetim gözden geçirmesi toplantısında yapılması önerilir
 4. **Onaylayın**: karar veren organı ve isterseniz tutanağıyla birlikte yönetim gözden geçirmesini belirtin. Onay, kaydın bir anlık görüntüsünü dondurur (**Değerlendirmeler** sekmesi, Excel'e aktarılabilir)
 
 Yeni prosedürden önceki kayıt, Değerlendirmeler sekmesinden salt okunur olarak görüntülenebilir (**eski yöntem**). Onaydan sonra önemli olaylar meydana gelirse (ciddi olaylar, yeni kritik varlıklar, değişiklikler, büyük uygunsuzluklar, boşluklu kontroller, geciken önlemler), çubuk olağanüstü bir gözden geçirmeyi değerlendirmek için bunları bildirir.

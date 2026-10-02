@@ -1638,10 +1638,24 @@ def register_coverage(plant=None) -> dict:
 def cycle_submission_errors(cycle) -> list:
     from django.utils.translation import gettext as _
 
+    from .models import RiskMitigationPlan
+
     errors = []
     register = register_queryset(cycle.plant)
     if register.filter(status="bozza").exists():
         errors.append(_("Ci sono rischi con valutazione non completata."))
+    # ISO 27001 §6.1.3 e: l'organo approva valutazione E piano di trattamento,
+    # quindi un High/Critical da trattare senza misure non si invia. Il manager
+    # di default esclude le misure eliminate.
+    without_plan = (
+        register.filter(applicable=True, current_class__in=HIGH_CLASSES,
+                        treatment__in=("mitigare", "evitare", "trasferire"))
+        .exclude(pk__in=RiskMitigationPlan.objects.values("assessment_id"))
+        .count()
+    )
+    if without_plan:
+        errors.append(_("Rischi High o Critical da trattare senza misure nel piano di trattamento: %(count)s.")
+                      % {"count": without_plan})
     if cycle.kind in ("primo", "periodico"):
         if register.filter(applicable=True).exclude(evaluated_in_cycle=cycle).exists():
             errors.append(_("Ci sono rischi non ancora valutati o confermati in questa valutazione."))

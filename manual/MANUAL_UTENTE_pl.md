@@ -433,7 +433,7 @@ Pasek pod tytułem pokazuje stan oceny rejestru:
 
 1. **Rozpocznij pierwszą ocenę ryzyka** (lub, po zatwierdzeniu, **przegląd okresowy** albo **nadzwyczajny** z podaniem powodu)
 2. Oceń ryzyka; pola oceny można edytować tylko podczas oceny **w toku**
-3. **Prześlij do zatwierdzenia**: system sprawdza pełne pokrycie i ocenione ryzyka (lub potwierdzone, w przeglądzie okresowym)
+3. **Prześlij do zatwierdzenia**: system sprawdza pełne pokrycie i ocenione ryzyka (lub potwierdzone, w przeglądzie okresowym); ryzyka High i Critical do ograniczenia, uniknięcia lub przeniesienia muszą mieć co najmniej jedno działanie w planie postępowania, ponieważ organ zatwierdza razem ocenę i plan (ISO 27001 §6.1.3). Najlepiej zatwierdzać na posiedzeniu przeglądu zarządzania, łącząc protokół
 4. **Zatwierdź**: wskaż organ, który podjął uchwałę, i opcjonalnie przegląd zarządzania z protokołem. Zatwierdzenie zamraża obraz rejestru (zakładka **Oceny**, eksport do Excela)
 
 Rejestr sprzed nowej procedury pozostaje dostępny tylko do odczytu w zakładce Oceny (**zastąpiona metoda**). Jeśli po zatwierdzeniu wystąpią istotne zdarzenia (poważne incydenty, nowe krytyczne aktywa, zmiany, poważne niezgodności, kontrole z luką, opóźnione działania), pasek je sygnalizuje, aby rozważyć przegląd nadzwyczajny.

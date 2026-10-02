@@ -3516,3 +3516,7 @@ msgstr "A measure cannot be moved to another risk."
 
 msgid "Una misura con efficacia verificata non si modifica: riaprila prima."
 msgstr "A measure with verified effectiveness cannot be changed: reopen it first."
+
+#, python-format
+msgid "Rischi High o Critical da trattare senza misure nel piano di trattamento: %(count)s."
+msgstr "High or Critical risks to be treated without measures in the treatment plan: %(count)s."

@@ -433,7 +433,7 @@ La barre sous le titre indique l'état de l'appréciation du registre :
 
 1. **Lancez la première appréciation des risques** (ou, après une approbation, une **révision périodique** ou **extraordinaire** avec le motif)
 2. Évaluez les risques ; les champs d'évaluation ne se modifient que pendant une appréciation **en cours**
-3. **Soumettez à l'approbation** : le système vérifie la couverture complète et les risques évalués (ou confirmés, en révision périodique)
+3. **Soumettez à l'approbation** : le système vérifie la couverture complète et les risques évalués (ou confirmés, en révision périodique) ; les risques High et Critical à atténuer, éviter ou transférer doivent avoir au moins une mesure dans le plan de traitement, car l'organe approuve ensemble l'appréciation et le plan (ISO 27001 §6.1.3). Il est conseillé d'approuver lors de la séance de revue de direction, en liant le procès-verbal
 4. **Approuvez** : indiquez l'organe qui a délibéré et, si vous le souhaitez, la revue de direction avec le procès-verbal. L'approbation fige une photographie du registre (onglet **Appréciations**, exportable en Excel)
 
 Le registre antérieur à la nouvelle procédure reste consultable en lecture seule depuis l'onglet Appréciations (**méthode remplacée**). Si des événements importants surviennent après l'approbation (incidents importants, nouveaux actifs critiques, changements, non-conformités majeures, contrôles en écart, mesures en retard), la barre les signale pour envisager une révision extraordinaire.

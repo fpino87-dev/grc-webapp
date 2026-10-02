@@ -433,7 +433,7 @@ La barra sotto il titolo mostra lo stato della valutazione del registro:
 
 1. **Avvia il primo risk assessment** (o, dopo un'approvazione, una **revisione periodica** o **straordinaria** con il motivo)
 2. Valuta i rischi; i campi di valutazione si modificano solo con una valutazione **in corso**
-3. **Invia in approvazione**: il sistema verifica copertura completa e rischi valutati (o confermati, nella revisione periodica)
+3. **Invia in approvazione**: il sistema verifica copertura completa e rischi valutati (o confermati, nella revisione periodica); i rischi High e Critical da mitigare, evitare o trasferire devono avere almeno una misura nel piano di trattamento, perché l'organo approva insieme valutazione e piano (ISO 27001 §6.1.3). Conviene approvare nella seduta di riesame di direzione, collegando il verbale
 4. **Approva**: indica l'organo che ha deliberato e, se vuoi, il riesame di direzione con il verbale. L'approvazione congela una fotografia del registro (scheda **Valutazioni**, esportabile in Excel)
 
 Il registro precedente alla nuova procedura resta consultabile in sola lettura dalla scheda Valutazioni (**metodo superato**). Se dopo l'approvazione accadono eventi rilevanti (incidenti significativi, nuovi asset critici, cambiamenti, non conformità maggiori, controlli in gap, misure in ritardo) la barra li segnala per valutare una revisione straordinaria.

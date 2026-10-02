@@ -3538,3 +3538,7 @@ msgstr "Działania nie można przenieść do innego ryzyka."
 
 msgid "Una misura con efficacia verificata non si modifica: riaprila prima."
 msgstr "Działania o zweryfikowanej skuteczności nie można zmienić: najpierw je otwórz ponownie."
+
+#, python-format
+msgid "Rischi High o Critical da trattare senza misure nel piano di trattamento: %(count)s."
+msgstr "Ryzyka High lub Critical do postępowania bez działań w planie postępowania: %(count)s."
