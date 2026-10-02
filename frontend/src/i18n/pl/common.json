@@ -265,7 +265,11 @@
         "generate_procedure": "Generuj dokument procedury (M03 Kontrole)",
         "cockpit_explain": "Wyjaśnij insight (M21 Centrum operacyjne)",
         "cockpit_assistant": "Zapytaj govrico (M21 Centrum operacyjne)",
-        "vda_interview": "Wywiad VDA ISA (M03 Kontrole)"
+        "vda_interview": "Wywiad VDA ISA (M03 Kontrole)",
+        "risk_draft": "Ocena ryzyka: szkic oceny",
+        "risk_measures": "Ocena ryzyka: działania planu",
+        "risk_review": "Ocena ryzyka: przegląd uzasadnień",
+        "risk_summary": "Ocena ryzyka: podsumowanie dla organu"
       },
       "insufficient_permissions": "Niewystarczające uprawnienia.",
       "provider_cloud": "Dostawca Cloud",
@@ -3808,6 +3812,47 @@
         "missing": "Niepokryta"
       },
       "open": "Otwórz"
+    },
+    "ai": {
+      "draft": "Zaproponuj z AI",
+      "working": "AI pracuje…",
+      "draft_title": "Szkic oceny",
+      "draft_hint": "Wybierz, czego użyć: zaznaczone wartości trafiają do karty i trzeba je zapisać. Nic nie zostanie zapisane, dopóki tego nie zrobisz.",
+      "nothing": "AI nie zaproponowała niczego użytecznego.",
+      "current": "obecnie",
+      "class_note": "AI nie proponuje klasy: wynika ona z macierzy.",
+      "apply_selected": "Użyj zaznaczonych",
+      "error": "Usługa AI nie odpowiedziała. Spróbuj ponownie lub uzupełnij ręcznie.",
+      "measures": "Zaproponuj działania z AI",
+      "measures_title": "Proponowane działania",
+      "measures_hint": "Dodaj do planu tylko działania, z którymi się zgadzasz; odpowiedzialny i termin pozostają edytowalne w planie.",
+      "added": "Dodano",
+      "add_to_plan": "Dodaj do planu",
+      "review_button": "Przegląd spójności",
+      "review_title": "Przegląd spójności rejestru",
+      "review_hint": "Sprawdza rejestr przed przesłaniem do zatwierdzenia. Niczego nie zmienia: otwórz wskazane ryzyka i popraw je.",
+      "review_with_ai": "Uwzględnij analizę uzasadnień przez AI",
+      "review_run": "Uruchom przegląd",
+      "review_rules": "Kontrole automatyczne",
+      "review_ok": "Brak uwag.",
+      "review_ai": "Uwagi AI dotyczące uzasadnień",
+      "severity": {
+        "error": "do poprawy",
+        "warning": "do sprawdzenia"
+      },
+      "checks": {
+        "confidentiality_without_information": "Zagrożenie poufności bez powiązanych klas informacji: minimalny próg wpływu nie może zadziałać.",
+        "objectives_not_matching_impact": "Wskazane cele ({{objectives}}) nie odpowiadają żadnemu ocenionemu wymiarowi wpływu.",
+        "high_without_plan": "Ryzyko High lub Critical do postępowania bez działań w planie.",
+        "rationale_too_short": "Zbyt krótkie uzasadnienie: {{field}}.",
+        "expected_not_lower": "Ryzyko oczekiwane nie jest niższe od bieżącego, choć postępowanie przewiduje działania.",
+        "impact_spread": "To samo zagrożenie i typ co „{{other}}” z bardzo różnym wpływem ({{low}} wobec {{high}}): sprawdź, czy jest to uzasadnione."
+      },
+      "summary_button": "Podsumowanie dla organu",
+      "summary_title": "Podsumowanie rejestru dla organu",
+      "summary_hint": "Szkic raportu dla organu i przeglądu zarządzania, napisany wyłącznie na podstawie danych rejestru. Przejrzyj go przed użyciem.",
+      "summary_run": "Wygeneruj szkic",
+      "copy": "Kopiuj tekst"
     }
   },
   "pdca": {

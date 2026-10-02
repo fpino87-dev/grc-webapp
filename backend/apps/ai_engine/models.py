@@ -87,6 +87,10 @@ TASK_TYPES = [
     ("assistant_greeting", "Assistant: Saluto contestuale"),
     ("cockpit_explain", "Centro Operativo: Spiega insight + bozza remediation"),
     ("cockpit_assistant", "Centro Operativo: Chiedi al Copilot"),
+    ("risk_draft", "Risk assessment: bozza della valutazione"),
+    ("risk_measures", "Risk assessment: misure del piano di trattamento"),
+    ("risk_review", "Risk assessment: revisione delle motivazioni"),
+    ("risk_summary", "Risk assessment: sintesi per l'organo"),
 ]
 
 FALLBACK_MODES = [
@@ -164,6 +168,10 @@ class AiProviderConfig(BaseModel):
             "assistant_greeting": "ollama",
             "cockpit_explain": "cloud",
             "cockpit_assistant": "cloud",
+            "risk_draft": "cloud",
+            "risk_measures": "cloud",
+            "risk_review": "cloud",
+            "risk_summary": "cloud",
         }
         routing = self.task_routing or {}
         return routing.get(task_type, defaults.get(task_type, "ollama"))

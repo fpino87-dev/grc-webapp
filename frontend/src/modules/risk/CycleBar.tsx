@@ -6,6 +6,7 @@ import { governanceApi } from "../../api/endpoints/governance";
 import { managementReviewApi } from "../../api/endpoints/managementReview";
 import { ErrorBox, inputCls } from "./RiskUi";
 import type { RegisterId } from "./RiskPage";
+import { ReviewDialog, SummaryDialog } from "./RiskAi";
 
 function fmt(d: string | null | undefined, lang: string) {
   return d ? new Date(d).toLocaleDateString(lang) : "—";
@@ -13,7 +14,7 @@ function fmt(d: string | null | undefined, lang: string) {
 
 /** Stato della valutazione del registro e azioni del ciclo (procedura §5, §11). */
 export function CycleBar({
-  registerId, registerLabel, openCycle, approvedCycle, hasLegacy, canWrite, orgScope,
+  registerId, registerLabel, openCycle, approvedCycle, hasLegacy, canWrite, orgScope, onOpenRisk,
 }: {
   registerId: RegisterId;
   registerLabel: string;
@@ -22,10 +23,11 @@ export function CycleBar({
   hasLegacy: boolean;
   canWrite: boolean;
   orgScope: boolean;
+  onOpenRisk: (id: string) => void;
 }) {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
-  const [dialog, setDialog] = useState<null | "start" | "submit" | "approve" | "return">(null);
+  const [dialog, setDialog] = useState<null | "start" | "submit" | "approve" | "return" | "review" | "summary">(null);
   const [error, setError] = useState<string | null>(null);
 
   const { data: triggers = [] } = useQuery({
@@ -68,7 +70,17 @@ export function CycleBar({
           <span className="font-semibold">{registerLabel}</span> · {text}
         </div>
         {canWrite && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {(openCycle || approvedCycle) && (
+              <>
+                <button onClick={() => setDialog("review")} className="px-3 py-1.5 bg-white border rounded text-sm hover:bg-gray-50">
+                  {t("risk.ai.review_button")}
+                </button>
+                <button onClick={() => setDialog("summary")} className="px-3 py-1.5 bg-white border border-amber-300 rounded text-sm hover:bg-amber-50">
+                  ✨ {t("risk.ai.summary_button")}
+                </button>
+              </>
+            )}
             {!openCycle && (
               <button onClick={() => setDialog("start")} className="px-3 py-1.5 bg-white border rounded text-sm hover:bg-gray-50">
                 {t(approvedCycle ? "risk.cycle.start_review" : "risk.cycle.start_first")}
@@ -119,6 +131,8 @@ export function CycleBar({
           }}
         />
       )}
+      {dialog === "review" && <ReviewDialog registerId={registerId} onOpen={onOpenRisk} onClose={close} />}
+      {dialog === "summary" && <SummaryDialog registerId={registerId} onClose={close} />}
       {dialog === "approve" && openCycle && (
         <ApproveDialog cycle={openCycle} orgScope={orgScope} onClose={close} onDone={() => { close(); refresh(); }} />
       )}

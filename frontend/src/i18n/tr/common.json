@@ -265,7 +265,11 @@
         "generate_procedure": "Prosedür belgesi oluştur (M03 Kontroller)",
         "cockpit_explain": "Insight'ı açıkla (M21 Operasyon Merkezi)",
         "cockpit_assistant": "govrico'ya sor (M21 Operasyon Merkezi)",
-        "vda_interview": "VDA ISA rehberli görüşme (M03 Kontroller)"
+        "vda_interview": "VDA ISA rehberli görüşme (M03 Kontroller)",
+        "risk_draft": "Risk değerlendirmesi: değerlendirme taslağı",
+        "risk_measures": "Risk değerlendirmesi: plan önlemleri",
+        "risk_review": "Risk değerlendirmesi: gerekçe incelemesi",
+        "risk_summary": "Risk değerlendirmesi: organ için özet"
       },
       "insufficient_permissions": "Yetersiz izinler.",
       "provider_cloud": "Cloud Sağlayıcı",
@@ -3808,6 +3812,47 @@
         "missing": "Kapsanmıyor"
       },
       "open": "Aç"
+    },
+    "ai": {
+      "draft": "AI ile öner",
+      "working": "AI çalışıyor…",
+      "draft_title": "Değerlendirme taslağı",
+      "draft_hint": "Neyi kullanacağınızı seçin: seçilen değerler karta girer ve kaydedilmelidir. Siz kaydetmedikçe hiçbir şey kaydedilmez.",
+      "nothing": "AI kullanılabilir bir şey önermedi.",
+      "current": "şu an",
+      "class_note": "Sınıfı AI önermez: matristen hesaplanır.",
+      "apply_selected": "Seçilenleri kullan",
+      "error": "AI hizmeti yanıt vermedi. Tekrar deneyin veya elle doldurun.",
+      "measures": "AI ile önlem öner",
+      "measures_title": "Önerilen önlemler",
+      "measures_hint": "Plana yalnızca katıldığınız önlemleri ekleyin; sorumlu ve son tarih planda düzenlenebilir.",
+      "added": "Eklendi",
+      "add_to_plan": "Plana ekle",
+      "review_button": "Tutarlılık incelemesi",
+      "review_title": "Kayıt tutarlılık incelemesi",
+      "review_hint": "Onaya göndermeden önce kaydı kontrol eder. Hiçbir şeyi değiştirmez: işaretlenen riskleri açıp düzeltin.",
+      "review_with_ai": "Gerekçelerin AI analizini dahil et",
+      "review_run": "İncelemeyi başlat",
+      "review_rules": "Otomatik kontroller",
+      "review_ok": "Gözlem yok.",
+      "review_ai": "Gerekçeler hakkında AI gözlemleri",
+      "severity": {
+        "error": "düzeltilmeli",
+        "warning": "kontrol edilmeli"
+      },
+      "checks": {
+        "confidentiality_without_information": "Bağlı bilgi sınıfı olmayan gizlilik tehdidi: asgari etki eşiği uygulanamaz.",
+        "objectives_not_matching_impact": "Belirtilen hedefler ({{objectives}}) değerlendirilmiş hiçbir etki boyutuyla eşleşmiyor.",
+        "high_without_plan": "Planda önlem olmayan, işlenmesi gereken High veya Critical risk.",
+        "rationale_too_short": "Gerekçe çok kısa: {{field}}.",
+        "expected_not_lower": "İşlem önlem öngördüğü halde beklenen risk mevcut riskten düşük değil.",
+        "impact_spread": "«{{other}}» ile aynı tehdit ve tür, çok farklı etki ({{low}} / {{high}}): gerekçeli olduğunu kontrol edin."
+      },
+      "summary_button": "Organ için özet",
+      "summary_title": "Organ için kayıt özeti",
+      "summary_hint": "Organ ve yönetim gözden geçirmesi için yalnızca kayıt verilerinden yazılmış rapor taslağı. Kullanmadan önce gözden geçirin.",
+      "summary_run": "Taslak oluştur",
+      "copy": "Metni kopyala"
     }
   },
   "pdca": {

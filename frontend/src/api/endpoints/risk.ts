@@ -287,6 +287,23 @@ export interface ResolvedPolicy {
   user_org_scope: boolean;
 }
 
+// ── Supporto IA (M20): proposte da confermare, mai applicate dal server ──
+export interface AiMeta { provider: string; model: string; used_fallback: boolean; interaction_id: string | null }
+export type AiDraftProposal = Partial<Pick<Risk,
+  | "vulnerability" | "consequence" | "probability" | "probability_method" | "probability_rationale"
+  | "impact_economic" | "impact_legal" | "impact_customer" | "impact_reputational" | "impact_people"
+  | "impact_operational" | "impact_rationale" | "treatment" | "treatment_rationale"
+  | "expected_probability" | "expected_impact">>;
+export interface AiMeasure {
+  action: string; expected_effect: "" | "probabilita" | "impatto" | "entrambi"; due_date: string;
+  control_instance: string | null; control_label: string | null; rationale: string;
+}
+export interface ConsistencyFinding {
+  code: string; severity: "error" | "warning"; risk_id: string; risk_name: string; params: Record<string, string | number>;
+}
+export interface AiReviewFinding { risk_id: string; risk_name: string; issue: string; suggestion: string }
+export interface RegisterReview { checks: ConsistencyFinding[]; ai: (AiMeta & { findings: AiReviewFinding[] }) | null }
+
 export type AttentionKey = "critical_untreated" | "high_untreated" | "acceptances_expiring" | "overdue_measures";
 export const ATTENTION_KEYS: AttentionKey[] = ["critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"];
 /** Cosa richiede di agire nel registro (backend: risk.services.register_attention). */
@@ -383,6 +400,16 @@ export const riskApi = {
   updateBusinessObjective: (id: string, payload: Partial<BusinessObjective>) =>
     data(apiClient.patch<BusinessObjective>(`/risk/business-objectives/${id}/`, payload)),
   deleteBusinessObjective: (id: string) => apiClient.delete(`/risk/business-objectives/${id}/`),
+  aiDraft: (id: string) => data(apiClient.post<AiMeta & { proposal: AiDraftProposal }>(`/risk/assessments/${id}/ai-draft/`)),
+  aiMeasures: (id: string) => data(apiClient.post<AiMeta & { measures: AiMeasure[] }>(`/risk/assessments/${id}/ai-measures/`)),
+  review: (plantId: string | null, ai: boolean) =>
+    data(apiClient.post<RegisterReview>("/risk/assessments/review/", { ai }, { params: { plant: registerParam(plantId) } })),
+  aiSummary: (plantId: string | null) =>
+    data(apiClient.post<AiMeta & { summary: string }>("/risk/assessments/ai-summary/", {}, {
+      params: { plant: registerParam(plantId) }, timeout: 180000,
+    })),
+  aiFeedback: (interactionId: string, action: "confirm" | "ignore", finalText = "") =>
+    data(apiClient.post("/risk/assessments/ai-feedback/", { interaction_id: interactionId, action, final_text: finalText })),
   attention: (plantId: string | null) =>
     data(apiClient.get<Attention>("/risk/assessments/attention/", { params: { plant: registerParam(plantId) } })),
   triggers: (plantId: string | null) =>

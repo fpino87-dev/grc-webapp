@@ -479,6 +479,15 @@ Kimin kabul edebileceği sınıfa ve **risk yönetişimi politikasına** (Ayarla
 
 Bir tesis kaydında, o tesisi ilgilendiren grup riskleri ⇩ ile ve salt okunur olarak görünür. Tesis üzerindeki etki daha yüksekse karttan bildirin (**Yerel etki**): grup bildirimi kabul eder ve değerlendirmeyi günceller. Tesisin Kapsam sekmesinde bu tehditler **Grup tarafından kapsanıyor** olarak görünür: yinelenmemeli veya uygulanamaz olarak işaretlenmemelidir. Tesiste koşullar veya önlemler farklıysa **Tesis riski** ile tesise ait bir risk ekleyin.
 
+### AI desteği
+
+Modül, platformun AI motorunu (Ayarlar › AI Engine) kendi kurallarıyla kullanır: kişisel veriler bulut modeline gönderilmeden önce anonimleştirilir ve **hiçbir öneri onayınız olmadan uygulanmaz**. Öneriler «AI» olarak işaretlenir ve sonuç (kullanıldı veya yok sayıldı) AI etkileşim kaydında kalır.
+
+- **AI ile öner** (risk kartı, değerlendirme sırasında): prosedür kriterleri ve mevcut verilerle (BIA süreci, bilgiler, hedefler, mevcut önlemler) yazılmış zafiyet, sonuç, yöntem ve gerekçesiyle olasılık, boyut başına etki, işlem ve beklenen risk taslağı. Kullanılacak alanları seçin, ardından kaydedin. Sınıfı AI önermez: matris hesaplar
+- **AI ile önlem öner** (işlem planı): tesis kontrollerine bağlı, sınıfın süresi içinde tamamlanacak 3–5 önlem; plana tek tek eklenir
+- **Tutarlılık incelemesi** (değerlendirme çubuğu): kayıt üzerinde otomatik kontroller, örneğin bilgi sınıfı olmayan gizlilik tehdidi, etkiyle eşleşmeyen hedefler, planı olmayan High/Critical, aynı tehdit için çok farklı etkiler; isteğe bağlı olarak gerekçelerin AI analizi. Hiçbir şeyi değiştirmez: işaretlenen riskleri açıp düzeltin
+- **Organ için özet** (değerlendirme çubuğu): yalnızca kayıt verilerinden yazılmış, gözden geçirilip tutanağa veya karara kopyalanacak rapor taslağı
+
 ### Matris ve Ayarlar
 
 **Matris** sekmesi hücre başına mevcut veya beklenen sayıları gösterir; risklerini görmek için bir hücreye tıklayın. **Ayarlar**'da tüm organizasyona erişimi olan kullanıcılar yönetişim modelini (merkezi, federe, tek tesis), her sınıfı kimin kabul ettiğini ve kabulün kaç ay geçerli olduğunu (yanında, salt okunur, prosedürün belirlediği önlem süresi), ekonomik eşikleri (isteğe bağlı tesis istisnalarıyla), tehdit kataloğunu (her dil için bir başlık ve zorunlu İngilizce ile özel kayıtlar) ve gizliliği Genel, Dahili, Gizli veya Çok gizli olarak ifade edilen bilgi sınıflarını yönetir: gizlilik tehdidinde etki 2, 3, 4 veya 5'in altına düşmez.

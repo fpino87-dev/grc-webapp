@@ -479,6 +479,15 @@ Who can accept depends on the class and on the **risk governance policy** (Setti
 
 In a site register, the group risks that concern it appear with ⇩, read-only. If the impact on site is higher, report it from the card (**Local impact**): the group acknowledges the report and updates the assessment. In the site Coverage tab these threats show as **Covered by the group**: do not duplicate them or mark them not applicable. If conditions or measures differ on site, add a site risk with **Site risk**.
 
+### AI support
+
+The module uses the platform AI engine (Settings › AI Engine) with its rules: personal data is anonymised before being sent to a cloud model and **no suggestion is applied without your confirmation**. Suggestions are marked "AI" and the outcome (used or ignored) is kept in the AI interaction log.
+
+- **Suggest with AI** (risk card, during the assessment): draft vulnerability, consequence, probability with method and rationale, impact per dimension, treatment and expected risk, written with the procedure criteria and the data already present (BIA process, information, objectives, existing measures). Choose the fields to use, then save. The AI does not suggest the class: the matrix calculates it
+- **Suggest measures with AI** (treatment plan): 3 to 5 measures linked to the site controls, due within the class deadline; add them to the plan one by one
+- **Coherence review** (assessment bar): automatic checks on the register, for example a confidentiality threat without information classes, objectives not matching the impact, High/Critical without a plan, very different impacts for the same threat; optionally the AI analysis of the rationales too. It changes nothing: open the flagged risks and fix them
+- **Summary for the board** (assessment bar): draft register report written only from the register figures, to review and copy into the minutes or resolution
+
 ### Matrix and Settings
 
 The **Matrix** tab shows counts per cell, current or expected; click a cell to see its risks. In **Settings**, users with access to the whole organisation manage the governance model (centralised, federated, single site), who accepts per class and how many months the acceptance lasts (next to it, read-only, the measures deadline set by the procedure), economic thresholds (with optional site exceptions), the threat catalogue (custom entries, with one title per language and English mandatory) and information classes, with confidentiality expressed as Public, Internal, Confidential or Strictly confidential: with a confidentiality threat the impact does not fall below 2, 3, 4 or 5.

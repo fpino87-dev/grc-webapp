@@ -479,6 +479,15 @@ Qui peut accepter dépend de la classe et de la **politique de gouvernance des r
 
 Dans le registre d'un site, les risques de groupe qui le concernent apparaissent avec ⇩, en lecture seule. Si l'impact sur le site est plus élevé, signalez-le depuis la fiche (**Impact local**) : le groupe prend en compte le signalement et met à jour l'évaluation. Dans l'onglet Couverture du site, ces menaces apparaissent **Couvertes par le groupe** : il ne faut ni les dupliquer ni les déclarer non applicables. Si les conditions ou les mesures diffèrent sur le site, ajoutez un risque propre avec **Risque du site**.
 
+### Assistance IA
+
+Le module utilise le moteur IA de la plateforme (Paramètres › AI Engine) avec ses règles : les données personnelles sont anonymisées avant l'envoi à un modèle cloud et **aucune proposition n'est appliquée sans votre confirmation**. Les propositions sont marquées « IA » et le résultat (utilisée ou ignorée) reste dans le journal des interactions IA.
+
+- **Proposer avec l'IA** (fiche du risque, pendant l'appréciation) : brouillon de vulnérabilité, conséquence, probabilité avec méthode et justification, impact par dimension, traitement et risque attendu, rédigé avec les critères de la procédure et les données déjà présentes (processus BIA, informations, objectifs, mesures existantes). Choisissez les champs à utiliser, puis enregistrez. L'IA ne propose pas la classe : la matrice la calcule
+- **Proposer des mesures avec l'IA** (plan de traitement) : 3 à 5 mesures liées aux contrôles du site, avec une échéance dans le délai de la classe ; elles s'ajoutent au plan une par une
+- **Revue de cohérence** (barre de l'appréciation) : contrôles automatiques du registre, par exemple une menace sur la confidentialité sans classes d'informations, des objectifs ne correspondant pas à l'impact, des High/Critical sans plan, des impacts très différents pour la même menace ; au choix, aussi l'analyse IA des justifications. Ne modifie rien : ouvrez les risques signalés et corrigez-les
+- **Synthèse pour l'organe** (barre de l'appréciation) : brouillon de rapport rédigé uniquement à partir des chiffres du registre, à relire et à copier dans le procès-verbal ou la délibération
+
 ### Matrice et Paramètres
 
 L'onglet **Matrice** affiche les comptes par cellule, actuels ou attendus ; cliquez sur une cellule pour voir ses risques. Dans **Paramètres**, les utilisateurs ayant accès à toute l'organisation gèrent le modèle de gouvernance (centralisé, fédéré, site unique), qui accepte par classe et pendant combien de mois l'acceptation est valable (à côté, en lecture seule, le délai des mesures fixé par la procédure), les seuils économiques (avec exceptions éventuelles par site), le catalogue des menaces (entrées personnalisées, avec un titre par langue et l'anglais obligatoire) et les classes d'informations, la confidentialité étant exprimée en Public, Interne, Confidentiel ou Strictement confidentiel : avec une menace sur la confidentialité, l'impact ne descend pas sous 2, 3, 4 ou 5.

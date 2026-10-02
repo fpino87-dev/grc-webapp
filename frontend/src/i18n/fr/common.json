@@ -265,7 +265,11 @@
         "generate_procedure": "Générer un document de procédure (M03 Contrôles)",
         "cockpit_explain": "Expliquer l'insight (M21 Centre opérationnel)",
         "cockpit_assistant": "Demander à govrico (M21 Centre opérationnel)",
-        "vda_interview": "Entretien guidé VDA ISA (M03 Contrôles)"
+        "vda_interview": "Entretien guidé VDA ISA (M03 Contrôles)",
+        "risk_draft": "Appréciation des risques : brouillon de l'évaluation",
+        "risk_measures": "Appréciation des risques : mesures du plan",
+        "risk_review": "Appréciation des risques : revue des justifications",
+        "risk_summary": "Appréciation des risques : synthèse pour l'organe"
       },
       "insufficient_permissions": "Permissions insuffisantes.",
       "provider_cloud": "Fournisseur Cloud",
@@ -3808,6 +3812,47 @@
         "missing": "Non couverte"
       },
       "open": "Ouvrir"
+    },
+    "ai": {
+      "draft": "Proposer avec l'IA",
+      "working": "L'IA travaille…",
+      "draft_title": "Brouillon de l'évaluation",
+      "draft_hint": "Choisissez ce qu'il faut utiliser : les valeurs sélectionnées entrent dans la fiche et doivent être enregistrées. Rien n'est enregistré tant que vous ne le faites pas.",
+      "nothing": "L'IA n'a rien proposé d'utilisable.",
+      "current": "actuel",
+      "class_note": "L'IA ne propose pas la classe : elle est calculée par la matrice.",
+      "apply_selected": "Utiliser la sélection",
+      "error": "Le service IA n'a pas répondu. Réessayez ou remplissez à la main.",
+      "measures": "Proposer des mesures avec l'IA",
+      "measures_title": "Mesures proposées",
+      "measures_hint": "N'ajoutez au plan que les mesures que vous partagez ; responsable et échéance restent modifiables dans le plan.",
+      "added": "Ajoutée",
+      "add_to_plan": "Ajouter au plan",
+      "review_button": "Revue de cohérence",
+      "review_title": "Revue de cohérence du registre",
+      "review_hint": "Contrôle le registre avant l'envoi en approbation. Ne modifie rien : ouvrez les risques signalés et corrigez-les.",
+      "review_with_ai": "Inclure l'analyse IA des justifications",
+      "review_run": "Lancer la revue",
+      "review_rules": "Contrôles automatiques",
+      "review_ok": "Aucune observation.",
+      "review_ai": "Observations de l'IA sur les justifications",
+      "severity": {
+        "error": "à corriger",
+        "warning": "à vérifier"
+      },
+      "checks": {
+        "confidentiality_without_information": "Menace sur la confidentialité sans classes d'informations liées : le seuil minimal d'impact ne peut pas s'appliquer.",
+        "objectives_not_matching_impact": "Les objectifs indiqués ({{objectives}}) ne correspondent à aucune dimension d'impact renseignée.",
+        "high_without_plan": "Risque High ou Critical à traiter sans mesures dans le plan.",
+        "rationale_too_short": "Justification trop courte : {{field}}.",
+        "expected_not_lower": "Le risque attendu n'est pas inférieur au risque actuel, alors que le traitement prévoit des mesures.",
+        "impact_spread": "Même menace et même type que « {{other}} » avec un impact très différent ({{low}} contre {{high}}) : vérifiez que c'est justifié."
+      },
+      "summary_button": "Synthèse pour l'organe",
+      "summary_title": "Synthèse du registre pour l'organe",
+      "summary_hint": "Brouillon de rapport pour l'organe et la revue de direction, rédigé uniquement à partir des chiffres du registre. Relisez-le avant usage.",
+      "summary_run": "Générer le brouillon",
+      "copy": "Copier le texte"
     }
   },
   "pdca": {

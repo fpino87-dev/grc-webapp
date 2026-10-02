@@ -479,3 +479,149 @@ Reply ONLY with valid JSON: {{"draft_en": "...", "draft_local": "..."}}"""
         "model": result.get("model", ""),
         "used_fallback": result.get("used_fallback", False),
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Risk assessment (M06): bozza della valutazione, misure, revisione delle
+# motivazioni, sintesi per l'organo. Output sempre proposto, mai applicato:
+# l'utente accetta campo per campo (regola 9). La classe resta della matrice.
+# ─────────────────────────────────────────────────────────────────────────────
+
+_LANG_NAMES = {"it": "italiano", "en": "English", "fr": "français", "pl": "polski", "tr": "Türkçe"}
+_RISK_SYSTEM = (
+    "Sei un risk manager esperto di sicurezza delle informazioni nel settore automotive (TISAX/VDA ISA, NIS2). "
+    "Applichi la procedura aziendale D-ITA-INF-23: il rischio è la minaccia a un obiettivo aziendale; "
+    "probabilità e impatto si scelgono SOLO con i criteri forniti; l'impatto è il caso peggiore fra le dimensioni. "
+    "Non inventi fatti non presenti nei dati: se un dato manca, lo dici nella motivazione. Rispondi SOLO in JSON valido."
+)
+
+
+def _lang_name(lang: str) -> str:
+    return _LANG_NAMES.get((lang or "it")[:2], "italiano")
+
+
+def _risk_plants(risk) -> list:
+    return [risk.plant_id] if risk.plant_id else []
+
+
+def draft_risk_assessment(risk, user, lang: str = "it") -> dict:
+    """Bozza di valutazione di un rischio: vulnerabilità, conseguenza,
+    probabilità, impatto per dimensione, trattamento e rischio atteso."""
+    from apps.risk.services import PROCEDURE_CRITERIA, economic_criteria, risk_ai_context, validate_ai_draft
+
+    criteria = {**PROCEDURE_CRITERIA, "economic": economic_criteria(risk.plant)}
+    prompt = f"""Prepara una bozza di valutazione del rischio seguente.
+
+DATI DEL RISCHIO (JSON):
+{json.dumps(risk_ai_context(risk, lang), ensure_ascii=False, indent=1)}
+
+CRITERI DELLA PROCEDURA (livelli 1–5 per probabilità e per ogni dimensione d'impatto):
+{json.dumps(criteria, ensure_ascii=False, indent=1)}
+
+Regole:
+- Valuta solo le dimensioni pertinenti (le altre: null). Usa le soglie economiche del registro.
+- Motiva probabilità e impatto citando il criterio del livello scelto e i dati (RTO/MTPD, misure esistenti, informazioni).
+- Trattamento fra: mitigare, evitare, trasferire, accettare. Se proponi mitigare/evitare/trasferire indica il rischio atteso dopo le misure.
+- Scrivi i testi in {_lang_name(lang)}, frasi brevi.
+
+Rispondi con questo JSON:
+{{"vulnerability": "...", "consequence": "conseguenza sugli obiettivi aziendali",
+ "probability_method": "frequenza|fer", "probability": 1-5, "probability_rationale": "...",
+ "impacts": {{"economic": null, "legal": null, "customer": null, "reputational": null, "people": null, "operational": null}},
+ "impact_rationale": "...", "treatment": "...", "treatment_rationale": "...",
+ "expected_probability": 1-5, "expected_impact": 1-5}}"""
+    result = route(
+        task_type="risk_draft", prompt=prompt, system=_RISK_SYSTEM, user=user, entity_id=risk.pk,
+        module_source="M06", sanitize=True, plant_ids=_risk_plants(risk), max_tokens=3000,
+    )
+    return {**result, "proposal": validate_ai_draft(_parse_json_object(result["text"]))}
+
+
+def suggest_risk_measures(risk, user, lang: str = "it") -> dict:
+    """Misure del piano di trattamento collegate ai controlli VDA ISA del sito."""
+    from apps.risk.services import (
+        ai_control_candidates, risk_ai_context, treatment_rule, validate_ai_measures,
+    )
+
+    candidates = ai_control_candidates(risk)
+    controls = [
+        {"n": i, "controllo": ci.control.external_id, "titolo": ci.control.get_title(lang), "stato": ci.status}
+        for i, ci in enumerate(candidates, start=1)
+    ]
+    months = (treatment_rule(risk.current_class) or {}).get("months", 12)
+    prompt = f"""Proponi da 3 a 5 misure concrete per trattare il rischio seguente (classe {risk.current_class},
+trattamento {risk.treatment or "da definire"}), da completare entro {months} mesi.
+
+DATI DEL RISCHIO (JSON):
+{json.dumps(risk_ai_context(risk, lang), ensure_ascii=False, indent=1)}
+
+CONTROLLI DEL SITO (collega ogni misura al controllo più pertinente, se c'è, indicandone il numero "n"):
+{json.dumps(controls, ensure_ascii=False)}
+
+Scrivi in {_lang_name(lang)}. Rispondi con questo JSON:
+{{"measures": [{{"action": "misura concreta e verificabile", "expected_effect": "probabilita|impatto|entrambi",
+  "weeks": 8, "control": 3, "rationale": "perché riduce il rischio"}}]}}"""
+    result = route(
+        task_type="risk_measures", prompt=prompt, system=_RISK_SYSTEM, user=user, entity_id=risk.pk,
+        module_source="M06", sanitize=True, plant_ids=_risk_plants(risk), max_tokens=2500,
+    )
+    items = _parse_json_object(result["text"]).get("measures", [])
+    return {**result, "measures": validate_ai_measures(items, risk, candidates)}
+
+
+def review_risk_rationales(risks: list, user, entity_id, plant_ids: list, lang: str = "it") -> dict:
+    """Revisione delle motivazioni: livelli scelti coerenti con i testi e i criteri."""
+    from apps.risk.services import IMPACT_DIMENSIONS, PROCEDURE_CRITERIA, risk_label
+
+    rows = []
+    for i, r in enumerate(risks, start=1):
+        rows.append({
+            "n": i, "rischio": risk_label(r, lang), "minaccia": r.threat.code if r.threat else None,
+            "probabilita": r.probability, "motivazione_probabilita": (r.probability_rationale or "")[:500],
+            "impatti": {d: getattr(r, f"impact_{d}") for d in IMPACT_DIMENSIONS if getattr(r, f"impact_{d}")},
+            "motivazione_impatto": (r.impact_rationale or "")[:500],
+            "classe": r.current_class,
+        })
+    prompt = f"""Controlla la coerenza delle motivazioni di questi rischi con i livelli scelti e con i criteri.
+Segnala SOLO i casi con un problema reale: motivazione generica, livello non giustificato dal testo,
+testo che descrive un livello diverso da quello scelto. Non ripetere i dati.
+
+CRITERI: {json.dumps(PROCEDURE_CRITERIA, ensure_ascii=False)}
+
+RISCHI: {json.dumps(rows, ensure_ascii=False)}
+
+Scrivi in {_lang_name(lang)}. Rispondi con questo JSON:
+{{"findings": [{{"n": 1, "issue": "problema in una frase", "suggestion": "come correggere"}}]}}"""
+    result = route(
+        task_type="risk_review", prompt=prompt, system=_RISK_SYSTEM, user=user, entity_id=entity_id,
+        module_source="M06", sanitize=True, plant_ids=plant_ids, max_tokens=3000,
+    )
+    findings = []
+    for f in _parse_json_object(result["text"]).get("findings", [])[:30]:
+        n = f.get("n") if isinstance(f, dict) else None
+        if isinstance(n, int) and 1 <= n <= len(risks) and str(f.get("issue") or "").strip():
+            risk = risks[n - 1]
+            findings.append({
+                "risk_id": str(risk.pk), "risk_name": risk_label(risk, lang),
+                "issue": str(f["issue"]).strip()[:400], "suggestion": str(f.get("suggestion") or "").strip()[:400],
+            })
+    return {**result, "findings": findings}
+
+
+def draft_risk_summary(digest: dict, user, entity_id, plant_ids: list, lang: str = "it") -> dict:
+    """Bozza di relazione del registro per l'organo e il riesame di direzione."""
+    prompt = f"""Scrivi una relazione sintetica (250–400 parole) sullo stato del risk assessment per l'organo di
+amministrazione, a partire SOLO da questi dati:
+
+{json.dumps(digest, ensure_ascii=False, indent=1)}
+
+Struttura: 1) situazione generale e copertura; 2) obiettivi aziendali più esposti; 3) rischi High e Critical non
+accettati e trattamento; 4) accettazioni e misure in ritardo; 5) decisioni richieste all'organo.
+Tono formale, frasi brevi, nessun dato inventato. Scrivi in {_lang_name(lang)}.
+Rispondi con questo JSON: {{"summary": "testo"}}"""
+    result = route(
+        task_type="risk_summary", prompt=prompt, system=_RISK_SYSTEM, user=user, entity_id=entity_id,
+        module_source="M06", sanitize=True, plant_ids=plant_ids, max_tokens=2500,
+    )
+    summary = str(_parse_json_object(result["text"]).get("summary") or "").strip()
+    return {**result, "summary": summary[:6000]}

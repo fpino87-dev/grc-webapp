@@ -108,7 +108,11 @@
         "generate_procedure": "Genera documento procedura (M03 Controlli)",
         "cockpit_explain": "Spiega insight (M21 Centro Operativo)",
         "cockpit_assistant": "Chiedi a govrico (M21 Centro Operativo)",
-        "vda_interview": "Intervista guidata VDA ISA (M03 Controlli)"
+        "vda_interview": "Intervista guidata VDA ISA (M03 Controlli)",
+        "risk_draft": "Risk assessment: bozza della valutazione",
+        "risk_measures": "Risk assessment: misure del piano",
+        "risk_review": "Risk assessment: revisione delle motivazioni",
+        "risk_summary": "Risk assessment: sintesi per l'organo"
       },
       "insufficient_permissions": "Permessi insufficienti.",
       "provider_cloud": "Provider Cloud",
@@ -3808,6 +3812,47 @@
         "missing": "Scoperta"
       },
       "open": "Apri"
+    },
+    "ai": {
+      "draft": "Proponi con IA",
+      "working": "L'IA sta lavorando…",
+      "draft_title": "Bozza della valutazione",
+      "draft_hint": "Scegli cosa usare: i valori selezionati entrano nella scheda e vanno salvati. Niente è salvato finché non lo fai tu.",
+      "nothing": "L'IA non ha proposto nulla di utilizzabile.",
+      "current": "ora",
+      "class_note": "La classe non la propone l'IA: si calcola dalla matrice.",
+      "apply_selected": "Usa i selezionati",
+      "error": "Il servizio IA non ha risposto. Riprova o compila a mano.",
+      "measures": "Proponi misure con IA",
+      "measures_title": "Misure proposte",
+      "measures_hint": "Aggiungi al piano solo le misure che condividi; responsabile e scadenza restano modificabili nel piano.",
+      "added": "Aggiunta",
+      "add_to_plan": "Aggiungi al piano",
+      "review_button": "Revisione di coerenza",
+      "review_title": "Revisione di coerenza del registro",
+      "review_hint": "Controlla il registro prima dell'invio in approvazione. Non modifica nulla: apri i rischi segnalati e correggili.",
+      "review_with_ai": "Includi l'analisi IA delle motivazioni",
+      "review_run": "Avvia la revisione",
+      "review_rules": "Controlli automatici",
+      "review_ok": "Nessuna osservazione.",
+      "review_ai": "Osservazioni dell'IA sulle motivazioni",
+      "severity": {
+        "error": "da correggere",
+        "warning": "da verificare"
+      },
+      "checks": {
+        "confidentiality_without_information": "Minaccia alla riservatezza senza classi di informazioni collegate: la soglia minima di impatto non può scattare.",
+        "objectives_not_matching_impact": "Gli obiettivi indicati ({{objectives}}) non corrispondono a nessuna dimensione d'impatto valorizzata.",
+        "high_without_plan": "Rischio High o Critical da trattare senza misure nel piano.",
+        "rationale_too_short": "Motivazione troppo breve: {{field}}.",
+        "expected_not_lower": "Il rischio atteso non è più basso dell'attuale, ma il trattamento prevede misure.",
+        "impact_spread": "Stessa minaccia e tipologia di «{{other}}» con impatto molto diverso ({{low}} contro {{high}}): verifica che sia giustificato."
+      },
+      "summary_button": "Sintesi per l'organo",
+      "summary_title": "Sintesi del registro per l'organo",
+      "summary_hint": "Bozza di relazione per l'organo e il riesame di direzione, scritta solo dai numeri del registro. Rivedila prima di usarla.",
+      "summary_run": "Genera la bozza",
+      "copy": "Copia il testo"
     }
   },
   "pdca": {

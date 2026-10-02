@@ -479,6 +479,15 @@ Chi può accettare dipende dalla classe e dalla **policy di governo del rischio*
 
 Nel registro di un sito i rischi di gruppo che lo riguardano compaiono con ⇩, in sola lettura. Se nel sito l'impatto è più alto, segnalalo dalla scheda (**Impatto locale**): il gruppo recepisce la segnalazione e aggiorna la valutazione. Nella scheda Copertura del sito queste minacce risultano **Coperte dal gruppo**: non vanno duplicate né dichiarate non applicabili. Se nel sito condizioni o misure sono diverse, si può aggiungere un rischio proprio del sito con **Rischio del sito**.
 
+### Supporto IA
+
+Il modulo usa il motore IA della piattaforma (Impostazioni › AI Engine) con le sue regole: i dati personali sono anonimizzati prima dell'invio a un modello cloud e **nessuna proposta viene applicata senza la tua conferma**. Le proposte sono marcate «IA» e l'esito (usata o ignorata) resta nel registro delle interazioni IA.
+
+- **Proponi con IA** (scheda del rischio, durante la valutazione): bozza di vulnerabilità, conseguenza, probabilità con metodo e motivazione, impatto per dimensione, trattamento e rischio atteso, scritta con i criteri della procedura e i dati già presenti (processo BIA, informazioni, obiettivi, misure esistenti). Scegli i campi da usare, poi salva. La classe non la propone l'IA: la calcola la matrice
+- **Proponi misure con IA** (piano di trattamento): da 3 a 5 misure collegate ai controlli del sito, con scadenza entro il termine della classe; si aggiungono al piano una per una
+- **Revisione di coerenza** (barra della valutazione): controlli automatici sul registro, per esempio minaccia alla riservatezza senza classi di informazioni, obiettivi che non corrispondono all'impatto, High/Critical senza piano, impatti molto diversi per la stessa minaccia; a scelta anche l'analisi IA delle motivazioni. Non modifica nulla: apri i rischi segnalati e correggili
+- **Sintesi per l'organo** (barra della valutazione): bozza di relazione del registro scritta solo dai numeri del registro, da rivedere e copiare nel verbale o nella delibera
+
 ### Matrice e Impostazioni
 
 La scheda **Matrice** mostra i conteggi per cella, attuali o attesi; clic su una cella per vedere i rischi. In **Impostazioni** chi ha accesso a tutta l'organizzazione gestisce il modello di governo (centralizzato, federato, sito singolo), chi accetta per classe e per quanti mesi vale l'accettazione (accanto, in sola lettura, la scadenza delle misure fissata dalla procedura), le soglie economiche (con eventuali eccezioni per sito), il catalogo minacce (voci personalizzate, con un titolo per lingua e l'inglese obbligatorio) e le classi di informazioni, con la riservatezza espressa come Pubblico, Interno, Confidenziale o Segreto: con una minaccia alla riservatezza l'impatto non scende sotto 2, 3, 4 o 5.

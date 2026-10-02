@@ -479,6 +479,15 @@ Kto może zaakceptować, zależy od klasy i od **polityki zarządzania ryzykiem*
 
 W rejestrze zakładu ryzyka grupy, które go dotyczą, są oznaczone ⇩ i dostępne tylko do odczytu. Jeśli wpływ na zakład jest większy, zgłoś to z karty (**Wpływ lokalny**): grupa przyjmuje zgłoszenie i aktualizuje ocenę. W zakładce Pokrycie zakładu te zagrożenia są oznaczone jako **Pokryte przez grupę**: nie należy ich powielać ani oznaczać jako nie dotyczy. Jeśli warunki lub środki w zakładzie są inne, dodaj własne ryzyko przyciskiem **Ryzyko zakładu**.
 
+### Wsparcie AI
+
+Moduł korzysta z silnika AI platformy (Ustawienia › AI Engine) na jego zasadach: dane osobowe są anonimizowane przed wysłaniem do modelu w chmurze i **żadna propozycja nie jest stosowana bez Twojego potwierdzenia**. Propozycje są oznaczone „AI”, a wynik (użyta lub zignorowana) pozostaje w rejestrze interakcji AI.
+
+- **Zaproponuj z AI** (karta ryzyka, podczas oceny): szkic podatności, skutku, prawdopodobieństwa z metodą i uzasadnieniem, wpływu dla każdego wymiaru, postępowania i ryzyka oczekiwanego, przygotowany według kryteriów procedury i danych już dostępnych (proces BIA, informacje, cele, istniejące środki). Wybierz pola do użycia, a następnie zapisz. AI nie proponuje klasy: oblicza ją macierz
+- **Zaproponuj działania z AI** (plan postępowania): od 3 do 5 działań powiązanych z kontrolami zakładu, z terminem w granicach klasy; dodaje się je do planu pojedynczo
+- **Przegląd spójności** (pasek oceny): automatyczne kontrole rejestru, np. zagrożenie poufności bez klas informacji, cele niepasujące do wpływu, High/Critical bez planu, bardzo różne wpływy dla tego samego zagrożenia; opcjonalnie także analiza uzasadnień przez AI. Niczego nie zmienia: otwórz wskazane ryzyka i popraw je
+- **Podsumowanie dla organu** (pasek oceny): szkic raportu napisany wyłącznie na podstawie danych rejestru, do przejrzenia i skopiowania do protokołu lub uchwały
+
 ### Macierz i Ustawienia
 
 Zakładka **Macierz** pokazuje liczby w komórkach, bieżące lub oczekiwane; kliknij komórkę, aby zobaczyć jej ryzyka. W **Ustawieniach** użytkownicy z dostępem do całej organizacji zarządzają modelem zarządzania (scentralizowany, sfederowany, jeden zakład), tym, kto akceptuje każdą klasę i ile miesięcy ważna jest akceptacja (obok, tylko do odczytu, termin działań ustalony w procedurze), progami ekonomicznymi (z ewentualnymi wyjątkami dla zakładów), katalogiem zagrożeń (pozycje własne, z tytułem dla każdego języka i obowiązkowym angielskim) i klasami informacji, z poufnością wyrażoną jako Publiczne, Wewnętrzne, Poufne lub Ściśle poufne: przy zagrożeniu poufności wpływ nie spada poniżej 2, 3, 4 lub 5.

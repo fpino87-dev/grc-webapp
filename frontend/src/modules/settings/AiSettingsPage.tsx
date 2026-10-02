@@ -16,6 +16,10 @@ const TASKS = [
   "vda_interview",
   "cockpit_explain",
   "cockpit_assistant",
+  "risk_draft",
+  "risk_measures",
+  "risk_review",
+  "risk_summary",
 ] as const;
 
 export function AiSettingsPage() {

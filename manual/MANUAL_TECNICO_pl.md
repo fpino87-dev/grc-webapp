@@ -528,6 +528,7 @@ Odpowiedź: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Katalog zagrożeń: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (pozycje własne przez API)
 - Cele biznesowe `BusinessObjective` (procedura §2, `risk_catalogs/business_objectives.json` jako propozycja) powiązane z ryzykiem (`business_objectives`, wymagane do zakończenia); `governance.SecurityObjective.risks` łączy cele bezpieczeństwa z traktowanymi ryzykami
 - Wspólne funkcje dla innych modułów: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
+- Wsparcie AI: `risk.services` (kontekst, kryteria, walidacja propozycji, `register_consistency_checks`, `register_ai_digest`) + `ai_engine.tasks_ai` (zadania `risk_draft`, `risk_measures`, `risk_review`, `risk_summary`); endpointy `assessments/{id}/ai-draft|ai-measures`, `assessments/review|ai-summary|ai-feedback`; żadna propozycja nie jest stosowana po stronie serwera
 
 ### M00 — Governance
 

@@ -151,6 +151,7 @@ export function RiskPage() {
       {ready && (
         <CycleBar
           registerId={registerId}
+          onOpenRisk={setOpenRiskId}
           registerLabel={registerLabel}
           openCycle={openCycle}
           approvedCycle={approvedCycle}

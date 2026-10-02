@@ -3511,3 +3511,9 @@ msgstr "Nie można powiązać ryzyk z oceny według zastąpionej metody."
 
 msgid "I rischi devono essere del sito dell'obiettivo o di gruppo."
 msgstr "Ryzyka muszą należeć do zakładu celu lub do grupy."
+
+msgid "Interazione non trovata."
+msgstr "Nie znaleziono interakcji."
+
+msgid "Azione non valida."
+msgstr "Nieprawidłowa akcja."

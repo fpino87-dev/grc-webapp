@@ -108,7 +108,11 @@
         "generate_procedure": "Generate procedure document (M03 Controls)",
         "cockpit_explain": "Explain insight (M21 Operations Cockpit)",
         "cockpit_assistant": "Ask govrico (M21 Operations Cockpit)",
-        "vda_interview": "VDA ISA guided interview (M03 Controls)"
+        "vda_interview": "VDA ISA guided interview (M03 Controls)",
+        "risk_draft": "Risk assessment: assessment draft",
+        "risk_measures": "Risk assessment: plan measures",
+        "risk_review": "Risk assessment: rationale review",
+        "risk_summary": "Risk assessment: summary for the board"
       },
       "insufficient_permissions": "Insufficient permissions.",
       "provider_cloud": "Cloud Provider",
@@ -3808,6 +3812,47 @@
         "missing": "Uncovered"
       },
       "open": "Open"
+    },
+    "ai": {
+      "draft": "Suggest with AI",
+      "working": "AI is working…",
+      "draft_title": "Assessment draft",
+      "draft_hint": "Choose what to use: the selected values go into the card and must be saved. Nothing is saved until you do.",
+      "nothing": "The AI suggested nothing usable.",
+      "current": "now",
+      "class_note": "The AI does not suggest the class: it is calculated from the matrix.",
+      "apply_selected": "Use selected",
+      "error": "The AI service did not respond. Try again or fill in manually.",
+      "measures": "Suggest measures with AI",
+      "measures_title": "Suggested measures",
+      "measures_hint": "Add to the plan only the measures you agree with; owner and deadline remain editable in the plan.",
+      "added": "Added",
+      "add_to_plan": "Add to plan",
+      "review_button": "Coherence review",
+      "review_title": "Register coherence review",
+      "review_hint": "Checks the register before submitting it for approval. It changes nothing: open the flagged risks and fix them.",
+      "review_with_ai": "Include AI analysis of the rationales",
+      "review_run": "Run review",
+      "review_rules": "Automatic checks",
+      "review_ok": "No observations.",
+      "review_ai": "AI observations on the rationales",
+      "severity": {
+        "error": "to fix",
+        "warning": "to check"
+      },
+      "checks": {
+        "confidentiality_without_information": "Confidentiality threat with no linked information classes: the minimum impact threshold cannot apply.",
+        "objectives_not_matching_impact": "The indicated objectives ({{objectives}}) match no valued impact dimension.",
+        "high_without_plan": "High or Critical risk to treat with no measures in the plan.",
+        "rationale_too_short": "Rationale too short: {{field}}.",
+        "expected_not_lower": "The expected risk is not lower than the current one, but the treatment includes measures.",
+        "impact_spread": "Same threat and type as \"{{other}}\" with a very different impact ({{low}} vs {{high}}): check that it is justified."
+      },
+      "summary_button": "Summary for the board",
+      "summary_title": "Register summary for the governing body",
+      "summary_hint": "Draft report for the governing body and the management review, written only from the register figures. Review it before use.",
+      "summary_run": "Generate draft",
+      "copy": "Copy text"
     }
   },
   "pdca": {

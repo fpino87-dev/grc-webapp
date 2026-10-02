@@ -3556,3 +3556,9 @@ msgstr "Les risques de l'appréciation avec la méthode remplacée ne peuvent pa
 
 msgid "I rischi devono essere del sito dell'obiettivo o di gruppo."
 msgstr "Les risques doivent appartenir au site de l'objectif ou au groupe."
+
+msgid "Interazione non trovata."
+msgstr "Interaction introuvable."
+
+msgid "Azione non valida."
+msgstr "Action non valide."

@@ -3489,3 +3489,9 @@ msgstr "Risks from the superseded-method assessment cannot be linked."
 
 msgid "I rischi devono essere del sito dell'obiettivo o di gruppo."
 msgstr "Risks must belong to the objective's site or to the group."
+
+msgid "Interazione non trovata."
+msgstr "Interaction not found."
+
+msgid "Azione non valida."
+msgstr "Invalid action."

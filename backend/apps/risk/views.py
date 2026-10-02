@@ -163,6 +163,109 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         services.recompute_risk(risk)
         return Response({"errors": services.risk_completeness_errors(risk)})
 
+    # ── Supporto IA (M20): proposte, mai applicate senza conferma ───────────
+
+    def _ai_call(self, fn, *args, **kwargs):
+        """Esegue una funzione IA traducendo gli errori del motore in risposte chiare."""
+        from apps.ai_engine.router import AiNotConfigured, LlmUnavailable
+
+        try:
+            return fn(*args, **kwargs), None
+        except AiNotConfigured as exc:
+            return None, Response({"error": str(exc)}, status=400)
+        except LlmUnavailable:
+            return None, Response({"error": _("Servizio IA temporaneamente non disponibile. Riprova più tardi.")},
+                                  status=503)
+
+    @staticmethod
+    def _ai_meta(result):
+        return {k: result.get(k) for k in ("provider", "model", "used_fallback", "interaction_id")}
+
+    @action(detail=True, methods=["post"], url_path="ai-draft")
+    def ai_draft(self, request, pk=None):
+        """Bozza di valutazione proposta dall'IA (solo chi può modificare il registro)."""
+        from apps.ai_engine.tasks_ai import draft_risk_assessment
+
+        risk = self.get_object()
+        _call_service(services.require_register_write, request.user, risk.plant)
+        result, error = self._ai_call(draft_risk_assessment, risk, request.user, request.LANGUAGE_CODE)
+        if error:
+            return error
+        return Response({**self._ai_meta(result), "proposal": result["proposal"]})
+
+    @action(detail=True, methods=["post"], url_path="ai-measures")
+    def ai_measures(self, request, pk=None):
+        """Misure del piano di trattamento proposte dall'IA."""
+        from apps.ai_engine.tasks_ai import suggest_risk_measures
+
+        risk = self.get_object()
+        _call_service(services.require_register_write, request.user, risk.plant)
+        result, error = self._ai_call(suggest_risk_measures, risk, request.user, request.LANGUAGE_CODE)
+        if error:
+            return error
+        return Response({**self._ai_meta(result), "measures": result["measures"]})
+
+    @action(detail=False, methods=["post"])
+    def review(self, request):
+        """Revisione di coerenza del registro: regole fisse e, con `ai=1`, analisi
+        IA delle motivazioni. Non modifica nulla."""
+        from apps.ai_engine.tasks_ai import review_risk_rationales
+
+        plant = self._register_plant(request)
+        out = {"checks": services.register_consistency_checks(plant), "ai": None}
+        if str(request.data.get("ai", "")).lower() in ("1", "true"):
+            risks = list(
+                services.register_queryset(plant).filter(applicable=True, status="completato")
+                .select_related("threat").order_by("-impact")[:40]
+            )
+            if risks:
+                cycle = services.open_cycle(plant) or services.approved_cycle(plant)
+                result, error = self._ai_call(
+                    review_risk_rationales, risks, request.user, cycle.pk if cycle else None,
+                    [plant.pk] if plant else [], request.LANGUAGE_CODE,
+                )
+                if error:
+                    return error
+                out["ai"] = {**self._ai_meta(result), "findings": result["findings"]}
+        return Response(out)
+
+    @action(detail=False, methods=["post"], url_path="ai-summary")
+    def ai_summary(self, request):
+        """Bozza di relazione del registro per l'organo e il riesame."""
+        from apps.ai_engine.tasks_ai import draft_risk_summary
+
+        plant = self._register_plant(request)
+        cycle = services.open_cycle(plant) or services.approved_cycle(plant)
+        result, error = self._ai_call(
+            draft_risk_summary, services.register_ai_digest(plant), request.user,
+            cycle.pk if cycle else None, [plant.pk] if plant else [], request.LANGUAGE_CODE,
+        )
+        if error:
+            return error
+        return Response({**self._ai_meta(result), "summary": result["summary"]})
+
+    @action(detail=False, methods=["post"], url_path="ai-feedback")
+    def ai_feedback(self, request):
+        """Esito di una proposta IA (accettata, anche modificata, o ignorata):
+        lo registra solo chi l'ha richiesta, e solo per le funzioni del rischio."""
+        from apps.ai_engine.models import AiInteractionLog
+        from apps.ai_engine.router import confirm_output, ignore_output
+
+        log = AiInteractionLog.objects.filter(
+            pk=request.data.get("interaction_id"), user_id=request.user.pk, function__startswith="risk_",
+        ).first()
+        if log is None:
+            return Response({"error": _("Interazione non trovata.")}, status=404)
+        if request.data.get("action") == "confirm":
+            confirm_output(str(log.pk), request.user, str(request.data.get("final_text", "")))
+        elif request.data.get("action") == "ignore":
+            ignore_output(str(log.pk))
+        else:
+            return Response({"error": _("Azione non valida.")}, status=400)
+        log_action(user=request.user, action_code=f"risk.ai.{request.data['action']}", level="L1",
+                   entity=log, payload={"function": log.function})
+        return Response({"ok": True})
+
     @action(detail=True, methods=["get"], url_path="acceptance-requirements")
     def acceptance_requirements(self, request, pk=None):
         return Response(services.acceptance_requirements(self.get_object()))

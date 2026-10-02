@@ -2267,3 +2267,254 @@ def legacy_register_rows(plant) -> list:
             "assessed_at": s.get("assessed_at", ""),
         })
     return rows
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Supporto IA (M20): contesto, criteri della procedura, validazione delle
+# proposte e controlli di coerenza. Le chiamate al modello stanno in
+# ai_engine.tasks_ai; qui solo regole deterministiche. Nessuna proposta IA è
+# applicata senza conferma dell'utente (regola 9).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Criteri della procedura D-ITA-INF-23 (§7) usati nei prompt: stessi testi
+# delle scale mostrate nella scheda del rischio.
+PROCEDURE_CRITERIA = {
+    "probability": {
+        "5": "frequenza: più di 1 volta l'anno | FER: vulnerabilità non presidiate o controlli non efficaci",
+        "4": "frequenza: 1 volta ogni 1–2 anni | FER: controlli con lacune o non del tutto efficaci",
+        "3": "frequenza: 1 volta ogni 2–4 anni | FER: vulnerabilità sfruttabili solo da esperti o da eventi naturali importanti",
+        "2": "frequenza: 1 volta ogni 4–10 anni | FER: serve un attacco mirato molto motivato o un evento eccezionale",
+        "1": "frequenza: meno di 1 volta ogni 10 anni | FER: controlli multipli e verificati, nessun agente credibile",
+    },
+    "legal": {
+        "5": "sanzioni penali per amministratori; sanzioni NIS2 o GDPR della fascia massima; provvedimenti interdittivi",
+        "4": "sanzioni penali per dipendenti; sanzioni amministrative rilevanti",
+        "3": "sanzioni civili rilevanti; sanzioni amministrative minori o diffide",
+        "2": "procedimento legale ordinario; contenziosi routinari",
+        "1": "nessuna conseguenza legale",
+    },
+    "customer": {
+        "5": "perdita o sospensione della label TISAX; perdita di un cliente OEM; fermo linea presso il cliente",
+        "4": "penali contrattuali rilevanti; escalation formale; violazione di NDA su informazioni high o very high",
+        "3": "reclamo formale del cliente; ritardi recuperati con costi straordinari",
+        "2": "segnalazione informale del cliente, senza penali",
+        "1": "nessun effetto sul cliente",
+    },
+    "reputational": {
+        "5": "notizia su media nazionali o internazionali; fiducia compromessa in modo duraturo",
+        "4": "danno visibile a clienti e settore",
+        "3": "danno noto ad alcuni clienti o partner, senza effetti duraturi",
+        "2": "danno lieve, limitato all'interno o a pochi interlocutori",
+        "1": "nessun effetto",
+    },
+    "people": {
+        "5": "decessi o infortuni con danni permanenti a più persone",
+        "4": "decesso o infortunio con danni permanenti a una persona",
+        "3": "lieve infortunio di una o più persone",
+        "2": "nessun infortunio",
+        "1": "nessun effetto",
+    },
+    "operational": {
+        "5": "processo critico fermo oltre l'MTPD; consegne bloccate oltre 24 ore; funzioni interne ferme oltre 2 giorni",
+        "4": "interruzione oltre l'RTO ma entro l'MTPD; consegne con forti ritardi; 31–50% delle funzioni ferme",
+        "3": "disagi nelle consegne entro l'RTO; 11–30% delle funzioni ferme",
+        "2": "1–10% delle funzioni ferme; nessun effetto sulle consegne",
+        "1": "nessun effetto apprezzabile",
+    },
+}
+
+AI_TREATMENTS = ("mitigare", "evitare", "trasferire", "accettare")
+AI_EFFECTS = ("probabilita", "impatto", "entrambi")
+
+
+def economic_criteria(plant) -> dict:
+    """Fasce dell'impatto economico (€) dalla policy del registro."""
+    th = resolve_policy(plant)["economic_thresholds"]
+    return {
+        "5": f"oltre {th['5']} €", "4": f"da {th['4']} a {th['5']} €", "3": f"da {th['3']} a {th['4']} €",
+        "2": f"da {th['2']} a {th['3']} €", "1": f"meno di {th['2']} €",
+    }
+
+
+def risk_ai_context(risk, lang: str = "it") -> dict:
+    """Dati del rischio per la bozza IA: solo ciò che il programma sa già.
+    Le persone non compaiono (owner esclusi); il resto passa dal Sanitizer."""
+    threat = risk.threat
+    process = risk.critical_process
+    return {
+        "registro": risk.plant.name if risk.plant else "gruppo (servizi condivisi)",
+        "paese": risk.plant.country if risk.plant else None,
+        "nis2": bool(risk.nis2_in_scope),
+        "tipologia_asset": risk.asset_type,
+        "minaccia": {"codice": threat.code, "titolo": threat.get_title(lang), "cia": threat.cia} if threat else None,
+        "asset": ({"nome": risk.asset.name, "criticita": getattr(risk.asset, "criticality", None)}
+                  if risk.asset_id else (risk.asset_group_label or None)),
+        "fornitore": risk.supplier.name if risk.supplier_id else None,
+        "processo_bia": ({
+            "nome": process.name, "criticita": process.criticality, "rto_ore": process.rto_target_hours,
+            "mtpd_ore": process.mtpd_hours,
+            "costo_fermo_ora_eur": float(process.downtime_cost_hour) if process.downtime_cost_hour else None,
+        } if process else None),
+        "informazioni": [{"nome": ic.name, "riservatezza": ic.confidentiality, "integrita": ic.integrity,
+                          "disponibilita": ic.availability} for ic in risk.information_classes.all()],
+        "obiettivi_aziendali": [{"nome": bo.name, "dimensioni": bo.impact_dimensions}
+                                for bo in risk.business_objectives.all()],
+        "misure_esistenti": [
+            {"descrizione": m.description, "efficacia": m.effectiveness,
+             "controllo": (f"{m.control_instance.control.external_id} ({m.control_instance.status})"
+                           if m.control_instance_id else None)}
+            for m in risk.existing_measures.select_related("control_instance__control")
+        ],
+        "testi_attuali": {"vulnerabilita": risk.vulnerability, "conseguenza": risk.consequence},
+    }
+
+
+def _clip(value, limit: int = 1200) -> str:
+    return str(value or "").strip()[:limit]
+
+
+def _level(value):
+    try:
+        v = int(value)
+    except (TypeError, ValueError):
+        return None
+    return v if 1 <= v <= 5 else None
+
+
+def validate_ai_draft(data: dict) -> dict:
+    """Proposta di valutazione ripulita: solo campi noti, livelli 1–5, valori
+    ammessi. La classe NON arriva dall'IA: la calcola la matrice."""
+    data = data if isinstance(data, dict) else {}
+    out = {
+        "vulnerability": _clip(data.get("vulnerability")),
+        "consequence": _clip(data.get("consequence")),
+        "probability": _level(data.get("probability")),
+        "probability_method": data.get("probability_method") if data.get("probability_method") in ("frequenza", "fer") else "",
+        "probability_rationale": _clip(data.get("probability_rationale")),
+        "impact_rationale": _clip(data.get("impact_rationale")),
+        "treatment": data.get("treatment") if data.get("treatment") in AI_TREATMENTS else "",
+        "treatment_rationale": _clip(data.get("treatment_rationale")),
+        "expected_probability": _level(data.get("expected_probability")),
+        "expected_impact": _level(data.get("expected_impact")),
+    }
+    impacts = data.get("impacts") if isinstance(data.get("impacts"), dict) else {}
+    for dim in IMPACT_DIMENSIONS:
+        out[f"impact_{dim}"] = _level(impacts.get(dim))
+    return {k: v for k, v in out.items() if v not in ("", None)}
+
+
+def ai_control_candidates(risk, limit: int = 40) -> list:
+    """Controlli del sito che una misura può richiamare: prima quelli non conformi."""
+    from apps.controls.models import ControlInstance
+
+    if risk.plant_id is None:
+        return []
+    order = {"gap": 0, "parziale": 1, "non_valutato": 2, "compliant": 3}
+    rows = list(
+        ControlInstance.objects.filter(plant_id=risk.plant_id).exclude(status="na")
+        .select_related("control")
+    )
+    rows.sort(key=lambda ci: (order.get(ci.status, 9), ci.control.external_id))
+    return rows[:limit]
+
+
+def validate_ai_measures(items, risk, candidates: list) -> list:
+    """Misure proposte ripulite: testo, effetto ammesso, scadenza entro il
+    termine della classe (§9.2), controllo solo fra quelli del sito."""
+    import datetime
+
+    months = (treatment_rule(risk.current_class) or {}).get("months", 12)
+    limit_days = 30 * months
+    today = timezone.localdate()
+    out = []
+    for item in (items if isinstance(items, list) else [])[:5]:
+        if not isinstance(item, dict) or not _clip(item.get("action"), 500):
+            continue
+        try:
+            weeks = max(1, int(item.get("weeks") or 0))
+        except (TypeError, ValueError):
+            weeks = 4
+        days = min(weeks * 7, limit_days)
+        idx = item.get("control")
+        control = candidates[idx - 1] if isinstance(idx, int) and 1 <= idx <= len(candidates) else None
+        out.append({
+            "action": _clip(item.get("action"), 500),
+            "expected_effect": item.get("expected_effect") if item.get("expected_effect") in AI_EFFECTS else "",
+            "due_date": (today + datetime.timedelta(days=days)).isoformat(),
+            "control_instance": str(control.pk) if control else None,
+            "control_label": f"{control.control.external_id} — {control.control.get_title()}" if control else None,
+            "rationale": _clip(item.get("rationale"), 400),
+        })
+    return out
+
+
+def register_consistency_checks(plant=None) -> list:
+    """Controlli di coerenza deterministici del registro proprio (gratuiti e
+    ripetibili), prima dell'invio in approvazione. Ritorna codici + parametri:
+    i testi li compone l'interfaccia nella lingua dell'utente."""
+    risks = list(
+        register_queryset(plant).filter(applicable=True)
+        .select_related("threat").prefetch_related("information_classes", "business_objectives", "mitigation_plans")
+    )
+    findings = []
+
+    def add(code, risk, severity="warning", **params):
+        findings.append({"code": code, "severity": severity, "risk_id": str(risk.pk),
+                         "risk_name": risk_label(risk), "params": params})
+
+    for r in risks:
+        valued = {d for d in IMPACT_DIMENSIONS if getattr(r, f"impact_{d}")}
+        if r.threat and "C" in (r.threat.cia or []) and not r.information_classes.all():
+            add("confidentiality_without_information", r)
+        objectives = list(r.business_objectives.all())
+        if objectives and valued and not any(set(bo.impact_dimensions) & valued for bo in objectives):
+            add("objectives_not_matching_impact", r, objectives=", ".join(bo.name for bo in objectives))
+        if r.status == "completato" and r.current_class in HIGH_CLASSES \
+                and r.treatment in ("mitigare", "evitare", "trasferire") and not r.mitigation_plans.all():
+            add("high_without_plan", r, severity="error")
+        for field in ("probability_rationale", "impact_rationale"):
+            if getattr(r, field) and len(getattr(r, field).strip()) < 25:
+                add("rationale_too_short", r, field=field)
+        if r.treatment in ("mitigare", "evitare", "trasferire") and r.expected_class and r.current_class \
+                and class_rank(r.expected_class) >= class_rank(r.current_class):
+            add("expected_not_lower", r)
+    groups: dict = {}
+    for r in risks:
+        if r.threat_id and r.impact:
+            groups.setdefault((r.threat_id, r.asset_type), []).append(r)
+    for same in groups.values():
+        if len(same) > 1:
+            low, high = min(same, key=lambda x: x.impact), max(same, key=lambda x: x.impact)
+            if high.impact - low.impact >= 3:
+                add("impact_spread", high, other=risk_label(low), low=low.impact, high=high.impact)
+    rank = {"error": 0, "warning": 1}
+    findings.sort(key=lambda f: (rank[f["severity"]], f["code"], f["risk_name"]))
+    return findings
+
+
+def register_ai_digest(plant=None) -> dict:
+    """Numeri del registro per la sintesi IA destinata all'organo: solo le
+    funzioni uniche già usate da Reporting e riesame."""
+    risks = evaluated_risks(plant.pk if plant else None) if plant is not None else register_queryset(None).filter(
+        applicable=True, status="completato")
+    from .models import RiskAcceptance, RiskMitigationPlan
+
+    today = timezone.localdate()
+    top = sorted(untreated_high_risks(risks).select_related("threat"),
+                 key=lambda r: (class_rank(r.current_class), r.impact or 0), reverse=True)[:8]
+    return {
+        "registro": plant.name if plant else "gruppo",
+        "per_classe": class_counts(risks),
+        "per_obiettivo": [
+            {"obiettivo": (o["objective"] or {}).get("name") or "senza obiettivo", "rischi": o["count"],
+             "classe_peggiore": o["worst_class"], "high_critical_non_accettati": o["untreated_high"]}
+            for o in register_objectives(plant)
+        ],
+        "principali_non_accettati": [{"rischio": risk_label(r), "classe": r.current_class,
+                                      "trattamento": r.treatment} for r in top],
+        "accettazioni_attive": RiskAcceptance.objects.filter(risk__in=risks, status="active").count(),
+        "misure_in_ritardo": RiskMitigationPlan.objects.filter(
+            assessment__in=risks, completed_at__isnull=True, due_date__lt=today).count(),
+        "copertura": {k: v for k, v in register_coverage(plant).items() if k != "pairs"},
+        "informazioni_scoperte": sum(1 for i in information_coverage(plant) if i["state"] == "missing"),
+    }
