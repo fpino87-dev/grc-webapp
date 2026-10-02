@@ -469,7 +469,7 @@ Sınıf matristen okunur. Değerlendirme iki hücre arasındaki sınıra düşer
 
 ### İşlem planı ve beklenen risk
 
-Plan önlemlerinin bir sorumlusu, son tarihi ve beklenen etkisi vardır. Tamamlanan bir önlem **doğrulanmalıdır** (test, kanıt, denetim). Ancak tüm önlemler tamamlanıp doğrulandığında **Beklenen riski uygula** görünür: yeni bir değerlendirme dışında sınıfı düşürmenin tek yolu budur. Geciken önlemler Risk Yöneticisini uyarır, ardından organizasyon düzeyine iletilir.
+Plan önlemlerinin bir sorumlusu, son tarihi ve beklenen etkisi vardır. Tamamlanan bir önlem **doğrulanmalıdır** (test, kanıt, denetim). Ancak tüm önlemler tamamlanıp doğrulandığında **Beklenen riski uygula** görünür: yeni bir değerlendirme dışında sınıfı düşürmenin tek yolu budur. Geciken önlemler Risk Yöneticisini uyarır, ardından organizasyon düzeyine iletilir. Her önlem, AI tarafından önerilenler dahil, etkinliği doğrulanana kadar **Düzenle** ile düzeltilebilir (metin, son tarih, etki, kontrol, sorumlu); doğrulamadan sonra önce yeniden açılmalıdır.
 
 ### Kabul
 

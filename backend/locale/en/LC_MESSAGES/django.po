@@ -3510,3 +3510,9 @@ msgstr "Accepted"
 
 msgid "Seleziona almeno una proposta."
 msgstr "Select at least one proposal."
+
+msgid "Una misura non si sposta su un altro rischio."
+msgstr "A measure cannot be moved to another risk."
+
+msgid "Una misura con efficacia verificata non si modifica: riaprila prima."
+msgstr "A measure with verified effectiveness cannot be changed: reopen it first."

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { AiMeasuresButton } from "./RiskAi";
@@ -85,7 +85,11 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({ action: "", due_date: "", expected_effect: "", control_instance: "", owner: "", owner_external: "" });
+  const emptyForm = { action: "", due_date: "", expected_effect: "", control_instance: "", owner: "", owner_external: "" };
+  const [form, setForm] = useState(emptyForm);
+  // Misura in modifica: il modulo sotto l'elenco passa da "aggiungi" a "salva".
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
   const [verifying, setVerifying] = useState<MitigationPlan | null>(null);
   const [note, setNote] = useState("");
   const { data: plans = [] } = useQuery({
@@ -100,15 +104,27 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
   };
   const onErr = (e: unknown) => setError(apiError(e, t("risk.errors.generic")));
   const add = useMutation({
-    mutationFn: () => riskApi.createPlan({
-      assessment: risk.id, action: form.action, due_date: form.due_date,
-      expected_effect: form.expected_effect as MitigationPlan["expected_effect"],
-      control_instance: form.control_instance || null,
-      owner: form.owner ? Number(form.owner) : null, owner_external: form.owner_external,
-    }),
-    onSuccess: () => { setForm({ action: "", due_date: "", expected_effect: "", control_instance: "", owner: "", owner_external: "" }); setError(null); refresh(); },
+    mutationFn: () => {
+      const payload = {
+        action: form.action, due_date: form.due_date,
+        expected_effect: form.expected_effect as MitigationPlan["expected_effect"],
+        control_instance: form.control_instance || null,
+        owner: form.owner ? Number(form.owner) : null, owner_external: form.owner_external,
+      };
+      return editingId ? riskApi.updatePlan(editingId, payload) : riskApi.createPlan({ assessment: risk.id, ...payload });
+    },
+    onSuccess: () => { setForm(emptyForm); setEditingId(null); setError(null); refresh(); },
     onError: onErr,
   });
+  const startEdit = (p: MitigationPlan) => {
+    setEditingId(p.id); setError(null);
+    setForm({
+      action: p.action, due_date: p.due_date, expected_effect: p.expected_effect,
+      control_instance: p.control_instance ?? "", owner: p.owner ? String(p.owner) : "", owner_external: p.owner_external,
+    });
+    formRef.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  };
+  const cancelEdit = () => { setEditingId(null); setForm(emptyForm); };
   const complete = useMutation({
     mutationFn: (p: MitigationPlan) => p.completed_at ? riskApi.uncompletePlan(p.id) : riskApi.updatePlan(p.id, { completed_at: new Date().toISOString() }),
     onSuccess: refresh, onError: onErr,
@@ -143,7 +159,7 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
         {plans.map(p => {
           const overdue = !p.completed_at && p.due_date < today;
           return (
-            <li key={p.id} className={`border rounded px-2 py-1.5 text-sm ${overdue ? "border-red-200 bg-red-50" : ""}`}>
+            <li key={p.id} className={`border rounded px-2 py-1.5 text-sm ${editingId === p.id ? "border-primary-400 ring-1 ring-primary-200" : overdue ? "border-red-200 bg-red-50" : ""}`}>
               <div className="flex items-start justify-between gap-2">
                 <span className="flex-1">
                   {p.action}
@@ -167,6 +183,9 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
                   {p.completed_at && !p.verified_at && (
                     <button onClick={() => setVerifying(p)} className="text-green-700 hover:underline">{t("risk.drawer.verify")}</button>
                   )}
+                  {!p.verified_at && (
+                    <button onClick={() => startEdit(p)} className="text-gray-700 hover:underline">{t("common.edit")}</button>
+                  )}
                   <button onClick={() => remove.mutate(p.id)} className="text-red-600 hover:underline">{t("common.delete")}</button>
                 </div>
               )}
@@ -181,9 +200,10 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
         })}
       </ul>
       {canMonitor && (
-        <div className="border rounded p-2 bg-gray-50">
+        <div ref={formRef} className={`border rounded p-2 ${editingId ? "bg-primary-50 border-primary-300" : "bg-gray-50"}`}>
+          {editingId && <p className="text-xs font-medium text-primary-700 mb-1">{t("risk.drawer.editing_measure")}</p>}
           <div className="grid grid-cols-2 gap-2">
-            <input value={form.action} onChange={e => setForm({ ...form, action: e.target.value })}
+            <textarea value={form.action} onChange={e => setForm({ ...form, action: e.target.value })} rows={editingId ? 3 : 1}
               className={`${inputCls} col-span-2`} placeholder={t("risk.drawer.measure_action")} />
             <input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} className={inputCls} />
             <select value={form.expected_effect} onChange={e => setForm({ ...form, expected_effect: e.target.value })} className={inputCls}>
@@ -199,10 +219,15 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
               noneLabel={t("risk.drawer.measure_owner")}
               onChange={(uid, ext) => setForm({ ...form, owner: uid ?? "", owner_external: ext })} />
           </div>
-          <button onClick={() => add.mutate()} disabled={!form.action || !form.due_date || add.isPending}
-            className="mt-2 px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50 disabled:opacity-50">
-            + {t("risk.drawer.add_measure")}
-          </button>
+          <div className="flex gap-2 mt-2">
+            <button onClick={() => add.mutate()} disabled={!form.action || !form.due_date || add.isPending}
+              className="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50 disabled:opacity-50">
+              {editingId ? t("common.save") : `+ ${t("risk.drawer.add_measure")}`}
+            </button>
+            {editingId && (
+              <button onClick={cancelEdit} className="px-3 py-1.5 text-sm text-gray-600 hover:underline">{t("common.cancel")}</button>
+            )}
+          </div>
         </div>
       )}
       <ErrorBox message={error} />

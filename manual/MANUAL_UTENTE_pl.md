@@ -469,7 +469,7 @@ Klasę odczytuje się z macierzy. Jeśli ocena wypada na granicy dwóch komórek
 
 ### Plan postępowania i ryzyko oczekiwane
 
-Działania planu mają odpowiedzialnego, termin i oczekiwany efekt. Zakończone działanie musi zostać **zweryfikowane** (test, dowód, audyt). Dopiero gdy wszystkie działania są zakończone i zweryfikowane, pojawia się **Zastosuj ryzyko oczekiwane**: poza nową oceną to jedyny sposób obniżenia klasy. Opóźnione działania powiadamiają Risk Managera, a następnie są eskalowane na poziom organizacji.
+Działania planu mają odpowiedzialnego, termin i oczekiwany efekt. Zakończone działanie musi zostać **zweryfikowane** (test, dowód, audyt). Dopiero gdy wszystkie działania są zakończone i zweryfikowane, pojawia się **Zastosuj ryzyko oczekiwane**: poza nową oceną to jedyny sposób obniżenia klasy. Opóźnione działania powiadamiają Risk Managera, a następnie są eskalowane na poziom organizacji. Każde działanie, także zaproponowane przez AI, można poprawić przyciskiem **Edytuj** (treść, termin, efekt, kontrola, odpowiedzialny), dopóki jego skuteczność nie zostanie zweryfikowana; po weryfikacji trzeba je najpierw otworzyć ponownie.
 
 ### Akceptacja
 

@@ -340,6 +340,29 @@ def test_plan_api_verify_and_uncomplete_resets_verification(org_user, plant, thr
     assert res.status_code == 200 and res.json()["verified_at"] is None
 
 
+
+@pytest.mark.django_db
+def test_plan_api_edit(org_user, plant, threats, cycle):
+    risk = _completed_risk(org_user, plant, threats["malware"])
+    other = services.create_risk(org_user, plant, {"asset_type": "SEDE", "threat": threats["fire"]})
+    c = _client(org_user)
+    plan_id = c.post("/api/v1/risk/mitigation-plans/", {
+        "assessment": str(risk.pk), "action": "EDR", "due_date": "2030-01-01", "owner_external": "MSP",
+    }, format="json").json()["id"]
+    url = f"/api/v1/risk/mitigation-plans/{plan_id}/"
+    res = c.patch(url, {"action": "EDR su postazioni e server", "due_date": "2030-03-01",
+                        "expected_effect": "entrambi"}, format="json")
+    assert res.status_code == 200 and res.json()["action"] == "EDR su postazioni e server"
+    assert res.json()["due_date"] == "2030-03-01"
+    # non si sposta su un altro rischio
+    assert c.patch(url, {"assessment": str(other.pk)}, format="json").status_code == 400
+    # verificata: contenuti bloccati finché non si riapre
+    c.patch(url, {"completed_at": timezone.now().isoformat()}, format="json")
+    assert c.post(f"{url}verify/", {"note": "ok"}, format="json").status_code == 200
+    assert c.patch(url, {"action": "altro"}, format="json").status_code == 400
+    c.post(f"{url}uncomplete/")
+    assert c.patch(url, {"action": "altro"}, format="json").status_code == 200
+
 # ── accettazione ─────────────────────────────────────────────────────────────
 
 @pytest.mark.django_db

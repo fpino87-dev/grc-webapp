@@ -3460,6 +3460,7 @@
       "expected_effect": "Oczekiwany efekt",
       "measure_owner": "Odpowiedzialny",
       "add_measure": "Dodaj działanie",
+      "editing_measure": "Edycja działania: popraw treść, termin, efekt, kontrolę lub odpowiedzialnego i zapisz.",
       "acceptance": "Akceptacja",
       "acceptance_needs_completion": "Akceptować można tylko ryzyko z zakończoną oceną.",
       "not_acceptable_notice": "Ryzyko nieakceptowalne: należy je obsłużyć.",

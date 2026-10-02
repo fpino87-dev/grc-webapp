@@ -460,6 +460,15 @@ class RiskMitigationPlanViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         _call_service(services.require_plan_write, self.request.user, serializer.instance.assessment)
+        new_risk = serializer.validated_data.get("assessment")
+        if new_risk is not None and new_risk.pk != serializer.instance.assessment_id:
+            raise DRFValidationError({"assessment": _("Una misura non si sposta su un altro rischio.")})
+        content = ("action", "due_date", "expected_effect", "control_instance", "owner", "owner_external", "bcp_plan")
+        if serializer.instance.verified_at and any(
+            f in serializer.validated_data and serializer.validated_data[f] != getattr(serializer.instance, f)
+            for f in content
+        ):
+            raise DRFValidationError({"error": _("Una misura con efficacia verificata non si modifica: riaprila prima.")})
         was_completed = serializer.instance.completed_at
         with transaction.atomic():
             instance = serializer.save()

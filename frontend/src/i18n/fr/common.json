@@ -3460,6 +3460,7 @@
       "expected_effect": "Effet attendu",
       "measure_owner": "Responsable",
       "add_measure": "Ajouter une mesure",
+      "editing_measure": "Modification de la mesure : corrigez le texte, l'échéance, l'effet, le contrôle ou le responsable puis enregistrez.",
       "acceptance": "Acceptation",
       "acceptance_needs_completion": "Seul un risque applicable dont l'évaluation est terminée peut être accepté.",
       "not_acceptable_notice": "Risque non acceptable : il doit être traité.",

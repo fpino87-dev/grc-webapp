@@ -469,7 +469,7 @@ La classe si legge dalla matrice. Se la valutazione cade al limite fra due celle
 
 ### Piano di trattamento e rischio atteso
 
-Le misure del piano hanno responsabile, scadenza ed effetto atteso. Quando una misura è completata va **verificata** (test, evidenza, audit). Solo con tutte le misure completate e verificate compare **Applica il rischio atteso**: è l'unico modo, oltre a una nuova valutazione, per abbassare la classe. Le misure in ritardo generano un avviso al Risk Manager e poi l'escalation al livello di organizzazione.
+Le misure del piano hanno responsabile, scadenza ed effetto atteso. Quando una misura è completata va **verificata** (test, evidenza, audit). Solo con tutte le misure completate e verificate compare **Applica il rischio atteso**: è l'unico modo, oltre a una nuova valutazione, per abbassare la classe. Le misure in ritardo generano un avviso al Risk Manager e poi l'escalation al livello di organizzazione. Ogni misura, anche quelle proposte dall'IA, si corregge con **Modifica** (testo, scadenza, effetto, controllo, responsabile) finché la sua efficacia non è verificata; dopo la verifica va prima riaperta.
 
 ### Accettazione
 

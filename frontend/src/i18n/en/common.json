@@ -3460,6 +3460,7 @@
       "expected_effect": "Expected effect",
       "measure_owner": "Owner",
       "add_measure": "Add measure",
+      "editing_measure": "Editing the measure: correct text, deadline, effect, control or owner and save.",
       "acceptance": "Acceptance",
       "acceptance_needs_completion": "Only an applicable risk with a completed assessment can be accepted.",
       "not_acceptable_notice": "Risk not acceptable: it must be treated.",

@@ -3532,3 +3532,9 @@ msgstr "Zaakceptowane"
 
 msgid "Seleziona almeno una proposta."
 msgstr "Wybierz co najmniej jedną propozycję."
+
+msgid "Una misura non si sposta su un altro rischio."
+msgstr "Działania nie można przenieść do innego ryzyka."
+
+msgid "Una misura con efficacia verificata non si modifica: riaprila prima."
+msgstr "Działania o zweryfikowanej skuteczności nie można zmienić: najpierw je otwórz ponownie."

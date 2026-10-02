@@ -469,7 +469,7 @@ The class is read from the matrix. If the assessment falls on the border between
 
 ### Treatment plan and expected risk
 
-Plan measures have an owner, deadline and expected effect. When a measure is completed it must be **verified** (test, evidence, audit). Only when all measures are completed and verified does **Apply the expected risk** appear: besides a new assessment, it is the only way to lower the class. Overdue measures notify the Risk Manager and then escalate to organisation level.
+Plan measures have an owner, deadline and expected effect. When a measure is completed it must be **verified** (test, evidence, audit). Only when all measures are completed and verified does **Apply the expected risk** appear: besides a new assessment, it is the only way to lower the class. Overdue measures notify the Risk Manager and then escalate to organisation level. Every measure, including those suggested by AI, can be corrected with **Edit** (text, deadline, effect, control, owner) until its effectiveness is verified; after verification it must be reopened first.
 
 ### Acceptance
 

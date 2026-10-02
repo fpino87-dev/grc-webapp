@@ -3511,3 +3511,9 @@ msgstr "Kabul edildi"
 
 msgid "Seleziona almeno una proposta."
 msgstr "En az bir öneri seçin."
+
+msgid "Una misura non si sposta su un altro rischio."
+msgstr "Bir önlem başka bir riske taşınamaz."
+
+msgid "Una misura con efficacia verificata non si modifica: riaprila prima."
+msgstr "Etkinliği doğrulanmış bir önlem değiştirilemez: önce yeniden açın."

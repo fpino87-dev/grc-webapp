@@ -3577,3 +3577,9 @@ msgstr "Accepté"
 
 msgid "Seleziona almeno una proposta."
 msgstr "Sélectionnez au moins une proposition."
+
+msgid "Una misura non si sposta su un altro rischio."
+msgstr "Une mesure ne peut pas être déplacée vers un autre risque."
+
+msgid "Una misura con efficacia verificata non si modifica: riaprila prima."
+msgstr "Une mesure dont l'efficacité a été vérifiée ne peut pas être modifiée : rouvrez-la d'abord."

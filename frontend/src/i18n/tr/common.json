@@ -3460,6 +3460,7 @@
       "expected_effect": "Beklenen etki",
       "measure_owner": "Sorumlu",
       "add_measure": "Önlem ekle",
+      "editing_measure": "Önlem düzenleniyor: metni, son tarihi, etkiyi, kontrolü veya sorumluyu düzeltip kaydedin.",
       "acceptance": "Kabul",
       "acceptance_needs_completion": "Yalnızca değerlendirmesi tamamlanmış bir risk kabul edilebilir.",
       "not_acceptable_notice": "Risk kabul edilemez: işlem görmelidir.",

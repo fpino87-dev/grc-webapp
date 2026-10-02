@@ -469,7 +469,7 @@ La classe se lit dans la matrice. Si l'évaluation se situe à la limite entre d
 
 ### Plan de traitement et risque attendu
 
-Les mesures du plan ont un responsable, une échéance et un effet attendu. Une mesure terminée doit être **vérifiée** (test, preuve, audit). Ce n'est que lorsque toutes les mesures sont terminées et vérifiées qu'apparaît **Appliquer le risque attendu** : en dehors d'une nouvelle évaluation, c'est le seul moyen de baisser la classe. Les mesures en retard alertent le Risk Manager puis font l'objet d'une escalade au niveau de l'organisation.
+Les mesures du plan ont un responsable, une échéance et un effet attendu. Une mesure terminée doit être **vérifiée** (test, preuve, audit). Ce n'est que lorsque toutes les mesures sont terminées et vérifiées qu'apparaît **Appliquer le risque attendu** : en dehors d'une nouvelle évaluation, c'est le seul moyen de baisser la classe. Les mesures en retard alertent le Risk Manager puis font l'objet d'une escalade au niveau de l'organisation. Chaque mesure, y compris celles proposées par l'IA, se corrige avec **Modifier** (texte, échéance, effet, contrôle, responsable) tant que son efficacité n'est pas vérifiée ; après la vérification, il faut d'abord la rouvrir.
 
 ### Acceptation
 
