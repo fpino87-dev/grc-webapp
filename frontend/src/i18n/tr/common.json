@@ -3249,6 +3249,7 @@
       "tabs_label": "Risk değerlendirmesi bölümleri",
       "tabs": {
         "register": "Kayıt",
+        "objectives": "Hedefe göre",
         "matrix": "Matris",
         "coverage": "Kapsam",
         "plan": "İşlem planı",
@@ -3263,7 +3264,7 @@
       "steps": {
         "1": "Kayıt değerlendirmesini başlatın (ilk değerlendirme, periyodik veya olağanüstü gözden geçirme).",
         "2": "Kapsam sekmesinde her uygulanabilir tehdidi değerlendirin veya nedeniyle uygulanamaz olarak bildirin.",
-        "3": "Risk kartında gerekçeleriyle olasılık ve etkiyi, mevcut önlemleri ve işlemi girin.",
+        "3": "Risk kartında tehdit altındaki iş hedeflerinden başlayın, ardından gerekçeleriyle olasılık ve etkiyi, mevcut önlemleri ve işlemi girin.",
         "4": "Değerlendirmeyi tamamlayın: High ve Critical işlem planını açar.",
         "5": "Onaya gönderin: organ onaylar ve kayıt dondurulur.",
         "6": "Önlemleri, doğrulamaları ve kabulleri izleyin: sınıf yalnızca doğrulanmış önlemlerle düşer."
@@ -3277,7 +3278,7 @@
       },
       "config_needed": {
         "1": "Risk yönetişimi politikası (Ayarlar)",
-        "2": "Saha bilgi sınıfları ve yüklenmiş tehdit kataloğu"
+        "2": "İş hedefleri ve bilgi sınıfları (Ayarlar), yüklenmiş tehdit kataloğu"
       }
     },
     "cycle": {
@@ -3499,7 +3500,14 @@
       "delete_confirm": "Bu risk kayıttan çıkarılsın mı?",
       "reopen": "Yeniden aç",
       "confirm": "Değerlendirmeyi onayla",
-      "complete": "Değerlendirmeyi tamamla"
+      "complete": "Değerlendirmeyi tamamla",
+      "business_objectives": "Tehdit altındaki iş hedefleri",
+      "business_objectives_hint": "Değerlendirmenin başlangıç noktası (prosedür §2): riskin şirketin hangi hedefini tehlikeye attığı. Tamamlamak için zorunludur.",
+      "no_business_objectives": "İş hedefi yok: Ayarlar'da tanımlayın.",
+      "suggested": "önerilen",
+      "use_suggested": "Önerilen hedefleri kullan",
+      "security_objectives": "Bağlı güvenlik hedefleri",
+      "no_security_objectives": "Bu riski işleyen bir güvenlik hedefi yok. Organizasyon › Güvenlik hedefleri'nden «Risk değerlendirmesi» kaynağıyla bağlayın."
     },
     "register": {
       "search": "Ara",
@@ -3599,7 +3607,8 @@
       "sections": {
         "governance": "Risk yönetişimi",
         "catalog": "Tehdit kataloğu",
-        "information": "Bilgi sınıfları"
+        "information": "Bilgi sınıfları",
+        "objectives": "İş hedefleri"
       },
       "org_policy": "Kuruluş politikası",
       "configured": "Onaylı ve yürürlükte.",
@@ -3671,7 +3680,15 @@
       "availability": "Erişilebilirlik",
       "new_class": "Yeni bilgi sınıfı",
       "edit_class": "Bilgi sınıfını düzenle",
-      "delete_class_confirm": "Bu bilgi sınıfı silinsin mi?"
+      "delete_class_confirm": "Bu bilgi sınıfı silinsin mi?",
+      "objectives_hint": "Risk değerlendirmesinin başladığı şirket hedefleri (prosedür §2). Etki boyutları, risk kartında hedefi önermek için kullanılır. Tesisi olmayanlar grup için geçerlidir.",
+      "no_objectives": "Tanımlı iş hedefi yok.",
+      "objective_name": "Hedef",
+      "objective_description": "Açıklama",
+      "objective_dimensions": "Etki boyutları",
+      "objective_dimensions_hint": "Bu hedefe verilen zararın ölçüldüğü boyutlar.",
+      "new_objective": "Yeni iş hedefi",
+      "edit_objective": "İş hedefini düzenle"
     },
     "protection": {
       "low": "Low",
@@ -3768,6 +3785,26 @@
           "1": "Kayda değer etkisi yok"
         }
       }
+    },
+    "objectives": {
+      "hint": "Devralınan grup riskleri dahil, iş hedefine göre değerlendirilen riskler: değerlendirmenin hedeflerden başladığını gösterir. Riskleri görmek için bir satıra tıklayın.",
+      "col_objective": "İş hedefi",
+      "col_risks": "Riskler",
+      "col_worst": "En yüksek sınıf",
+      "col_untreated": "Kabul edilmemiş High/Critical",
+      "col_distribution": "Sınıfa göre",
+      "none": "Hedef belirtilmemiş riskler"
+    },
+    "information_coverage": {
+      "title": "Bilgi kapsamı",
+      "hint": "Gizli ve Çok gizli bilgi sınıfları: her birinin gizlilik tehdidiyle değerlendirilmiş en az bir riski olmalıdır (VDA ISA 1.3.1, 1.3.2).",
+      "missing": "Gizlilik riski olmayan sınıflar: {{count}}",
+      "states": {
+        "evaluated": "Değerlendirildi",
+        "draft": "Değerlendiriliyor",
+        "missing": "Kapsanmıyor"
+      },
+      "open": "Aç"
     }
   },
   "pdca": {
@@ -6133,7 +6170,13 @@
         "in_corso": "Devam ediyor",
         "in_approvazione": "Onay bekliyor",
         "approvato": "Onaylandı"
-      }
+      },
+      "col_treated_risks": "İşlenen riskler ← iş hedefi",
+      "risks_by_objective": "İş hedefine göre riskler",
+      "col_business_objective": "İş hedefi",
+      "col_assessed_risks": "Değerlendirilen riskler",
+      "col_worst_class": "En yüksek sınıf",
+      "col_untreated_high": "Kabul edilmemiş High/Critical"
     },
     "participants": {
       "heading": "Davetliler ve katılım",
@@ -6403,7 +6446,10 @@
       "track": "Gidişat",
       "objective": "Hedef",
       "value": "Değer",
-      "note": "Not"
+      "note": "Not",
+      "risks": "İşlenen riskler",
+      "risks_hint": "Bu hedefin işlenmesine katkıda bulunduğu riskler: hedefi risk değerlendirmesine ve iş hedeflerine bağlar.",
+      "risks_search": "Risk ara…"
     },
     "actions": {
       "new": "Yeni hedef",

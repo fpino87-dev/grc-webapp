@@ -20,6 +20,7 @@ export function initialEvaluation(r: Risk): EvaluationState {
   return {
     name: r.name, asset_type: r.asset_type, asset: r.asset, asset_group_label: r.asset_group_label,
     supplier: r.supplier, threat: r.threat, information_classes: r.information_classes,
+    business_objectives: r.business_objectives,
     critical_process: r.critical_process, vulnerability: r.vulnerability, consequence: r.consequence,
     probability: r.probability, probability_method: r.probability_method, probability_rationale: r.probability_rationale,
     impact_economic: r.impact_economic, impact_legal: r.impact_legal, impact_customer: r.impact_customer,
@@ -58,6 +59,17 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
     queryFn: () => riskApi.threats({ asset_type: value.asset_type ?? "" }),
     enabled: !!value.asset_type, retry: false,
   });
+  const { data: objectives = [] } = useQuery({
+    queryKey: ["risk-business-objectives", plantId], queryFn: () => riskApi.businessObjectives(plantId), retry: false,
+  });
+  // Proposta: obiettivi misurati dalle dimensioni con l'impatto più alto.
+  const suggestedObjectives = useMemo(() => {
+    const levels = IMPACT_DIMENSIONS.map(d => [d, value[`impact_${d}` as keyof EvaluationState] as number | null] as const);
+    const top = Math.max(0, ...levels.map(([, v]) => v ?? 0));
+    if (!top) return [] as string[];
+    const worst = new Set(levels.filter(([, v]) => v === top).map(([d]) => d));
+    return objectives.filter(o => o.active && o.impact_dimensions.some(d => worst.has(d))).map(o => o.id);
+  }, [objectives, value]);
   const { data: infoClasses = [] } = useQuery({
     queryKey: ["risk-info-classes", plantId], queryFn: () => riskApi.informationClasses(plantId), retry: false,
   });
@@ -112,6 +124,14 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
     return `${t(`risk.scales.probability.${level}.frequency`)} — ${t(`risk.scales.probability.${level}.fer`)}`;
   };
 
+  // Il processo BIA propone le classi di informazioni che usa (se non ne sono state scelte).
+  const onProcessChange = (process: string | null) => {
+    const proposed = process && !(value.information_classes ?? []).length
+      ? infoClasses.filter(ic => (ic.critical_processes ?? []).includes(process)).map(ic => ic.id)
+      : value.information_classes;
+    onChange({ ...value, critical_process: process, information_classes: proposed });
+  };
+
   const textarea = (k: keyof EvaluationState, rows = 2, placeholder?: string) => (
     <textarea value={(value[k] as string) ?? ""} onChange={e => set(k, e.target.value as never)} rows={rows}
       disabled={!editable} className={inputCls} placeholder={placeholder} />
@@ -120,6 +140,27 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
   return (
     <div>
       <Section title={t("risk.drawer.identification")}>
+        <Field label={t("risk.drawer.business_objectives")} hint={t("risk.drawer.business_objectives_hint")}>
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
+            {objectives.length === 0 && <span className="text-xs text-gray-400">{t("risk.drawer.no_business_objectives")}</span>}
+            {objectives.filter(o => o.active || (value.business_objectives ?? []).includes(o.id)).map(o => (
+              <label key={o.id} className="flex items-center gap-1 text-xs" title={o.description}>
+                <input type="checkbox" disabled={!editable} checked={(value.business_objectives ?? []).includes(o.id)}
+                  onChange={e => set("business_objectives", e.target.checked
+                    ? [...(value.business_objectives ?? []), o.id]
+                    : (value.business_objectives ?? []).filter(x => x !== o.id))} />
+                {o.name}
+                {suggestedObjectives.includes(o.id) && (
+                  <span className="text-[10px] px-1 rounded bg-blue-50 text-blue-700">{t("risk.drawer.suggested")}</span>
+                )}
+              </label>
+            ))}
+          </div>
+          {editable && !(value.business_objectives ?? []).length && suggestedObjectives.length > 0 && (
+            <button type="button" onClick={() => set("business_objectives", suggestedObjectives)}
+              className="mt-1 text-xs text-primary-600 hover:underline">{t("risk.drawer.use_suggested")}</button>
+          )}
+        </Field>
         <div className="grid grid-cols-2 gap-x-3">
           <Field label={t("risk.drawer.name")}>
             <input value={value.name ?? ""} onChange={e => set("name", e.target.value)} disabled={!editable} className={inputCls}
@@ -157,7 +198,7 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
             </Field>
           )}
           <Field label={t("risk.drawer.process")}>
-            <select value={value.critical_process ?? ""} onChange={e => set("critical_process", e.target.value || null)}
+            <select value={value.critical_process ?? ""} onChange={e => onProcessChange(e.target.value || null)}
               disabled={!editable} className={inputCls}>
               <option value="">—</option>
               {(processes?.results ?? []).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}

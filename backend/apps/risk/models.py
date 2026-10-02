@@ -123,6 +123,10 @@ class RiskAssessment(BaseModel):
     information_classes = models.ManyToManyField(
         "risk.InformationClass", blank=True, related_name="risks",
     )
+    business_objectives = models.ManyToManyField(
+        "risk.BusinessObjective", blank=True, related_name="risks",
+        help_text="Obiettivi aziendali minacciati (procedura §2): il punto di partenza della valutazione",
+    )
     vulnerability = models.TextField(blank=True, default="")
     applicable = models.BooleanField(default=True)
     not_applicable_reason = models.TextField(blank=True, default="")
@@ -394,6 +398,35 @@ class ThreatCatalogEntry(BaseModel):
 
     def __str__(self):
         return f"{self.code} {self.get_title()}"
+
+
+class BusinessObjective(BaseModel):
+    """Obiettivo aziendale da cui parte la valutazione (procedura §2, rilievo
+    TISAX: i rischi si valutano a partire dagli obiettivi). Non è un obiettivo
+    di sicurezza §6.2 (governance.SecurityObjective): quello è un traguardo
+    misurabile che nasce dal trattamento di un rischio.
+
+    `plant` nullo = obiettivo di gruppo, valido per tutti i siti.
+    `impact_dimensions` = dimensioni d'impatto con cui si misura il danno
+    all'obiettivo: la scheda del rischio le usa per proporlo.
+    """
+
+    plant = models.ForeignKey(
+        "plants.Plant", null=True, blank=True, on_delete=models.CASCADE,
+        related_name="business_objectives",
+    )
+    code = models.CharField(max_length=30, blank=True, default="", db_index=True)
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default="")
+    impact_dimensions = models.JSONField(default=list, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
 
 
 class InformationClass(BaseModel):

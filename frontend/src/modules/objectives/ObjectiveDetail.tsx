@@ -6,6 +6,7 @@ import {
   type SecurityObjective,
 } from "../../api/endpoints/securityObjectives";
 import { ObjectiveStatusBadge, ProgressBar, TrackBadge } from "./objectiveBadges";
+import { classBadge } from "../risk/riskClasses";
 
 /** Andamento delle misure: una spark-line in SVG, senza librerie. Serve a
  *  vedere se la curva sale verso il target o è piatta, non a leggere valori
@@ -138,6 +139,25 @@ export function ObjectiveDetail({ objective, onClose }: { objective: SecurityObj
           <div className="mb-4">
             <p className="text-xs font-medium text-gray-600 mb-1">{t("objectives.trend")}</p>
             <Sparkline points={series} target={objective.target_value} baseline={objective.baseline_value} />
+          </div>
+        )}
+
+        {objective.risks_summary?.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-gray-600 mb-1">{t("objectives.fields.risks")}</p>
+            <ul className="text-sm space-y-1">
+              {objective.risks_summary.map((r) => (
+                <li key={r.id} className="flex flex-wrap items-center gap-2">
+                  {r.current_class && (
+                    <span className={`text-[11px] px-1.5 rounded border ${classBadge(r.current_class)}`}>{t(`risk.classes.${r.current_class}`)}</span>
+                  )}
+                  <span>{r.name}</span>
+                  {r.business_objectives.length > 0 && (
+                    <span className="text-xs text-gray-500">← {r.business_objectives.join(", ")}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 

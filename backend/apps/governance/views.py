@@ -396,7 +396,9 @@ class SecurityObjectiveViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, v
     sono impegni aziendali, non dati di un singolo sito.
     """
 
-    queryset = SecurityObjective.objects.select_related("plant", "kpi_definition").all()
+    queryset = SecurityObjective.objects.select_related("plant", "kpi_definition").prefetch_related(
+        "risks__threat", "risks__business_objectives",
+    )
     serializer_class = SecurityObjectiveSerializer
     permission_classes = [SecurityObjectivePermission]
     filterset_fields = ["plant", "status", "origin", "measure_source", "owner_role"]

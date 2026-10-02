@@ -6,6 +6,7 @@ import { RiskIntegratedRegisters } from "./RiskIntegratedRegisters";
 import { ClassBadge, ErrorBox } from "./RiskUi";
 import { ReasonDialog } from "./CycleBar";
 import type { RegisterId } from "./RiskPage";
+import { classBadge } from "./riskClasses";
 
 const STATE_TONE: Record<CoveragePair["state"], string> = {
   evaluated: "border-gray-200 bg-white",
@@ -92,6 +93,8 @@ export function CoverageTab({ registerId, evaluating, onOpen, onEvaluate }: {
         );
       })}
 
+      <InformationCoverage registerId={registerId} onOpen={onOpen} />
+
       {registerId && <RiskIntegratedRegisters plantId={registerId} />}
 
       {naPair && (
@@ -104,6 +107,44 @@ export function CoverageTab({ registerId, evaluating, onOpen, onEvaluate }: {
         />
       )}
       <ErrorBox message={naPair ? null : error} />
+    </div>
+  );
+}
+
+/** Classi di informazioni Confidenziali/Segrete e rischi di riservatezza che le
+ *  coprono (VDA ISA 1.3.1/1.3.2): una classe scoperta è un buco della valutazione. */
+function InformationCoverage({ registerId, onOpen }: { registerId: RegisterId; onOpen: (id: string) => void }) {
+  const { t } = useTranslation();
+  const { data: rows = [] } = useQuery({
+    queryKey: ["risk-register", registerId, "information-coverage"],
+    queryFn: () => riskApi.informationCoverage(registerId),
+    retry: false,
+  });
+  if (!rows.length) return null;
+  const missing = rows.filter(r => r.state === "missing").length;
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <h4 className="text-sm font-semibold text-gray-700">{t("risk.information_coverage.title")}</h4>
+      <p className="text-[11px] text-gray-500 mb-2">{t("risk.information_coverage.hint")}</p>
+      {missing > 0 && <p className="text-xs text-red-700 mb-2">{t("risk.information_coverage.missing", { count: missing })}</p>}
+      <div className="divide-y divide-gray-100">
+        {rows.map(r => (
+          <div key={r.id} className="flex flex-wrap items-center gap-2 py-1.5 text-sm">
+            <span className="flex-1 min-w-0 truncate">{r.name}</span>
+            <span className="text-[11px] text-gray-500">{t(`risk.confidentiality_levels.${r.confidentiality}`)}</span>
+            <span className={`text-[11px] px-2 py-0.5 rounded ${
+              r.state === "evaluated" ? "bg-green-50 text-green-700" : r.state === "draft" ? "bg-amber-50 text-amber-700" : "bg-red-50 text-red-700"}`}>
+              {t(`risk.information_coverage.states.${r.state}`)}
+            </span>
+            {r.worst_class && (
+              <span className={`text-[11px] px-1.5 rounded border ${classBadge(r.worst_class)}`}>{t(`risk.classes.${r.worst_class}`)}</span>
+            )}
+            {r.risk_ids[0] && (
+              <button onClick={() => onOpen(r.risk_ids[0])} className="text-xs text-primary-600 hover:underline">{t("risk.information_coverage.open")}</button>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

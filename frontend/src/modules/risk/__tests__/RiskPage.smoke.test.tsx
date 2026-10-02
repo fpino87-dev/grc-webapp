@@ -29,7 +29,7 @@ const policy = {
 };
 const risk = {
   id: "r1", plant: "p1", plant_name: "Sito 1", cycle: "c1", evaluated_in_cycle: "c1", is_legacy: false,
-  is_inherited: false, affected_plants: [], name: "Ransomware MES", display_name: "Ransomware MES", status: "completato", asset_type: "IT",
+  is_inherited: false, affected_plants: [], name: "Ransomware MES", display_name: "Ransomware MES", business_objectives: ["bo1"], security_objectives_summary: [], status: "completato", asset_type: "IT",
   asset: null, asset_name: null, asset_group_label: "Server", supplier: null, supplier_name: null,
   threat: "t1", threat_code: "IN_MAL", threat_title: "Malware", information_classes: [],
   critical_process: null, critical_process_name: null, vulnerability: "", consequence: "", applicable: true,
@@ -65,7 +65,9 @@ vi.mock("../../../api/endpoints/risk", () => {
       coverage: ok({ asset_types: ["IT"], pairs: [{ asset_type: "IT", threat_id: "t1", threat_code: "IN_MAL", state: "evaluated", risk_ids: ["r1"], worst_class: "critical" }], total: 1, closed: 1, missing: 0, pct: 100 }),
       matrix: ok([5, 4, 3, 2, 1].flatMap(p => [1, 2, 3, 4, 5].map(i => ({ probability: p, impact: i, count: p === 4 && i === 4 ? 1 : 0, class: "medium" })))),
       threats: ok([{ id: "t1", code: "IN_MAL", title: "Malware", asset_types: ["IT"], cia: ["C"], translations: {}, source: "catalog", catalog_version: "1", active: true }]),
-      informationClasses: ok([]), measures: ok([]),
+      informationClasses: ok([]), measures: ok([]), informationCoverage: ok([]),
+      businessObjectives: ok([{ id: "bo1", plant: null, plant_name: null, code: "BO-01", name: "OEM supply", description: "", impact_dimensions: ["operational"], order: 1, active: true }]),
+      objectives: ok([{ objective: { id: "bo1", code: "BO-01", name: "OEM supply", impact_dimensions: ["operational"] }, count: 1, worst_class: "critical", by_class: { very_low: 0, low: 0, medium: 0, high: 0, critical: 1 }, untreated_high: 1, risk_ids: ["r1"] }]),
       plans: ok([{ id: "m1", assessment: "r1", action: "EDR", owner: null, owner_external: "MSP", owner_name: "MSP", due_date: "2020-01-01", expected_effect: "probabilita", bcp_plan: null, bcp_plan_title: null, bcp_plan_status: null, control_instance: null, control_title: null, completed_at: null, verified_at: null, verified_by: null, verified_by_name: null, verification_note: "", escalation_level: 1, created_at: "" }]),
       acceptances: ok([]), acceptanceRequirements: ok({ class: "critical", roles: [], scope: "org", requires_body: true, notify: [], upper_opinion: "binding", max_months: 6, not_acceptable: false }),
       localImpactReports: ok([]), exportExcel: ok({ data: "" }), exportCycle: ok({ data: "" }),
@@ -86,6 +88,8 @@ describe("RiskPage", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(<QueryClientProvider client={qc}><MemoryRouter><RiskPage /></MemoryRouter></QueryClientProvider>);
     expect(await screen.findByText("Ransomware MES")).toBeTruthy();
+    fireEvent.click(screen.getByText("risk.page.tabs.objectives"));
+    expect(await screen.findByText("OEM supply")).toBeTruthy();
     for (const tab of ["matrix", "coverage", "plan", "acceptances", "cycles", "settings", "register"]) {
       fireEvent.click(screen.getByText(`risk.page.tabs.${tab}`));
       await waitFor(() => expect(screen.getByText(`risk.page.tabs.${tab}`)).toBeTruthy());
@@ -94,5 +98,9 @@ describe("RiskPage", () => {
     expect(await screen.findByText("risk.drawer.identification")).toBeTruthy();
     expect(await screen.findByText("risk.drawer.treatment_plan")).toBeTruthy();
     expect(screen.getByText("risk.drawer.complete")).toBeTruthy();
+    // obiettivi aziendali nella scheda, con quello collegato selezionato
+    expect(screen.getByText("risk.drawer.business_objectives")).toBeTruthy();
+    expect((screen.getByLabelText(/OEM supply/) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByText("risk.drawer.no_security_objectives")).toBeTruthy();
   });
 });

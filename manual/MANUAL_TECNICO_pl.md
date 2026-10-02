@@ -526,6 +526,7 @@ Odpowiedź: { "propagated_to": 3, "skipped_no_instance": 0 }
 - `RiskAssessmentCycle` (pierwsza / okresowa / nadzwyczajna / legacy) ze `snapshot` zamrożonym przy zatwierdzeniu
 - `RiskAcceptance` z podpisami ról, opinią CISO i uchwałą organu zgodnie z `RiskGovernancePolicy`
 - Katalog zagrożeń: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (pozycje własne przez API)
+- Cele biznesowe `BusinessObjective` (procedura §2, `risk_catalogs/business_objectives.json` jako propozycja) powiązane z ryzykiem (`business_objectives`, wymagane do zakończenia); `governance.SecurityObjective.risks` łączy cele bezpieczeństwa z traktowanymi ryzykami
 - Wspólne funkcje dla innych modułów: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
 
 ### M00 — Governance
@@ -1407,7 +1408,7 @@ Suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`)
 |---------|------|-----------------|
 | `migrate` | Stosuje migracje DB | Po każdym deployu |
 | `load_frameworks` | Importuje frameworki normatywne z JSON | Początkowa konfiguracja + aktualizacja frameworku |
-| `load_risk_catalog` | Importuje katalog zagrożeń (`risk_catalogs/threats.json`); idempotentne, nie zmienia pozycji własnych | Początkowa konfiguracja + aktualizacja katalogu |
+| `load_risk_catalog` | Importuje katalog zagrożeń (`risk_catalogs/threats.json`) i tworzy brakujące proponowane cele biznesowe; idempotentne, nie zmienia pozycji własnych | Początkowa konfiguracja + aktualizacja katalogu |
 | `load_notification_profiles` | Domyślne profile powiadomień | Początkowa konfiguracja |
 | `load_competency_requirements` | Wymagania kompetencyjne M15 | Początkowa konfiguracja |
 | `load_required_documents` | Obowiązkowe dokumenty | Początkowa konfiguracja |

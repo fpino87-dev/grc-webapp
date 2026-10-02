@@ -403,6 +403,13 @@ def _risk_class_blocks(r) -> list:
                   "tone": None if x.get("has_plan") else "red", "bold": not x.get("has_plan")}]
                 for x in r.get("top_critici", [])],
                r.get("oltre_soglia")),
+        _table(_("Rischi per obiettivo aziendale"),
+               [_("Obiettivo aziendale"), _("Rischi valutati"), _("Classe peggiore"), _("Non accettati High/Critical")],
+               [[x.get("name") or _("Nessun obiettivo indicato"), x.get("count", 0),
+                 RISK_CLASS.get(x.get("worst_class"), "—"),
+                 {"text": str(x.get("untreated_high", 0)), "tone": "red" if x.get("untreated_high") else None,
+                  "bold": bool(x.get("untreated_high"))}]
+                for x in r.get("per_obiettivo", []) if x.get("name") or x.get("count")]),
         _table(_("Rischi accettati"),
                [_("Rischio"), _("Classe"), _("Firme"), _("Organo"), _("Scadenza accettazione")],
                [[x.get("name"), RISK_CLASS.get(x.get("current_class"), "—"), ", ".join(x.get("signatures") or []) or "—",
@@ -532,6 +539,11 @@ def _objectives_blocks(snap) -> list:
             {"text": OBJECTIVE_TRACK.get(i.get("track"), _dash(i.get("track"))),
              "tone": tone.get(i.get("track")), "bold": i.get("track") in ("mancato", "a_rischio")},
             ROLE.get(i.get("owner_role"), _dash(i.get("owner_role"))),
+            "; ".join(
+                f"{x.get('name')} ({RISK_CLASS.get(x.get('current_class'), '—')})"
+                + (f" ← {', '.join(x['obiettivi_aziendali'])}" if x.get("obiettivi_aziendali") else "")
+                for x in i.get("rischi") or []
+            ) or "—",
         ])
     return [
         _kpis((_("Obiettivi attivi"), o.get("attivi", 0), None),
@@ -540,7 +552,7 @@ def _objectives_blocks(snap) -> list:
               (_("Raggiunti (12 mesi)"), o.get("raggiunti", 0), "green")),
         _table(_("Obiettivi di sicurezza (§6.2)"),
                [_("Obiettivo"), _("Partenza → target"), _("Valore attuale"), _("Progresso"), _("Scadenza"),
-                _("Traiettoria"), _("Responsabile")],
+                _("Traiettoria"), _("Responsabile"), _("Rischi trattati ← obiettivo aziendale")],
                rows, o.get("totale"), empty=_("Nessun obiettivo di sicurezza definito per questo perimetro.")),
     ]
 

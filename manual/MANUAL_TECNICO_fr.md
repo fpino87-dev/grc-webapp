@@ -526,6 +526,7 @@ Réponse : { "propagated_to": 3, "skipped_no_instance": 0 }
 - `RiskAssessmentCycle` (première / périodique / extraordinaire / legacy) avec `snapshot` figé à l'approbation
 - `RiskAcceptance` avec signatures des rôles, avis du RSSI et délibération de l'organe selon `RiskGovernancePolicy`
 - Catalogue des menaces : `backend/risk_catalogs/threats.json` + `load_risk_catalog` (entrées personnalisées via API)
+- Objectifs métier `BusinessObjective` (procédure §2, `risk_catalogs/business_objectives.json` comme proposition) liés au risque (`business_objectives`, obligatoire pour terminer) ; `governance.SecurityObjective.risks` relie les objectifs de sécurité aux risques traités
 - Fonctions uniques pour les autres modules : `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
 
 ### M00 — Gouvernance
@@ -1407,7 +1408,7 @@ La suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=7
 |---------|-------------|-----------------|
 | `migrate` | Applique les migrations DB | Après chaque déploiement |
 | `load_frameworks` | Importe les référentiels normatifs JSON | Configuration initiale + mise à jour des référentiels |
-| `load_risk_catalog` | Importe le catalogue des menaces (`risk_catalogs/threats.json`) ; idempotent, ne touche pas aux entrées personnalisées | Configuration initiale + mise à jour du catalogue |
+| `load_risk_catalog` | Importe le catalogue des menaces (`risk_catalogs/threats.json`) et crée les objectifs métier proposés manquants ; idempotent, ne touche pas aux entrées personnalisées | Configuration initiale + mise à jour du catalogue |
 | `load_notification_profiles` | Profils de notification par défaut | Configuration initiale |
 | `load_competency_requirements` | Exigences de compétences M15 | Configuration initiale |
 | `load_required_documents` | Documents obligatoires | Configuration initiale |

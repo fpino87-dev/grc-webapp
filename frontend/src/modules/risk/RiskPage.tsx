@@ -10,6 +10,7 @@ import { scrollAndHighlight } from "../../lib/scrollAndHighlight";
 import { CycleBar } from "./CycleBar";
 import { RegisterTab } from "./RegisterTab";
 import { MatrixTab } from "./MatrixTab";
+import { ObjectivesTab } from "./ObjectivesTab";
 import { CoverageTab } from "./CoverageTab";
 import { PlanTab } from "./PlanTab";
 import { AcceptancesTab } from "./AcceptancesTab";
@@ -18,7 +19,7 @@ import { SettingsTab } from "./SettingsTab";
 import { RiskDrawer } from "./RiskDrawer";
 import { NewRiskModal, type NewRiskPrefill } from "./NewRiskModal";
 
-const TABS = ["register", "matrix", "coverage", "plan", "acceptances", "cycles", "settings"] as const;
+const TABS = ["register", "objectives", "matrix", "coverage", "plan", "acceptances", "cycles", "settings"] as const;
 type Tab = typeof TABS[number];
 
 /** Registro corrente: id del sito, oppure null per il registro di gruppo. */
@@ -179,6 +180,7 @@ export function RiskPage() {
       {ready && tab === "register" && (
         <RegisterTab registerId={registerId} onOpen={setOpenRiskId} />
       )}
+      {ready && tab === "objectives" && <ObjectivesTab registerId={registerId} onOpen={setOpenRiskId} />}
       {ready && tab === "matrix" && <MatrixTab registerId={registerId} onOpen={setOpenRiskId} />}
       {ready && tab === "coverage" && (
         <CoverageTab

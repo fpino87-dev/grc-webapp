@@ -417,6 +417,16 @@ Moduł stosuje procedurę zarządzania ryzykiem (D-ITA-INF-23). Każdy zakład m
 
 U góry rejestru cztery liczniki pokazują, gdzie trzeba działać: **Critical do postępowania** (postępowanie obowiązkowe), **High do decyzji** (postępować z analizą kosztów i korzyści lub formalnie zaakceptować), **Wygasające akceptacje** w ciągu 30 dni oraz **Ryzyka z opóźnionymi działaniami**. Kliknięcie licznika filtruje rejestr do tych ryzyk, drugie kliknięcie usuwa filtr. Terminy wynikają z procedury: działania należy zakończyć w ciągu 3 miesięcy dla Critical, 1 roku dla High, 2 lat dla Medium i 5 lat dla Low i Very Low; akceptacja ryzyka Critical jest ważna maksymalnie 6 miesięcy, High 12 miesięcy.
 
+### Cele biznesowe, informacje i cele bezpieczeństwa
+
+Ocena zaczyna się od **celów biznesowych** (procedura §2): ciągłość dostaw do OEM, ochrona informacji klientów i etykiety TISAX, zgodność, wynik ekonomiczny, ludzie i środowisko, reputacja. Zarządza się nimi w **Ustawienia › Cele biznesowe**; każdy wskazuje wymiary wpływu, którymi mierzy się szkodę. Nie są to cele bezpieczeństwa z Organizacji: tamte są mierzalnymi celami wynikającymi z postępowania z ryzykiem.
+
+- W karcie ryzyka pierwszym polem są **Zagrożone cele biznesowe**: co najmniej jeden jest wymagany do zakończenia oceny. System proponuje te powiązane z wymiarami o najwyższym wpływie
+- Zakładka **Według celu** pokazuje dla każdego celu, ile ryzyk mu zagraża, najwyższą klasę i niezaakceptowane High/Critical; kliknij wiersz, aby zobaczyć ryzyka. To samo podsumowanie jest w Excelu rejestru, w zatwierdzonej ocenie i w przeglądzie zarządzania
+- Po wybraniu procesu BIA karta proponuje **klasy informacji** używane przez ten proces
+- W zakładce **Pokrycie** sekcja **Pokrycie informacji** wymienia klasy Poufne i Ściśle poufne i sygnalizuje te bez ryzyka ocenionego z zagrożeniem poufności
+- **Cel bezpieczeństwa** (Organizacja › Cele bezpieczeństwa) ze źródłem „Ocena ryzyka” wskazuje **traktowane ryzyka**; karta ryzyka pokazuje cele bezpieczeństwa, które je śledzą, i ich postęp, a przegląd podaje dla każdego ryzyko i cel biznesowy, z którego wynika
+
 ### Oceny (cykle)
 
 Pasek pod tytułem pokazuje stan oceny rejestru:

@@ -3249,6 +3249,7 @@
       "tabs_label": "Sekcje oceny ryzyka",
       "tabs": {
         "register": "Rejestr",
+        "objectives": "Według celu",
         "matrix": "Macierz",
         "coverage": "Pokrycie",
         "plan": "Plan postępowania",
@@ -3263,7 +3264,7 @@
       "steps": {
         "1": "Rozpocznij ocenę rejestru (pierwsza ocena, przegląd okresowy lub nadzwyczajny).",
         "2": "Na karcie Pokrycie oceń każde mające zastosowanie zagrożenie lub oznacz je jako niemające zastosowania z uzasadnieniem.",
-        "3": "W karcie ryzyka podaj prawdopodobieństwo i wpływ z uzasadnieniem, istniejące zabezpieczenia i sposób postępowania.",
+        "3": "W karcie ryzyka zacznij od zagrożonych celów biznesowych, następnie podaj prawdopodobieństwo i wpływ z uzasadnieniami, istniejące środki i postępowanie.",
         "4": "Zakończ ocenę: High i Critical otwierają plan postępowania.",
         "5": "Prześlij do zatwierdzenia: organ zatwierdza, a rejestr zostaje zamrożony.",
         "6": "Monitoruj działania, weryfikacje i akceptacje: klasa spada dopiero po weryfikacji działań."
@@ -3277,7 +3278,7 @@
       },
       "config_needed": {
         "1": "Polityka zarządzania ryzykiem (Ustawienia)",
-        "2": "Klasy informacji zakładu i wczytany katalog zagrożeń"
+        "2": "Cele biznesowe i klasy informacji (Ustawienia), załadowany katalog zagrożeń"
       }
     },
     "cycle": {
@@ -3499,7 +3500,14 @@
       "delete_confirm": "Usunąć to ryzyko z rejestru?",
       "reopen": "Otwórz ponownie",
       "confirm": "Potwierdź ocenę",
-      "complete": "Zakończ ocenę"
+      "complete": "Zakończ ocenę",
+      "business_objectives": "Zagrożone cele biznesowe",
+      "business_objectives_hint": "Punkt wyjścia oceny (procedura §2): który cel firmy ryzyko zagraża. Wymagane do zakończenia.",
+      "no_business_objectives": "Brak celów biznesowych: zdefiniuj je w Ustawieniach.",
+      "suggested": "proponowany",
+      "use_suggested": "Użyj proponowanych celów",
+      "security_objectives": "Powiązane cele bezpieczeństwa",
+      "no_security_objectives": "Żaden cel bezpieczeństwa nie dotyczy tego ryzyka. Powiąż je w Organizacja › Cele bezpieczeństwa, ze źródłem „Ocena ryzyka”."
     },
     "register": {
       "search": "Szukaj",
@@ -3599,7 +3607,8 @@
       "sections": {
         "governance": "Zarządzanie ryzykiem",
         "catalog": "Katalog zagrożeń",
-        "information": "Klasy informacji"
+        "information": "Klasy informacji",
+        "objectives": "Cele biznesowe"
       },
       "org_policy": "Polityka organizacji",
       "configured": "Zatwierdzona i obowiązująca.",
@@ -3671,7 +3680,15 @@
       "availability": "Dostępność",
       "new_class": "Nowa klasa informacji",
       "edit_class": "Edytuj klasę informacji",
-      "delete_class_confirm": "Usunąć tę klasę informacji?"
+      "delete_class_confirm": "Usunąć tę klasę informacji?",
+      "objectives_hint": "Cele firmy, od których zaczyna się ocena ryzyka (procedura §2). Wymiary wpływu służą do proponowania celu w karcie ryzyka. Cele bez zakładu obowiązują w grupie.",
+      "no_objectives": "Nie zdefiniowano celów biznesowych.",
+      "objective_name": "Cel",
+      "objective_description": "Opis",
+      "objective_dimensions": "Wymiary wpływu",
+      "objective_dimensions_hint": "Wymiary, którymi mierzy się szkodę dla tego celu.",
+      "new_objective": "Nowy cel biznesowy",
+      "edit_objective": "Edytuj cel biznesowy"
     },
     "protection": {
       "low": "Low",
@@ -3768,6 +3785,26 @@
           "1": "Brak zauważalnych skutków"
         }
       }
+    },
+    "objectives": {
+      "hint": "Ocenione ryzyka według celu biznesowego, łącznie z dziedziczonymi ryzykami grupy: pokazuje, że ocena zaczyna się od celów. Kliknij wiersz, aby zobaczyć ryzyka.",
+      "col_objective": "Cel biznesowy",
+      "col_risks": "Ryzyka",
+      "col_worst": "Najwyższa klasa",
+      "col_untreated": "High/Critical niezaakceptowane",
+      "col_distribution": "Według klasy",
+      "none": "Ryzyka bez wskazanego celu"
+    },
+    "information_coverage": {
+      "title": "Pokrycie informacji",
+      "hint": "Klasy informacji Poufne i Ściśle poufne: każda powinna mieć co najmniej jedno ryzyko ocenione z zagrożeniem poufności (VDA ISA 1.3.1, 1.3.2).",
+      "missing": "Klasy bez ryzyk poufności: {{count}}",
+      "states": {
+        "evaluated": "Oceniona",
+        "draft": "W ocenie",
+        "missing": "Niepokryta"
+      },
+      "open": "Otwórz"
     }
   },
   "pdca": {
@@ -6133,7 +6170,13 @@
         "in_corso": "W toku",
         "in_approvazione": "Do zatwierdzenia",
         "approvato": "Zatwierdzona"
-      }
+      },
+      "col_treated_risks": "Traktowane ryzyka ← cel biznesowy",
+      "risks_by_objective": "Ryzyka według celu biznesowego",
+      "col_business_objective": "Cel biznesowy",
+      "col_assessed_risks": "Ocenione ryzyka",
+      "col_worst_class": "Najwyższa klasa",
+      "col_untreated_high": "High/Critical niezaakceptowane"
     },
     "participants": {
       "heading": "Zaproszeni i obecność",
@@ -6403,7 +6446,10 @@
       "track": "Trajektoria",
       "objective": "Cel",
       "value": "Wartość",
-      "note": "Uwaga"
+      "note": "Uwaga",
+      "risks": "Traktowane ryzyka",
+      "risks_hint": "Ryzyka, w których traktowaniu pomaga ten cel: łączą cel z oceną ryzyka i z celami biznesowymi.",
+      "risks_search": "Szukaj ryzyka…"
     },
     "actions": {
       "new": "Nowy cel",

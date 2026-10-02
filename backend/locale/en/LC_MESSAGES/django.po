@@ -3453,3 +3453,39 @@ msgstr "Enter the group risk and the site."
 
 msgid "La valutazione non ha una fotografia: si esporta solo una valutazione approvata."
 msgstr "The assessment has no snapshot: only an approved assessment can be exported."
+
+msgid "Rischi per obiettivo aziendale"
+msgstr "Risks by business objective"
+
+msgid "Obiettivo aziendale"
+msgstr "Business objective"
+
+msgid "Rischi valutati"
+msgstr "Assessed risks"
+
+msgid "Classe peggiore"
+msgstr "Worst class"
+
+msgid "Non accettati High/Critical"
+msgstr "High/Critical not accepted"
+
+msgid "Nessun obiettivo indicato"
+msgstr "No objective indicated"
+
+msgid "Rischi trattati ← obiettivo aziendale"
+msgstr "Treated risks ← business objective"
+
+msgid "Indica almeno un obiettivo aziendale minacciato dal rischio."
+msgstr "Indicate at least one business objective threatened by the risk."
+
+msgid "Gli obiettivi aziendali devono essere del sito del registro o di gruppo."
+msgstr "Business objectives must belong to the register's site or to the group."
+
+msgid "Dimensioni d'impatto non valide."
+msgstr "Invalid impact dimensions."
+
+msgid "Non si collegano rischi della valutazione con il metodo superato."
+msgstr "Risks from the superseded-method assessment cannot be linked."
+
+msgid "I rischi devono essere del sito dell'obiettivo o di gruppo."
+msgstr "Risks must belong to the objective's site or to the group."

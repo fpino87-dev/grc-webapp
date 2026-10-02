@@ -90,8 +90,17 @@ def cycle(org_user, plant):
     return services.start_cycle(org_user, plant, "primo")
 
 
+def _objective():
+    from apps.risk.models import BusinessObjective
+
+    return BusinessObjective.objects.get_or_create(
+        code="BO-T", defaults={"name": "OEM supply continuity", "impact_dimensions": ["operational"]},
+    )[0]
+
+
 def _eval(owner, **extra):
     data = {
+        "business_objectives": [_objective()],
         "asset_type": "IT", "probability": 4, "probability_rationale": "Phishing frequente",
         "impact_operational": 4, "impact_rationale": "Fermo produzione oltre RTO",
         "owner": owner, "treatment": "mitigare", "expected_probability": 2, "expected_impact": 4,
@@ -521,7 +530,7 @@ def test_register_api_crud_and_actions(site_user, plant, other_plant, threats, o
     payload = {"plant": str(plant.pk), "threat": str(threats["malware"].pk), "asset_type": "IT",
                "probability": 3, "probability_rationale": "Storico", "impact_operational": 3,
                "impact_rationale": "Disagi", "owner": site_user.pk, "treatment": "accettare",
-               "treatment_owner_external": "  MSP Srl  "}
+               "treatment_owner_external": "  MSP Srl  ", "business_objectives": [str(_objective().pk)]}
     res = c.post("/api/v1/risk/assessments/", payload, format="json")
     assert res.status_code == 201, res.content
     rid = res.json()["id"]
@@ -580,10 +589,11 @@ def test_excel_export_sheets(org_user, plant, threats, cycle):
 
     _completed_risk(org_user, plant, threats["malware"])
     wb = load_workbook(io.BytesIO(services.generate_risk_excel(plant)))
-    assert wb.sheetnames == ["Registro", "Piano di trattamento", "Accettazioni", "Copertura", "Criteri"]
+    assert wb.sheetnames == ["Registro", "Piano di trattamento", "Accettazioni", "Obiettivi aziendali",
+                             "Copertura informazioni", "Copertura", "Criteri"]
     reg = wb["Registro"]
     assert reg.cell(row=2, column=3).value == "IN_MAL"
-    assert reg.cell(row=2, column=28).value == "Critical"
+    assert reg.cell(row=2, column=29).value == "Critical"
     res = _client(org_user).get(f"/api/v1/risk/assessments/export/?plant={plant.pk}")
     assert res.status_code == 200
 
@@ -655,7 +665,7 @@ def test_cycle_export_and_audit_pack_history(org_user, plant, threats, cycle, tm
     res = c.get(f"/api/v1/risk/cycles/{cycle.pk}/export/")
     assert res.status_code == 200
     wb = load_workbook(io.BytesIO(b"".join(res.streaming_content) if hasattr(res, "streaming_content") else res.content))
-    assert wb.sheetnames == ["Valutazione", "Registro", "Criteri"]
+    assert wb.sheetnames == ["Valutazione", "Registro", "Obiettivi aziendali", "Criteri"]
     assert wb["Registro"].max_row == 4  # intestazione + 3 coppie della copertura
 
     out = _collect_risk(tmp_path, plant)
@@ -724,3 +734,96 @@ def test_display_name_follows_viewer_language(org_user, plant, cycle):
     assert c.get(url, HTTP_ACCEPT_LANGUAGE="tr").data["display_name"] == "Targeted phishing"
     services.update_risk(org_user, risk, {"name": "Phishing ufficio acquisti"})
     assert c.get(url, HTTP_ACCEPT_LANGUAGE="pl").data["display_name"] == "Phishing ufficio acquisti"
+
+
+# ── obiettivi aziendali e informazioni ──────────────────────────────────────
+
+@pytest.mark.django_db
+def test_complete_requires_business_objective(org_user, plant, threats, cycle):
+    risk = services.create_risk(org_user, plant, {**_eval(org_user), "threat": threats["malware"],
+                                                  "business_objectives": []})
+    # tutto il resto è compilato: l'unica mancanza è l'obiettivo aziendale
+    assert len(services.risk_completeness_errors(risk)) == 1
+    with pytest.raises(ValidationError):
+        services.complete_risk(org_user, risk)
+    services.update_risk(org_user, risk, {"business_objectives": [_objective()]})
+    assert services.complete_risk(org_user, risk).status == "completato"
+
+
+@pytest.mark.django_db
+def test_site_objective_not_usable_elsewhere(org_user, plant, other_plant, threats, cycle):
+    from apps.risk.models import BusinessObjective
+
+    other = BusinessObjective.objects.create(plant=other_plant, name="Altro sito")
+    with pytest.raises(ValidationError):
+        services.create_risk(org_user, plant, {**_eval(org_user), "threat": threats["malware"],
+                                               "business_objectives": [other]})
+
+
+@pytest.mark.django_db
+def test_register_objectives_summary(org_user, plant, threats, cycle):
+    from apps.risk.models import BusinessObjective
+
+    bo = _objective()
+    empty = BusinessObjective.objects.create(name="Reputation", impact_dimensions=["reputational"])
+    critical = _completed_risk(org_user, plant, threats["malware"])
+    rows = {(r["objective"] or {}).get("name"): r for r in services.register_objectives(plant)}
+    assert rows[bo.name]["count"] == 1 and rows[bo.name]["worst_class"] == "critical"
+    assert rows[bo.name]["untreated_high"] == 1 and rows[bo.name]["risk_ids"] == [str(critical.pk)]
+    assert rows[empty.name]["count"] == 0
+    assert rows[None]["count"] == 0
+    resp = _client(org_user).get(f"/api/v1/risk/assessments/objectives/?plant={plant.pk}")
+    assert resp.status_code == 200 and len(resp.data) == 3
+
+
+@pytest.mark.django_db
+def test_information_coverage(org_user, plant, threats, cycle):
+    from apps.risk.models import InformationClass
+
+    secret = InformationClass.objects.create(name="Prototype CAD", confidentiality="very_high")
+    InformationClass.objects.create(name="Brochures", confidentiality="low")
+    state = {i["name"]: i["state"] for i in services.information_coverage(plant)}
+    assert state == {"Prototype CAD": "missing"}
+    _completed_risk(org_user, plant, threats["malware"], information_classes=[secret])
+    item = services.information_coverage(plant)[0]
+    assert item["state"] == "evaluated" and item["worst_class"] == "critical"
+    # una minaccia senza riservatezza (incendio) non copre la classe
+    other = InformationClass.objects.create(name="Customer data", confidentiality="high")
+    _completed_risk(org_user, plant, threats["fire"], asset_type="SEDE", information_classes=[other])
+    assert {i["name"]: i["state"] for i in services.information_coverage(plant)}["Customer data"] == "missing"
+
+
+@pytest.mark.django_db
+def test_org_wide_supplier_allowed_in_site_risk(org_user, plant, cycle):
+    from apps.suppliers.models import Supplier
+
+    threat = ThreatCatalogEntry.objects.create(code="FO_X", asset_types=["FORNITORI"], cia=["A"],
+                                               source="catalog", translations={"en": {"title": "Supplier"}})
+    supplier = Supplier.objects.create(name="Org supplier")  # nessun sito = di organizzazione
+    risk = services.create_risk(org_user, plant, {**_eval(org_user), "asset_type": "FORNITORI",
+                                                  "threat": threat, "supplier": supplier})
+    assert risk.supplier == supplier
+
+
+@pytest.mark.django_db
+def test_security_objective_links_risks(org_user, plant, other_plant, threats, cycle):
+    from apps.governance.models import SecurityObjective
+
+    risk = _completed_risk(org_user, plant, threats["malware"])
+    c = _client(org_user)
+    base = {"code": "OBJ-R1", "title": "Restore test MES", "origin": "risk_assessment",
+            "measure_source": "manual", "unit": "%", "start_date": "2026-01-01", "baseline_value": 0,
+            "target_value": 100, "target_direction": "above", "target_date": "2026-12-31",
+            "plant": str(plant.pk), "risks": [str(risk.pk)]}
+    res = c.post("/api/v1/governance/security-objectives/", base, format="json")
+    assert res.status_code == 201, res.content
+    assert res.json()["risks_summary"][0]["business_objectives"] == ["OEM supply continuity"]
+    detail = c.get(f"/api/v1/risk/assessments/{risk.pk}/").json()
+    assert detail["security_objectives_summary"][0]["code"] == "OBJ-R1"
+    # un rischio di un altro sito non si collega
+    services.start_cycle(org_user, other_plant, "primo")
+    foreign = _completed_risk(org_user, other_plant, threats["malware"])
+    res = c.post("/api/v1/governance/security-objectives/",
+                 {**base, "code": "OBJ-R2", "risks": [str(foreign.pk)]}, format="json")
+    assert res.status_code == 400
+    assert SecurityObjective.objects.filter(code="OBJ-R2").count() == 0

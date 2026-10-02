@@ -983,6 +983,15 @@ def _validate_objective(data, instance=None):
             "kpi_definition": _("Un obiettivo di organizzazione non può usare un KPI di un singolo sito.")
         })
 
+    if data.get("risks"):
+        # Rischi trattati: del registro corrente (non legacy), del sito
+        # dell'obiettivo o di gruppo; un obiettivo di organizzazione li vede tutti.
+        for risk in data["risks"]:
+            if risk.cycle_id and risk.cycle.kind == "legacy":
+                raise ValidationError({"risks": _("Non si collegano rischi della valutazione con il metodo superato.")})
+            if plant is not None and risk.plant_id not in (None, plant.id):
+                raise ValidationError({"risks": _("I rischi devono essere del sito dell'obiettivo o di gruppo.")})
+
     start_date, target_date = field("start_date"), field("target_date")
     if start_date and target_date and target_date <= start_date:
         raise ValidationError({"target_date": _("La scadenza deve essere successiva all'inizio del periodo.")})
@@ -1009,6 +1018,7 @@ def create_objective(serializer, user):
         "measure_source": objective.measure_source,
         "target_value": objective.target_value,
         "target_date": objective.target_date.isoformat(),
+        "risks": objective.risks.count(),
     })
     return objective
 

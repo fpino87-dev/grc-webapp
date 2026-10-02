@@ -417,6 +417,16 @@ Le module applique la procédure de gestion des risques (D-ITA-INF-23). Chaque s
 
 En haut du registre, quatre compteurs indiquent où agir : **Critical à traiter** (traitement obligatoire), **High à décider** (traiter avec une analyse coûts/bénéfices ou accepter formellement), **Acceptations arrivant à échéance** sous 30 jours et **Risques avec mesures en retard**. Un clic sur un compteur filtre le registre sur ces risques, un second clic retire le filtre. Les délais suivent la procédure : les mesures doivent être terminées sous 3 mois pour les Critical, 1 an pour les High, 2 ans pour les Medium et 5 ans pour les Low et Very Low ; l'acceptation d'un Critical vaut au maximum 6 mois, celle d'un High 12 mois.
 
+### Objectifs métier, informations et objectifs de sécurité
+
+L'appréciation part des **objectifs métier** (procédure §2) : continuité des livraisons aux OEM, protection des informations des clients et label TISAX, conformité, résultat économique, personnes et environnement, réputation. Ils se gèrent dans **Paramètres › Objectifs métier** ; chacun indique les dimensions d'impact avec lesquelles on mesure le dommage. Ce ne sont pas les objectifs de sécurité de l'Organisation : ceux-ci sont des cibles mesurables issues du traitement des risques.
+
+- Dans la fiche du risque, le premier champ est **Objectifs métier menacés** : au moins un est obligatoire pour terminer l'évaluation. Le système propose ceux liés aux dimensions ayant l'impact le plus élevé
+- L'onglet **Par objectif** montre, pour chaque objectif, combien de risques le menacent, la classe la plus élevée et les High/Critical non acceptés ; cliquez sur une ligne pour voir les risques. La même synthèse figure dans l'Excel du registre, dans l'appréciation approuvée et dans la revue de direction
+- En choisissant le processus BIA, la fiche propose les **classes d'informations** utilisées par ce processus
+- Dans **Couverture**, la section **Couverture des informations** liste les classes Confidentielles et Strictement confidentielles et signale celles sans risque évalué avec une menace sur la confidentialité
+- Un **objectif de sécurité** (Organisation › Objectifs de sécurité) d'origine « Appréciation des risques » indique les **risques traités** ; la fiche du risque montre les objectifs de sécurité qui le suivent et leur avancement, et la revue indique pour chacun le risque et l'objectif métier dont il découle
+
 ### Appréciations (cycles)
 
 La barre sous le titre indique l'état de l'appréciation du registre :

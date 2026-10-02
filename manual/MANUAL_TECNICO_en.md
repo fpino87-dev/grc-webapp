@@ -527,6 +527,7 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 - `RiskAssessmentCycle` (first / periodic / extraordinary / legacy) with a `snapshot` frozen on approval
 - `RiskAcceptance` with role signatures, CISO opinion and governing body resolution per `RiskGovernancePolicy`
 - Threat catalogue: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (custom entries via API)
+- Business objectives `BusinessObjective` (procedure §2, `risk_catalogs/business_objectives.json` as a proposal) linked to the risk (`business_objectives`, required to complete); `governance.SecurityObjective.risks` links security objectives to the treated risks
 - Single functions for other modules: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
 
 ### M00 — Governance
@@ -1408,7 +1409,7 @@ The pytest suite (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=
 |---------|-------------|-----------------|
 | `migrate` | Apply DB migrations | After every deploy |
 | `load_frameworks` | Import regulatory framework JSON | Initial setup + framework update |
-| `load_risk_catalog` | Imports the threat catalogue (`risk_catalogs/threats.json`); idempotent, leaves custom entries untouched | Initial setup + catalogue update |
+| `load_risk_catalog` | Imports the threat catalogue (`risk_catalogs/threats.json`) and creates the missing proposed business objectives; idempotent, leaves custom entries untouched | Initial setup + catalogue update |
 | `load_notification_profiles` | Default notification profiles | Initial setup |
 | `load_competency_requirements` | M15 competency requirements | Initial setup |
 | `load_required_documents` | Mandatory documents | Initial setup |

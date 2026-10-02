@@ -8,6 +8,7 @@ from apps.plants.models import Plant
 from apps.suppliers.models import Supplier
 
 from .models import (
+    BusinessObjective,
     InformationClass,
     RiskAcceptance,
     RiskAssessment,
@@ -63,6 +64,7 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
     mitigation_plans_verified = serializers.SerializerMethodField()
     active_acceptance = serializers.SerializerMethodField()
     display_name = serializers.SerializerMethodField()
+    security_objectives_summary = serializers.SerializerMethodField()
 
     class Meta:
         model = RiskAssessment
@@ -70,7 +72,8 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
             "id", "plant", "plant_name", "cycle", "evaluated_in_cycle", "is_legacy", "is_inherited",
             "affected_plants", "name", "display_name", "status",
             "asset_type", "asset", "asset_name", "asset_group_label", "supplier", "supplier_name",
-            "threat", "threat_code", "threat_title", "information_classes",
+            "threat", "threat_code", "threat_title", "information_classes", "business_objectives",
+            "security_objectives_summary",
             "critical_process", "critical_process_name", "vulnerability", "consequence",
             "applicable", "not_applicable_reason",
             "probability", "probability_method", "probability_rationale",
@@ -93,6 +96,19 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
 
     def get_threat_title(self, obj):
         return obj.threat.get_title(_request_lang(self)) if obj.threat else None
+
+    def get_security_objectives_summary(self, obj):
+        """Obiettivi di sicurezza §6.2 che trattano il rischio, con l'andamento.
+        Solo nella scheda (retrieve): in elenco costerebbe una query per riga."""
+        if self.context.get("view") is not None and getattr(self.context["view"], "action", None) != "retrieve":
+            return None
+        from apps.governance.services import evaluate_objective
+
+        return [
+            {"id": str(o.pk), "code": o.code, "title": o.title, "status": o.status,
+             "target_date": o.target_date.isoformat(), "track": evaluate_objective(o)["track"]}
+            for o in obj.security_objectives.select_related("plant", "kpi_definition").order_by("target_date")
+        ]
 
     def get_display_name(self, obj):
         from .services import risk_label
@@ -163,6 +179,9 @@ class RiskEvaluationInputSerializer(serializers.Serializer):
         queryset=InformationClass.objects.all(), many=True, required=False,
     )
     affected_plants = serializers.PrimaryKeyRelatedField(queryset=Plant.objects.all(), many=True, required=False)
+    business_objectives = serializers.PrimaryKeyRelatedField(
+        queryset=BusinessObjective.objects.filter(active=True), many=True, required=False,
+    )
     critical_process = serializers.PrimaryKeyRelatedField(
         queryset=CriticalProcess.objects.all(), required=False, allow_null=True,
     )
@@ -337,6 +356,24 @@ class ThreatCatalogEntrySerializer(serializers.ModelSerializer):
 
     def get_title(self, obj):
         return obj.get_title(_request_lang(self))
+
+
+class BusinessObjectiveSerializer(serializers.ModelSerializer):
+    plant_name = serializers.CharField(source="plant.name", read_only=True)
+
+    class Meta:
+        model = BusinessObjective
+        fields = ["id", "plant", "plant_name", "code", "name", "description", "impact_dimensions",
+                  "order", "active"]
+
+    def validate_impact_dimensions(self, value):
+        from django.utils.translation import gettext as _
+
+        from .services import IMPACT_DIMENSIONS
+
+        if not isinstance(value, list) or any(v not in IMPACT_DIMENSIONS for v in value):
+            raise serializers.ValidationError(_("Dimensioni d'impatto non valide."))
+        return list(dict.fromkeys(value))
 
 
 class InformationClassSerializer(serializers.ModelSerializer):

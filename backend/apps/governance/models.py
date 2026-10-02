@@ -415,6 +415,10 @@ class SecurityObjective(BaseModel):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     origin = models.CharField(max_length=20, choices=ORIGIN_CHOICES, default="politica")
+    risks = models.ManyToManyField(
+        "risk.RiskAssessment", blank=True, related_name="security_objectives",
+        help_text="Rischi che l'obiettivo tratta (origine «Valutazione del rischio»)",
+    )
     # Riesame di direzione che ha deliberato l'obiettivo. UUID e non FK per
     # non accoppiare le migrazioni di governance a quelle di M13 (stesso
     # criterio di RoleAssignment.document_id).

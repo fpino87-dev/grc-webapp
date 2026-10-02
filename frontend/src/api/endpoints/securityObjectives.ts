@@ -70,6 +70,9 @@ export interface SecurityObjective {
   closed_at: string | null;
   closure_note: string;
   evaluation: ObjectiveEvaluation;
+  /** Rischi trattati (origine «Valutazione del rischio»). */
+  risks: string[];
+  risks_summary: { id: string; name: string; plant: string | null; current_class: string; business_objectives: string[] }[];
 }
 
 export interface ObjectiveSeriesPoint {

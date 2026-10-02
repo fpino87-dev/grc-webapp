@@ -147,6 +147,7 @@ class SecurityObjectiveSerializer(serializers.ModelSerializer):
     plant_code = serializers.SerializerMethodField(read_only=True)
     kpi_code = serializers.SerializerMethodField(read_only=True)
     evaluation = serializers.SerializerMethodField(read_only=True)
+    risks_summary = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SecurityObjective
@@ -164,6 +165,20 @@ class SecurityObjectiveSerializer(serializers.ModelSerializer):
 
     def get_plant_code(self, obj):
         return obj.plant.code if obj.plant_id else None
+
+    def get_risks_summary(self, obj):
+        """Rischi trattati con classe e obiettivi aziendali da cui nascono:
+        la catena obiettivo aziendale → rischio → obiettivo di sicurezza."""
+        from apps.risk.services import risk_label
+
+        request = self.context.get("request")
+        lang = (getattr(request, "LANGUAGE_CODE", None) if request else None) or None
+        return [
+            {"id": str(r.pk), "name": risk_label(r, lang), "plant": str(r.plant_id) if r.plant_id else None,
+             "current_class": r.current_class,
+             "business_objectives": [bo.name for bo in r.business_objectives.all()]}
+            for r in obj.risks.all()
+        ]
 
     def get_kpi_code(self, obj):
         return obj.kpi_definition.kpi_code if obj.kpi_definition_id else None

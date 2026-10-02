@@ -417,6 +417,16 @@ The module applies the risk management procedure (D-ITA-INF-23). Each site has i
 
 At the top of the register four counters show where action is needed: **Critical to treat** (mandatory treatment), **High to decide** (treat with a cost/benefit analysis or accept formally), **Expiring acceptances** within 30 days and **Risks with overdue measures**. Clicking a counter filters the register on those risks; a second click removes the filter. Deadlines follow the procedure: measures must be completed within 3 months for Critical, 1 year for High, 2 years for Medium and 5 years for Low and Very Low; acceptance of a Critical risk lasts at most 6 months, of a High risk 12 months.
 
+### Business objectives, information and security objectives
+
+The assessment starts from the **business objectives** (procedure §2): continuity of supply to OEMs, protection of customer information and the TISAX label, compliance, financial result, people and the environment, reputation. They are managed in **Settings › Business objectives**; each indicates the impact dimensions used to measure the damage. They are not the security objectives under Organisation: those are measurable targets that come from treating risks.
+
+- In the risk card the first field is **Business objectives threatened**: at least one is required to complete the assessment. The system suggests those linked to the dimensions with the highest impact
+- The **By objective** tab shows, for each objective, how many risks threaten it, the worst class and the High/Critical risks not accepted; click a row to see the risks. The same summary is in the register Excel, in the approved assessment and in the management review
+- When you choose the BIA process, the card suggests the **information classes** that process uses
+- In **Coverage**, the **Information coverage** section lists Confidential and Strictly confidential classes and flags those without a risk assessed with a confidentiality threat
+- A **security objective** (Organisation › Security objectives) with origin "Risk assessment" indicates the **treated risks**; the risk card shows the security objectives that follow it and their progress, and the management review reports for each one the risk and the business objective it comes from
+
 ### Assessments (cycles)
 
 The bar under the title shows the status of the register assessment:

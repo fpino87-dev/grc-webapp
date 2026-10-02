@@ -1,7 +1,9 @@
 """Carica il catalogo minacce di gruppo da backend/risk_catalogs/threats.json.
 
 Idempotente: aggiorna le voci del catalogo per codice, disattiva quelle tolte
-dal file e non tocca le voci personalizzate create da UI.
+dal file e non tocca le voci personalizzate create da UI. Crea anche gli
+obiettivi aziendali proposti (risk_catalogs/business_objectives.json) che
+mancano, senza toccare quelli modificati o eliminati.
 """
 import json
 from pathlib import Path
@@ -34,6 +36,12 @@ class Command(BaseCommand):
             f"Catalogo {data.get('version', '')}: {counts['created']} create, "
             f"{counts['updated']} aggiornate, {counts['deactivated']} disattivate"
         ))
+        objectives_path = path.parent / "business_objectives.json"
+        if not options["file"] and objectives_path.exists():
+            from apps.risk.services import seed_business_objectives
+
+            created = seed_business_objectives(json.loads(objectives_path.read_text("utf-8")).get("objectives", []))
+            self.stdout.write(self.style.SUCCESS(f"Obiettivi aziendali proposti: {created} creati"))
         if counts["conflicts"]:
             self.stdout.write(self.style.WARNING(
                 "Codici già usati da voci personalizzate (non importati): "

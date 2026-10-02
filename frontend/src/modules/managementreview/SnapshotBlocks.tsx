@@ -4,7 +4,7 @@ import i18n from "../../i18n";
 import {
   DetailTable, KpiBox, KpiGrid, SnapSection, fmtDate, isOverdue, type SnapRiskCycle,
   type Snap, type SnapAudit, type SnapDoc, type SnapFinding, type SnapFramework, type SnapIncident,
-  type SnapKpi, type SnapObjective, type SnapPdca, type SnapPdcaOverdue, type SnapPendingDoc, type SnapPrevAction, type SnapRisk,
+  type SnapKpi, type SnapObjective, type SnapObjectiveRisks, type SnapPdca, type SnapPdcaOverdue, type SnapPendingDoc, type SnapPrevAction, type SnapRisk,
   type SnapSite, type SnapTask,
 } from "./shared";
 
@@ -159,7 +159,7 @@ export function ObjectivesBlock({ snap }: { snap: Snap }) {
         headers={[
           t("objectives.fields.objective"), t("objectives.baseline_to_target"),
           t("objectives.current_value"), t("objectives.progress"),
-          t("objectives.fields.target_date"), t("objectives.fields.track"),
+          t("objectives.fields.target_date"), t("objectives.fields.track"), t("management_review.snap.col_treated_risks"),
         ]}
         rows={((o.elenco ?? []) as SnapObjective[]).map(i => [
           <span>{i.title}<span className="text-gray-400"> · {i.code}{i.plant_code ? ` · ${i.plant_code}` : ""}</span></span>,
@@ -168,6 +168,12 @@ export function ObjectivesBlock({ snap }: { snap: Snap }) {
           i.progress_pct === null ? "—" : `${i.progress_pct}%`,
           fmtDate(i.target_date),
           <span className={tone[i.track] ?? ""}>{t(`objectives.track.${i.track}`)}</span>,
+          (i.rischi ?? []).length === 0 ? "—" : (
+            <span className="text-xs">
+              {(i.rischi ?? []).map(x => `${x.name} (${t(`risk.classes.${x.current_class}`, x.current_class)})`
+                + (x.obiettivi_aziendali.length ? ` ← ${x.obiettivi_aziendali.join(", ")}` : "")).join("; ")}
+            </span>
+          ),
         ])}
         total={o.totale}
       />
@@ -414,6 +420,21 @@ function ClassRisksBlock({ snap }: { snap: Snap }) {
         ])}
         total={r.oltre_soglia}
       />
+      {(r.per_obiettivo ?? []).length > 0 && (
+        <DetailTable
+          title={t("management_review.snap.risks_by_objective")}
+          headers={[
+            t("management_review.snap.col_business_objective"), t("management_review.snap.col_assessed_risks"),
+            t("management_review.snap.col_worst_class"), t("management_review.snap.col_untreated_high"),
+          ]}
+          rows={((r.per_obiettivo ?? []) as SnapObjectiveRisks[]).filter(x => x.name || x.count).map(x => [
+            x.name ?? <span className="text-amber-700">{t("risk.objectives.none")}</span>,
+            x.count,
+            x.worst_class ? cls(x.worst_class) : "—",
+            <span className={x.untreated_high ? "text-red-600 font-semibold" : ""}>{x.untreated_high}</span>,
+          ])}
+        />
+      )}
       <DetailTable
         title={t("management_review.snap.accepted_risks")}
         headers={[

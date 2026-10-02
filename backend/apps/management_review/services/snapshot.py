@@ -235,7 +235,11 @@ def _objectives_block(plant_id, today) -> dict:
         OBJECTIVE_OPEN_STATUSES, evaluate_objective, latest_objective_values,
     )
 
-    qs = SecurityObjective.objects.select_related("plant", "kpi_definition")
+    from apps.risk.services import risk_label
+
+    qs = SecurityObjective.objects.select_related("plant", "kpi_definition").prefetch_related(
+        "risks__threat", "risks__business_objectives",
+    )
     if plant_id:
         qs = qs.filter(Q(plant_id=plant_id) | Q(plant__isnull=True))
     recently_closed = Q(closed_at__gte=timezone.now() - timezone.timedelta(days=365))
@@ -269,6 +273,12 @@ def _objectives_block(plant_id, today) -> dict:
             "unit": ev["unit"],
             "progress_pct": ev["progress_pct"],
             "track": ev["track"],
+            # Catena obiettivo aziendale → rischio → obiettivo di sicurezza.
+            "rischi": [
+                {"name": risk_label(r), "current_class": r.current_class,
+                 "obiettivi_aziendali": [bo.name for bo in r.business_objectives.all()]}
+                for r in o.risks.all()
+            ],
         })
 
     # In direzione si guardano per primi quelli che non stanno andando bene.
@@ -699,6 +709,26 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         ]
 
     risk_summary["top_critici"] = _risk_items(over_qs)
+    # Rischi per obiettivo aziendale (procedura §2): la valutazione parte dagli obiettivi.
+    from apps.risk.models import BusinessObjective
+    from apps.risk.services import HIGH_CLASSES, active_acceptance_risk_ids, worst_class
+
+    objective_risks = list(risks_qs.prefetch_related("business_objectives"))
+    accepted_ids = active_acceptance_risk_ids(risks_qs)
+    objective_scope = Q(plant__isnull=True) | (Q(plant_id=plant_id) if plant_id else Q(plant__isnull=False))
+    per_objective = []
+    for bo in BusinessObjective.objects.filter(objective_scope, active=True):
+        linked = [r for r in objective_risks if bo in r.business_objectives.all()]
+        per_objective.append({
+            "name": bo.name, "count": len(linked),
+            "worst_class": worst_class(r.current_class for r in linked),
+            "untreated_high": sum(1 for r in linked if r.current_class in HIGH_CLASSES and r.pk not in accepted_ids),
+        })
+    per_objective.append({
+        "name": None, "count": sum(1 for r in objective_risks if not r.business_objectives.all()),
+        "worst_class": "", "untreated_high": 0,
+    })
+    risk_summary["per_obiettivo"] = per_objective
     risk_summary["elenco_accettati"] = [
         {
             "id": str(a.risk_id),

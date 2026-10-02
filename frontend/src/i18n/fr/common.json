@@ -3249,6 +3249,7 @@
       "tabs_label": "Sections de l'appréciation des risques",
       "tabs": {
         "register": "Registre",
+        "objectives": "Par objectif",
         "matrix": "Matrice",
         "coverage": "Couverture",
         "plan": "Plan de traitement",
@@ -3263,7 +3264,7 @@
       "steps": {
         "1": "Lancez l'appréciation du registre (première appréciation, révision périodique ou extraordinaire).",
         "2": "Dans l'onglet Couverture, évaluez chaque menace applicable ou déclarez-la non applicable avec le motif.",
-        "3": "Dans la fiche du risque, indiquez probabilité et impact avec justification, mesures existantes et traitement.",
+        "3": "Dans la fiche du risque, partez des objectifs métier menacés, puis indiquez la probabilité et l'impact avec les justifications, les mesures existantes et le traitement.",
         "4": "Terminez l'évaluation : High et Critical ouvrent le plan de traitement.",
         "5": "Soumettez à l'approbation : l'organe approuve et le registre est figé.",
         "6": "Suivez mesures, vérifications et acceptations : la classe ne baisse qu'avec des mesures vérifiées."
@@ -3277,7 +3278,7 @@
       },
       "config_needed": {
         "1": "Politique de gouvernance des risques (Paramètres)",
-        "2": "Classes d'informations du site et catalogue des menaces chargé"
+        "2": "Objectifs métier et classes d'informations (Paramètres), catalogue des menaces chargé"
       }
     },
     "cycle": {
@@ -3499,7 +3500,14 @@
       "delete_confirm": "Retirer ce risque du registre ?",
       "reopen": "Rouvrir",
       "confirm": "Confirmer l'évaluation",
-      "complete": "Terminer l'évaluation"
+      "complete": "Terminer l'évaluation",
+      "business_objectives": "Objectifs métier menacés",
+      "business_objectives_hint": "Le point de départ de l'appréciation (procédure §2) : quel objectif de l'entreprise le risque met en danger. Obligatoire pour terminer.",
+      "no_business_objectives": "Aucun objectif métier : définissez-les dans Paramètres.",
+      "suggested": "proposé",
+      "use_suggested": "Utiliser les objectifs proposés",
+      "security_objectives": "Objectifs de sécurité liés",
+      "no_security_objectives": "Aucun objectif de sécurité ne traite ce risque. Liez-les depuis Organisation › Objectifs de sécurité, avec l'origine « Appréciation des risques »."
     },
     "register": {
       "search": "Rechercher",
@@ -3599,7 +3607,8 @@
       "sections": {
         "governance": "Gouvernance des risques",
         "catalog": "Catalogue des menaces",
-        "information": "Classes d'informations"
+        "information": "Classes d'informations",
+        "objectives": "Objectifs métier"
       },
       "org_policy": "Politique de l'organisation",
       "configured": "Approuvée et en vigueur.",
@@ -3671,7 +3680,15 @@
       "availability": "Disponibilité",
       "new_class": "Nouvelle classe d'informations",
       "edit_class": "Modifier la classe d'informations",
-      "delete_class_confirm": "Supprimer cette classe d'informations ?"
+      "delete_class_confirm": "Supprimer cette classe d'informations ?",
+      "objectives_hint": "Les objectifs de l'entreprise dont part l'appréciation des risques (procédure §2). Les dimensions d'impact servent à proposer l'objectif dans la fiche du risque. Ceux sans site valent pour le groupe.",
+      "no_objectives": "Aucun objectif métier défini.",
+      "objective_name": "Objectif",
+      "objective_description": "Description",
+      "objective_dimensions": "Dimensions d'impact",
+      "objective_dimensions_hint": "Les dimensions avec lesquelles on mesure le dommage à cet objectif.",
+      "new_objective": "Nouvel objectif métier",
+      "edit_objective": "Modifier l'objectif métier"
     },
     "protection": {
       "low": "Low",
@@ -3768,6 +3785,26 @@
           "1": "Aucun effet notable"
         }
       }
+    },
+    "objectives": {
+      "hint": "Risques évalués par objectif métier, y compris les risques de groupe hérités : montre que l'appréciation part des objectifs. Cliquez sur une ligne pour voir les risques.",
+      "col_objective": "Objectif métier",
+      "col_risks": "Risques",
+      "col_worst": "Classe la plus élevée",
+      "col_untreated": "High/Critical non acceptés",
+      "col_distribution": "Par classe",
+      "none": "Risques sans objectif indiqué"
+    },
+    "information_coverage": {
+      "title": "Couverture des informations",
+      "hint": "Classes d'informations Confidentielles et Strictement confidentielles : chacune devrait avoir au moins un risque évalué avec une menace sur la confidentialité (VDA ISA 1.3.1, 1.3.2).",
+      "missing": "Classes sans risques de confidentialité : {{count}}",
+      "states": {
+        "evaluated": "Évaluée",
+        "draft": "En cours d'évaluation",
+        "missing": "Non couverte"
+      },
+      "open": "Ouvrir"
     }
   },
   "pdca": {
@@ -6133,7 +6170,13 @@
         "in_corso": "En cours",
         "in_approvazione": "En attente d'approbation",
         "approvato": "Approuvée"
-      }
+      },
+      "col_treated_risks": "Risques traités ← objectif métier",
+      "risks_by_objective": "Risques par objectif métier",
+      "col_business_objective": "Objectif métier",
+      "col_assessed_risks": "Risques évalués",
+      "col_worst_class": "Classe la plus élevée",
+      "col_untreated_high": "High/Critical non acceptés"
     },
     "participants": {
       "heading": "Convoqués et présences",
@@ -6403,7 +6446,10 @@
       "track": "Trajectoire",
       "objective": "Objectif",
       "value": "Valeur",
-      "note": "Note"
+      "note": "Note",
+      "risks": "Risques traités",
+      "risks_hint": "Les risques que cet objectif contribue à traiter : ils relient l'objectif à l'appréciation des risques et aux objectifs métier.",
+      "risks_search": "Rechercher un risque…"
     },
     "actions": {
       "new": "Nouvel objectif",

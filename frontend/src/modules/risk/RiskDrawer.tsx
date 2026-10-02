@@ -6,6 +6,9 @@ import { EvaluationForm, initialEvaluation, type EvaluationState } from "./Evalu
 import { AcceptanceSection, LocalImpactSection, MeasuresSection, PlanSection } from "./RiskSections";
 import { ClassTransition, ErrorBox, Section } from "./RiskUi";
 import type { RegisterId } from "./RiskPage";
+import { Link } from "react-router-dom";
+import { TrackBadge } from "../objectives/objectiveBadges";
+import type { ObjectiveTrack } from "../../api/endpoints/securityObjectives";
 
 /** Scheda del rischio in un pannello laterale (pattern UserDrawer). */
 export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite, orgScope, onClose }: {
@@ -123,6 +126,21 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
               <PlanSection risk={risk} canMonitor={canMonitor} />
               <AcceptanceSection risk={risk} canMonitor={canMonitor} />
               {risk.plant === null && <LocalImpactSection risk={risk} registerId={registerId} orgScope={orgScope} />}
+              <Section title={t("risk.drawer.security_objectives")}>
+                {(risk.security_objectives_summary ?? []).length === 0 ? (
+                  <p className="text-xs text-gray-500">{t("risk.drawer.no_security_objectives")}</p>
+                ) : (
+                  <ul className="space-y-1 text-sm">
+                    {(risk.security_objectives_summary ?? []).map(o => (
+                      <li key={o.id} className="flex flex-wrap items-center gap-2">
+                        <TrackBadge track={o.track as ObjectiveTrack} />
+                        <Link to="/objectives" className="text-primary-600 hover:underline">{o.code} — {o.title}</Link>
+                        <span className="text-xs text-gray-500">{new Date(o.target_date).toLocaleDateString(i18n.language)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
               <Section title={t("risk.drawer.history")}>
                 <p className="text-xs text-gray-500">
                   {t("risk.drawer.assessed", {

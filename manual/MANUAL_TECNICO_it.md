@@ -527,6 +527,7 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 - `RiskAssessmentCycle` (primo / periodico / straordinario / legacy) con `snapshot` congelato all'approvazione
 - `RiskAcceptance` con firme dei ruoli, parere del CISO e delibera dell'organo secondo `RiskGovernancePolicy`
 - Catalogo minacce: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (voci personalizzate da API)
+- Obiettivi aziendali `BusinessObjective` (procedura §2, `risk_catalogs/business_objectives.json` come proposta) collegati al rischio (`business_objectives`, obbligatorio per completare); `governance.SecurityObjective.risks` collega gli obiettivi di sicurezza ai rischi trattati
 - Funzioni uniche per gli altri moduli: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
 
 ### M00 — Governance
@@ -1408,7 +1409,7 @@ La suite pytest (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=7
 |---------|-------------|-----------------|
 | `migrate` | Applica migrazioni DB | Dopo ogni deploy |
 | `load_frameworks` | Importa JSON framework normativi | Setup iniziale + aggiornamento framework |
-| `load_risk_catalog` | Importa il catalogo minacce (`risk_catalogs/threats.json`); idempotente, non tocca le voci personalizzate | Setup iniziale + aggiornamento del catalogo |
+| `load_risk_catalog` | Importa il catalogo minacce (`risk_catalogs/threats.json`) e crea gli obiettivi aziendali proposti mancanti; idempotente, non tocca le voci personalizzate | Setup iniziale + aggiornamento del catalogo |
 | `load_notification_profiles` | Profili notifica default | Setup iniziale |
 | `load_competency_requirements` | Requisiti competenze M15 | Setup iniziale |
 | `load_required_documents` | Documenti obbligatori | Setup iniziale |

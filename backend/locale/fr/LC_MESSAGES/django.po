@@ -3520,3 +3520,39 @@ msgstr "Indiquez le risque de groupe et le site."
 
 msgid "La valutazione non ha una fotografia: si esporta solo una valutazione approvata."
 msgstr "L'appréciation n'a pas de photographie : seule une appréciation approuvée peut être exportée."
+
+msgid "Rischi per obiettivo aziendale"
+msgstr "Risques par objectif métier"
+
+msgid "Obiettivo aziendale"
+msgstr "Objectif métier"
+
+msgid "Rischi valutati"
+msgstr "Risques évalués"
+
+msgid "Classe peggiore"
+msgstr "Classe la plus élevée"
+
+msgid "Non accettati High/Critical"
+msgstr "High/Critical non acceptés"
+
+msgid "Nessun obiettivo indicato"
+msgstr "Aucun objectif indiqué"
+
+msgid "Rischi trattati ← obiettivo aziendale"
+msgstr "Risques traités ← objectif métier"
+
+msgid "Indica almeno un obiettivo aziendale minacciato dal rischio."
+msgstr "Indiquez au moins un objectif métier menacé par le risque."
+
+msgid "Gli obiettivi aziendali devono essere del sito del registro o di gruppo."
+msgstr "Les objectifs métier doivent appartenir au site du registre ou au groupe."
+
+msgid "Dimensioni d'impatto non valide."
+msgstr "Dimensions d'impact non valides."
+
+msgid "Non si collegano rischi della valutazione con il metodo superato."
+msgstr "Les risques de l'appréciation avec la méthode remplacée ne peuvent pas être liés."
+
+msgid "I rischi devono essere del sito dell'obiettivo o di gruppo."
+msgstr "Les risques doivent appartenir au site de l'objectif ou au groupe."

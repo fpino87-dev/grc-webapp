@@ -457,6 +457,25 @@ def create_custom_threat(user, *, code, asset_types, cia, translations):
     return entry
 
 
+def seed_business_objectives(items) -> int:
+    """Crea gli obiettivi aziendali proposti mancanti (per codice, di gruppo).
+    Non tocca quelli esistenti né ricrea quelli eliminati da Impostazioni."""
+    from .models import BusinessObjective
+
+    existing = set(BusinessObjective.objects.all_with_deleted().exclude(code="").values_list("code", flat=True))
+    created = 0
+    for order, item in enumerate(items or [], start=1):
+        if item.get("code") in existing:
+            continue
+        dims = [d for d in item.get("impact_dimensions", []) if d in IMPACT_DIMENSIONS]
+        BusinessObjective.objects.create(
+            code=item["code"], name=item["name"], description=item.get("description", ""),
+            impact_dimensions=dims, order=order,
+        )
+        created += 1
+    return created
+
+
 THREAT_LANGS = ("it", "en", "fr", "pl", "tr")
 
 
@@ -644,7 +663,7 @@ EVALUATION_FIELDS = (
     "nis2_in_scope", "nis2_art21_category", "impacted_systems",
     "significant_incident_potential", "significant_incident_note",
 )
-EVALUATION_M2M = ("information_classes", "affected_plants")
+EVALUATION_M2M = ("information_classes", "affected_plants", "business_objectives")
 
 
 def _err(message, **params):
@@ -731,7 +750,7 @@ def recompute_risk(risk) -> None:
     risk.expected_class = risk_class(risk.expected_probability, risk.expected_impact) or ""
 
 
-def _validate_risk_links(risk, information_classes, affected_plants) -> None:
+def _validate_risk_links(risk, information_classes, affected_plants, business_objectives=None) -> None:
     """Coerenza fra registro, tipologia, minaccia e oggetti collegati."""
     from django.utils.translation import gettext as _
 
@@ -749,11 +768,16 @@ def _validate_risk_links(risk, information_classes, affected_plants) -> None:
         raise _err(_("L'asset deve appartenere al sito del registro."))
     if risk.critical_process_id and plant is not None and risk.critical_process.plant_id != plant.pk:
         raise _err(_("Il processo deve appartenere al sito del registro."))
-    if risk.supplier_id and plant is not None and not risk.supplier.plants.filter(pk=plant.pk).exists():
+    # Un fornitore senza siti è di organizzazione e vale per tutti i siti.
+    if risk.supplier_id and plant is not None and risk.supplier.plants.exists() \
+            and not risk.supplier.plants.filter(pk=plant.pk).exists():
         raise _err(_("Il fornitore deve operare per il sito del registro."))
     for ic in information_classes or []:
         if ic.plant_id is not None and (plant is None or ic.plant_id != plant.pk):
             raise _err(_("Le classi di informazioni devono essere del sito del registro o di gruppo."))
+    for bo in business_objectives or []:
+        if bo.plant_id is not None and (plant is None or bo.plant_id != plant.pk):
+            raise _err(_("Gli obiettivi aziendali devono essere del sito del registro o di gruppo."))
     if affected_plants and plant is not None:
         raise _err(_("Solo i rischi di gruppo indicano i siti che li ereditano."))
     if risk.class_override not in (-1, 0, 1):
@@ -802,7 +826,8 @@ def create_risk(user, plant, data: dict):
     m2m = _apply_fields(risk, data)
     if not risk.asset_type or not risk.threat_id:
         raise _err(_("Indica la tipologia di asset e la minaccia del catalogo."))
-    _validate_risk_links(risk, m2m.get("information_classes"), m2m.get("affected_plants"))
+    _validate_risk_links(risk, m2m.get("information_classes"), m2m.get("affected_plants"),
+                         m2m.get("business_objectives"))
     if "nis2_in_scope" not in data:
         risk.nis2_in_scope = _default_nis2_scope(risk, m2m.get("affected_plants"))
     with transaction.atomic():
@@ -832,6 +857,7 @@ def update_risk(user, risk, data: dict):
         m2m.get("information_classes", list(risk.information_classes.all())),
         m2m.get("affected_plants", list(risk.affected_plants.all())) if risk.plant is None
         else m2m.get("affected_plants"),
+        m2m.get("business_objectives"),
     )
     before = risk.current_class
     with transaction.atomic():
@@ -858,6 +884,8 @@ def risk_completeness_errors(risk) -> list:
         if not risk.not_applicable_reason.strip():
             errors.append(_("Motiva perché la minaccia non è applicabile."))
         return errors
+    if not risk.business_objectives.exists():
+        errors.append(_("Indica almeno un obiettivo aziendale minacciato dal rischio."))
     if not risk.probability or not risk.probability_rationale.strip():
         errors.append(_("Indica la probabilità e la sua motivazione."))
     if not risk.impact or not risk.impact_rationale.strip():
@@ -918,6 +946,10 @@ def confirm_risk(user, risk):
     cycle = _require_evaluation_cycle(risk.plant)
     if risk.status != "completato":
         raise _err(_("Si conferma solo un rischio con valutazione completata."))
+    # Si conferma solo ciò che rispetta le regole attuali (es. obiettivi aziendali).
+    errors = risk_completeness_errors(risk)
+    if errors:
+        raise _err(errors[0])
     with transaction.atomic():
         risk.evaluated_in_cycle = cycle
         risk.assessed_by = user
@@ -1641,7 +1673,7 @@ def build_register_snapshot(plant, cycle) -> dict:
     risks = (
         register_queryset(plant)
         .select_related("threat", "owner", "asset", "supplier", "critical_process")
-        .prefetch_related("mitigation_plans", "affected_plants")
+        .prefetch_related("mitigation_plans", "affected_plants", "business_objectives", "information_classes")
         .order_by("asset_type", "threat__code")
     )
     active_acc = {
@@ -1660,6 +1692,8 @@ def build_register_snapshot(plant, cycle) -> dict:
             "asset": r.asset.name if r.asset else (r.asset_group_label or None),
             "supplier": r.supplier.name if r.supplier else None,
             "process": r.critical_process.name if r.critical_process else None,
+            "business_objectives": [bo.name for bo in r.business_objectives.all()],
+            "information_classes": [ic.name for ic in r.information_classes.all()],
             "probability": r.probability,
             "impact": r.impact,
             "impacts": {d: getattr(r, f"impact_{d}") for d in IMPACT_DIMENSIONS},
@@ -1678,6 +1712,8 @@ def build_register_snapshot(plant, cycle) -> dict:
         "kind": cycle.kind,
         "risks": items,
         "coverage": {k: v for k, v in register_coverage(plant).items() if k != "pairs"},
+        "objectives": [{k: v for k, v in o.items() if k != "risk_ids"} for o in register_objectives(plant)],
+        "information_coverage": [{k: v for k, v in i.items() if k != "risk_ids"} for i in information_coverage(plant)],
         "policy": resolve_policy(plant),
     }
 
@@ -1853,6 +1889,74 @@ def register_attention(plant=None, today=None) -> dict:
     return result
 
 
+def register_objectives(plant=None) -> list:
+    """Rischi per obiettivo aziendale (procedura §2): la vista che mostra che la
+    valutazione parte dagli obiettivi. Registro proprio + rischi di gruppo
+    ereditati (un sito risponde anche di quelli); in coda i rischi senza obiettivo."""
+    from django.db.models import Q
+
+    from .models import BusinessObjective
+
+    risks = list(
+        register_queryset(plant, include_inherited=plant is not None)
+        .filter(applicable=True, status="completato")
+        .prefetch_related("business_objectives")
+    )
+    accepted = active_acceptance_risk_ids(RiskAssessment.objects.filter(pk__in=[r.pk for r in risks]))
+    scope = Q(plant__isnull=True) | (Q(plant=plant) if plant is not None else Q(pk__in=[]))
+    rows = []
+
+    def _row(objective, linked):
+        untreated = [r for r in linked if r.current_class in HIGH_CLASSES and r.pk not in accepted]
+        return {
+            "objective": None if objective is None else {
+                "id": str(objective.pk), "code": objective.code, "name": objective.name,
+                "impact_dimensions": objective.impact_dimensions,
+            },
+            "count": len(linked),
+            "worst_class": worst_class(r.current_class for r in linked),
+            "by_class": {c: sum(1 for r in linked if r.current_class == c) for c in RISK_CLASSES},
+            "untreated_high": len(untreated),
+            "risk_ids": [str(r.pk) for r in linked],
+        }
+
+    for objective in BusinessObjective.objects.filter(scope, active=True):
+        rows.append(_row(objective, [r for r in risks if objective in r.business_objectives.all()]))
+    rows.append(_row(None, [r for r in risks if not r.business_objectives.all()]))
+    return rows
+
+
+CONFIDENTIALITY_COVERAGE_LEVELS = ("high", "very_high")
+
+
+def information_coverage(plant=None) -> list:
+    """Classi di informazioni Confidenziali/Segrete e rischi di riservatezza che
+    le coprono (VDA ISA 1.3.1/1.3.2): una classe senza rischi valutati con una
+    minaccia alla riservatezza è un buco della valutazione."""
+    from django.db.models import Q
+
+    from .models import InformationClass
+
+    scope = Q(plant__isnull=True) | (Q(plant=plant) if plant is not None else Q(pk__in=[]))
+    classes = InformationClass.objects.filter(scope, confidentiality__in=CONFIDENTIALITY_COVERAGE_LEVELS)
+    risks = list(
+        register_queryset(plant, include_inherited=plant is not None)
+        .filter(applicable=True).select_related("threat").prefetch_related("information_classes")
+    )
+    out = []
+    for ic in classes:
+        linked = [r for r in risks if ic in r.information_classes.all() and r.threat and "C" in (r.threat.cia or [])]
+        evaluated = [r for r in linked if r.status == "completato"]
+        out.append({
+            "id": str(ic.pk), "name": ic.name, "confidentiality": ic.confidentiality,
+            "plant": str(ic.plant_id) if ic.plant_id else None,
+            "state": "evaluated" if evaluated else ("draft" if linked else "missing"),
+            "worst_class": worst_class(r.current_class for r in evaluated),
+            "risk_ids": [str(r.pk) for r in linked],
+        })
+    return out
+
+
 def worst_class(classes) -> str:
     return max((c for c in classes if c), key=class_rank, default="")
 
@@ -1863,7 +1967,8 @@ def worst_class(classes) -> str:
 
 def generate_risk_excel(plant=None) -> bytes:
     """Registro corrente del sito (o del gruppo se `plant` è None) in Excel:
-    fogli Registro, Piano di trattamento, Accettazioni, Copertura, Criteri."""
+    fogli Registro, Piano di trattamento, Accettazioni, Obiettivi aziendali,
+    Copertura informazioni, Copertura, Criteri."""
     import io
 
     from django.utils.translation import get_language
@@ -1895,14 +2000,16 @@ def generate_risk_excel(plant=None) -> bytes:
     risks = list(
         register_queryset(plant, include_inherited=plant is not None)
         .select_related("plant", "threat", "asset", "supplier", "critical_process", "owner", "treatment_owner")
-        .prefetch_related("information_classes", "existing_measures__control_instance__control")
+        .prefetch_related("information_classes", "business_objectives",
+                          "existing_measures__control_instance__control")
         .order_by("asset_type", "threat__code")
     )
     art21 = dict(NIS2_ART21_CHOICES)
     wb = Workbook()
     ws = sheet(wb, "Registro", [
         "Registro", "Tipologia", "Codice minaccia", "Minaccia", "Scenario", "Asset / gruppo", "Fornitore",
-        "Processo BIA", "Informazioni", "Vulnerabilità", "Conseguenza", "Applicabile", "Motivo non applicabile",
+        "Obiettivi aziendali", "Processo BIA", "Informazioni", "Vulnerabilità", "Conseguenza", "Applicabile",
+        "Motivo non applicabile",
         "Misure esistenti", "Probabilità", "Motivazione probabilità",
         "Imp. economico", "Imp. legale", "Imp. cliente", "Imp. reputazionale", "Imp. persone", "Imp. operativo",
         "Impatto", "Motivazione impatto", "Classe matrice", "Override", "Motivazione override", "Classe attuale",
@@ -1919,6 +2026,7 @@ def generate_risk_excel(plant=None) -> bytes:
             r.plant.name if r.plant else "Gruppo", r.asset_type, r.threat.code if r.threat else "",
             r.threat.get_title((get_language() or "en")[:2]) if r.threat else "", risk_label(r),
             r.asset.name if r.asset else r.asset_group_label, r.supplier.name if r.supplier else "",
+            ", ".join(bo.name for bo in r.business_objectives.all()),
             r.critical_process.name if r.critical_process else "",
             ", ".join(ic.name for ic in r.information_classes.all()), r.vulnerability, r.consequence,
             "Sì" if r.applicable else "No", r.not_applicable_reason, measures,
@@ -1971,6 +2079,24 @@ def generate_risk_excel(plant=None) -> bytes:
         ], 1):
             ws.cell(row=row, column=col, value=value)
 
+    ws = sheet(wb, "Obiettivi aziendali", [
+        "Obiettivo", "Rischi valutati", "Classe peggiore", "High/Critical non accettati",
+        "Critical", "High", "Medium", "Low", "Very Low",
+    ])
+    for row, item in enumerate(register_objectives(plant), 2):
+        bc = item["by_class"]
+        for col, value in enumerate([
+            item["objective"]["name"] if item["objective"] else "(nessun obiettivo indicato)",
+            item["count"], CLASS_LABELS.get(item["worst_class"], ""), item["untreated_high"],
+            bc["critical"], bc["high"], bc["medium"], bc["low"], bc["very_low"],
+        ], 1):
+            ws.cell(row=row, column=col, value=value)
+    ws = sheet(wb, "Copertura informazioni", ["Classe di informazioni", "Riservatezza", "Stato", "Classe peggiore"])
+    for row, item in enumerate(information_coverage(plant), 2):
+        for col, value in enumerate([
+            item["name"], item["confidentiality"], item["state"], CLASS_LABELS.get(item["worst_class"], ""),
+        ], 1):
+            ws.cell(row=row, column=col, value=value)
     ws = sheet(wb, "Copertura", ["Tipologia", "Codice minaccia", "Stato", "Classe peggiore"])
     for row, pair in enumerate(register_coverage(plant)["pairs"], 2):
         for col, value in enumerate([
@@ -2041,8 +2167,8 @@ def generate_cycle_excel(cycle) -> bytes:
     ws.column_dimensions["B"].width = 40
 
     ws = wb.create_sheet("Registro")
-    cols = ["Tipologia", "Minaccia", "Scenario", "Applicabile", "Motivo non applicabile", "Asset / gruppo",
-            "Fornitore", "Processo", "Probabilità", "Impatto", *[f"Imp. {d}" for d in IMPACT_DIMENSIONS],
+    cols = ["Tipologia", "Minaccia", "Scenario", "Obiettivi aziendali", "Informazioni", "Applicabile",
+            "Motivo non applicabile", "Asset / gruppo", "Fornitore", "Processo", "Probabilità", "Impatto", *[f"Imp. {d}" for d in IMPACT_DIMENSIONS],
             "Classe attuale", "Classe attesa", "Trattamento", "Misure (completate/verificate)",
             "Accettazione", "Siti che lo ereditano"]
     header(ws, cols)
@@ -2051,6 +2177,7 @@ def generate_cycle_excel(cycle) -> bytes:
         acc = item.get("acceptance")
         values = [
             item.get("asset_type"), item.get("threat"), item.get("name"),
+            ", ".join(item.get("business_objectives") or []), ", ".join(item.get("information_classes") or []),
             "Sì" if item.get("applicable") else "No", item.get("not_applicable_reason"), item.get("asset"),
             item.get("supplier"), item.get("process"), item.get("probability"), item.get("impact"),
             *[(item.get("impacts") or {}).get(d) for d in IMPACT_DIMENSIONS],
@@ -2062,6 +2189,16 @@ def generate_cycle_excel(cycle) -> bytes:
         ]
         for c, v in enumerate(values, 1):
             ws.cell(row=r, column=c, value=v)
+
+    if snap.get("objectives"):
+        ws = wb.create_sheet("Obiettivi aziendali")
+        header(ws, ["Obiettivo", "Rischi valutati", "Classe peggiore", "High/Critical non accettati"])
+        for r, item in enumerate(snap["objectives"], 2):
+            for c, v in enumerate([
+                (item.get("objective") or {}).get("name") or "(nessun obiettivo indicato)", item.get("count"),
+                CLASS_LABELS.get(item.get("worst_class"), ""), item.get("untreated_high"),
+            ], 1):
+                ws.cell(row=r, column=c, value=v)
 
     ws = wb.create_sheet("Criteri")
     policy = snap.get("policy", {})

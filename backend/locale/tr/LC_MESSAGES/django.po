@@ -3454,3 +3454,39 @@ msgstr "Grup riskini ve sahayı girin."
 
 msgid "La valutazione non ha una fotografia: si esporta solo una valutazione approvata."
 msgstr "Değerlendirmenin anlık görüntüsü yok: yalnızca onaylanmış bir değerlendirme dışa aktarılabilir."
+
+msgid "Rischi per obiettivo aziendale"
+msgstr "İş hedefine göre riskler"
+
+msgid "Obiettivo aziendale"
+msgstr "İş hedefi"
+
+msgid "Rischi valutati"
+msgstr "Değerlendirilen riskler"
+
+msgid "Classe peggiore"
+msgstr "En yüksek sınıf"
+
+msgid "Non accettati High/Critical"
+msgstr "Kabul edilmemiş High/Critical"
+
+msgid "Nessun obiettivo indicato"
+msgstr "Hedef belirtilmemiş"
+
+msgid "Rischi trattati ← obiettivo aziendale"
+msgstr "İşlenen riskler ← iş hedefi"
+
+msgid "Indica almeno un obiettivo aziendale minacciato dal rischio."
+msgstr "Riskin tehdit ettiği en az bir iş hedefi belirtin."
+
+msgid "Gli obiettivi aziendali devono essere del sito del registro o di gruppo."
+msgstr "İş hedefleri kaydın tesisine veya gruba ait olmalıdır."
+
+msgid "Dimensioni d'impatto non valide."
+msgstr "Geçersiz etki boyutları."
+
+msgid "Non si collegano rischi della valutazione con il metodo superato."
+msgstr "Eski yöntemle yapılan değerlendirmenin riskleri bağlanamaz."
+
+msgid "I rischi devono essere del sito dell'obiettivo o di gruppo."
+msgstr "Riskler hedefin tesisine veya gruba ait olmalıdır."

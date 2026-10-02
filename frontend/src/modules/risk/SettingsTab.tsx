@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
-  ASSET_TYPES, apiError, riskApi, type AssetType, type InformationClass, type ProtectionLevel,
+  ASSET_TYPES, IMPACT_DIMENSIONS, apiError, riskApi, type AssetType, type BusinessObjective, type ImpactDimension,
+  type InformationClass, type ProtectionLevel,
   type ResolvedPolicy, type ThreatEntry,
 } from "../../api/endpoints/risk";
 import { RISK_CLASSES, type RiskClass } from "./riskClasses";
 import { ErrorBox, Field, inputCls } from "./RiskUi";
 import type { RegisterId } from "./RiskPage";
 
-const SECTIONS = ["governance", "catalog", "information"] as const;
+const SECTIONS = ["governance", "objectives", "catalog", "information"] as const;
 type SectionKey = typeof SECTIONS[number];
 const ROLE_TOKENS = ["risk_owner", "plant_manager", "site_risk_manager", "it_manager", "hr_manager",
   "purchasing_manager", "production_manager", "engineering_manager", "ciso"];
@@ -31,8 +32,114 @@ export function SettingsTab({ registerId, policy, plants }: {
         ))}
       </div>
       {section === "governance" && <GovernanceSettings registerId={registerId} policy={policy} plants={plants} />}
+      {section === "objectives" && <ObjectiveSettings registerId={registerId} canEditGroup={policy.user_org_scope} />}
       {section === "catalog" && <CatalogSettings canEdit={policy.user_org_scope} />}
       {section === "information" && <InformationSettings registerId={registerId} canEditGroup={policy.user_org_scope} />}
+    </div>
+  );
+}
+
+// ── Obiettivi aziendali ─────────────────────────────────────────────────────
+
+const emptyObjective = { name: "", description: "", impact_dimensions: [] as ImpactDimension[], order: 0 };
+
+function ObjectiveSettings({ registerId, canEditGroup }: { registerId: RegisterId; canEditGroup: boolean }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [form, setForm] = useState(emptyObjective);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { data: objectives = [] } = useQuery({
+    queryKey: ["risk-business-objectives", registerId],
+    queryFn: () => riskApi.businessObjectives(registerId),
+    retry: false,
+  });
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["risk-business-objectives"] });
+    qc.invalidateQueries({ queryKey: ["risk-register"] });
+  };
+  const onErr = (e: unknown) => setError(apiError(e, t("risk.errors.generic")));
+  const reset = () => { setForm(emptyObjective); setEditing(null); setError(null); };
+  const save = useMutation({
+    mutationFn: () => editing
+      ? riskApi.updateBusinessObjective(editing, form)
+      : riskApi.createBusinessObjective({ ...form, plant: registerId }),
+    onSuccess: () => { reset(); refresh(); },
+    onError: onErr,
+  });
+  const toggle = useMutation({
+    mutationFn: (o: BusinessObjective) => riskApi.updateBusinessObjective(o.id, { active: !o.active }),
+    onSuccess: refresh, onError: onErr,
+  });
+  const canEdit = (o: BusinessObjective) => o.plant !== null || canEditGroup;
+  const canCreate = registerId !== null || canEditGroup;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-gray-500">{t("risk.settings.objectives_hint")}</p>
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {objectives.length === 0 ? <p className="p-6 text-center text-sm text-gray-400">{t("risk.settings.no_objectives")}</p> : (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b text-xs text-gray-600">
+              <tr>
+                <th className="text-left px-3 py-2 font-medium">{t("risk.settings.objective_name")}</th>
+                <th className="text-left px-3 py-2 font-medium">{t("risk.settings.objective_dimensions")}</th>
+                <th className="text-left px-3 py-2 font-medium">{t("risk.settings.class_scope")}</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {objectives.map(o => (
+                <tr key={o.id} className={o.active ? "" : "opacity-50"}>
+                  <td className="px-3 py-1.5"><span title={o.description}>{o.name}</span></td>
+                  <td className="px-3 py-1.5 text-xs text-gray-600">{o.impact_dimensions.map(d => t(`risk.dimensions.${d}`)).join(", ") || "—"}</td>
+                  <td className="px-3 py-1.5 text-xs text-gray-500">{o.plant_name ?? t("risk.page.group_register")}</td>
+                  <td className="px-3 py-1.5 text-right whitespace-nowrap">
+                    {canEdit(o) && (
+                      <>
+                        <button onClick={() => { setEditing(o.id); setForm({ name: o.name, description: o.description, impact_dimensions: o.impact_dimensions, order: o.order }); }}
+                          className="text-xs text-primary-600 hover:underline mr-3">{t("common.edit")}</button>
+                        <button onClick={() => toggle.mutate(o)} className="text-xs text-primary-600 hover:underline">
+                          {t(o.active ? "risk.settings.deactivate" : "risk.settings.reactivate")}
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      {canCreate && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">{t(editing ? "risk.settings.edit_objective" : "risk.settings.new_objective")}</h4>
+          <Field label={t("risk.settings.objective_name")}>
+            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className={inputCls} />
+          </Field>
+          <Field label={t("risk.settings.objective_description")}>
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className={inputCls} />
+          </Field>
+          <Field label={t("risk.settings.objective_dimensions")} hint={t("risk.settings.objective_dimensions_hint")}>
+            <div className="flex flex-wrap gap-3 text-xs">
+              {IMPACT_DIMENSIONS.map(d => (
+                <label key={d} className="flex items-center gap-1">
+                  <input type="checkbox" checked={form.impact_dimensions.includes(d)}
+                    onChange={e => setForm({ ...form, impact_dimensions: e.target.checked
+                      ? [...form.impact_dimensions, d] : form.impact_dimensions.filter(x => x !== d) })} />
+                  {t(`risk.dimensions.${d}`)}
+                </label>
+              ))}
+            </div>
+          </Field>
+          <div className="flex gap-2">
+            <button onClick={() => save.mutate()} disabled={!form.name.trim() || save.isPending}
+              className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm disabled:opacity-50">{t("common.save")}</button>
+            {editing && <button onClick={reset} className="px-3 py-1.5 border rounded text-sm">{t("common.cancel")}</button>}
+          </div>
+          <ErrorBox message={error} />
+        </div>
+      )}
     </div>
   );
 }

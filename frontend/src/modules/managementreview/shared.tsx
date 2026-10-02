@@ -77,7 +77,10 @@ export type SnapObjective = {
   id: string; code: string; title: string; plant_code: string | null; owner_role: string;
   status: string; baseline_value: number | null; target_value: number; target_date: string | null;
   current_value: number | null; unit: string; progress_pct: number | null; track: string;
+  /** Rischi trattati con gli obiettivi aziendali da cui nascono (snapshot da ottobre 2026). */
+  rischi?: { name: string; current_class: string; obiettivi_aziendali: string[] }[];
 };
+export type SnapObjectiveRisks = { name: string | null; count: number; worst_class: string; untreated_high: number };
 export type SnapSite = {
   plant_id: string; code: string; name: string; pct_compliant: number | null;
   rischi_critici: number; incidenti_aperti: number; task_scaduti: number;

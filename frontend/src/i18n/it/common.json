@@ -3249,6 +3249,7 @@
       "tabs_label": "Sezioni del risk assessment",
       "tabs": {
         "register": "Registro",
+        "objectives": "Per obiettivo",
         "matrix": "Matrice",
         "coverage": "Copertura",
         "plan": "Piano di trattamento",
@@ -3263,7 +3264,7 @@
       "steps": {
         "1": "Avvia la valutazione del registro (primo risk assessment, revisione periodica o straordinaria).",
         "2": "Dalla scheda Copertura valuta ogni minaccia applicabile o dichiarala non applicabile con il motivo.",
-        "3": "Nella scheda del rischio indica probabilità e impatto con le motivazioni, le misure esistenti e il trattamento.",
+        "3": "Nella scheda del rischio parti dagli obiettivi aziendali minacciati, poi indica probabilità e impatto con le motivazioni, le misure esistenti e il trattamento.",
         "4": "Completa la valutazione: High e Critical aprono il piano di trattamento.",
         "5": "Invia in approvazione: l'organo approva e il registro viene congelato.",
         "6": "Segui misure, verifiche e accettazioni: la classe scende solo con le misure verificate."
@@ -3277,7 +3278,7 @@
       },
       "config_needed": {
         "1": "Policy di governo del rischio (Impostazioni)",
-        "2": "Classi di informazioni del sito e catalogo minacce caricato"
+        "2": "Obiettivi aziendali e classi di informazioni (Impostazioni), catalogo minacce caricato"
       }
     },
     "cycle": {
@@ -3499,7 +3500,14 @@
       "delete_confirm": "Togliere questo rischio dal registro?",
       "reopen": "Riapri",
       "confirm": "Conferma valutazione",
-      "complete": "Completa la valutazione"
+      "complete": "Completa la valutazione",
+      "business_objectives": "Obiettivi aziendali minacciati",
+      "business_objectives_hint": "Il punto di partenza della valutazione (procedura §2): quale obiettivo dell'azienda il rischio mette in pericolo. Obbligatorio per completare.",
+      "no_business_objectives": "Nessun obiettivo aziendale: definiscili in Impostazioni.",
+      "suggested": "proposto",
+      "use_suggested": "Usa gli obiettivi proposti",
+      "security_objectives": "Obiettivi di sicurezza collegati",
+      "no_security_objectives": "Nessun obiettivo di sicurezza tratta questo rischio. Si collegano da Organizzazione › Obiettivi di sicurezza, con origine «Valutazione del rischio»."
     },
     "register": {
       "search": "Cerca",
@@ -3599,7 +3607,8 @@
       "sections": {
         "governance": "Governo del rischio",
         "catalog": "Catalogo minacce",
-        "information": "Classi di informazioni"
+        "information": "Classi di informazioni",
+        "objectives": "Obiettivi aziendali"
       },
       "org_policy": "Policy di organizzazione",
       "configured": "Approvata e in vigore.",
@@ -3671,7 +3680,15 @@
       "availability": "Disponibilità",
       "new_class": "Nuova classe di informazioni",
       "edit_class": "Modifica classe di informazioni",
-      "delete_class_confirm": "Eliminare questa classe di informazioni?"
+      "delete_class_confirm": "Eliminare questa classe di informazioni?",
+      "objectives_hint": "Gli obiettivi dell'azienda da cui parte la valutazione dei rischi (procedura §2). Le dimensioni d'impatto servono a proporre l'obiettivo nella scheda del rischio. Quelli senza sito valgono per il gruppo.",
+      "no_objectives": "Nessun obiettivo aziendale definito.",
+      "objective_name": "Obiettivo",
+      "objective_description": "Descrizione",
+      "objective_dimensions": "Dimensioni d'impatto",
+      "objective_dimensions_hint": "Con quali dimensioni si misura il danno a questo obiettivo.",
+      "new_objective": "Nuovo obiettivo aziendale",
+      "edit_objective": "Modifica obiettivo aziendale"
     },
     "protection": {
       "low": "Low",
@@ -3768,6 +3785,26 @@
           "1": "Nessun effetto apprezzabile"
         }
       }
+    },
+    "objectives": {
+      "hint": "Rischi valutati per obiettivo aziendale, compresi quelli di gruppo ereditati: mostra che la valutazione parte dagli obiettivi. Clic su una riga per vedere i rischi.",
+      "col_objective": "Obiettivo aziendale",
+      "col_risks": "Rischi",
+      "col_worst": "Classe peggiore",
+      "col_untreated": "High/Critical non accettati",
+      "col_distribution": "Per classe",
+      "none": "Rischi senza obiettivo indicato"
+    },
+    "information_coverage": {
+      "title": "Copertura delle informazioni",
+      "hint": "Classi di informazioni Confidenziali e Segrete: ognuna dovrebbe avere almeno un rischio valutato con una minaccia alla riservatezza (VDA ISA 1.3.1, 1.3.2).",
+      "missing": "Classi senza rischi di riservatezza: {{count}}",
+      "states": {
+        "evaluated": "Valutata",
+        "draft": "In valutazione",
+        "missing": "Scoperta"
+      },
+      "open": "Apri"
     }
   },
   "pdca": {
@@ -6133,7 +6170,13 @@
         "in_corso": "In corso",
         "in_approvazione": "In approvazione",
         "approvato": "Approvato"
-      }
+      },
+      "col_treated_risks": "Rischi trattati ← obiettivo aziendale",
+      "risks_by_objective": "Rischi per obiettivo aziendale",
+      "col_business_objective": "Obiettivo aziendale",
+      "col_assessed_risks": "Rischi valutati",
+      "col_worst_class": "Classe peggiore",
+      "col_untreated_high": "High/Critical non accettati"
     },
     "participants": {
       "heading": "Convocati e presenze",
@@ -6403,7 +6446,10 @@
       "track": "Traiettoria",
       "objective": "Obiettivo",
       "value": "Valore",
-      "note": "Nota"
+      "note": "Nota",
+      "risks": "Rischi trattati",
+      "risks_hint": "I rischi che questo obiettivo contribuisce a trattare: collegano l'obiettivo alla valutazione dei rischi e agli obiettivi aziendali.",
+      "risks_search": "Cerca un rischio…"
     },
     "actions": {
       "new": "Nuovo obiettivo",

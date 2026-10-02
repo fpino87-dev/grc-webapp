@@ -45,6 +45,9 @@ export interface Risk {
   threat_code: string | null;
   threat_title: string | null;
   information_classes: string[];
+  business_objectives: string[];
+  /** Obiettivi di sicurezza §6.2 che trattano il rischio (solo nella scheda). */
+  security_objectives_summary: SecurityObjectiveLink[] | null;
   critical_process: string | null;
   critical_process_name: string | null;
   vulnerability: string;
@@ -100,6 +103,7 @@ export interface Risk {
 /** Campi scrivibili della valutazione (le regole stanno nel backend). */
 export type RiskInput = Partial<Pick<Risk,
   | "name" | "asset_type" | "asset" | "asset_group_label" | "supplier" | "threat" | "information_classes"
+  | "business_objectives"
   | "critical_process" | "vulnerability" | "consequence" | "probability" | "probability_method"
   | "probability_rationale" | "impact_economic" | "impact_legal" | "impact_customer" | "impact_reputational"
   | "impact_people" | "impact_operational" | "impact_rationale" | "class_override" | "override_rationale"
@@ -207,6 +211,47 @@ export interface ThreatEntry {
 
 export type ProtectionLevel = "low" | "normal" | "high" | "very_high";
 
+/** Obiettivo aziendale (procedura §2): il punto di partenza della valutazione. */
+export interface BusinessObjective {
+  id: string;
+  plant: string | null;
+  plant_name: string | null;
+  code: string;
+  name: string;
+  description: string;
+  impact_dimensions: ImpactDimension[];
+  order: number;
+  active: boolean;
+}
+
+export interface SecurityObjectiveLink {
+  id: string;
+  code: string;
+  title: string;
+  status: string;
+  target_date: string;
+  track: string;
+}
+
+export interface ObjectiveRow {
+  objective: { id: string; code: string; name: string; impact_dimensions: ImpactDimension[] } | null;
+  count: number;
+  worst_class: RiskClass | "";
+  by_class: Record<RiskClass, number>;
+  untreated_high: number;
+  risk_ids: string[];
+}
+
+export interface InformationCoverageRow {
+  id: string;
+  name: string;
+  confidentiality: ProtectionLevel;
+  plant: string | null;
+  state: "evaluated" | "draft" | "missing";
+  worst_class: RiskClass | "";
+  risk_ids: string[];
+}
+
 export interface InformationClass {
   id: string;
   plant: string | null;
@@ -302,6 +347,8 @@ export const riskApi = {
   // Registro
   list: (plantId: string | null, params: Record<string, string> = {}) =>
     fetchAllPages<Risk>("/risk/assessments/", { plant: registerParam(plantId), ...params }),
+  /** Tutti i rischi del nuovo metodo visibili all'utente (per obiettivi di organizzazione). */
+  listAll: () => fetchAllPages<Risk>("/risk/assessments/"),
   legacy: (plantId: string) => fetchAllPages<Risk>("/risk/assessments/", { plant: plantId, legacy: "1" }),
   get: (id: string) => data(apiClient.get<Risk>(`/risk/assessments/${id}/`)),
   create: (payload: RiskInput) => data(apiClient.post<Risk>("/risk/assessments/", payload)),
@@ -321,6 +368,20 @@ export const riskApi = {
     })),
   coverage: (plantId: string | null) =>
     data(apiClient.get<Coverage>("/risk/assessments/coverage/", { params: { plant: registerParam(plantId) } })),
+  objectives: (plantId: string | null) =>
+    data(apiClient.get<ObjectiveRow[]>("/risk/assessments/objectives/", { params: { plant: registerParam(plantId) } })),
+  informationCoverage: (plantId: string | null) =>
+    data(apiClient.get<InformationCoverageRow[]>("/risk/assessments/information-coverage/", {
+      params: { plant: registerParam(plantId) },
+    })),
+  businessObjectives: (plantId: string | null) =>
+    fetchAllPages<BusinessObjective>("/risk/business-objectives/").then(all =>
+      all.filter(o => o.plant === null || o.plant === plantId)),
+  createBusinessObjective: (payload: Partial<BusinessObjective>) =>
+    data(apiClient.post<BusinessObjective>("/risk/business-objectives/", payload)),
+  updateBusinessObjective: (id: string, payload: Partial<BusinessObjective>) =>
+    data(apiClient.patch<BusinessObjective>(`/risk/business-objectives/${id}/`, payload)),
+  deleteBusinessObjective: (id: string) => apiClient.delete(`/risk/business-objectives/${id}/`),
   attention: (plantId: string | null) =>
     data(apiClient.get<Attention>("/risk/assessments/attention/", { params: { plant: registerParam(plantId) } })),
   triggers: (plantId: string | null) =>

@@ -3475,3 +3475,39 @@ msgstr "Podaj ryzyko grupy i zakład."
 
 msgid "La valutazione non ha una fotografia: si esporta solo una valutazione approvata."
 msgstr "Ocena nie ma migawki: eksportować można tylko zatwierdzoną ocenę."
+
+msgid "Rischi per obiettivo aziendale"
+msgstr "Ryzyka według celu biznesowego"
+
+msgid "Obiettivo aziendale"
+msgstr "Cel biznesowy"
+
+msgid "Rischi valutati"
+msgstr "Ocenione ryzyka"
+
+msgid "Classe peggiore"
+msgstr "Najwyższa klasa"
+
+msgid "Non accettati High/Critical"
+msgstr "High/Critical niezaakceptowane"
+
+msgid "Nessun obiettivo indicato"
+msgstr "Nie wskazano celu"
+
+msgid "Rischi trattati ← obiettivo aziendale"
+msgstr "Traktowane ryzyka ← cel biznesowy"
+
+msgid "Indica almeno un obiettivo aziendale minacciato dal rischio."
+msgstr "Wskaż co najmniej jeden cel biznesowy zagrożony przez ryzyko."
+
+msgid "Gli obiettivi aziendali devono essere del sito del registro o di gruppo."
+msgstr "Cele biznesowe muszą należeć do zakładu rejestru lub do grupy."
+
+msgid "Dimensioni d'impatto non valide."
+msgstr "Nieprawidłowe wymiary wpływu."
+
+msgid "Non si collegano rischi della valutazione con il metodo superato."
+msgstr "Nie można powiązać ryzyk z oceny według zastąpionej metody."
+
+msgid "I rischi devono essere del sito dell'obiettivo o di gruppo."
+msgstr "Ryzyka muszą należeć do zakładu celu lub do grupy."

@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { securityObjectivesApi, type SecurityObjective } from "../../api/endpoints/securityObjectives";
 import { kpiApi } from "../../api/endpoints/kpi";
 import { plantsApi } from "../../api/endpoints/plants";
+import { riskApi } from "../../api/endpoints/risk";
+import { classBadge } from "../risk/riskClasses";
 
 const ROLES = ["compliance_officer", "risk_manager", "plant_manager", "control_owner", "internal_auditor"];
 const ORIGINS = ["politica", "risk_assessment", "audit", "requisito", "incidente", "riesame", "altro"];
@@ -17,6 +19,8 @@ export function ObjectiveForm({ objective, onClose }: Props) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [error, setError] = useState<string>("");
+  const [risks, setRisks] = useState<string[]>(objective?.risks ?? []);
+  const [riskQuery, setRiskQuery] = useState("");
   const [form, setForm] = useState({
     code: objective?.code ?? "",
     title: objective?.title ?? "",
@@ -43,6 +47,14 @@ export function ObjectiveForm({ objective, onClose }: Props) {
     enabled: form.measure_source === "kpi",
   });
 
+  // Rischi trattabili: del sito (con quelli di gruppo ereditati) o, per un
+  // obiettivo di organizzazione, tutti quelli visibili.
+  const { data: candidateRisks = [] } = useQuery({
+    queryKey: ["objective-risks", form.plant],
+    queryFn: () => (form.plant ? riskApi.list(form.plant, { include_inherited: "1" }) : riskApi.listAll()),
+    enabled: form.origin === "risk_assessment" || risks.length > 0,
+  });
+
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const save = useMutation({
@@ -53,6 +65,7 @@ export function ObjectiveForm({ objective, onClose }: Props) {
         kpi_definition: form.measure_source === "kpi" ? form.kpi_definition || null : null,
         baseline_value: form.baseline_value === "" ? null : Number(form.baseline_value),
         target_value: Number(form.target_value),
+        risks,
       };
       return objective
         ? securityObjectivesApi.update(objective.id, payload)
@@ -108,6 +121,30 @@ export function ObjectiveForm({ objective, onClose }: Props) {
               {ORIGINS.map((o) => <option key={o} value={o}>{t(`objectives.origin.${o}`)}</option>)}
             </select>
           </div>
+          {(form.origin === "risk_assessment" || risks.length > 0) && (
+            <div className="col-span-2">
+              <label className={label}>{t("objectives.fields.risks")}</label>
+              <p className="text-xs text-gray-500 mb-1">{t("objectives.fields.risks_hint")}</p>
+              <input className={`${field} mb-1`} value={riskQuery} onChange={(e) => setRiskQuery(e.target.value)}
+                     placeholder={t("objectives.fields.risks_search")} />
+              <div className="max-h-44 overflow-y-auto border rounded divide-y">
+                {candidateRisks
+                  .filter((r) => r.applicable && (risks.includes(r.id) || !riskQuery
+                    || `${r.threat_code} ${r.display_name}`.toLowerCase().includes(riskQuery.toLowerCase())))
+                  .map((r) => (
+                    <label key={r.id} className="flex items-center gap-2 px-2 py-1 text-xs">
+                      <input type="checkbox" checked={risks.includes(r.id)}
+                             onChange={(e) => setRisks(e.target.checked ? [...risks, r.id] : risks.filter((x) => x !== r.id))} />
+                      <span className="font-mono text-gray-500">{r.threat_code}</span>
+                      <span className="flex-1 truncate">{r.display_name}</span>
+                      {r.current_class && (
+                        <span className={`px-1.5 rounded border ${classBadge(r.current_class)}`}>{t(`risk.classes.${r.current_class}`)}</span>
+                      )}
+                    </label>
+                  ))}
+              </div>
+            </div>
+          )}
           <div>
             <label className={label}>{t("objectives.fields.owner_role")}</label>
             <select className={field} value={form.owner_role} onChange={(e) => set("owner_role", e.target.value)}>

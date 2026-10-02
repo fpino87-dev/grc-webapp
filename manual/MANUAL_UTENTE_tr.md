@@ -417,6 +417,16 @@ Modül, risk yönetimi prosedürünü (D-ITA-INF-23) uygular. Her tesisin kendi 
 
 Kaydın üstündeki dört sayaç nerede müdahale edilmesi gerektiğini gösterir: **İşlenecek Critical** (zorunlu işlem), **Karar bekleyen High** (maliyet/fayda analiziyle işleyin veya resmi olarak kabul edin), 30 gün içinde **süresi dolmak üzere olan kabuller** ve **geciken önlemli riskler**. Bir sayaca tıklamak kaydı bu risklere göre filtreler, ikinci tıklama filtreyi kaldırır. Süreler prosedürü izler: önlemler Critical için 3 ay, High için 1 yıl, Medium için 2 yıl, Low ve Very Low için 5 yıl içinde tamamlanmalıdır; Critical bir riskin kabulü en fazla 6 ay, High bir riskinki 12 ay geçerlidir.
 
+### İş hedefleri, bilgiler ve güvenlik hedefleri
+
+Değerlendirme **iş hedeflerinden** başlar (prosedür §2): OEM'lere tedarik sürekliliği, müşteri bilgilerinin ve TISAX etiketinin korunması, uyum, ekonomik sonuç, insanlar ve çevre, itibar. **Ayarlar › İş hedefleri** bölümünden yönetilirler; her biri zararın ölçüldüğü etki boyutlarını belirtir. Bunlar Organizasyon altındaki güvenlik hedefleri değildir: onlar risklerin işlenmesinden doğan ölçülebilir hedeflerdir.
+
+- Risk kartındaki ilk alan **Tehdit altındaki iş hedefleri**dir: değerlendirmeyi tamamlamak için en az biri zorunludur. Sistem, etkisi en yüksek boyutlara bağlı olanları önerir
+- **Hedefe göre** sekmesi her hedef için onu tehdit eden risk sayısını, en yüksek sınıfı ve kabul edilmemiş High/Critical riskleri gösterir; riskleri görmek için bir satıra tıklayın. Aynı özet kayıt Excel'inde, onaylanmış değerlendirmede ve yönetim gözden geçirmesinde yer alır
+- BIA süreci seçildiğinde kart, o sürecin kullandığı **bilgi sınıflarını** önerir
+- **Kapsam** sekmesindeki **Bilgi kapsamı** bölümü Gizli ve Çok gizli sınıfları listeler ve gizlilik tehdidiyle değerlendirilmiş riski olmayanları işaretler
+- «Risk değerlendirmesi» kaynaklı bir **güvenlik hedefi** (Organizasyon › Güvenlik hedefleri) **işlenen riskleri** belirtir; risk kartı onu izleyen güvenlik hedeflerini ve ilerlemelerini gösterir, gözden geçirme ise her biri için riski ve kaynaklandığı iş hedefini raporlar
+
 ### Değerlendirmeler (döngüler)
 
 Başlığın altındaki çubuk, kaydın değerlendirme durumunu gösterir:

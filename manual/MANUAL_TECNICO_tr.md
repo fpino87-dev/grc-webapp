@@ -526,6 +526,7 @@ Yanıt: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Onayda dondurulan `snapshot` ile `RiskAssessmentCycle` (ilk / dönemsel / olağanüstü / legacy)
 - `RiskGovernancePolicy`'ye göre rol imzaları, CISO görüşü ve organ kararıyla `RiskAcceptance`
 - Tehdit kataloğu: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (API ile özel kayıtlar)
+- İş hedefleri `BusinessObjective` (prosedür §2, öneri olarak `risk_catalogs/business_objectives.json`) riske bağlı (`business_objectives`, tamamlamak için zorunlu); `governance.SecurityObjective.risks` güvenlik hedeflerini işlenen risklere bağlar
 - Diğer modüller için ortak fonksiyonlar: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
 
 ### M00 — Yönetişim
@@ -1407,7 +1408,7 @@ pytest paketi (`backend/pytest.ini`, `--cov=apps --cov=core --cov-fail-under=70`
 |-------|----------|------------------------|
 | `migrate` | DB migrasyonlarını uygular | Her dağıtımdan sonra |
 | `load_frameworks` | Normatif çerçeve JSON'larını içe aktarır | İlk kurulum + çerçeve güncellemesi |
-| `load_risk_catalog` | Tehdit kataloğunu içe aktarır (`risk_catalogs/threats.json`); idempotent, özel kayıtlara dokunmaz | İlk kurulum + katalog güncellemesi |
+| `load_risk_catalog` | Tehdit kataloğunu içe aktarır (`risk_catalogs/threats.json`) ve eksik önerilen iş hedeflerini oluşturur; idempotent, özel kayıtlara dokunmaz | İlk kurulum + katalog güncellemesi |
 | `load_notification_profiles` | Varsayılan bildirim profilleri | İlk kurulum |
 | `load_competency_requirements` | M15 yeterlilik gereksinimleri | İlk kurulum |
 | `load_required_documents` | Zorunlu belgeler | İlk kurulum |

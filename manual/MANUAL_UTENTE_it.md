@@ -417,6 +417,16 @@ Il modulo applica la procedura di risk management (D-ITA-INF-23). Ogni sito ha i
 
 In cima al registro quattro contatori mostrano dove bisogna intervenire: **Critical da trattare** (trattamento obbligatorio), **High da decidere** (trattare con analisi costi/benefici oppure accettare formalmente), **Accettazioni in scadenza** entro 30 giorni e **Rischi con misure in ritardo**. Un clic su un contatore filtra il registro su quei rischi, un secondo clic toglie il filtro. Le scadenze seguono la procedura: le misure vanno completate entro 3 mesi per i Critical, 1 anno per gli High, 2 anni per i Medium e 5 anni per Low e Very Low; l'accettazione di un Critical vale al massimo 6 mesi, quella di un High 12 mesi.
 
+### Obiettivi aziendali, informazioni e obiettivi di sicurezza
+
+La valutazione parte dagli **obiettivi aziendali** (procedura §2): continuità delle forniture agli OEM, protezione delle informazioni dei clienti e label TISAX, conformità, risultato economico, persone e ambiente, reputazione. Si gestiscono in **Impostazioni › Obiettivi aziendali**; ognuno indica le dimensioni d'impatto con cui si misura il danno. Non sono gli obiettivi di sicurezza di Organizzazione: quelli sono traguardi misurabili che nascono dal trattamento dei rischi.
+
+- Nella scheda del rischio il primo campo è **Obiettivi aziendali minacciati**: almeno uno è obbligatorio per completare la valutazione. Il programma propone quelli legati alle dimensioni con l'impatto più alto
+- La scheda **Per obiettivo** mostra, per ogni obiettivo, quanti rischi lo minacciano, la classe peggiore e gli High/Critical non accettati; clic su una riga per vedere i rischi. La stessa sintesi è nell'Excel del registro, nella valutazione approvata e nel riesame di direzione
+- Scegliendo il processo BIA, la scheda propone le **classi di informazioni** usate da quel processo
+- In **Copertura**, la sezione **Copertura delle informazioni** elenca le classi Confidenziali e Segrete e segnala quelle senza un rischio valutato con una minaccia alla riservatezza
+- Un **obiettivo di sicurezza** (Organizzazione › Obiettivi di sicurezza) con origine «Valutazione del rischio» indica i **rischi trattati**; la scheda del rischio mostra gli obiettivi di sicurezza che lo seguono e il loro andamento, e il riesame riporta per ognuno il rischio e l'obiettivo aziendale da cui nasce
+
 ### Valutazioni (cicli)
 
 La barra sotto il titolo mostra lo stato della valutazione del registro:

@@ -14,6 +14,7 @@ from core.viewsets import SoftDeleteAuditMixin
 
 from . import services
 from .models import (
+    BusinessObjective,
     InformationClass,
     RiskAcceptance,
     RiskAssessment,
@@ -26,6 +27,7 @@ from .models import (
 )
 from .permissions import RiskGovernancePermission, RiskPermission
 from .serializers import (
+    BusinessObjectiveSerializer,
     InformationClassSerializer,
     RiskAcceptanceSerializer,
     RiskAssessmentCycleSerializer,
@@ -77,7 +79,7 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         "plant", "cycle", "asset", "supplier", "critical_process", "threat",
         "owner", "treatment_owner", "assessed_by",
     ).prefetch_related(
-        "information_classes", "affected_plants",
+        "information_classes", "affected_plants", "business_objectives",
         Prefetch("mitigation_plans", queryset=RiskMitigationPlan.objects.all()),
         Prefetch("acceptances", queryset=RiskAcceptance.objects.all()),
     )
@@ -188,6 +190,16 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def coverage(self, request):
         return Response(services.register_coverage(self._register_plant(request)))
+
+    @action(detail=False, methods=["get"])
+    def objectives(self, request):
+        """Rischi per obiettivo aziendale (procedura §2)."""
+        return Response(services.register_objectives(self._register_plant(request)))
+
+    @action(detail=False, methods=["get"], url_path="information-coverage")
+    def information_coverage(self, request):
+        """Classi Confidenziali/Segrete e rischi di riservatezza che le coprono."""
+        return Response(services.information_coverage(self._register_plant(request)))
 
     @action(detail=False, methods=["get"])
     def attention(self, request):
@@ -572,6 +584,42 @@ class InformationClassViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, vi
         )
         instance = serializer.save()
         log_action(user=self.request.user, action_code="risk.information_class.update", level="L2",
+                   entity=instance, payload={"id": str(instance.id)})
+
+    def perform_destroy(self, instance):
+        from core.scoping import require_org_scope_for_org_wide
+
+        require_org_scope_for_org_wide(self.request.user, instance.plant)
+        super().perform_destroy(instance)
+
+
+class BusinessObjectiveViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+    """Obiettivi aziendali (procedura §2); senza sito = di gruppo."""
+
+    queryset = BusinessObjective.objects.select_related("plant")
+    serializer_class = BusinessObjectiveSerializer
+    permission_classes = [RiskPermission]
+    plant_field = "plant"
+    allow_null_plant = True
+    audit_action = "risk.business_objective"
+
+    def perform_create(self, serializer):
+        from core.scoping import require_org_scope_for_org_wide
+
+        require_org_scope_for_org_wide(self.request.user, serializer.validated_data.get("plant"))
+        instance = serializer.save(created_by=self.request.user)
+        log_action(user=self.request.user, action_code="risk.business_objective.create", level="L2",
+                   entity=instance, payload={"id": str(instance.id)})
+
+    def perform_update(self, serializer):
+        from core.scoping import require_org_scope_for_org_wide
+
+        require_org_scope_for_org_wide(self.request.user, serializer.instance.plant)
+        require_org_scope_for_org_wide(
+            self.request.user, serializer.validated_data.get("plant", serializer.instance.plant),
+        )
+        instance = serializer.save()
+        log_action(user=self.request.user, action_code="risk.business_objective.update", level="L2",
                    entity=instance, payload={"id": str(instance.id)})
 
     def perform_destroy(self, instance):
