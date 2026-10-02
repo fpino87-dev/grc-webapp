@@ -231,7 +231,7 @@ function NewNdaModal({ onClose }: { onClose: () => void }) {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.document_code")}</label>
-              <input name="document_code" onChange={handleChange} placeholder="D-ITA-NDA-001" className="w-full border rounded px-3 py-2 text-sm font-mono" />
+              <input name="document_code" onChange={handleChange} placeholder="NDA-001" className="w-full border rounded px-3 py-2 text-sm font-mono" />
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">{t("documents.fields.title")} *</label>

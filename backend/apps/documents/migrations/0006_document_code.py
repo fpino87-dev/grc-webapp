@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='document',
             name='document_code',
-            field=models.CharField(blank=True, db_index=True, help_text='Codice identificativo del documento (es. D-ITA-INF-001). Libero, unico per convenzione aziendale.', max_length=50),
+            field=models.CharField(blank=True, db_index=True, help_text='Codice identificativo del documento (es. DOC-001). Libero, unico per convenzione aziendale.', max_length=50),
         ),
     ]

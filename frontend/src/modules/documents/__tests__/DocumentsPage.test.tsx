@@ -59,7 +59,7 @@ function makeDoc(overrides = {}) {
   return {
     id: "doc-1",
     title: "Politica sicurezza informazioni",
-    document_code: "D-ITA-INF-001",
+    document_code: "DOC-001",
     document_type: "policy",
     category: "politica",
     status: "approvato",
@@ -120,7 +120,7 @@ describe("DocumentsPage", () => {
     mockList.mockResolvedValue({ results: [makeDoc()] } as never);
     renderPage();
     expect(await screen.findByText("Politica sicurezza informazioni")).toBeInTheDocument();
-    expect(screen.getByText("D-ITA-INF-001")).toBeInTheDocument();
+    expect(screen.getByText("DOC-001")).toBeInTheDocument();
   });
 
   it("copia PDF: pulsante se pronta, stato se in preparazione o fallita", async () => {
