@@ -10,7 +10,6 @@ Gli import dei modelli sono volutamente locali alle funzioni per evitare cicli d
 import tra app e mantenere leggero il caricamento del modulo.
 """
 from datetime import date
-from decimal import Decimal
 
 from django.db.models import Avg, Count, DurationField, ExpressionWrapper, F, Prefetch, Q
 from django.utils import timezone
@@ -46,15 +45,13 @@ def compliance_summary(plant_id, framework_code=None) -> dict:
 # Risk summary
 # ───────────────────────────────────────────────────────────────────────────
 def risk_summary(plant_id) -> dict:
-    from apps.risk.models import RiskAssessment
+    """Rischi valutati per semaforo (regola unica risk.services)."""
+    from apps.risk.services import class_counts, evaluated_risks
 
-    qs = RiskAssessment.objects.filter(status="completato")
-    if plant_id:
-        qs = qs.filter(plant_id=plant_id)
-    high = qs.filter(score__gt=14).count()
-    medium = qs.filter(score__gt=7, score__lte=14).count()
-    low = qs.filter(score__lte=7).count()
-    return {"high": high, "medium": medium, "low": low, "total": qs.count()}
+    counts = class_counts(evaluated_risks(plant_id))
+    return {"high": counts["rosso"], "medium": counts["giallo"], "low": counts["verde"],
+            "total": counts["total"], "by_class": {k: counts[k] for k in
+                                                   ("very_low", "low", "medium", "high", "critical")}}
 
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -76,21 +73,20 @@ def incident_summary(plant_id) -> dict:
 # ───────────────────────────────────────────────────────────────────────────
 def owner_report(plant_id) -> dict:
     from apps.bia.models import CriticalProcess
-    from apps.risk.models import RiskAssessment
     from apps.tasks.models import Task
 
-    risks_qs = RiskAssessment.objects.filter(status="completato", deleted_at__isnull=True)
-    if plant_id:
-        risks_qs = risks_qs.filter(plant_id=plant_id)
+    from apps.risk.services import evaluated_risks
+
+    risks_qs = evaluated_risks(plant_id)
 
     risks_by_owner = list(
         risks_qs.values(
             "owner__id", "owner__first_name", "owner__last_name", "owner__email"
         ).annotate(
             totale=Count("id"),
-            rossi=Count("id", filter=Q(score__gt=14)),
-            gialli=Count("id", filter=Q(score__gt=7, score__lte=14)),
-            verdi=Count("id", filter=Q(score__lte=7)),
+            rossi=Count("id", filter=Q(current_class__in=["high", "critical"])),
+            gialli=Count("id", filter=Q(current_class="medium")),
+            verdi=Count("id", filter=Q(current_class__in=["low", "very_low"])),
         ).order_by("-rossi")
     )
 
@@ -172,70 +168,28 @@ def kpi_trend(plant_id, framework_code="ISO27001", weeks=12) -> dict:
 # ───────────────────────────────────────────────────────────────────────────
 def risk_bia_bcp(plant_id) -> dict:
     from apps.bcp.models import BcpPlan, BcpTest
-    from apps.bia.models import CriticalProcess, TreatmentOption
-    from apps.risk.models import (
-        NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES, RiskAssessment, THREAT_CATEGORIES,
+    from apps.bia.models import CriticalProcess
+    from apps.risk.models import NIS2_ART21_CHOICES
+    from apps.risk.services import (
+        CLASS_LABELS, active_acceptance_risk_ids, class_counts, class_rank, evaluated_risks,
+        risk_class, risk_level_bucket, untreated_high_risks,
     )
-    from apps.risk.services import calc_ale
 
     today = timezone.localdate()
 
-    risk_qs = RiskAssessment.objects.filter(
-        status="completato", deleted_at__isnull=True
-    ).select_related("owner", "accepted_by", "critical_process")
+    risk_qs = evaluated_risks(plant_id).select_related("owner", "threat", "plant", "critical_process")
     bia_qs = CriticalProcess.objects.filter(deleted_at__isnull=True)
     # I piani archiviati non contano: né come copertura né come test da fare.
     bcp_qs = BcpPlan.objects.filter(deleted_at__isnull=True).exclude(status="archiviato")
 
     if plant_id:
-        risk_qs = risk_qs.filter(plant_id=plant_id)
         bia_qs = bia_qs.filter(plant_id=plant_id)
         bcp_qs = bcp_qs.filter(plant_id=plant_id)
 
-    # KPIs
-    risks_total = risk_qs.count()
-    risks_red = risk_qs.filter(score__gt=14).count()
-    risks_yellow = risk_qs.filter(score__gt=7, score__lte=14).count()
-    risks_needs_revaluation = risk_qs.filter(needs_revaluation=True).count()
-    risks_formally_accepted = risk_qs.filter(risk_accepted_formally=True).count()
-
-    # Propensione al rischio approvata dalla direzione: soglia del sito di
-    # ciascun rischio (regola unica in risk.services.AppetiteThresholds).
-    from apps.risk.services import AppetiteThresholds, appetite_summary
-
-    thresholds = AppetiteThresholds()
-    risks_over_appetite = len(thresholds.over_ids(risk_qs))
-    appetite = appetite_summary(plant_id, thresholds)
-
-    # ALE (Annualized Loss Expectancy) — perdita attesa annua in €.
-    # Calcolata live da calc_ale() sui dati BIA collegati; vale 0 se il rischio
-    # non ha processo critico/costo di fermo. residua = post-controlli (campi
-    # correnti), inerente = pre-controlli (campi inherent_*). La differenza
-    # (inerente − residua) è il rischio già abbattuto dai controlli, in €.
-    # critical_process è in select_related → nessuna query N+1; risk_qs viene
-    # valutato una sola volta e riusato (cache queryset) per entrambe le ALE.
-    ale_by_risk = {}
-    ale_inherent_by_risk = {}
-    ale_by_proc = {}  # ALE residua aggregata per processo critico → base ROSI
-    for r in risk_qs:
-        residual = calc_ale(r)
-        ale_by_risk[r.id] = residual
-        ale_inherent_by_risk[r.id] = calc_ale(r, inherent=True)
-        if r.critical_process_id and residual:
-            ale_by_proc[r.critical_process_id] = (
-                ale_by_proc.get(r.critical_process_id, Decimal("0")) + residual
-            )
-    ale_total = sum((v for v in ale_by_risk.values() if v), Decimal("0"))
-    ale_total_inherent = sum((v for v in ale_inherent_by_risk.values() if v), Decimal("0"))
-    ale_saved = ale_total_inherent - ale_total
-    ale_valued_count = sum(1 for v in ale_by_risk.values() if v and v > 0)
-    ale_coverage_pct = (
-        round(ale_valued_count / risks_total * 100, 1) if risks_total else 0.0
-    )
-    ale_saved_pct = (
-        round(float(ale_saved) / float(ale_total_inherent) * 100, 1)
-        if ale_total_inherent else 0.0
-    )
+    # KPI rischi: classi della matrice della procedura (regola unica risk.services)
+    counts = class_counts(risk_qs)
+    accepted_ids = active_acceptance_risk_ids(risk_qs)
+    risks_untreated_high = untreated_high_risks(risk_qs).count()
 
     # Copertura BCP: regola unica di bcp.services — senza piano approvato, e
     # con piano approvato ma test scaduto o mai eseguito (scoperti per test).
@@ -254,95 +208,71 @@ def risk_bia_bcp(plant_id) -> dict:
         if plan_test_state(last, nxt, today) != TEST_OK
     )
 
-    # Heatmap 5x5
+    # Heatmap 5x5 (rischio attuale), con la classe di ogni cella
     heatmap_raw = (
         risk_qs.filter(probability__isnull=False, impact__isnull=False)
         .values("probability", "impact")
         .annotate(count=Count("id"))
     )
     heatmap_dict = {(r["probability"], r["impact"]): r["count"] for r in heatmap_raw}
-    heatmap = []
-    for prob in range(1, 6):
-        for imp in range(1, 6):
-            heatmap.append({"prob": prob, "impact": imp, "count": heatmap_dict.get((prob, imp), 0)})
-
-    # Top 10 rischi per score
-    top_risks_qs = risk_qs.filter(score__isnull=False).order_by("-score")[:10]
-    threat_label_map = dict(THREAT_CATEGORIES)
-    nis2_relevance_label_map = dict(NIS2_RELEVANCE_CHOICES)
-    top_risks = []
-    for r in top_risks_qs:
-        top_risks.append({
-            "id": str(r.id),
-            "name": r.name,
-            "score": r.score,
-            "inherent_score": r.inherent_score,
-            "threat_category": r.threat_category,
-            "threat_label": threat_label_map.get(r.threat_category, r.threat_category),
-            "treatment": r.treatment,
-            "nis2_relevance": r.nis2_relevance,
-            "nis2_relevance_label": nis2_relevance_label_map.get(r.nis2_relevance, ""),
-            "nis2_art21_category": r.nis2_art21_category,
-            "owner_name": (
-                f"{r.owner.first_name} {r.owner.last_name}".strip() if r.owner else "—"
-            ),
-            "formally_accepted": r.risk_accepted_formally,
-            "needs_revaluation": r.needs_revaluation,
-            "ale": float(ale_by_risk.get(r.id) or 0),
-            "ale_inherent": float(ale_inherent_by_risk.get(r.id) or 0),
-            "over_appetite": thresholds.is_over(r.plant_id, r.score),
-        })
-
-    # Breakdown per categoria minaccia
-    by_threat_raw = (
-        risk_qs.values("threat_category")
-        .annotate(
-            count=Count("id"),
-            residual_avg=Avg("score"),
-            inherent_avg=Avg("inherent_score"),
-            rossi=Count("id", filter=Q(score__gt=14)),
-            gialli=Count("id", filter=Q(score__gt=7, score__lte=14)),
-            verdi=Count("id", filter=Q(score__lte=7)),
-        )
-        .order_by("-count")
-    )
-    by_threat = [
-        {
-            "category": r["threat_category"] or "altro",
-            "label": threat_label_map.get(r["threat_category"] or "altro", r["threat_category"] or "Altro"),
-            "count": r["count"],
-            "residual_avg": round(r["residual_avg"] or 0, 1),
-            "inherent_avg": round(r["inherent_avg"] or 0, 1),
-            "rossi": r["rossi"],
-            "gialli": r["gialli"],
-            "verdi": r["verdi"],
-        }
-        for r in by_threat_raw
+    heatmap = [
+        {"prob": prob, "impact": imp, "count": heatmap_dict.get((prob, imp), 0), "class": risk_class(prob, imp)}
+        for prob in range(1, 6) for imp in range(1, 6)
     ]
 
-    # NIS2 Art.21 breakdown
+    # Top 10 rischi per classe attuale (poi impatto)
+    ranked = sorted(risk_qs, key=lambda r: (class_rank(r.current_class), r.impact or 0), reverse=True)[:10]
+    top_risks = [
+        {
+            "id": str(r.id),
+            "name": r.name,
+            "plant_name": r.plant.name if r.plant else None,
+            "asset_type": r.asset_type,
+            "threat_code": r.threat.code if r.threat else None,
+            "current_class": r.current_class,
+            "current_class_label": CLASS_LABELS.get(r.current_class, ""),
+            "expected_class": r.expected_class,
+            "treatment": r.treatment,
+            "owner_name": (f"{r.owner.first_name} {r.owner.last_name}".strip() if r.owner else "—"),
+            "accepted": r.id in accepted_ids,
+            "significant_incident_potential": r.significant_incident_potential,
+            "nis2_art21_category": r.nis2_art21_category,
+        }
+        for r in ranked
+    ]
+
+    # Distribuzione per tipologia di asset
+    by_asset_type = [
+        {
+            "asset_type": row["asset_type"] or "—",
+            "count": row["count"],
+            "rossi": row["rossi"],
+            "gialli": row["gialli"],
+            "verdi": row["verdi"],
+        }
+        for row in risk_qs.values("asset_type").annotate(
+            count=Count("id"),
+            rossi=Count("id", filter=Q(current_class__in=["high", "critical"])),
+            gialli=Count("id", filter=Q(current_class="medium")),
+            verdi=Count("id", filter=Q(current_class__in=["low", "very_low"])),
+        ).order_by("-count")
+    ]
+
+    # NIS2 Art.21: rischi per area, nel perimetro NIS2 e con possibile incidente significativo
     nis2_art21_label_map = dict(NIS2_ART21_CHOICES)
-    nis2_raw = (
-        risk_qs.filter(nis2_art21_category__gt="")
-        .values("nis2_art21_category")
-        .annotate(
-            total=Count("id"),
-            significativo=Count("id", filter=Q(nis2_relevance="significativo")),
-            potenzialmente=Count("id", filter=Q(nis2_relevance="potenzialmente_significativo")),
-            non_significativo=Count("id", filter=Q(nis2_relevance="non_significativo")),
-        )
-        .order_by("nis2_art21_category")
-    )
     nis2_breakdown = [
         {
-            "category": r["nis2_art21_category"],
-            "label": nis2_art21_label_map.get(r["nis2_art21_category"], r["nis2_art21_category"]),
-            "total": r["total"],
-            "significativo": r["significativo"],
-            "potenzialmente_significativo": r["potenzialmente"],
-            "non_significativo": r["non_significativo"],
+            "category": row["nis2_art21_category"],
+            "label": nis2_art21_label_map.get(row["nis2_art21_category"], row["nis2_art21_category"]),
+            "total": row["total"],
+            "in_scope": row["in_scope"],
+            "significant_incident_potential": row["significant"],
         }
-        for r in nis2_raw
+        for row in risk_qs.filter(nis2_art21_category__gt="").values("nis2_art21_category").annotate(
+            total=Count("id"),
+            in_scope=Count("id", filter=Q(nis2_in_scope=True)),
+            significant=Count("id", filter=Q(significant_incident_potential=True)),
+        ).order_by("nis2_art21_category")
     ]
 
     # Tabella BIA–BCP correlation
@@ -350,8 +280,8 @@ def risk_bia_bcp(plant_id) -> dict:
     proc_ids = [p.id for p in processes]
 
     risk_by_proc = {}
-    for r in risk_qs.filter(critical_process_id__in=proc_ids).values("critical_process_id", "score"):
-        risk_by_proc.setdefault(r["critical_process_id"], []).append(r["score"] or 0)
+    for r in risk_qs.filter(critical_process_id__in=proc_ids).values("critical_process_id", "current_class"):
+        risk_by_proc.setdefault(r["critical_process_id"], []).append(risk_level_bucket(r["current_class"]))
 
     bcp_by_proc = {}
     bcp_fields = ("status", "next_test_date", "last_test_date", "id")
@@ -407,9 +337,9 @@ def risk_bia_bcp(plant_id) -> dict:
             "rto_target_hours": proc.rto_target_hours,
             "rpo_target_hours": proc.rpo_target_hours,
             "risks_total": len(scores),
-            "risks_red": sum(1 for s in scores if s > 14),
-            "risks_yellow": sum(1 for s in scores if 7 < s <= 14),
-            "risks_green": sum(1 for s in scores if s <= 7),
+            "risks_red": scores.count("rosso"),
+            "risks_yellow": scores.count("giallo"),
+            "risks_green": scores.count("verde"),
             "bcp_plans_count": len(bcp_plans),
             "bcp_status": best_bcp["status"] if best_bcp else None,
             "next_test_date": (
@@ -426,104 +356,23 @@ def risk_bia_bcp(plant_id) -> dict:
             ),
         })
 
-    # ROSI (Return on Security Investment) dei trattamenti pianificati (M05 BIA).
-    # Standard ENISA: ROSI = (ALE_evitata − costo_annualizzato) / costo_annualizzato.
-    # Il CapEx una tantum (cost_implementation) è ammortizzato su AMORT_YEARS anni
-    # (vita utile convenzionale del controllo); cost_annual è il ricorrente.
-    # ALE_evitata = ALE residua del processo × % di riduzione del trattamento.
-    # Ogni trattamento è valutato indipendentemente (non sommabile linearmente sullo
-    # stesso processo) come supporto alla decisione di investimento.
-    AMORT_YEARS = 3
-    opt_qs = TreatmentOption.objects.filter(deleted_at__isnull=True).select_related("process")
-    if plant_id:
-        opt_qs = opt_qs.filter(process__plant_id=plant_id)
-
-    treatments = []
-    tot_ale_avoided = Decimal("0")
-    tot_annual_cost = Decimal("0")
-    for opt in opt_qs:
-        proc_ale = ale_by_proc.get(opt.process_id, Decimal("0"))
-        reduction = Decimal(str(opt.ale_reduction_pct)) / Decimal("100")
-        ale_avoided = (proc_ale * reduction).quantize(Decimal("0.01"))
-        annual_cost = (
-            Decimal(str(opt.cost_annual))
-            + Decimal(str(opt.cost_implementation)) / Decimal(AMORT_YEARS)
-        ).quantize(Decimal("0.01"))
-        net_annual = ale_avoided - annual_cost
-        rosi_pct = (
-            round(float(net_annual / annual_cost * 100), 1) if annual_cost > 0 else None
-        )
-        # payback (mesi): solo CapEx contro il beneficio netto ricorrente positivo
-        net_recurring = ale_avoided - Decimal(str(opt.cost_annual))
-        payback_months = (
-            round(float(Decimal(str(opt.cost_implementation)) / net_recurring * 12), 1)
-            if net_recurring > 0 and opt.cost_implementation else None
-        )
-        worth_it = (rosi_pct is not None and rosi_pct > 0) or (
-            annual_cost == 0 and ale_avoided > 0
-        )
-        treatments.append({
-            "id": str(opt.id),
-            "title": opt.title,
-            "process_id": str(opt.process_id),
-            "process_name": opt.process.name,
-            "ale_reduction_pct": opt.ale_reduction_pct,
-            "process_ale": float(proc_ale),
-            "ale_avoided": float(ale_avoided),
-            "cost_implementation": float(opt.cost_implementation),
-            "cost_annual": float(opt.cost_annual),
-            "annual_cost": float(annual_cost),
-            "net_annual": float(net_annual),
-            "rosi_pct": rosi_pct,
-            "payback_months": payback_months,
-            "worth_it": worth_it,
-        })
-        tot_ale_avoided += ale_avoided
-        tot_annual_cost += annual_cost
-
-    # Ordina per ROSI decrescente (i None — costo annuo nullo — in coda)
-    treatments.sort(
-        key=lambda x: (x["rosi_pct"] is not None, x["rosi_pct"] if x["rosi_pct"] is not None else -1e9),
-        reverse=True,
-    )
-    treatments_totals = {
-        "count": len(treatments),
-        "ale_avoided": float(tot_ale_avoided),
-        "annual_cost": float(tot_annual_cost),
-        "net_annual": float(tot_ale_avoided - tot_annual_cost),
-        "rosi_pct": (
-            round(float((tot_ale_avoided - tot_annual_cost) / tot_annual_cost * 100), 1)
-            if tot_annual_cost > 0 else None
-        ),
-        "amort_years": AMORT_YEARS,
-    }
-
     return {
         "kpis": {
-            "risks_total": risks_total,
-            "risks_red": risks_red,
-            "risks_yellow": risks_yellow,
-            "risks_needs_revaluation": risks_needs_revaluation,
-            "risks_formally_accepted": risks_formally_accepted,
-            "risks_over_appetite": risks_over_appetite,
+            "risks_total": counts["total"],
+            "risks_by_class": {k: counts[k] for k in ("very_low", "low", "medium", "high", "critical")},
+            "risks_red": counts["rosso"],
+            "risks_yellow": counts["giallo"],
+            "risks_accepted": len(accepted_ids),
+            "risks_untreated_high": risks_untreated_high,
             "bia_critical_no_bcp": bia_critical_no_bcp,
             "bia_critical_test_expired": bia_critical_test_expired,
             "bcp_test_overdue": bcp_test_overdue,
-            "ale_total": float(ale_total),
-            "ale_total_inherent": float(ale_total_inherent),
-            "ale_saved": float(ale_saved),
-            "ale_saved_pct": ale_saved_pct,
-            "ale_valued_count": ale_valued_count,
-            "ale_coverage_pct": ale_coverage_pct,
         },
-        "appetite": appetite,
         "heatmap": heatmap,
         "top_risks": top_risks,
-        "by_threat": by_threat,
+        "by_asset_type": by_asset_type,
         "nis2_breakdown": nis2_breakdown,
         "bia_bcp_table": bia_bcp_table,
-        "treatments": treatments,
-        "treatments_totals": treatments_totals,
     }
 
 
@@ -537,7 +386,7 @@ def dashboard_summary(plant_id) -> dict:
     from apps.pdca.models import PdcaCycle
     from apps.plants.models import Plant
     from apps.plants.services import get_active_framework_codes
-    from apps.risk.models import RiskAssessment
+    from apps.risk.services import class_counts, evaluated_risks
     from apps.tasks.models import Task
 
     plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
@@ -553,9 +402,7 @@ def dashboard_summary(plant_id) -> dict:
     compliant = ctrl["compliant"]
     gap = ctrl["gap"]
 
-    risk_qs = RiskAssessment.objects.filter(status="completato", deleted_at__isnull=True)
-    if plant:
-        risk_qs = risk_qs.filter(plant=plant)
+    risks = class_counts(evaluated_risks(plant.pk if plant else None))
 
     inc_qs = Incident.objects.filter(status__in=["aperto", "in_analisi"])
     if plant:
@@ -583,8 +430,8 @@ def dashboard_summary(plant_id) -> dict:
         "frameworks": fw_codes,
         "tasks_overdue": task_qs.count(),
         "pdca_open": pdca_qs.count(),
-        "risks_red": risk_qs.filter(score__gt=14).count(),
-        "risks_yellow": risk_qs.filter(score__gt=7, score__lte=14).count(),
+        "risks_red": risks["rosso"],
+        "risks_yellow": risks["giallo"],
         "incidents_nis2": inc_qs.filter(nis2_notifiable="si").count(),
         "vacant_roles": get_vacant_mandatory_roles(plant) if plant else [],
     }

@@ -185,10 +185,12 @@
         "control_status_gap": "Marked as gap (awaiting remediation)",
         "control_status_partial": "Partially compliant",
         "control_not_evaluated": "Never assessed",
-        "risk_needs_revaluation": "Needs reassessment (recent change)",
-        "risk_expired": "Assessment expired {{count}} days ago",
+        "risk_expired": "Risk assessment overdue by {{count}} days",
         "supplier_never_assessed": "Never assessed (NIS2 / high risk)",
-        "supplier_assessment_expired": "Assessment expired {{count}} days ago"
+        "supplier_assessment_expired": "Assessment expired {{count}} days ago",
+        "risk_no_assessment": "No risk assessment approved with the current method",
+        "risk_acceptance_expired": "Risk acceptance expired {{count}} days ago",
+        "risk_acceptance_expiring": "Risk acceptance about to expire"
       }
     }
   },
@@ -1140,7 +1142,6 @@
       "assets": "IT/OT assets",
       "bia": "BIA",
       "risk": "Risks",
-      "risk_appetite": "Risk appetite",
       "documents": "Documents",
       "tasks": "Tasks and schedule",
       "checklist_delete": "Checklist deletion",
@@ -1160,7 +1161,8 @@
       "schedule_policy": "Deadline policies",
       "ai_engine": "AI engine",
       "competencies": "Competencies",
-      "users": "Users and access"
+      "users": "Users and access",
+      "risk_governance": "Risk governance"
     }
   },
   "governance": {
@@ -1170,7 +1172,6 @@
       "roles": "Roles & bodies",
       "workflow": "Document workflow (M07)",
       "frameworks": "Normative frameworks",
-      "risk_appetite": "Risk Appetite",
       "requirements": "Mandatory roles"
     },
     "workflow": {
@@ -1389,31 +1390,6 @@
       "delete_title": "Delete framework",
       "delete_action": "Delete",
       "delete_confirm": "Permanently delete framework \"{{code}}\"? All associated controls and domains will be removed. This action cannot be undone."
-    },
-    "risk_appetite": {
-      "title": "Risk Appetite",
-      "subtitle": "Define acceptable risk thresholds by site and framework: maximum acceptable score, limits on red risks and unacceptable score.",
-      "note": "For each Plant/Framework combination, the most recent active policy (by start date) is used; these thresholds are applied in M06 to compare Inherent, Residual and Weighted.",
-      "table_title": "Risk Appetite policies",
-      "empty": "No policy configured yet. Define at least one org-wide or per-plant threshold.",
-      "new": "+ New policy",
-      "edit_title": "Edit Risk Appetite policy",
-      "new_title": "New Risk Appetite policy",
-      "delete_title": "Delete policy",
-      "delete_body": "Are you sure you want to delete this Risk Appetite policy? M06 assessments will use any other active policies.",
-      "org_wide": "Org-wide (all sites)",
-      "framework_all": "All frameworks",
-      "columns": {
-        "plant": "Site",
-        "framework": "Framework",
-        "max_acceptable": "Max acceptable score",
-        "max_red": "Max red risks",
-        "max_unacceptable": "Unacceptable score",
-        "valid_from": "Valid from",
-        "valid_until": "Valid until",
-        "status": "Status",
-        "actions": "Actions"
-      }
     },
     "appetite_notes_placeholder": "Approval notes, management resolution references, etc.",
     "coverage": {
@@ -3520,7 +3496,28 @@
     "appetite": {
       "all_frameworks": "All frameworks"
     },
-    "col_score": "Score"
+    "col_score": "Score",
+    "classes": {
+      "very_low": "Very Low",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "asset_types": {
+      "IT": "IT",
+      "OT": "OT",
+      "SEDE": "Site",
+      "PERSONALE": "Personnel",
+      "FORNITORI": "Suppliers",
+      "PROTOTIPI": "Prototypes"
+    },
+    "acceptance_roles": {
+      "risk_owner": "Risk Owner",
+      "plant_manager": "Plant Manager",
+      "site_risk_manager": "Site Risk Manager",
+      "ciso": "CISO"
+    }
   },
   "pdca": {
     "title": "PDCA — Continuous improvement",
@@ -4552,57 +4549,23 @@
     },
     "risk_bia_bcp": {
       "kpi_total": "Total risks",
-      "kpi_yellow": "Yellow risks",
-      "kpi_revaluation": "To revaluate",
-      "kpi_revaluation_sub": "to re-assess after a change",
-      "kpi_accepted": "Formally accepted",
+      "kpi_yellow": "Medium risks",
+      "kpi_accepted": "Active acceptances",
       "kpi_bia_no_bcp": "Critical w/o BCP",
       "kpi_bia_no_bcp_sub": "criticality ≥ 4",
       "kpi_bcp_overdue": "BCP tests overdue",
       "kpi_bcp_overdue_sub": "approved plans with a test due",
-      "ale_section_title": "Economic exposure (ALE)",
-      "kpi_ale_inherent": "Inherent ALE (€/yr)",
-      "kpi_ale_residual": "Residual ALE (€/yr)",
-      "kpi_ale_saved": "Risk reduced by controls",
-      "kpi_ale_saved_sub": "−{{pct}}% vs inherent",
-      "kpi_ale_coverage": "{{valued}}/{{total}} valued · coverage {{pct}}%",
       "heatmap_title": "Risk heatmap (probability × impact)",
       "probability": "Probability",
       "impact": "Impact",
-      "legend_red": "High",
+      "legend_red": "High / Critical",
       "legend_yellow": "Medium",
-      "legend_green": "Low",
-      "top_risks_title": "Top 10 risks by score",
+      "legend_green": "Low / Very Low",
+      "top_risks_title": "Top 10 risks by class",
       "col_risk": "Scenario",
       "col_owner": "Owner",
-      "col_score_residual": "Residual score",
-      "col_score_inherent": "Inherent score",
-      "col_ale_residual": "Residual ALE",
-      "rosi_title": "Treatment ROSI (return on security investment)",
-      "rosi_subtitle": "ALE avoided − annualized cost (CapEx amortized over {{years}} years). Treatments don't stack: each is evaluated on its own.",
-      "rosi_empty": "No planned treatments. Add them in BIA to assess their return.",
-      "rosi_col_treatment": "Treatment",
-      "rosi_col_process": "Process",
-      "rosi_col_reduction": "Reduction",
-      "rosi_col_avoided": "ALE avoided (€/yr)",
-      "rosi_col_cost": "Annual cost (€/yr)",
-      "rosi_col_net": "Net benefit (€/yr)",
-      "rosi_col_rosi": "ROSI",
-      "rosi_col_payback": "Payback",
-      "rosi_col_verdict": "Verdict",
-      "rosi_months": "{{n}} mo",
-      "rosi_worth": "Worth it",
-      "rosi_not_worth": "Not worth it",
-      "rosi_total": "Total ({{count}} treatments)",
       "col_treatment": "Treatment",
-      "threat_chart_title": "Avg score by threat category (inherent vs residual)",
-      "bar_inherent": "Inherent",
-      "bar_residual": "Residual",
-      "threat_chart_note": "The gap between inherent and residual shows the effectiveness of existing controls.",
-      "nis2_chart_title": "NIS2 risks by Art.21 category",
-      "nis2_sig": "Significant",
-      "nis2_pot": "Pot. significant",
-      "nis2_non": "Non significant",
+      "nis2_chart_title": "Risks by NIS2 Art. 21 area",
       "bia_bcp_table_title": "BIA Processes – Risks – BCP Plans correlation",
       "col_process": "Critical process",
       "col_criticality": "Crit.",
@@ -4614,20 +4577,10 @@
       "test_overdue": "⚠ Overdue",
       "views": {
         "risks": "Risks",
-        "continuity": "Continuity",
-        "economic": "Economic value"
+        "continuity": "Continuity"
       },
-      "heatmap_cell": "P{{prob}} × I{{imp}} = {{score}} · risks: {{count}}",
-      "legend_appetite": "above the acceptance threshold (> {{threshold}})",
+      "heatmap_cell": "P{{prob}} × I{{imp}} = {{cls}} · risks: {{count}}",
       "accepted": "✓ Accepted",
-      "revaluate": "⚠ To be re-assessed",
-      "over_appetite_hint": "Above the acceptance threshold approved by management",
-      "kpi_over_appetite": "Above threshold",
-      "kpi_over_appetite_sub": "score > {{threshold}} · tolerated: {{max}}",
-      "kpi_over_appetite_sub_nomax": "score > {{threshold}}",
-      "appetite_missing": "No risk appetite approved: the default threshold {{threshold}} is used. Define it in the Risk module.",
-      "appetite_per_plant": "Acceptance thresholds differ between sites: the count uses each site's threshold, the heatmap shows the organisation's.",
-      "appetite_defined": "Acceptance threshold from the risk appetite approved by management.",
       "no_bcp": "No plan",
       "bcp_status": {
         "bozza": "Draft",
@@ -4639,11 +4592,20 @@
         "approvato": "BIA approved"
       },
       "bia_bcp_table_hint": "A process is covered only by an approved BCP; the test is due when its planned date has passed or is missing.",
-      "col_risks": "Risks (high · medium · low)",
+      "col_risks": "Risks (High+ · Medium · Low)",
       "kpi_processes": "Critical processes",
-      "ale_hint": "Annualised loss expectancy calculated from BIA downtime costs: only risks linked to a process with a downtime cost are valued.",
       "kpi_bia_test_expired": "Critical with test overdue",
-      "kpi_bia_test_expired_sub": "approved plan, test to redo"
+      "kpi_bia_test_expired_sub": "approved plan, test to redo",
+      "kpi_untreated_high": "High/Critical not accepted",
+      "kpi_untreated_high_sub": "above the acceptance threshold",
+      "kpi_red": "High and Critical risks",
+      "kpi_red_sub": "{{critical}} Critical · {{high}} High",
+      "col_class": "Class (current → expected)",
+      "group_register": "Group",
+      "asset_type_chart_title": "Risks by asset type",
+      "nis2_in_scope": "In NIS2 scope",
+      "nis2_significant": "Possible significant incident",
+      "heatmap_note": "The class is read from the procedure matrix, not from the P × I product."
     },
     "access_matrix": {
       "subtitle": "Who has access and who is responsible for what — review accesses at any time.",
@@ -5898,7 +5860,29 @@
       "appetite_tolerated": "Risks above threshold tolerated: {{count}}.",
       "appetite_per_plant": "Thresholds differ between sites: each risk is compared with its own site's threshold.",
       "top_over_appetite": "Risks above the acceptance threshold (highest residual)",
-      "critical_bcp_test_expired": "{{count}} critical processes with an overdue or never-run BCP test"
+      "critical_bcp_test_expired": "{{count}} critical processes with an overdue or never-run BCP test",
+      "high_untreated": "High/Critical not accepted",
+      "high_untreated_no_plan": "of which without a plan",
+      "measures_overdue": "Overdue measures",
+      "active_acceptances": "Active acceptances",
+      "risk_cycles": "Risk assessments",
+      "col_register": "Register",
+      "col_cycle_kind": "Type",
+      "group_register": "Group",
+      "top_high_untreated": "High/Critical risks not accepted",
+      "col_class": "Class (current → expected)",
+      "col_signatures": "Signatures",
+      "col_body": "Body",
+      "cycle_kind": {
+        "primo": "First risk assessment",
+        "periodico": "Periodic review",
+        "straordinario": "Extraordinary review"
+      },
+      "cycle_status": {
+        "in_corso": "In progress",
+        "in_approvazione": "Awaiting approval",
+        "approvato": "Approved"
+      }
     },
     "participants": {
       "heading": "Invitees and attendance",

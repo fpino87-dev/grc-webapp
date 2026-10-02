@@ -8,17 +8,14 @@ from ..models import ManagementReview, ReviewAction
 # pochi elementi, i più rilevanti; il totale resta nei contatori.
 SNAPSHOT_LIST_LIMIT = 10
 
-# Fascia di rischio "alto" (rosso) della matrice 5×5, come la heatmap del
-# Reporting. La soglia di accettabilità della direzione è a parte
-# (risk.services.AppetiteThresholds).
-CRITICAL_RISK_SCORE = 14
-
 # Versione delle regole con cui lo snapshot calcola conformità, rischi e BCP:
 # 2 = regole uniche condivise con il Reporting (controls.services.
-# effective_control_rows, risk.services.AppetiteThresholds,
-# bcp.services.critical_processes_without_bcp). Assente negli snapshot
-# precedenti, che restano come sono stati congelati.
-COMPLIANCE_RULE = 2
+# effective_control_rows, soglia di accettabilità a punteggio,
+# bcp.services.critical_processes_without_bcp);
+# 3 = rischi per classe della matrice della procedura D-ITA-INF-23
+# (risk.services: evaluated_risks, class_counts, untreated_high_risks).
+# Gli snapshot precedenti restano come sono stati congelati.
+COMPLIANCE_RULE = 3
 
 
 def _display_name(first_name, last_name, email) -> str:
@@ -98,21 +95,18 @@ def get_operational_kpi_summary(plant_id, all_plants: bool = False) -> dict:
 def get_kpi_snapshot(plant_id) -> dict:
     """Metriche chiave del sito all'avvio del riesame, con le stesse regole del
     Reporting: conformità da `get_compliance_summary` (regola unica), rischi
-    oltre la soglia di accettabilità del sito."""
+    High/Critical non accettati."""
     from apps.controls.services import get_compliance_summary
     from apps.incidents.models import Incident
-    from apps.risk.models import RiskAssessment
-    from apps.risk.services import AppetiteThresholds
+    from apps.risk.services import evaluated_risks, untreated_high_risks
 
     compliance = get_compliance_summary(plant_id)
 
     incidents_qs = Incident.objects.filter(plant_id=plant_id)
     open_incidents = incidents_qs.filter(status__in=["aperto", "in_analisi"]).count()
 
-    risks_qs = RiskAssessment.objects.filter(
-        plant_id=plant_id, status="completato", deleted_at__isnull=True,
-    )
-    high_risks = len(AppetiteThresholds().over_ids(risks_qs))
+    # High/Critical senza accettazione attiva (regola unica risk.services)
+    high_risks = untreated_high_risks(evaluated_risks(plant_id)).count()
 
     return {
         "plant_id": str(plant_id),
@@ -402,8 +396,7 @@ def _sites_block(today) -> list[dict]:
     from apps.controls.services import effective_control_rows, summarize_compliance
     from apps.incidents.models import Incident
     from apps.plants.models import Plant
-    from apps.risk.models import RiskAssessment
-    from apps.risk.services import AppetiteThresholds
+    from apps.risk.services import evaluated_risks, untreated_high_risks
     from apps.tasks.models import Task
 
     def _by_plant(qs, **annotations):
@@ -414,13 +407,12 @@ def _sites_block(today) -> list[dict]:
     for r in effective_control_rows(plants):
         rows_by_plant.setdefault(r["plant_id"], []).append(r)
 
-    risks_qs = RiskAssessment.objects.filter(status="completato", deleted_at__isnull=True)
-    thresholds = AppetiteThresholds()
-    over_by_plant: dict = {}
-    for plant_id, score in risks_qs.values_list("plant_id", "score"):
-        if thresholds.is_over(plant_id, score):
-            over_by_plant[plant_id] = over_by_plant.get(plant_id, 0) + 1
-    high = _by_plant(risks_qs.filter(score__gt=CRITICAL_RISK_SCORE), n=Count("id"))
+    risks_qs = evaluated_risks().filter(plant__isnull=False)
+    over_by_plant = {
+        row["plant_id"]: row["n"]
+        for row in untreated_high_risks(risks_qs).values("plant_id").annotate(n=Count("id"))
+    }
+    high = _by_plant(risks_qs.filter(current_class="critical"), n=Count("id"))
     incidents = _by_plant(Incident.objects.filter(status__in=["aperto", "in_analisi"]), n=Count("id"))
     tasks = _by_plant(
         Task.objects.filter(status__in=["aperto", "in_corso"], due_date__lt=today), n=Count("id"),
@@ -458,7 +450,6 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     from django.db.models import Case, Count, IntegerField, Q, Value, When
     from apps.controls.models import ControlInstance
     from apps.documents.models import Document, Evidence
-    from apps.risk.models import RiskAssessment
     from apps.incidents.models import Incident
     from apps.pdca.models import PdcaCycle
     from apps.tasks.models import Task
@@ -649,60 +640,76 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     ).count()
 
     # ── 3. Rischi ──
-    risks_qs = RiskAssessment.objects.filter(
-        **scope, status="completato", deleted_at__isnull=True
-    )
-    # Oltre la soglia di accettabilità approvata dalla direzione (soglia del
-    # sito di ciascun rischio), come nel Reporting. rosso/giallo/verde restano
-    # le fasce della matrice 5×5.
-    from apps.risk.services import AppetiteThresholds, appetite_summary
+    # Regole uniche di risk.services (procedura D-ITA-INF-23): classi della
+    # matrice, High/Critical non accettati = oltre la soglia di accettazione.
+    from apps.risk.models import RiskAcceptance, RiskAssessmentCycle, RiskMitigationPlan
+    from apps.risk.services import class_counts, class_rank, evaluated_risks, untreated_high_risks
 
-    thresholds = AppetiteThresholds()
-    over_qs = risks_qs.filter(pk__in=thresholds.over_ids(risks_qs))
-    accepted_qs = risks_qs.filter(risk_accepted_formally=True)
+    risks_qs = evaluated_risks(plant_id)
+    counts = class_counts(risks_qs)
+    over_qs = untreated_high_risks(risks_qs)
+    acceptances = RiskAcceptance.objects.filter(risk__in=risks_qs, status="active")
+    cycles_qs = RiskAssessmentCycle.objects.exclude(kind="legacy").filter(
+        status__in=["in_corso", "in_approvazione", "approvato"],
+    )
+    if plant_id:
+        cycles_qs = cycles_qs.filter(plant_id=plant_id)
     risk_summary = {
+        "metodo": "classi",
         "oltre_soglia": over_qs.count(),
-        "soglia": appetite_summary(plant_id, thresholds),
-        "rosso":  risks_qs.filter(score__gt=CRITICAL_RISK_SCORE).count(),
-        "giallo": risks_qs.filter(score__gt=7, score__lte=CRITICAL_RISK_SCORE).count(),
-        "verde":  risks_qs.filter(score__lte=7).count(),
-        # Rischi oltre soglia senza piano di mitigazione.
+        "by_class": {k: counts[k] for k in ("very_low", "low", "medium", "high", "critical")},
+        "rosso": counts["rosso"],
+        "giallo": counts["giallo"],
+        "verde": counts["verde"],
         "senza_piano": over_qs.annotate(
             n_plans=Count("mitigation_plans", filter=Q(mitigation_plans__deleted_at__isnull=True))
         ).filter(n_plans=0).count(),
         "senza_owner": risks_qs.filter(owner__isnull=True).count(),
-        "accettati_formalmente": accepted_qs.count(),
+        "accettati_formalmente": acceptances.count(),
+        "misure_in_ritardo": RiskMitigationPlan.objects.filter(
+            assessment__in=risks_qs, completed_at__isnull=True, due_date__lt=today,
+        ).count(),
+        "valutazioni": [
+            {"plant": c.plant.name if c.plant else None, "kind": c.kind, "status": c.status,
+             "approved_at": _iso(c.approved_at)}
+            for c in cycles_qs.select_related("plant").order_by("plant__code", "-started_at")
+        ],
     }
 
-    def _risk_items(qs, order):
+    def _risk_items(qs):
         rows = (
-            qs.select_related("asset", "critical_process", "owner", "risk_accepted_by")
+            qs.select_related("asset", "critical_process", "owner", "threat")
             .annotate(n_plans=Count("mitigation_plans", filter=Q(mitigation_plans__deleted_at__isnull=True)))
-            .order_by(*order)[:SNAPSHOT_LIST_LIMIT]
         )
+        rows = sorted(rows, key=lambda r: (class_rank(r.current_class), r.impact or 0), reverse=True)
         return [
             {
                 "id": str(r.pk),
-                "name": r.name or (r.asset.name if r.asset else "") or "—",
-                "asset": r.asset.name if r.asset else None,
+                "name": r.name or "—",
+                "threat": r.threat.code if r.threat else None,
+                "asset": r.asset.name if r.asset else (r.asset_group_label or None),
                 "process": r.critical_process.name if r.critical_process else None,
-                "inherent_score": r.inherent_score,
-                "score": r.score,
+                "current_class": r.current_class,
+                "expected_class": r.expected_class,
                 "treatment": r.treatment or None,
                 "owner": _display_name(r.owner.first_name, r.owner.last_name, r.owner.email) if r.owner else None,
                 "has_plan": r.n_plans > 0,
-                "accepted_formally": r.risk_accepted_formally,
-                "accepted_by": (
-                    _display_name(r.risk_accepted_by.first_name, r.risk_accepted_by.last_name, r.risk_accepted_by.email)
-                    if r.risk_accepted_by else None
-                ),
-                "acceptance_expiry": _iso(r.risk_acceptance_expiry),
             }
-            for r in rows
+            for r in rows[:SNAPSHOT_LIST_LIMIT]
         ]
 
-    risk_summary["top_critici"] = _risk_items(over_qs, ["-score", "-inherent_score"])
-    risk_summary["elenco_accettati"] = _risk_items(accepted_qs, ["risk_acceptance_expiry", "-score"])
+    risk_summary["top_critici"] = _risk_items(over_qs)
+    risk_summary["elenco_accettati"] = [
+        {
+            "id": str(a.risk_id),
+            "name": a.risk.name,
+            "current_class": a.risk_class,
+            "signatures": [s["role"] for s in a.signatures],
+            "body": a.body.name if a.body else None,
+            "acceptance_expiry": _iso(a.expires_on),
+        }
+        for a in acceptances.select_related("risk", "body").order_by("expires_on")[:SNAPSHOT_LIST_LIMIT]
+    ]
 
     # ── 4. Incidenti ──
     incidents_qs = Incident.objects.filter(**scope)

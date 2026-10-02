@@ -63,7 +63,6 @@ def generate_weekly_kpi_snapshots():
 
 def _build_snapshot(plant, framework_code: str, week_start, plant_ids=None):
     from apps.controls.models import ControlInstance
-    from apps.risk.models import RiskAssessment
     from apps.incidents.models import Incident
     from .models import IsmsKpiSnapshot
 
@@ -85,11 +84,11 @@ def _build_snapshot(plant, framework_code: str, week_start, plant_ids=None):
     )
     overall_maturity = _calc_overall_maturity(ci_qs)
 
-    risk_qs = RiskAssessment.objects.filter(status="completato", deleted_at__isnull=True)
-    if plant is not None:
-        risk_qs = risk_qs.filter(plant=plant)
+    from apps.risk.services import HIGH_CLASSES, evaluated_risks
+
+    risk_qs = evaluated_risks(plant.pk if plant is not None else None)
     open_risks = risk_qs.count()
-    high_risks = risk_qs.filter(score__gt=14).count()
+    high_risks = risk_qs.filter(current_class__in=HIGH_CLASSES).count()
 
     inc_qs = Incident.objects.filter(deleted_at__isnull=True)
     if plant is not None:

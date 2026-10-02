@@ -6,7 +6,6 @@ import { ModuleHelp } from "../../components/ui/ModuleHelp";
 import { DocumentWorkflowSection } from "./DocumentWorkflowPage";
 import { FrameworkGovernanceTab } from "./FrameworkGovernanceTab";
 import { GoverningBodiesSection } from "./GoverningBodiesSection";
-import { RiskAppetiteGovernanceTab } from "./RiskAppetiteGovernanceTab";
 import { RoleCoverageMatrix, type AssignPrefill } from "./RoleCoverageMatrix";
 import { RoleRequirementsPanel } from "./RoleRequirementsPanel";
 import { useSearchParams } from "react-router-dom";
@@ -35,13 +34,11 @@ export function GovernancePage() {
       ? "workflow"
       : p === "frameworks"
       ? "frameworks"
-      : p === "risk-appetite"
-      ? "risk-appetite"
       : p === "requirements"
       ? "requirements"
       : "roles";
   const [tab, setTab] = useState<
-    "roles" | "workflow" | "frameworks" | "risk-appetite" | "requirements"
+    "roles" | "workflow" | "frameworks" | "requirements"
   >(resolveTab(tabParam));
 
   useEffect(() => {
@@ -172,24 +169,6 @@ export function GovernancePage() {
           <button
             type="button"
             onClick={() => {
-              setTab("risk-appetite");
-              setSearchParams((prev) => {
-                const next = new URLSearchParams(prev);
-                next.set("tab", "risk-appetite");
-                return next;
-              });
-            }}
-            className={
-              tab === "risk-appetite"
-                ? "border-primary-600 text-primary-700 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
-            }
-          >
-            {t("governance.tabs.risk_appetite", { defaultValue: "Risk Appetite" })}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
               setTab("requirements");
               setSearchParams((prev) => {
                 const next = new URLSearchParams(prev);
@@ -236,8 +215,6 @@ export function GovernancePage() {
           </div>
           <DocumentWorkflowSection embedded />
         </div>
-      ) : tab === "risk-appetite" ? (
-        <RiskAppetiteGovernanceTab />
       ) : tab === "requirements" ? (
         <RoleRequirementsPanel />
       ) : (

@@ -110,7 +110,6 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
     Ritorna una vista integrata BIA + Risk + BCP per un processo critico.
     Non effettua side-effect né logging audit: è solo read-model per API/UI.
     """
-    from apps.risk.models import RiskAssessment
     from apps.bcp.models import BcpPlan
 
     # BIA / BCP targets e impatti
@@ -128,31 +127,30 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
         "status": process.status,
     }
 
-    # Rischi collegati (via FK RiskAssessment.critical_process)
-    risk_qs = RiskAssessment.objects.filter(
-        critical_process=process,
-        deleted_at__isnull=True,
-    ).select_related("asset")
+    # Rischi collegati (via FK RiskAssessment.critical_process), registro corrente
+    from apps.risk.models import RiskAcceptance
+    from apps.risk.services import register_queryset
 
-    risks = []
-    for r in risk_qs:
-        risks.append(
-            {
-                "id": str(r.pk),
-                "name": r.name,
-                "assessment_type": r.assessment_type,
-                "asset_id": str(r.asset_id) if r.asset_id else None,
-                "score": r.score,
-                "inherent_score": r.inherent_score,
-                "risk_level": r.risk_level,
-                "inherent_risk_level": r.inherent_risk_level,
-                "risk_reduction_pct": r.risk_reduction_pct,
-                "status": r.status,
-                "treatment": r.treatment,
-                "risk_accepted_formally": r.risk_accepted_formally,
-                "risk_acceptance_expiry": r.risk_acceptance_expiry,
-            }
-        )
+    risk_qs = register_queryset(process.plant).filter(critical_process=process).select_related("threat")
+    expiry = dict(
+        RiskAcceptance.objects.filter(risk__in=risk_qs, status="active").values_list("risk_id", "expires_on")
+    )
+    risks = [
+        {
+            "id": str(r.pk),
+            "name": r.name,
+            "asset_type": r.asset_type,
+            "threat_code": r.threat.code if r.threat else None,
+            "asset_id": str(r.asset_id) if r.asset_id else None,
+            "applicable": r.applicable,
+            "current_class": r.current_class,
+            "expected_class": r.expected_class,
+            "status": r.status,
+            "treatment": r.treatment,
+            "acceptance_expiry": expiry.get(r.pk),
+        }
+        for r in risk_qs
+    ]
 
     # BCP collegati (FK + M2M)
     direct_plans = BcpPlan.objects.filter(
@@ -183,7 +181,7 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
 
     has_bcp_plan = len(bcp_plans) > 0
     has_high_risks_without_plan = any(
-        r.get("risk_level") == "rosso" for r in risks
+        r["applicable"] and r["current_class"] in ("high", "critical") for r in risks
     ) and not has_bcp_plan
 
     summary = {
@@ -247,18 +245,11 @@ def delete_process(process: CriticalProcess, user, cascade: bool = False) -> Non
     # Cascade: delete dependencies first.
     risk_assessments = (
         RiskAssessment.objects.filter(critical_process=process, deleted_at__isnull=True)
-        .prefetch_related("dimensions", "mitigation_plans")
+        .prefetch_related("existing_measures", "mitigation_plans")
     )
     for assessment in risk_assessments:
-        for dim in assessment.dimensions.all():
-            dim.soft_delete()
-            log_action(
-                user=user,
-                action_code="risk.dimension.deleted",
-                level="L2",
-                entity=dim,
-                payload={"id": str(dim.id), "dimension_code": dim.dimension_code},
-            )
+        for measure in assessment.existing_measures.all():
+            measure.soft_delete()
         for mp in assessment.mitigation_plans.all():
             mp.soft_delete()
             log_action(

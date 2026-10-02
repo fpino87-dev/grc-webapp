@@ -412,10 +412,12 @@
         "control_status_gap": "Boşluk olarak işaretlendi (iyileştirme bekleniyor)",
         "control_status_partial": "Kısmi uyum",
         "control_not_evaluated": "Hiç değerlendirilmedi",
-        "risk_needs_revaluation": "Yeniden değerlendirme gerekli (yakın zamanda değişiklik)",
-        "risk_expired": "Değerlendirmenin süresi {{count}} gün önce doldu",
+        "risk_expired": "Risk değerlendirmesi {{count}} gün gecikmeli",
         "supplier_never_assessed": "Hiç değerlendirilmedi (NIS2 / yüksek risk)",
-        "supplier_assessment_expired": "Değerlendirmenin süresi {{count}} gün önce doldu"
+        "supplier_assessment_expired": "Değerlendirmenin süresi {{count}} gün önce doldu",
+        "risk_no_assessment": "Mevcut yöntemle onaylanmış risk değerlendirmesi yok",
+        "risk_acceptance_expired": "Risk kabulünün süresi {{count}} gün önce doldu",
+        "risk_acceptance_expiring": "Risk kabulünün süresi dolmak üzere"
       }
     }
   },
@@ -1143,7 +1145,6 @@
       "assets": "BT/OT varlıkları",
       "bia": "BIA",
       "risk": "Riskler",
-      "risk_appetite": "Risk iştahı",
       "documents": "Dokümanlar",
       "tasks": "Görevler ve takvim",
       "checklist_delete": "Kontrol listesi silme",
@@ -1163,7 +1164,8 @@
       "schedule_policy": "Süre politikaları",
       "ai_engine": "Yapay zekâ motoru",
       "competencies": "Yetkinlikler",
-      "users": "Kullanıcılar ve erişim"
+      "users": "Kullanıcılar ve erişim",
+      "risk_governance": "Risk yönetişimi"
     }
   },
   "governance": {
@@ -1173,7 +1175,6 @@
       "roles": "Roller ve organlar",
       "workflow": "Belge iş akışı (M07)",
       "frameworks": "Normatif çerçeveler",
-      "risk_appetite": "Risk Appetite",
       "requirements": "Zorunlu roller"
     },
     "workflow": {
@@ -1392,31 +1393,6 @@
       "delete_action": "Sil",
       "delete_confirm": "\"{{code}}\" çerçevesini kalıcı olarak silmek istiyor musunuz? İlişkili tüm kontroller ve alanlar kaldırılacak. Bu işlem geri alınamaz.",
       "archive_action": "Arşivle"
-    },
-    "risk_appetite": {
-      "title": "Risk iştahı",
-      "subtitle": "Alan bazında risk kabul eşiklerini tanımlayın.",
-      "note": "Her Site/Çerçeve kombinasyonu için en son etkin politika (başlangıç tarihine göre) kullanılır; bu eşikler M06'da İçsel, Kalıntı ve Ağırlıklı karşılaştırmak için uygulanır.",
-      "table_title": "Risk iştahı politikaları",
-      "empty": "Politika yapılandırılmamış. En az bir org-wide veya site bazlı eşik tanımlayın.",
-      "new": "+ Yeni politika",
-      "edit_title": "Risk iştahı politikasını düzenle",
-      "new_title": "Yeni risk iştahı politikası",
-      "delete_title": "Politikayı sil",
-      "delete_body": "Bu risk iştahı politikasını silmek istediğinizden emin misiniz? M06 değerlendirmeleri diğer aktif politikaları kullanacak.",
-      "org_wide": "Org-wide (tüm siteler)",
-      "framework_all": "Tüm çerçeveler",
-      "columns": {
-        "plant": "Site",
-        "framework": "Framework",
-        "max_acceptable": "Maks. kabul edilebilir puan",
-        "max_red": "Maks. kırmızı riskler",
-        "max_unacceptable": "Kabul edilemez puan",
-        "valid_from": "Geçerlilik başlangıcı",
-        "valid_until": "Geçerlilik sonu",
-        "status": "Durum",
-        "actions": "İşlemler"
-      }
     },
     "appetite_notes_placeholder": "Onay notları, yönetim kararı referansları, vb.",
     "coverage": {
@@ -3520,7 +3496,28 @@
     "appetite": {
       "all_frameworks": "Tüm çerçeveler"
     },
-    "col_score": "Puan"
+    "col_score": "Puan",
+    "classes": {
+      "very_low": "Very Low",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "asset_types": {
+      "IT": "BT",
+      "OT": "OT",
+      "SEDE": "Tesis",
+      "PERSONALE": "Personel",
+      "FORNITORI": "Tedarikçiler",
+      "PROTOTIPI": "Prototipler"
+    },
+    "acceptance_roles": {
+      "risk_owner": "Risk Sahibi",
+      "plant_manager": "Tesis Müdürü",
+      "site_risk_manager": "Saha Risk Yöneticisi",
+      "ciso": "CISO"
+    }
   },
   "pdca": {
     "title": "PDCA — Sürekli iyileştirme",
@@ -4552,57 +4549,23 @@
     },
     "risk_bia_bcp": {
       "kpi_total": "Toplam risk",
-      "kpi_yellow": "Sarı riskler",
-      "kpi_revaluation": "Yeniden değerlendirilecek",
-      "kpi_revaluation_sub": "bir değişiklikten sonra yeniden değerlendirilecek",
-      "kpi_accepted": "Resmi kabul edilmiş",
+      "kpi_yellow": "Medium riskler",
+      "kpi_accepted": "Etkin kabuller",
       "kpi_bia_no_bcp": "BCP'siz kritik",
       "kpi_bia_no_bcp_sub": "kritiklik ≥ 4",
       "kpi_bcp_overdue": "Gecikmiş BCP testleri",
       "kpi_bcp_overdue_sub": "testi yenilenecek onaylı planlar",
-      "ale_section_title": "Ekonomik maruziyet (ALE)",
-      "kpi_ale_inherent": "İçsel ALE (€/yıl)",
-      "kpi_ale_residual": "Kalıntı ALE (€/yıl)",
-      "kpi_ale_saved": "Kontrollerle azaltılan risk",
-      "kpi_ale_saved_sub": "İçsele göre −%{{pct}}",
-      "kpi_ale_coverage": "{{valued}}/{{total}} değerlendirildi · kapsama {{pct}}%",
       "heatmap_title": "Risk ısı haritası (olasılık × etki)",
       "probability": "Olasılık",
       "impact": "Etki",
-      "legend_red": "Yüksek",
-      "legend_yellow": "Orta",
-      "legend_green": "Düşük",
-      "top_risks_title": "Skora göre ilk 10 risk",
+      "legend_red": "High / Critical",
+      "legend_yellow": "Medium",
+      "legend_green": "Low / Very Low",
+      "top_risks_title": "Sınıfa göre ilk 10 risk",
       "col_risk": "Senaryo",
       "col_owner": "Sahip",
-      "col_score_residual": "Kalıntı skor",
-      "col_score_inherent": "İçsel skor",
-      "col_ale_residual": "Kalıntı ALE",
-      "rosi_title": "Önlem ROSI (güvenlik yatırımı getirisi)",
-      "rosi_subtitle": "Önlenen ALE − yıllık maliyet (CapEx {{years}} yıla yayılmış). Önlemler toplanmaz: her biri ayrı değerlendirilir.",
-      "rosi_empty": "Planlanmış önlem yok. Getiriyi değerlendirmek için BIA'da ekleyin.",
-      "rosi_col_treatment": "Önlem",
-      "rosi_col_process": "Süreç",
-      "rosi_col_reduction": "Azalma",
-      "rosi_col_avoided": "Önlenen ALE (€/yıl)",
-      "rosi_col_cost": "Yıllık maliyet (€/yıl)",
-      "rosi_col_net": "Net fayda (€/yıl)",
-      "rosi_col_rosi": "ROSI",
-      "rosi_col_payback": "Geri ödeme",
-      "rosi_col_verdict": "Karar",
-      "rosi_months": "{{n}} ay",
-      "rosi_worth": "Değer",
-      "rosi_not_worth": "Değmez",
-      "rosi_total": "Toplam ({{count}} önlem)",
       "col_treatment": "İşlem",
-      "threat_chart_title": "Tehdit kategorisine göre ortalama skor (içsel - kalıntı)",
-      "bar_inherent": "İçsel",
-      "bar_residual": "Kalıntı",
-      "threat_chart_note": "İçsel ve kalıntı arasındaki fark, mevcut kontrollerin etkinliğini gösterir.",
-      "nis2_chart_title": "NIS2 riskleri Art.21 kategorisine göre",
-      "nis2_sig": "Önemli",
-      "nis2_pot": "Pot. önemli",
-      "nis2_non": "Önemsiz",
+      "nis2_chart_title": "NIS2 Md. 21 alanına göre riskler",
       "bia_bcp_table_title": "BIA Süreçleri – Riskler – BCP Planları korelasyonu",
       "col_process": "Kritik süreç",
       "col_criticality": "Krit.",
@@ -4614,20 +4577,10 @@
       "test_overdue": "⚠ Süresi geçmiş",
       "views": {
         "risks": "Riskler",
-        "continuity": "Süreklilik",
-        "economic": "Ekonomik değer"
+        "continuity": "Süreklilik"
       },
-      "heatmap_cell": "O{{prob}} × E{{imp}} = {{score}} · risk: {{count}}",
-      "legend_appetite": "kabul edilebilirlik eşiğinin üzerinde (> {{threshold}})",
+      "heatmap_cell": "O{{prob}} × E{{imp}} = {{cls}} · riskler: {{count}}",
       "accepted": "✓ Kabul edildi",
-      "revaluate": "⚠ Yeniden değerlendirilecek",
-      "over_appetite_hint": "Yönetimin onayladığı kabul edilebilirlik eşiğinin üzerinde",
-      "kpi_over_appetite": "Eşiğin üzerinde",
-      "kpi_over_appetite_sub": "puan > {{threshold}} · tolere edilen: {{max}}",
-      "kpi_over_appetite_sub_nomax": "puan > {{threshold}}",
-      "appetite_missing": "Onaylı risk iştahı yok: varsayılan eşik {{threshold}} kullanılıyor. Risk modülünde tanımlayın.",
-      "appetite_per_plant": "Kabul edilebilirlik eşikleri tesisler arasında farklı: sayım her tesisin eşiğini, ısı haritası kuruluşunkini kullanır.",
-      "appetite_defined": "Yönetimin onayladığı risk iştahından gelen kabul edilebilirlik eşiği.",
       "no_bcp": "Plan yok",
       "bcp_status": {
         "bozza": "Taslak",
@@ -4639,11 +4592,20 @@
         "approvato": "BIA onaylandı"
       },
       "bia_bcp_table_hint": "Bir süreç yalnızca onaylı bir BCP ile kapsanır; planlanan tarih geçmişse veya yoksa test yeniden yapılmalıdır.",
-      "col_risks": "Riskler (yüksek · orta · düşük)",
+      "col_risks": "Riskler (High+ · Medium · Low)",
       "kpi_processes": "Kritik süreçler",
-      "ale_hint": "BIA kesinti maliyetlerinden hesaplanan yıllık beklenen kayıp: yalnızca kesinti maliyeti olan bir sürece bağlı riskler değerlenir.",
       "kpi_bia_test_expired": "Testi gecikmiş kritikler",
-      "kpi_bia_test_expired_sub": "onaylı plan, test yenilenmeli"
+      "kpi_bia_test_expired_sub": "onaylı plan, test yenilenmeli",
+      "kpi_untreated_high": "Kabul edilmemiş High/Critical",
+      "kpi_untreated_high_sub": "kabul eşiğinin üzerinde",
+      "kpi_red": "High ve Critical riskler",
+      "kpi_red_sub": "{{critical}} Critical · {{high}} High",
+      "col_class": "Sınıf (mevcut → beklenen)",
+      "group_register": "Grup",
+      "asset_type_chart_title": "Varlık türüne göre riskler",
+      "nis2_in_scope": "NIS2 kapsamında",
+      "nis2_significant": "Olası önemli olay",
+      "heatmap_note": "Sınıf, P × I çarpımından değil prosedür matrisinden okunur."
     },
     "access_matrix": {
       "subtitle": "Kimin erişimi var ve kim neyden sorumlu — erişimleri istediğiniz zaman doğrulayın.",
@@ -5898,7 +5860,29 @@
       "appetite_tolerated": "Tolere edilen eşik üstü riskler: {{count}}.",
       "appetite_per_plant": "Eşikler tesisler arasında farklıdır: her risk kendi tesisinin eşiğiyle karşılaştırılır.",
       "top_over_appetite": "Kabul edilebilirlik eşiğinin üzerindeki riskler (en yüksek artık)",
-      "critical_bcp_test_expired": "İş sürekliliği testi gecikmiş veya hiç yapılmamış {{count}} kritik süreç"
+      "critical_bcp_test_expired": "İş sürekliliği testi gecikmiş veya hiç yapılmamış {{count}} kritik süreç",
+      "high_untreated": "Kabul edilmemiş High/Critical",
+      "high_untreated_no_plan": "bunların planı olmayanlar",
+      "measures_overdue": "Geciken önlemler",
+      "active_acceptances": "Etkin kabuller",
+      "risk_cycles": "Risk değerlendirmeleri",
+      "col_register": "Kayıt",
+      "col_cycle_kind": "Tür",
+      "group_register": "Grup",
+      "top_high_untreated": "Kabul edilmemiş High/Critical riskler",
+      "col_class": "Sınıf (mevcut → beklenen)",
+      "col_signatures": "İmzalar",
+      "col_body": "Organ",
+      "cycle_kind": {
+        "primo": "İlk risk değerlendirmesi",
+        "periodico": "Periyodik gözden geçirme",
+        "straordinario": "Olağanüstü gözden geçirme"
+      },
+      "cycle_status": {
+        "in_corso": "Devam ediyor",
+        "in_approvazione": "Onay bekliyor",
+        "approvato": "Onaylandı"
+      }
     },
     "participants": {
       "heading": "Davetliler ve katılım",

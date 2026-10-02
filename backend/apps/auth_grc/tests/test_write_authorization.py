@@ -56,8 +56,7 @@ def test_risk_manager_passes_write_permission(db):
 def test_auditor_cannot_complete_risk(db, plant):
     from apps.risk.models import RiskAssessment
     a = RiskAssessment.objects.create(
-        plant=plant, name="R", assessment_type="IT",
-        threat_category="malware_ransomware", probability=3, impact=4, status="bozza",
+        plant=plant, name="R", asset_type="IT", probability=3, impact=4, status="bozza",
     )
     auditor = client_with_role(GrcRole.INTERNAL_AUDITOR)
     res = auditor.post(f"/api/v1/risk/assessments/{a.id}/complete/")

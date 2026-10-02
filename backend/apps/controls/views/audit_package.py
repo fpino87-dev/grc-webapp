@@ -324,9 +324,11 @@ def _add_management_review_reports(zf, zip_name: str, plant_id) -> None:
 
 
 def _add_risk_register(zf, zip_name: str, plant_id) -> None:
+    from apps.plants.models import Plant
     from apps.risk.services import generate_risk_excel
     try:
-        excel_bytes = generate_risk_excel(plant_id=plant_id, include_draft=False)
+        plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
+        excel_bytes = generate_risk_excel(plant)
         zf.writestr(f"{zip_name}/RISK_REGISTER/risk_register.xlsx", excel_bytes)
     except Exception as exc:
         import logging

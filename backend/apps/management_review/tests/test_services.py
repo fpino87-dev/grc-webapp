@@ -95,18 +95,22 @@ def test_snapshot_lists_documents_risks_incidents_details(review, plant, user):
         approved_at=timezone.now(),
     )
     RiskAssessment.objects.create(
-        plant=plant, name="Ransomware MES", assessment_type="OT", status="completato",
-        probability=5, impact=4, inherent_probability=5, inherent_impact=5, owner=user,
+        plant=plant, name="Ransomware MES", asset_type="OT", status="completato",
+        probability=5, impact=4, current_class="critical", expected_class="medium", owner=user,
     )
     covered = RiskAssessment.objects.create(
-        plant=plant, name="Phishing", assessment_type="IT", status="completato",
-        probability=4, impact=4,
+        plant=plant, name="Phishing", asset_type="IT", status="completato",
+        probability=3, impact=4, current_class="high",
     )
     RiskMitigationPlan.objects.create(assessment=covered, action="MFA", due_date=today)
-    RiskAssessment.objects.create(
-        plant=plant, name="Accettato", assessment_type="IT", status="completato",
-        probability=2, impact=2, risk_accepted_formally=True, risk_accepted_by=user,
+    accepted = RiskAssessment.objects.create(
+        plant=plant, name="Accettato", asset_type="IT", status="completato",
+        probability=2, impact=2, current_class="low",
     )
+    from apps.risk.models import RiskAcceptance
+    RiskAcceptance.objects.create(risk=accepted, risk_class="low", status="active", rationale="ok",
+                                  signatures=[{"role": "risk_owner", "user_id": user.pk, "at": "x"}],
+                                  expires_on=today + timezone.timedelta(days=90))
     Incident.objects.create(
         plant=plant, title="Malware linea 3", description="x", detected_at=timezone.now(),
         severity="alta", status="aperto",
@@ -124,11 +128,13 @@ def test_snapshot_lists_documents_risks_incidents_details(review, plant, user):
     assert rischi["rosso"] == 2
     assert rischi["senza_piano"] == 1
     top = rischi["top_critici"]
-    assert top[0]["name"] == "Ransomware MES"  # score più alto prima
-    assert top[0]["inherent_score"] == 25 and top[0]["score"] == 20
+    assert rischi["metodo"] == "classi" and rischi["oltre_soglia"] == 2
+    assert top[0]["name"] == "Ransomware MES"  # classe più alta prima
+    assert top[0]["current_class"] == "critical" and top[0]["expected_class"] == "medium"
     assert top[0]["has_plan"] is False
     assert next(r for r in top if r["name"] == "Phishing")["has_plan"] is True
     assert [r["name"] for r in rischi["elenco_accettati"]] == ["Accettato"]
+    assert rischi["elenco_accettati"][0]["signatures"] == ["risk_owner"]
 
     assert [i["title"] for i in snap["incidenti"]["elenco_aperti"]] == ["Malware linea 3"]
     assert "risks_by_owner" not in snap

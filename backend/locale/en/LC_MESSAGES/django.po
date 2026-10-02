@@ -3208,3 +3208,245 @@ msgstr "Processes must belong to the site of the information class."
 
 msgid "Sito inesistente."
 msgstr "Site not found."
+
+msgid "Primo risk assessment"
+msgstr "First risk assessment"
+
+msgid "Revisione periodica"
+msgstr "Periodic review"
+
+msgid "Revisione straordinaria"
+msgstr "Extraordinary review"
+
+msgid "High/Critical non accettati"
+msgstr "High/Critical not accepted"
+
+msgid "di cui senza piano"
+msgstr "of which without a plan"
+
+msgid "Misure in ritardo"
+msgstr "Overdue measures"
+
+msgid "Accettazioni attive"
+msgstr "Active acceptances"
+
+msgid "Valutazioni dei rischi"
+msgstr "Risk assessments"
+
+msgid "Approvata il"
+msgstr "Approved on"
+
+msgid "Gruppo"
+msgstr "Group"
+
+msgid "Rischi High/Critical non accettati"
+msgstr "High/Critical risks not accepted"
+
+msgid "Attuale → atteso"
+msgstr "Current → expected"
+
+msgid "Rischi accettati"
+msgstr "Accepted risks"
+
+msgid "Classe"
+msgstr "Class"
+
+msgid "Firme"
+msgstr "Signatures"
+
+msgid "Il controllo deve essere del sito del registro."
+msgstr "The control must belong to the register's site."
+
+msgid "La valutazione si modifica solo con una valutazione in corso sul registro."
+msgstr "The assessment can only be changed while an assessment of the register is in progress."
+
+msgid "Il rischio appartiene alla valutazione precedente (metodo superato): è in sola lettura."
+msgstr "The risk belongs to the previous assessment (superseded method): it is read-only."
+
+msgid "La minaccia scelta non è più attiva nel catalogo."
+msgstr "The selected threat is no longer active in the catalogue."
+
+msgid "La minaccia scelta non si applica a questa tipologia di asset."
+msgstr "The selected threat does not apply to this asset type."
+
+msgid "L'asset deve appartenere al sito del registro."
+msgstr "The asset must belong to the register's site."
+
+msgid "Il processo deve appartenere al sito del registro."
+msgstr "The process must belong to the register's site."
+
+msgid "Il fornitore deve operare per il sito del registro."
+msgstr "The supplier must work for the register's site."
+
+msgid "Le classi di informazioni devono essere del sito del registro o di gruppo."
+msgstr "Information classes must belong to the register's site or to the group."
+
+msgid "Solo i rischi di gruppo indicano i siti che li ereditano."
+msgstr "Only group risks list the sites that inherit them."
+
+msgid "L'override della classe può spostare al massimo di un livello."
+msgstr "The class override can move by one level at most."
+
+msgid "La classe del rischio è cambiata."
+msgstr "The risk class has changed."
+
+msgid "Indica la tipologia di asset e la minaccia del catalogo."
+msgstr "Enter the asset type and the catalogue threat."
+
+msgid "Motiva perché la minaccia non è applicabile."
+msgstr "Explain why the threat does not apply."
+
+msgid "Indica la probabilità e la sua motivazione."
+msgstr "Enter the probability and its rationale."
+
+msgid "Indica almeno una dimensione d'impatto e la motivazione."
+msgstr "Enter at least one impact dimension and the rationale."
+
+msgid "Motiva lo spostamento della classe."
+msgstr "Explain the class adjustment."
+
+msgid "Indica il Risk Owner."
+msgstr "Enter the Risk Owner."
+
+msgid "Scegli il trattamento."
+msgstr "Choose the treatment."
+
+msgid "Per un rischio High o Critical non trattato serve la motivazione (analisi costi/benefici)."
+msgstr "An untreated High or Critical risk needs a rationale (cost/benefit analysis)."
+
+msgid "Indica il rischio atteso dopo il trattamento."
+msgstr "Enter the expected risk after treatment."
+
+msgid "Si conferma solo un rischio con valutazione completata."
+msgstr "Only a risk with a completed assessment can be confirmed."
+
+msgid "Rischio eliminato dal registro."
+msgstr "Risk removed from the register."
+
+#, python-format
+msgid "Piano di trattamento rischio %(cls)s — %(name)s"
+msgstr "Treatment plan for %(cls)s risk — %(name)s"
+
+msgid "Si verifica solo una misura completata."
+msgstr "Only a completed measure can be verified."
+
+msgid "Il rischio atteso si applica solo con tutte le misure completate e verificate."
+msgstr "The expected risk can only be applied when all measures are completed and verified."
+
+msgid "Si accetta solo un rischio applicabile con valutazione completata."
+msgstr "Only an applicable risk with a completed assessment can be accepted."
+
+msgid "Il rischio comporta una violazione di legge, di requisiti VDA ISA o di obblighi di riservatezza: non è accettabile."
+msgstr "The risk involves a breach of law, of VDA ISA requirements or of confidentiality obligations: it cannot be accepted."
+
+msgid "C'è già un'accettazione in corso o attiva per questo rischio."
+msgstr "There is already a pending or active acceptance for this risk."
+
+msgid "La motivazione dell'accettazione è obbligatoria."
+msgstr "The acceptance rationale is mandatory."
+
+#, python-format
+msgid "La scadenza dell'accettazione deve essere futura ed entro %(months)s mesi."
+msgstr "The acceptance expiry must be in the future and within %(months)s months."
+
+#, python-format
+msgid "Parere sull'accettazione del rischio — %(name)s"
+msgstr "Opinion on risk acceptance — %(name)s"
+
+#, python-format
+msgid "Informativa: accettazione del rischio — %(name)s"
+msgstr "For information: risk acceptance — %(name)s"
+
+msgid "L'accettazione non è più in approvazione."
+msgstr "The acceptance is no longer awaiting approval."
+
+msgid "Non hai un ruolo che possa firmare questa accettazione."
+msgstr "You do not have a role that can sign this acceptance."
+
+msgid "Questa accettazione non attende una delibera dell'organo."
+msgstr "This acceptance is not awaiting a decision of the governing body."
+
+msgid "Indica l'organo e il riferimento della delibera."
+msgstr "Enter the governing body and the resolution reference."
+
+msgid "Questa accettazione non attende un parere."
+msgstr "This acceptance is not awaiting an opinion."
+
+msgid "Il parere spetta al CISO."
+msgstr "The opinion is the CISO's responsibility."
+
+msgid "Motiva il parere contrario."
+msgstr "Explain the unfavourable opinion."
+
+msgid "L'accettazione è già chiusa."
+msgstr "The acceptance is already closed."
+
+msgid "Indica il motivo della revoca."
+msgstr "Enter the reason for the revocation."
+
+msgid "Accettazione scaduta."
+msgstr "Acceptance expired."
+
+#, python-format
+msgid "Accettazione scaduta: trattare o riaccettare il rischio — %(name)s"
+msgstr "Acceptance expired: treat or re-accept the risk — %(name)s"
+
+#, python-format
+msgid "Accettazione del rischio in scadenza il %(date)s — %(name)s"
+msgstr "Risk acceptance expiring on %(date)s — %(name)s"
+
+#, python-format
+msgid "Escalation: misura in ritardo di %(days)s giorni — %(name)s"
+msgstr "Escalation: measure %(days)s days overdue — %(name)s"
+
+#, python-format
+msgid "Misura del piano di trattamento in ritardo — %(name)s"
+msgstr "Treatment plan measure overdue — %(name)s"
+
+msgid "Si segnala l'impatto locale solo di un rischio di gruppo ereditato dal sito."
+msgstr "Local impact can only be reported for a group risk inherited by the site."
+
+msgid "Indica l'impatto locale (1–5) e la motivazione."
+msgstr "Enter the local impact (1–5) and the rationale."
+
+msgid "La segnalazione è già stata recepita."
+msgstr "The report has already been acknowledged."
+
+msgid "Ci sono rischi con valutazione non completata."
+msgstr "There are risks with an incomplete assessment."
+
+msgid "Ci sono rischi non ancora valutati o confermati in questa valutazione."
+msgstr "Some risks have not yet been assessed or confirmed in this assessment."
+
+msgid "La copertura del catalogo minacce non è completa."
+msgstr "The threat catalogue coverage is not complete."
+
+msgid "Si invia in approvazione solo una valutazione in corso."
+msgstr "Only an assessment in progress can be submitted for approval."
+
+msgid "La valutazione non è in approvazione."
+msgstr "The assessment is not awaiting approval."
+
+msgid "Indica il motivo del rinvio."
+msgstr "Enter the reason for sending it back."
+
+msgid "Si approva solo una valutazione inviata in approvazione."
+msgstr "Only an assessment submitted for approval can be approved."
+
+msgid "Indica l'organo che approva la valutazione."
+msgstr "Enter the governing body that approves the assessment."
+
+msgid "Minaccia inesistente."
+msgstr "Threat not found."
+
+msgid "Il piano non è ancora completato."
+msgstr "The plan is not completed yet."
+
+msgid "Rischio inesistente."
+msgstr "Risk not found."
+
+msgid "Data non valida."
+msgstr "Invalid date."
+
+msgid "Indica il rischio di gruppo e il sito."
+msgstr "Enter the group risk and the site."

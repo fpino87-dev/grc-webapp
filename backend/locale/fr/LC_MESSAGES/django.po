@@ -3275,3 +3275,245 @@ msgstr "Les processus doivent appartenir au site de la classe d'informations."
 
 msgid "Sito inesistente."
 msgstr "Site inexistant."
+
+msgid "Primo risk assessment"
+msgstr "Première appréciation des risques"
+
+msgid "Revisione periodica"
+msgstr "Révision périodique"
+
+msgid "Revisione straordinaria"
+msgstr "Révision extraordinaire"
+
+msgid "High/Critical non accettati"
+msgstr "High/Critical non acceptés"
+
+msgid "di cui senza piano"
+msgstr "dont sans plan"
+
+msgid "Misure in ritardo"
+msgstr "Mesures en retard"
+
+msgid "Accettazioni attive"
+msgstr "Acceptations actives"
+
+msgid "Valutazioni dei rischi"
+msgstr "Appréciations des risques"
+
+msgid "Approvata il"
+msgstr "Approuvée le"
+
+msgid "Gruppo"
+msgstr "Groupe"
+
+msgid "Rischi High/Critical non accettati"
+msgstr "Risques High/Critical non acceptés"
+
+msgid "Attuale → atteso"
+msgstr "Actuel → attendu"
+
+msgid "Rischi accettati"
+msgstr "Risques acceptés"
+
+msgid "Classe"
+msgstr "Classe"
+
+msgid "Firme"
+msgstr "Signatures"
+
+msgid "Il controllo deve essere del sito del registro."
+msgstr "Le contrôle doit appartenir au site du registre."
+
+msgid "La valutazione si modifica solo con una valutazione in corso sul registro."
+msgstr "L'évaluation ne se modifie que pendant une appréciation en cours du registre."
+
+msgid "Il rischio appartiene alla valutazione precedente (metodo superato): è in sola lettura."
+msgstr "Le risque appartient à l'appréciation précédente (méthode remplacée) : il est en lecture seule."
+
+msgid "La minaccia scelta non è più attiva nel catalogo."
+msgstr "La menace choisie n'est plus active dans le catalogue."
+
+msgid "La minaccia scelta non si applica a questa tipologia di asset."
+msgstr "La menace choisie ne s'applique pas à ce type d'actif."
+
+msgid "L'asset deve appartenere al sito del registro."
+msgstr "L'actif doit appartenir au site du registre."
+
+msgid "Il processo deve appartenere al sito del registro."
+msgstr "Le processus doit appartenir au site du registre."
+
+msgid "Il fornitore deve operare per il sito del registro."
+msgstr "Le fournisseur doit travailler pour le site du registre."
+
+msgid "Le classi di informazioni devono essere del sito del registro o di gruppo."
+msgstr "Les classes d'informations doivent appartenir au site du registre ou au groupe."
+
+msgid "Solo i rischi di gruppo indicano i siti che li ereditano."
+msgstr "Seuls les risques de groupe indiquent les sites qui en héritent."
+
+msgid "L'override della classe può spostare al massimo di un livello."
+msgstr "L'ajustement de classe peut déplacer d'un niveau au maximum."
+
+msgid "La classe del rischio è cambiata."
+msgstr "La classe du risque a changé."
+
+msgid "Indica la tipologia di asset e la minaccia del catalogo."
+msgstr "Indiquez le type d'actif et la menace du catalogue."
+
+msgid "Motiva perché la minaccia non è applicabile."
+msgstr "Expliquez pourquoi la menace ne s'applique pas."
+
+msgid "Indica la probabilità e la sua motivazione."
+msgstr "Indiquez la probabilité et sa justification."
+
+msgid "Indica almeno una dimensione d'impatto e la motivazione."
+msgstr "Indiquez au moins une dimension d'impact et la justification."
+
+msgid "Motiva lo spostamento della classe."
+msgstr "Justifiez l'ajustement de classe."
+
+msgid "Indica il Risk Owner."
+msgstr "Indiquez le Risk Owner."
+
+msgid "Scegli il trattamento."
+msgstr "Choisissez le traitement."
+
+msgid "Per un rischio High o Critical non trattato serve la motivazione (analisi costi/benefici)."
+msgstr "Un risque High ou Critical non traité exige une justification (analyse coûts/bénéfices)."
+
+msgid "Indica il rischio atteso dopo il trattamento."
+msgstr "Indiquez le risque attendu après traitement."
+
+msgid "Si conferma solo un rischio con valutazione completata."
+msgstr "Seul un risque dont l'évaluation est terminée peut être confirmé."
+
+msgid "Rischio eliminato dal registro."
+msgstr "Risque retiré du registre."
+
+#, python-format
+msgid "Piano di trattamento rischio %(cls)s — %(name)s"
+msgstr "Plan de traitement du risque %(cls)s — %(name)s"
+
+msgid "Si verifica solo una misura completata."
+msgstr "Seule une mesure terminée peut être vérifiée."
+
+msgid "Il rischio atteso si applica solo con tutte le misure completate e verificate."
+msgstr "Le risque attendu ne s'applique que lorsque toutes les mesures sont terminées et vérifiées."
+
+msgid "Si accetta solo un rischio applicabile con valutazione completata."
+msgstr "Seul un risque applicable dont l'évaluation est terminée peut être accepté."
+
+msgid "Il rischio comporta una violazione di legge, di requisiti VDA ISA o di obblighi di riservatezza: non è accettabile."
+msgstr "Le risque implique une violation de la loi, des exigences VDA ISA ou d'obligations de confidentialité : il n'est pas acceptable."
+
+msgid "C'è già un'accettazione in corso o attiva per questo rischio."
+msgstr "Une acceptation est déjà en cours ou active pour ce risque."
+
+msgid "La motivazione dell'accettazione è obbligatoria."
+msgstr "La justification de l'acceptation est obligatoire."
+
+#, python-format
+msgid "La scadenza dell'accettazione deve essere futura ed entro %(months)s mesi."
+msgstr "L'échéance de l'acceptation doit être future et dans les %(months)s mois."
+
+#, python-format
+msgid "Parere sull'accettazione del rischio — %(name)s"
+msgstr "Avis sur l'acceptation du risque — %(name)s"
+
+#, python-format
+msgid "Informativa: accettazione del rischio — %(name)s"
+msgstr "Pour information : acceptation du risque — %(name)s"
+
+msgid "L'accettazione non è più in approvazione."
+msgstr "L'acceptation n'est plus en attente d'approbation."
+
+msgid "Non hai un ruolo che possa firmare questa accettazione."
+msgstr "Vous n'avez pas de rôle permettant de signer cette acceptation."
+
+msgid "Questa accettazione non attende una delibera dell'organo."
+msgstr "Cette acceptation n'attend pas de délibération de l'organe."
+
+msgid "Indica l'organo e il riferimento della delibera."
+msgstr "Indiquez l'organe et la référence de la délibération."
+
+msgid "Questa accettazione non attende un parere."
+msgstr "Cette acceptation n'attend pas d'avis."
+
+msgid "Il parere spetta al CISO."
+msgstr "L'avis revient au RSSI."
+
+msgid "Motiva il parere contrario."
+msgstr "Justifiez l'avis défavorable."
+
+msgid "L'accettazione è già chiusa."
+msgstr "L'acceptation est déjà close."
+
+msgid "Indica il motivo della revoca."
+msgstr "Indiquez le motif de la révocation."
+
+msgid "Accettazione scaduta."
+msgstr "Acceptation expirée."
+
+#, python-format
+msgid "Accettazione scaduta: trattare o riaccettare il rischio — %(name)s"
+msgstr "Acceptation expirée : traiter ou accepter à nouveau le risque — %(name)s"
+
+#, python-format
+msgid "Accettazione del rischio in scadenza il %(date)s — %(name)s"
+msgstr "Acceptation du risque expirant le %(date)s — %(name)s"
+
+#, python-format
+msgid "Escalation: misura in ritardo di %(days)s giorni — %(name)s"
+msgstr "Escalade : mesure en retard de %(days)s jours — %(name)s"
+
+#, python-format
+msgid "Misura del piano di trattamento in ritardo — %(name)s"
+msgstr "Mesure du plan de traitement en retard — %(name)s"
+
+msgid "Si segnala l'impatto locale solo di un rischio di gruppo ereditato dal sito."
+msgstr "L'impact local ne peut être signalé que pour un risque de groupe hérité par le site."
+
+msgid "Indica l'impatto locale (1–5) e la motivazione."
+msgstr "Indiquez l'impact local (1–5) et la justification."
+
+msgid "La segnalazione è già stata recepita."
+msgstr "Le signalement a déjà été pris en compte."
+
+msgid "Ci sono rischi con valutazione non completata."
+msgstr "Des risques ont une évaluation non terminée."
+
+msgid "Ci sono rischi non ancora valutati o confermati in questa valutazione."
+msgstr "Des risques n'ont pas encore été évalués ou confirmés dans cette appréciation."
+
+msgid "La copertura del catalogo minacce non è completa."
+msgstr "La couverture du catalogue des menaces n'est pas complète."
+
+msgid "Si invia in approvazione solo una valutazione in corso."
+msgstr "Seule une appréciation en cours peut être soumise à approbation."
+
+msgid "La valutazione non è in approvazione."
+msgstr "L'appréciation n'est pas en attente d'approbation."
+
+msgid "Indica il motivo del rinvio."
+msgstr "Indiquez le motif du renvoi."
+
+msgid "Si approva solo una valutazione inviata in approvazione."
+msgstr "Seule une appréciation soumise à approbation peut être approuvée."
+
+msgid "Indica l'organo che approva la valutazione."
+msgstr "Indiquez l'organe qui approuve l'appréciation."
+
+msgid "Minaccia inesistente."
+msgstr "Menace inexistante."
+
+msgid "Il piano non è ancora completato."
+msgstr "Le plan n'est pas encore terminé."
+
+msgid "Rischio inesistente."
+msgstr "Risque inexistant."
+
+msgid "Data non valida."
+msgstr "Date non valide."
+
+msgid "Indica il rischio di gruppo e il sito."
+msgstr "Indiquez le risque de groupe et le site."

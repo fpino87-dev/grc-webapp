@@ -425,29 +425,21 @@ def bcp_expired_untested_advisor(context=None):
 
 @register_advisor
 def risk_open_high_advisor(context=None):
-    """Rischi residui **alti (rosso) non accettati formalmente**, per plant.
-
-    `risk_level` è una *property* (dipende da `weighted_score`/criticità BIA),
-    quindi si valuta in Python su un queryset ristretto (non archiviati, non
-    accettati formalmente) con `select_related` del processo critico (no N+1).
-    Un rischio rosso accettato formalmente è una decisione consapevole → escluso."""
-    from collections import Counter
-    from apps.risk.models import RiskAssessment
-    qs = (
-        RiskAssessment.objects.filter(deleted_at__isnull=True, risk_accepted_formally=False)
-        .exclude(status="archiviato")
-        .select_related("critical_process")
+    """Rischi **High/Critical senza accettazione attiva**, per plant: oltre la
+    soglia di accettazione e non ancora ricondotti (regola unica
+    risk.services.untreated_high_risks). Query aggregata, no N+1."""
+    from django.db.models import Count
+    from apps.risk.services import evaluated_risks, untreated_high_risks
+    rows = (
+        untreated_high_risks(evaluated_risks().filter(plant__isnull=False))
+        .values("plant_id").annotate(c=Count("id"))
     )
-    tally = Counter(
-        str(a.plant_id) for a in qs if a.plant_id and a.risk_level == "rosso"
-    )
-    rows = [{"plant_id": pid, "c": c} for pid, c in tally.items()]
     return _per_plant(
         rows, "risk.open_high", "risk", "risk", "warning",
         owner_role="risk_manager", effort_h=8.0,
         compliance_refs=[
             {"framework": "NIS2", "control": "art.21 §2(a) — Gestione del rischio"},
-            {"framework": "ISO27001", "control": "§6.1 — Trattamento del rischio"},
+            {"framework": "TISAX", "control": "ISA 1.4.1 — Gestione dei rischi"},
         ],
         deep_link="/risk",
     )
@@ -455,32 +447,29 @@ def risk_open_high_advisor(context=None):
 
 @register_advisor
 def risk_acceptance_expiring_advisor(context=None):
-    """Accettazioni di rischio **in scadenza** (entro 30g) o già scadute, per plant.
+    """Accettazioni di rischio attive **in scadenza** (entro 30g), per plant.
 
-    Quando la `risk_acceptance_expiry` decade, il rischio torna *non gestito*:
-    va rinnovato o trattato. Query aggregata, no N+1; la finestra di 30 giorni
-    parte dall'"oggi" del sito."""
+    Alla scadenza il rischio torna da trattare o riaccettare. Query aggregata,
+    no N+1; la finestra di 30 giorni parte dall'"oggi" del sito."""
     from datetime import timedelta
     from django.db.models import Count, Q
-    from apps.risk.models import RiskAssessment
+    from apps.risk.models import RiskAcceptance
     rows = (
-        RiskAssessment.objects.filter(
-            deleted_at__isnull=True, risk_accepted_formally=True,
-            risk_acceptance_expiry__isnull=False,
-        ).exclude(status="archiviato")
+        RiskAcceptance.objects.filter(status="active", risk__plant__isnull=False)
         .filter(_per_plant_today_q(
             lambda today, ids: Q(
-                plant_id__in=ids,
-                risk_acceptance_expiry__lte=today + timedelta(days=30),
+                risk__plant_id__in=ids,
+                expires_on__lte=today + timedelta(days=30),
             )
         ))
-        .values("plant_id").annotate(c=Count("id"))
+        .values("risk__plant_id").annotate(c=Count("id"))
     )
+    rows = [{"plant_id": r["risk__plant_id"], "c": r["c"]} for r in rows]
     return _per_plant(
         rows, "risk.acceptance_expiring", "risk", "risk", "warning",
         owner_role="risk_manager", effort_h=2.0,
         compliance_refs=[
-            {"framework": "ISO27001", "control": "§8.3 — Trattamento del rischio"},
+            {"framework": "TISAX", "control": "ISA 1.4.1 — Gestione dei rischi"},
             {"framework": "NIS2", "control": "art.21 §2(a) — Gestione del rischio"},
         ],
         deep_link="/risk",

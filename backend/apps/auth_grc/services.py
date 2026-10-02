@@ -290,7 +290,7 @@ ROLE_MATRIX_AREAS = [
     ("assets", "apps.assets.permissions.AssetPermission"),
     ("bia", "apps.bia.permissions.BiaPermission"),
     ("risk", "apps.risk.permissions.RiskPermission"),
-    ("risk_appetite", "apps.risk.permissions.RiskAppetitePermission"),
+    ("risk_governance", "apps.risk.permissions.RiskGovernancePermission"),
     ("documents", "apps.documents.permissions.DocumentPermission"),
     ("tasks", "apps.tasks.permissions.TaskPermission"),
     ("checklist_delete", "apps.tasks.permissions.ChecklistRunDeletePermission"),
@@ -314,8 +314,6 @@ ROLE_MATRIX_AREAS = [
 # Varianti che non aggiungono un'area distinta (stessi ruoli di un'altra).
 ROLE_MATRIX_EXCLUDED = {
     "apps.management_review.permissions.ReviewWithBodyMembersPermission",
-    # Stessi ruoli di RiskAppetitePermission (area "risk_appetite").
-    "apps.risk.permissions.RiskGovernancePermission",
 }
 
 

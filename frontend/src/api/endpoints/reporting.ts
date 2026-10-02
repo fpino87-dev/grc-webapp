@@ -84,37 +84,34 @@ export interface KpiSnapshot {
   controls_gap: number;
 }
 
+export type RiskClass = "very_low" | "low" | "medium" | "high" | "critical";
+
 export interface HeatmapCell {
   prob: number;
   impact: number;
   count: number;
+  class: RiskClass;
 }
 
 export interface TopRisk {
   id: string;
   name: string;
-  score: number;
-  inherent_score: number | null;
-  threat_category: string;
-  threat_label: string;
+  plant_name: string | null; // null = registro di gruppo
+  asset_type: string;
+  threat_code: string | null;
+  current_class: RiskClass | "";
+  current_class_label: string;
+  expected_class: RiskClass | "";
   treatment: string;
-  nis2_relevance: string;
-  nis2_relevance_label: string;
-  nis2_art21_category: string;
   owner_name: string;
-  formally_accepted: boolean;
-  needs_revaluation: boolean;
-  ale: number;
-  ale_inherent: number;
-  over_appetite: boolean; // punteggio oltre la soglia di accettabilità del sito
+  accepted: boolean;
+  significant_incident_potential: boolean;
+  nis2_art21_category: string;
 }
 
-export interface ThreatBreakdown {
-  category: string;
-  label: string;
+export interface AssetTypeBreakdown {
+  asset_type: string;
   count: number;
-  residual_avg: number;
-  inherent_avg: number;
   rossi: number;
   gialli: number;
   verdi: number;
@@ -124,9 +121,8 @@ export interface Nis2CategoryBreakdown {
   category: string;
   label: string;
   total: number;
-  significativo: number;
-  potenzialmente_significativo: number;
-  non_significativo: number;
+  in_scope: number;
+  significant_incident_potential: number;
 }
 
 export interface BiaBcpRow {
@@ -148,65 +144,23 @@ export interface BiaBcpRow {
   test_overdue: boolean;
 }
 
-export interface TreatmentRosi {
-  id: string;
-  title: string;
-  process_id: string;
-  process_name: string;
-  ale_reduction_pct: number;
-  process_ale: number;
-  ale_avoided: number;
-  cost_implementation: number;
-  cost_annual: number;
-  annual_cost: number;
-  net_annual: number;
-  rosi_pct: number | null;
-  payback_months: number | null;
-  worth_it: boolean;
-}
-
-export interface TreatmentRosiTotals {
-  count: number;
-  ale_avoided: number;
-  annual_cost: number;
-  net_annual: number;
-  rosi_pct: number | null;
-  amort_years: number;
-}
-
 export interface RiskBiaBcpData {
   kpis: {
     risks_total: number;
+    risks_by_class: Record<RiskClass, number>;
     risks_red: number;
     risks_yellow: number;
-    risks_needs_revaluation: number;
-    risks_formally_accepted: number;
-    risks_over_appetite: number;
+    risks_accepted: number;
+    risks_untreated_high: number; // High/Critical senza accettazione attiva
     bia_critical_no_bcp: number;
     bia_critical_test_expired: number;
     bcp_test_overdue: number;
-    ale_total: number;
-    ale_total_inherent: number;
-    ale_saved: number;
-    ale_saved_pct: number;
-    ale_valued_count: number;
-    ale_coverage_pct: number;
-  };
-  // Propensione al rischio (RiskAppetitePolicy) attiva per il perimetro.
-  appetite: {
-    defined: boolean;
-    max_acceptable_score: number;
-    max_red_risks_count: number | null;
-    max_unacceptable_score: number | null;
-    per_plant: boolean; // vista di organizzazione con soglie diverse fra siti
   };
   heatmap: HeatmapCell[];
   top_risks: TopRisk[];
-  by_threat: ThreatBreakdown[];
+  by_asset_type: AssetTypeBreakdown[];
   nis2_breakdown: Nis2CategoryBreakdown[];
   bia_bcp_table: BiaBcpRow[];
-  treatments: TreatmentRosi[];
-  treatments_totals: TreatmentRosiTotals;
 }
 
 // ── KPI Overview ──────────────────────────────────────────────────────────────

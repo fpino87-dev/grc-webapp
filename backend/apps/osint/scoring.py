@@ -145,17 +145,11 @@ def _score_grc(entity: "OsintEntity", scan: "OsintScan") -> int:
     # Sommarlo significava penalizzare un dominio perché è importante, cioè
     # confondere l'impatto con la vulnerabilità.
 
-    # Rischi aperti (non archiviati e non accettati formalmente) sul plant
-    # sorgente. RiskAssessment ha una FK diretta a plant; gli stati validi sono
-    # bozza/completato/archiviato (vedi apps.risk.models.RiskAssessment).
+    # Rischi aperti sul plant sorgente: High/Critical valutati senza
+    # accettazione attiva (regola unica risk.services.untreated_high_risks).
     try:
-        from apps.risk.models import RiskAssessment
-        open_risks = RiskAssessment.objects.filter(
-            plant_id=entity.source_id,
-            status__in=["bozza", "completato"],
-            risk_accepted=False,
-            deleted_at__isnull=True,
-        ).count()
+        from apps.risk.services import evaluated_risks, untreated_high_risks
+        open_risks = untreated_high_risks(evaluated_risks(entity.source_id)).count()
         if open_risks >= 3:
             base += 40
         elif open_risks >= 1:

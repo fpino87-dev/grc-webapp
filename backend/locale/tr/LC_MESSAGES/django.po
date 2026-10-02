@@ -3209,3 +3209,245 @@ msgstr "Süreçler bilgi sınıfının sahasına ait olmalıdır."
 
 msgid "Sito inesistente."
 msgstr "Saha bulunamadı."
+
+msgid "Primo risk assessment"
+msgstr "İlk risk değerlendirmesi"
+
+msgid "Revisione periodica"
+msgstr "Periyodik gözden geçirme"
+
+msgid "Revisione straordinaria"
+msgstr "Olağanüstü gözden geçirme"
+
+msgid "High/Critical non accettati"
+msgstr "Kabul edilmemiş High/Critical"
+
+msgid "di cui senza piano"
+msgstr "bunların planı olmayanlar"
+
+msgid "Misure in ritardo"
+msgstr "Geciken önlemler"
+
+msgid "Accettazioni attive"
+msgstr "Etkin kabuller"
+
+msgid "Valutazioni dei rischi"
+msgstr "Risk değerlendirmeleri"
+
+msgid "Approvata il"
+msgstr "Onay tarihi"
+
+msgid "Gruppo"
+msgstr "Grup"
+
+msgid "Rischi High/Critical non accettati"
+msgstr "Kabul edilmemiş High/Critical riskler"
+
+msgid "Attuale → atteso"
+msgstr "Mevcut → beklenen"
+
+msgid "Rischi accettati"
+msgstr "Kabul edilen riskler"
+
+msgid "Classe"
+msgstr "Sınıf"
+
+msgid "Firme"
+msgstr "İmzalar"
+
+msgid "Il controllo deve essere del sito del registro."
+msgstr "Kontrol, kaydın sahasına ait olmalıdır."
+
+msgid "La valutazione si modifica solo con una valutazione in corso sul registro."
+msgstr "Değerlendirme yalnızca kayıt için devam eden bir değerlendirme sırasında değiştirilebilir."
+
+msgid "Il rischio appartiene alla valutazione precedente (metodo superato): è in sola lettura."
+msgstr "Risk önceki değerlendirmeye aittir (eski yöntem): salt okunurdur."
+
+msgid "La minaccia scelta non è più attiva nel catalogo."
+msgstr "Seçilen tehdit katalogda artık etkin değil."
+
+msgid "La minaccia scelta non si applica a questa tipologia di asset."
+msgstr "Seçilen tehdit bu varlık türüne uygulanmaz."
+
+msgid "L'asset deve appartenere al sito del registro."
+msgstr "Varlık, kaydın sahasına ait olmalıdır."
+
+msgid "Il processo deve appartenere al sito del registro."
+msgstr "Süreç, kaydın sahasına ait olmalıdır."
+
+msgid "Il fornitore deve operare per il sito del registro."
+msgstr "Tedarikçi, kaydın sahası için çalışmalıdır."
+
+msgid "Le classi di informazioni devono essere del sito del registro o di gruppo."
+msgstr "Bilgi sınıfları kaydın sahasına veya gruba ait olmalıdır."
+
+msgid "Solo i rischi di gruppo indicano i siti che li ereditano."
+msgstr "Yalnızca grup riskleri onları devralan sahaları belirtir."
+
+msgid "L'override della classe può spostare al massimo di un livello."
+msgstr "Sınıf düzeltmesi en fazla bir seviye kaydırabilir."
+
+msgid "La classe del rischio è cambiata."
+msgstr "Risk sınıfı değişti."
+
+msgid "Indica la tipologia di asset e la minaccia del catalogo."
+msgstr "Varlık türünü ve katalog tehdidini girin."
+
+msgid "Motiva perché la minaccia non è applicabile."
+msgstr "Tehdidin neden uygulanmadığını açıklayın."
+
+msgid "Indica la probabilità e la sua motivazione."
+msgstr "Olasılığı ve gerekçesini girin."
+
+msgid "Indica almeno una dimensione d'impatto e la motivazione."
+msgstr "En az bir etki boyutunu ve gerekçesini girin."
+
+msgid "Motiva lo spostamento della classe."
+msgstr "Sınıf düzeltmesini gerekçelendirin."
+
+msgid "Indica il Risk Owner."
+msgstr "Risk Sahibini belirtin."
+
+msgid "Scegli il trattamento."
+msgstr "İşlem seçeneğini seçin."
+
+msgid "Per un rischio High o Critical non trattato serve la motivazione (analisi costi/benefici)."
+msgstr "İşlem görmeyen High veya Critical bir risk gerekçe ister (maliyet/fayda analizi)."
+
+msgid "Indica il rischio atteso dopo il trattamento."
+msgstr "İşlem sonrası beklenen riski girin."
+
+msgid "Si conferma solo un rischio con valutazione completata."
+msgstr "Yalnızca değerlendirmesi tamamlanmış bir risk onaylanabilir."
+
+msgid "Rischio eliminato dal registro."
+msgstr "Risk kayıttan çıkarıldı."
+
+#, python-format
+msgid "Piano di trattamento rischio %(cls)s — %(name)s"
+msgstr "%(cls)s risk işlem planı — %(name)s"
+
+msgid "Si verifica solo una misura completata."
+msgstr "Yalnızca tamamlanmış bir önlem doğrulanabilir."
+
+msgid "Il rischio atteso si applica solo con tutte le misure completate e verificate."
+msgstr "Beklenen risk yalnızca tüm önlemler tamamlanıp doğrulandığında uygulanabilir."
+
+msgid "Si accetta solo un rischio applicabile con valutazione completata."
+msgstr "Yalnızca değerlendirmesi tamamlanmış, uygulanabilir bir risk kabul edilebilir."
+
+msgid "Il rischio comporta una violazione di legge, di requisiti VDA ISA o di obblighi di riservatezza: non è accettabile."
+msgstr "Risk; yasa, VDA ISA gereklilikleri veya gizlilik yükümlülüklerinin ihlalini içeriyor: kabul edilemez."
+
+msgid "C'è già un'accettazione in corso o attiva per questo rischio."
+msgstr "Bu risk için zaten bekleyen veya etkin bir kabul var."
+
+msgid "La motivazione dell'accettazione è obbligatoria."
+msgstr "Kabul gerekçesi zorunludur."
+
+#, python-format
+msgid "La scadenza dell'accettazione deve essere futura ed entro %(months)s mesi."
+msgstr "Kabulün bitiş tarihi gelecekte ve %(months)s ay içinde olmalıdır."
+
+#, python-format
+msgid "Parere sull'accettazione del rischio — %(name)s"
+msgstr "Risk kabulü hakkında görüş — %(name)s"
+
+#, python-format
+msgid "Informativa: accettazione del rischio — %(name)s"
+msgstr "Bilgi için: risk kabulü — %(name)s"
+
+msgid "L'accettazione non è più in approvazione."
+msgstr "Kabul artık onay beklemiyor."
+
+msgid "Non hai un ruolo che possa firmare questa accettazione."
+msgstr "Bu kabulü imzalayabilecek bir rolünüz yok."
+
+msgid "Questa accettazione non attende una delibera dell'organo."
+msgstr "Bu kabul, yönetim organının kararını beklemiyor."
+
+msgid "Indica l'organo e il riferimento della delibera."
+msgstr "Organı ve karar referansını girin."
+
+msgid "Questa accettazione non attende un parere."
+msgstr "Bu kabul bir görüş beklemiyor."
+
+msgid "Il parere spetta al CISO."
+msgstr "Görüş vermek CISO'nun görevidir."
+
+msgid "Motiva il parere contrario."
+msgstr "Olumsuz görüşü gerekçelendirin."
+
+msgid "L'accettazione è già chiusa."
+msgstr "Kabul zaten kapatıldı."
+
+msgid "Indica il motivo della revoca."
+msgstr "İptal nedenini girin."
+
+msgid "Accettazione scaduta."
+msgstr "Kabulün süresi doldu."
+
+#, python-format
+msgid "Accettazione scaduta: trattare o riaccettare il rischio — %(name)s"
+msgstr "Kabulün süresi doldu: riski işleyin veya yeniden kabul edin — %(name)s"
+
+#, python-format
+msgid "Accettazione del rischio in scadenza il %(date)s — %(name)s"
+msgstr "Risk kabulünün süresi %(date)s tarihinde doluyor — %(name)s"
+
+#, python-format
+msgid "Escalation: misura in ritardo di %(days)s giorni — %(name)s"
+msgstr "Eskalasyon: önlem %(days)s gün gecikmeli — %(name)s"
+
+#, python-format
+msgid "Misura del piano di trattamento in ritardo — %(name)s"
+msgstr "İşlem planı önlemi gecikmeli — %(name)s"
+
+msgid "Si segnala l'impatto locale solo di un rischio di gruppo ereditato dal sito."
+msgstr "Yerel etki yalnızca sahanın devraldığı bir grup riski için bildirilebilir."
+
+msgid "Indica l'impatto locale (1–5) e la motivazione."
+msgstr "Yerel etkiyi (1–5) ve gerekçesini girin."
+
+msgid "La segnalazione è già stata recepita."
+msgstr "Bildirim zaten dikkate alındı."
+
+msgid "Ci sono rischi con valutazione non completata."
+msgstr "Değerlendirmesi tamamlanmamış riskler var."
+
+msgid "Ci sono rischi non ancora valutati o confermati in questa valutazione."
+msgstr "Bu değerlendirmede henüz değerlendirilmemiş veya onaylanmamış riskler var."
+
+msgid "La copertura del catalogo minacce non è completa."
+msgstr "Tehdit kataloğu kapsamı tamamlanmadı."
+
+msgid "Si invia in approvazione solo una valutazione in corso."
+msgstr "Yalnızca devam eden bir değerlendirme onaya gönderilebilir."
+
+msgid "La valutazione non è in approvazione."
+msgstr "Değerlendirme onay beklemiyor."
+
+msgid "Indica il motivo del rinvio."
+msgstr "Geri gönderme nedenini girin."
+
+msgid "Si approva solo una valutazione inviata in approvazione."
+msgstr "Yalnızca onaya gönderilmiş bir değerlendirme onaylanabilir."
+
+msgid "Indica l'organo che approva la valutazione."
+msgstr "Değerlendirmeyi onaylayan organı belirtin."
+
+msgid "Minaccia inesistente."
+msgstr "Tehdit bulunamadı."
+
+msgid "Il piano non è ancora completato."
+msgstr "Plan henüz tamamlanmadı."
+
+msgid "Rischio inesistente."
+msgstr "Risk bulunamadı."
+
+msgid "Data non valida."
+msgstr "Geçersiz tarih."
+
+msgid "Indica il rischio di gruppo e il sito."
+msgstr "Grup riskini ve sahayı girin."

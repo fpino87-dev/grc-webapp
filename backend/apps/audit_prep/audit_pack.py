@@ -300,32 +300,38 @@ def _collect_evidences(out_dir: Path, plant, frameworks: list[str]) -> dict:
 
 
 def _collect_risk(out_dir: Path, plant) -> dict:
-    """Risk register completato del plant."""
-    from apps.risk.models import RiskAssessment
+    """Registro rischi corrente del plant (con i rischi di gruppo ereditati)."""
 
     risk_dir = out_dir / "03_risk"
     risk_dir.mkdir(parents=True, exist_ok=True)
 
+    from apps.risk.models import RiskAcceptance
+    from apps.risk.services import register_queryset
+
     qs = (
-        RiskAssessment.objects
-        .filter(plant=plant, deleted_at__isnull=True, status="completato")
-        .select_related("owner")
-        .order_by("-score")
+        register_queryset(plant, include_inherited=True)
+        .filter(status="completato")
+        .select_related("owner", "threat")
+        .order_by("asset_type", "threat__code")
     )
+    accepted = dict(RiskAcceptance.objects.filter(risk__in=qs, status="active").values_list("risk_id", "expires_on"))
     rows = [{
+        "register": "gruppo" if r.plant_id is None else "sito",
         "name": r.name,
-        "threat_category": r.threat_category,
+        "asset_type": r.asset_type,
+        "threat": r.threat.code if r.threat else "",
+        "applicable": r.applicable,
+        "not_applicable_reason": r.not_applicable_reason,
         "probability": r.probability,
         "impact": r.impact,
-        "score": r.score,
-        "inherent_score": r.inherent_score,
+        "current_class": r.current_class,
         "treatment": r.treatment,
-        "nis2_relevance": r.nis2_relevance,
+        "expected_class": r.expected_class,
         "nis2_art21_category": r.nis2_art21_category,
-        "owner": (r.owner.email if r.owner else ""),
-        "risk_accepted_formally": r.risk_accepted_formally,
-        "needs_revaluation": r.needs_revaluation,
-        "completed_at": r.updated_at.isoformat() if r.updated_at else "",
+        "significant_incident_potential": r.significant_incident_potential,
+        "owner": (r.owner.get_full_name() or r.owner.username) if r.owner else "",
+        "acceptance_expires_on": accepted.get(r.pk, ""),
+        "assessed_at": r.assessed_at.isoformat() if r.assessed_at else "",
     } for r in qs]
 
     csv_path = risk_dir / "risk_register.csv"

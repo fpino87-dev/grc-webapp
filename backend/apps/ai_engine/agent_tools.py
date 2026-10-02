@@ -124,56 +124,56 @@ def get_missing_evidences(user, plant_id) -> list[dict]:
 
 def get_expired_risk_assessments(user, plant_id, today=None) -> list[dict]:
     """
-    RiskAssessment scaduti:
-    - status=completato e (assessed_at + frequency policy) < oggi
-    - OPPURE needs_revaluation=True
+    Risk assessment da rifare o completare per il sito:
+    - valutazione approvata più vecchia della frequenza della policy;
+    - nessuna valutazione approvata con il metodo attuale;
+    - accettazioni di rischio scadute o in scadenza entro 30 giorni.
     """
     from apps.compliance_schedule.services import _add_duration, _get_rule
     from apps.plants.models import Plant
-    from apps.risk.models import RiskAssessment
+    from apps.risk.models import RiskAcceptance
+    from apps.risk.services import approved_cycle, open_cycle
 
     today = today or timezone.localdate()
     if not _verify_plant_access(user, plant_id):
         return []
-
     plant = Plant.objects.filter(pk=plant_id, deleted_at__isnull=True).first()
+    if plant is None:
+        return []
     freq_val, freq_unit, _alert = _get_rule("risk_assessment", plant)
-
-    qs = RiskAssessment.objects.filter(
-        plant_id=plant_id,
-        deleted_at__isnull=True,
-    ).filter(
-        Q(needs_revaluation=True)
-        | Q(status="completato", assessed_at__isnull=False)
-    ).select_related("plant")
-    qs = scope_queryset_by_plant(qs, user, plant_field="plant")
-
     out = []
-    for ra in qs:
-        is_expired = False
-        next_due = None
-        reason = None
-        if ra.needs_revaluation:
-            is_expired = True
-            reason = "needs_revaluation"
-        elif ra.assessed_at:
-            next_due = _add_duration(ra.assessed_at.date(), freq_val, freq_unit)
-            if next_due < today:
-                is_expired = True
-                reason = "assessment_expired"
-        if not is_expired:
-            continue
+    cycle = approved_cycle(plant)
+    if cycle is None:
+        current = open_cycle(plant)
         out.append({
-            "id": str(ra.id),
-            "name": ra.name or f"Risk {ra.pk}",
-            "assessment_type": ra.assessment_type,
-            "status": ra.status,
-            "score": ra.score,
-            "reason": reason,
-            "assessed_at": str(ra.assessed_at.date()) if ra.assessed_at else None,
-            "next_due": str(next_due) if next_due else None,
-            "days_overdue": (today - next_due).days if next_due else None,
-            "frontend_url": f"/risk?id={ra.id}",
+            "id": str(current.id) if current else None,
+            "name": f"Risk assessment {plant.name}",
+            "reason": "assessment_in_progress" if current else "no_assessment",
+            "next_due": None,
+            "days_overdue": None,
+            "frontend_url": "/risk",
+        })
+    else:
+        next_due = _add_duration(cycle.approved_at.date(), freq_val, freq_unit)
+        if next_due < today:
+            out.append({
+                "id": str(cycle.id),
+                "name": f"Risk assessment {plant.name}",
+                "reason": "assessment_expired",
+                "next_due": str(next_due),
+                "days_overdue": (today - next_due).days,
+                "frontend_url": "/risk",
+            })
+    for acc in RiskAcceptance.objects.filter(
+        risk__plant=plant, status="active", expires_on__lte=today + timezone.timedelta(days=30),
+    ).select_related("risk"):
+        out.append({
+            "id": str(acc.risk_id),
+            "name": acc.risk.name,
+            "reason": "acceptance_expired" if acc.expires_on < today else "acceptance_expiring",
+            "next_due": str(acc.expires_on),
+            "days_overdue": (today - acc.expires_on).days if acc.expires_on < today else None,
+            "frontend_url": f"/risk?id={acc.risk_id}",
         })
     return out
 

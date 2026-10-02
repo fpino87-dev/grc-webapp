@@ -2,7 +2,6 @@
 classi di informazioni, cicli di valutazione e archiviazione del registro
 precedente."""
 import datetime
-import importlib
 import json
 from pathlib import Path
 
@@ -16,7 +15,6 @@ from rest_framework.test import APIClient
 from apps.risk import services
 from apps.risk.models import (
     InformationClass,
-    RiskAssessment,
     RiskAssessmentCycle,
     RiskGovernancePolicy,
     ThreatCatalogEntry,
@@ -386,22 +384,3 @@ def test_asset_types_present(plant):
 def test_plant_is_eu():
     assert _plant("EU-1", country="PL").is_eu is True
     assert _plant("TN-1", country="TN", nis2_scope="non_soggetto").is_eu is False
-
-
-# ── archiviazione del registro precedente ────────────────────────────────────
-
-@pytest.mark.django_db
-def test_legacy_migration_archives_existing_register(plant):
-    from django.apps import apps as django_apps
-
-    risk = RiskAssessment.objects.create(plant=plant, name="Vecchio", assessment_type="IT",
-                                         probability=3, impact=4, inherent_probability=4, inherent_impact=5)
-    migration = importlib.import_module("apps.risk.migrations.0015_legacy_cycles")
-    migration.forwards(django_apps, None)
-    risk.refresh_from_db()
-    assert risk.cycle.kind == "legacy" and risk.cycle.status == "archiviato"
-    assert risk.legacy_snapshot["score"] == 12
-    assert risk.legacy_snapshot["inherent_score"] == 20
-    # idempotente: i rischi già collegati non vengono riarchiviati
-    migration.forwards(django_apps, None)
-    assert RiskAssessmentCycle.objects.filter(plant=plant, kind="legacy").count() == 1

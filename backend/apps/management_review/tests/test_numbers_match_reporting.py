@@ -1,8 +1,6 @@
 """Guardia: il riesame di direzione (M13) e il Reporting (M18) danno gli
 stessi numeri sullo stesso perimetro — conformità per framework, quadro per
-sito, rischi oltre la soglia di accettabilità, processi critici senza BCP."""
-from datetime import timedelta
-
+sito, rischi High/Critical non accettati, processi critici senza BCP."""
 import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -41,21 +39,21 @@ def _instance(plant, fw, ext_id, status, user):
 
 def _risk(plant, user, prob, impact):
     from apps.risk.models import RiskAssessment
+    from apps.risk.services import risk_class
     return RiskAssessment.objects.create(
-        plant=plant, name=f"R{prob}x{impact}", assessment_type="IT", threat_category="malware_ransomware",
-        probability=prob, impact=impact, status="completato", created_by=user,
+        plant=plant, name=f"R{prob}x{impact}", asset_type="IT", probability=prob, impact=impact,
+        current_class=risk_class(prob, impact), status="completato", created_by=user,
     )
 
 
 @pytest.fixture
 def perimeter(user):
-    """Due siti: A con TISAX L2+L3 (un L2 sostituito dal VH, un N/A), soglia di
-    rischio di sito 9, un processo critico coperto solo da una bozza; B con
-    ISO 27001 e la soglia di organizzazione 14."""
+    """Due siti: A con TISAX L2+L3 (un L2 sostituito dal VH, un N/A), un rischio
+    High e uno Low, un processo critico coperto solo da una bozza; B con ISO
+    27001, un rischio Medium e uno Critical."""
     from apps.bcp.models import BcpPlan
     from apps.bia.models import CriticalProcess
     from apps.controls.models import ControlMapping
-    from apps.risk.models import RiskAppetitePolicy
 
     a, b = _plant("NUM-A"), _plant("NUM-B")
     l2, l3 = _framework("TISAX_L2", a), _framework("TISAX_L3", a)
@@ -69,13 +67,10 @@ def perimeter(user):
     _instance(b, iso, "A.5.1", "compliant", user)
     _instance(b, iso, "A.5.2", "parziale", user)
 
-    yesterday = timezone.localdate() - timedelta(days=1)
-    RiskAppetitePolicy.objects.create(plant=None, max_acceptable_score=14, max_red_risks_count=3, valid_from=yesterday)
-    RiskAppetitePolicy.objects.create(plant=a, max_acceptable_score=9, max_red_risks_count=1, valid_from=yesterday)
-    _risk(a, user, 2, 5)   # 10 > 9 (sito A)
-    _risk(a, user, 2, 4)   # 8
-    _risk(b, user, 3, 4)   # 12 < 14 (organizzazione)
-    _risk(b, user, 3, 5)   # 15 > 14
+    _risk(a, user, 4, 3)   # High
+    _risk(a, user, 2, 2)   # Low
+    _risk(b, user, 3, 3)   # Medium
+    _risk(b, user, 5, 5)   # Critical
 
     draft_only = CriticalProcess.objects.create(plant=a, name="Solo bozza", criticality=5)
     BcpPlan.objects.create(plant=a, title="Bozza", status="bozza", critical_process=draft_only, created_by=user)
@@ -105,7 +100,7 @@ def test_review_snapshot_matches_reporting(perimeter, user, site):
     overview = {f["code"]: f for f in compliance_overview(plant_id)["frameworks"]}
     risk = risk_bia_bcp(plant_id)
 
-    assert snap["compliance_rule"] == 2
+    assert snap["compliance_rule"] == 3
     assert set(snap["frameworks"]) == set(overview)
     for code, fw in snap["frameworks"].items():
         assert fw["pct_compliant"] == overview[code]["pct_compliant"], code
@@ -113,8 +108,8 @@ def test_review_snapshot_matches_reporting(perimeter, user, site):
         assert fw["by_status"]["gap"] == overview[code]["gap"], code
         assert fw["superseded_by_extender"] == overview[code]["superseded_by_extender"], code
 
-    assert snap["rischi"]["oltre_soglia"] == risk["kpis"]["risks_over_appetite"]
-    assert snap["rischi"]["soglia"]["max_acceptable_score"] == risk["appetite"]["max_acceptable_score"]
+    assert snap["rischi"]["oltre_soglia"] == risk["kpis"]["risks_untreated_high"]
+    assert snap["rischi"]["rosso"] == risk["kpis"]["risks_red"]
     assert snap["bcp"]["processi_critici_senza_bcp"] == risk["kpis"]["bia_critical_no_bcp"]
 
 
@@ -126,7 +121,7 @@ def test_expected_values_on_the_perimeter(perimeter, user):
     assert (l2["total"], l2["by_status"]["compliant"], l2["pct_compliant"]) == (2, 1, 50.0)
     assert (l2["na_excluded"], l2["superseded_by_extender"]) == (1, 1)
     assert [g["control__external_id"] for g in l2["gap_controls"]] == ["L2-2"]   # L2-3 si valuta sul VH
-    assert snap["rischi"]["oltre_soglia"] == 1          # soglia di sito 9
+    assert snap["rischi"]["oltre_soglia"] == 1          # il solo High del sito A
     assert snap["bcp"]["processi_critici_senza_bcp"] == 1   # la bozza non copre
 
 
@@ -136,7 +131,7 @@ def test_org_sites_block_matches_reporting(perimeter, user):
     snap = _snapshot(None, user)
     for row in snap["siti"]:
         assert row["pct_compliant"] == get_compliance_summary(row["plant_id"])["pct_compliant"]
-        assert row["rischi_oltre_soglia"] == risk_bia_bcp(row["plant_id"])["kpis"]["risks_over_appetite"]
+        assert row["rischi_oltre_soglia"] == risk_bia_bcp(row["plant_id"])["kpis"]["risks_untreated_high"]
 
 
 def test_kpi_snapshot_matches_reporting(perimeter, user):
@@ -146,7 +141,7 @@ def test_kpi_snapshot_matches_reporting(perimeter, user):
     a, _b = perimeter
     k = get_kpi_snapshot(a.pk)
     assert k["pct_compliant"] == get_compliance_summary(str(a.pk))["pct_compliant"] == dashboard_summary(str(a.pk))["pct_compliant"]
-    assert k["risks_high"] == risk_bia_bcp(str(a.pk))["kpis"]["risks_over_appetite"]
+    assert k["risks_high"] == risk_bia_bcp(str(a.pk))["kpis"]["risks_untreated_high"]
 
 
 def test_legacy_snapshot_still_renders(perimeter, user):
@@ -163,3 +158,12 @@ def test_legacy_snapshot_still_renders(perimeter, user):
     assert len(comp) == 1   # niente nota sulla regola
     risk = _risk_blocks(legacy)
     assert str(risk[0]["items"][0][0]) == "Rischi critici"
+
+
+def test_class_snapshot_renders(perimeter, user):
+    """Snapshot con le classi della procedura: tabelle per classe e accettazioni."""
+    from apps.management_review.report.builder import _risk_blocks
+    a, _b = perimeter
+    blocks = _risk_blocks(_snapshot(a, user))
+    assert str(blocks[0]["items"][0][0]) == "High/Critical non accettati"
+    assert blocks[0]["items"][0][1] == 1

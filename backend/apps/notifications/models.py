@@ -221,7 +221,7 @@ DEFAULT_ROLE_PROFILES = {
 }
 
 EVENT_LABELS = {
-    "risk_red":            "Rischio critico (score > soglia)",
+    "risk_red":            "Rischio High o Critical valutato",
     "finding_major":       "Finding Major NC aperto",
     "finding_minor":       "Finding Minor NC aperto",
     "incident_nis2":       "Incidente NIS2 rilevato",
@@ -316,7 +316,7 @@ class NotificationRoleProfile(BaseModel):
 # ── NotificationRule (legacy — mantenuto per compatibilità) ──────────────────
 
 EVENT_TYPES = [
-    ("risk_red", "Rischio critico (score > soglia)"),
+    ("risk_red", "Rischio High o Critical valutato"),
     ("finding_major", "Finding Major NC aperto"),
     ("finding_minor", "Finding Minor NC aperto"),
     ("incident_nis2", "Incidente NIS2 rilevato"),

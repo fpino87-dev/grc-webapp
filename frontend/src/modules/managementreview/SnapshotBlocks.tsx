@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import i18n from "../../i18n";
 import {
-  DetailTable, KpiBox, KpiGrid, SnapSection, fmtDate, isOverdue,
+  DetailTable, KpiBox, KpiGrid, SnapSection, fmtDate, isOverdue, type SnapRiskCycle,
   type Snap, type SnapAudit, type SnapDoc, type SnapFinding, type SnapFramework, type SnapIncident,
   type SnapKpi, type SnapObjective, type SnapPdca, type SnapPdcaOverdue, type SnapPendingDoc, type SnapPrevAction, type SnapRisk,
   type SnapSite, type SnapTask,
@@ -364,14 +364,87 @@ export function DocumentsBlock({ snap, approvedHere }: { snap: Snap; approvedHer
   );
 }
 
+function ClassRisksBlock({ snap }: { snap: Snap }) {
+  const { t } = useTranslation();
+  const r = snap.rischi;
+  const byClass = (r.by_class ?? {}) as Record<string, number>;
+  const cls = (c?: string) => (c ? t(`risk.classes.${c}`) : "—");
+  return (
+    <div>
+      <KpiGrid>
+        <KpiBox label={t("management_review.snap.high_untreated")} value={r.oltre_soglia ?? 0} color="text-red-600" />
+        <KpiBox label={t("management_review.snap.high_untreated_no_plan")} value={r.senza_piano ?? 0} color="text-red-600" />
+        <KpiBox label={t("management_review.snap.measures_overdue")} value={r.misure_in_ritardo ?? 0} color="text-orange-600" />
+        <KpiBox label={t("management_review.snap.active_acceptances")} value={r.accettati_formalmente ?? 0} />
+      </KpiGrid>
+      <p className="text-xs text-gray-500 mt-2">
+        {["critical", "high", "medium", "low", "very_low"].map(c => `${cls(c)} ${byClass[c] ?? 0}`).join(" · ")}
+      </p>
+      {(r.senza_owner ?? 0) > 0 && (
+        <p className="text-xs text-amber-600 mt-2">{t("management_review.snap.risks_no_owner", { count: r.senza_owner })}</p>
+      )}
+      {((r.valutazioni ?? []) as SnapRiskCycle[]).length > 0 && (
+        <DetailTable
+          title={t("management_review.snap.risk_cycles")}
+          headers={[t("management_review.snap.col_register"), t("management_review.snap.col_cycle_kind"),
+                    t("management_review.snap.col_status"), t("management_review.snap.col_approved_at")]}
+          rows={((r.valutazioni ?? []) as SnapRiskCycle[]).map(c => [
+            c.plant ?? t("management_review.snap.group_register"),
+            t(`management_review.snap.cycle_kind.${c.kind}`, c.kind),
+            t(`management_review.snap.cycle_status.${c.status}`, c.status),
+            fmtDate(c.approved_at),
+          ])}
+        />
+      )}
+      <DetailTable
+        title={t("management_review.snap.top_high_untreated")}
+        headers={[
+          t("management_review.snap.col_risk"), t("management_review.snap.col_asset_process"),
+          t("management_review.snap.col_class"), t("management_review.snap.col_treatment"),
+          t("management_review.snap.col_owner"), t("management_review.snap.col_plan"),
+        ]}
+        rows={((r.top_critici ?? []) as SnapRisk[]).map(x => [
+          <span className="font-medium">{x.name}</span>,
+          x.asset || x.process || "—",
+          <span><span className="text-red-600 font-semibold">{cls(x.current_class)}</span> → {cls(x.expected_class)}</span>,
+          x.treatment ? t(`risk.treatment_${x.treatment}`, x.treatment) : "—",
+          x.owner || <span className="text-amber-600">—</span>,
+          x.has_plan ? <span className="text-green-700">{t("management_review.snap.yes")}</span>
+                     : <span className="text-red-600 font-medium">{t("management_review.snap.no")}</span>,
+        ])}
+        total={r.oltre_soglia}
+      />
+      <DetailTable
+        title={t("management_review.snap.accepted_risks")}
+        headers={[
+          t("management_review.snap.col_risk"), t("management_review.snap.col_class"),
+          t("management_review.snap.col_signatures"), t("management_review.snap.col_body"),
+          t("management_review.snap.col_acceptance_expiry"),
+        ]}
+        rows={((r.elenco_accettati ?? []) as SnapRisk[]).map(x => [
+          x.name, cls(x.current_class),
+          (x.signatures ?? []).map(role => t(`risk.acceptance_roles.${role}`, role)).join(", ") || "—",
+          x.body || "—",
+          <span className={isOverdue(x.acceptance_expiry) ? "text-red-600 font-medium" : ""}>{fmtDate(x.acceptance_expiry)}</span>,
+        ])}
+        total={r.accettati_formalmente}
+      />
+    </div>
+  );
+}
+
 export function RisksBlock({ snap }: { snap: Snap }) {
   const { t } = useTranslation();
   const r = snap.rischi;
-  const bcp = snap.bcp as {
-    processi_critici_senza_bcp: number; nomi: string[];
-    processi_critici_test_scaduto?: number; nomi_test_scaduto?: string[];
-  } | undefined;
   if (!r) return null;
+  if (r.metodo === "classi") {
+    return (
+      <>
+        <ClassRisksBlock snap={snap} />
+        <BcpNotes snap={snap} />
+      </>
+    );
+  }
   // Snapshot con le regole del Reporting: soglia di accettabilità approvata.
   const byAppetite = r.oltre_soglia !== undefined;
   const soglia = (r.soglia ?? {}) as { defined?: boolean; max_acceptable_score?: number; max_red_risks_count?: number | null; per_plant?: boolean };
@@ -419,7 +492,7 @@ export function RisksBlock({ snap }: { snap: Snap }) {
           <span>{x.inherent_score ?? "—"} → <span className="text-red-600 font-semibold">{x.score ?? "—"}</span></span>,
           x.treatment ? t(`risk.treatment_${x.treatment}`, x.treatment) : "—",
           x.owner || <span className="text-amber-600">—</span>,
-          yesNo(x.has_plan),
+          yesNo(!!x.has_plan),
         ])}
         total={byAppetite ? r.oltre_soglia : r.rosso}
       />
@@ -435,6 +508,19 @@ export function RisksBlock({ snap }: { snap: Snap }) {
         ])}
         total={r.accettati_formalmente}
       />
+      <BcpNotes snap={snap} />
+    </div>
+  );
+}
+
+function BcpNotes({ snap }: { snap: Snap }) {
+  const { t } = useTranslation();
+  const bcp = snap.bcp as {
+    processi_critici_senza_bcp: number; nomi: string[];
+    processi_critici_test_scaduto?: number; nomi_test_scaduto?: string[];
+  } | undefined;
+  return (
+    <>
       {bcp && bcp.processi_critici_senza_bcp > 0 && (
         <div className="mt-3">
           <p className="text-xs text-red-600 font-medium">{t("management_review.snap.critical_no_bcp", { count: bcp.processi_critici_senza_bcp })}</p>
@@ -447,7 +533,7 @@ export function RisksBlock({ snap }: { snap: Snap }) {
           {(bcp.nomi_test_scaduto ?? []).length > 0 && <p className="text-xs text-gray-600 mt-1">{bcp.nomi_test_scaduto!.join(", ")}</p>}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -485,11 +571,13 @@ export function SitesBlock({ snap }: { snap: Snap }) {
   const sites = (snap.siti ?? []) as SnapSite[];
   if (sites.length === 0) return null;
   const byAppetite = sites[0].rischi_oltre_soglia !== undefined;
+  const byClass = (snap.compliance_rule ?? 0) >= 3;
   return (
     <DetailTable
       headers={[
         t("management_review.snap.col_site"), t("management_review.snap.col_compliance"),
-        t(byAppetite ? "management_review.snap.over_appetite" : "management_review.snap.critical"),
+        t(byClass ? "management_review.snap.high_untreated"
+          : byAppetite ? "management_review.snap.over_appetite" : "management_review.snap.critical"),
         t("management_review.snap.open_incidents"), t("management_review.snap.tasks_overdue"),
       ]}
       rows={sites.map(s => {

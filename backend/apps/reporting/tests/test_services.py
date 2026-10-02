@@ -39,20 +39,27 @@ def other_plant(db):
     )
 
 
-def make_risk(plant, user, prob, impact, status="completato", **extra):
-    """Crea un RiskAssessment; score = prob*impact (ricalcolato in save())."""
-    from apps.risk.models import RiskAssessment
-    return RiskAssessment.objects.create(
+def make_risk(plant, user, prob, impact, status="completato", accepted=False, **extra):
+    """Rischio valutato del registro corrente: classe dalla matrice della procedura."""
+    from apps.risk.models import RiskAcceptance, RiskAssessment
+    from apps.risk.services import risk_class
+    risk = RiskAssessment.objects.create(
         plant=plant,
         name=extra.pop("name", f"R{prob}x{impact}"),
-        assessment_type="IT",
-        threat_category=extra.pop("threat_category", "malware_ransomware"),
+        asset_type="IT",
         probability=prob,
         impact=impact,
+        current_class=risk_class(prob, impact),
         status=status,
         created_by=user,
         **extra,
     )
+    if accepted:
+        RiskAcceptance.objects.create(
+            risk=risk, risk_class=risk.current_class, status="active", rationale="ok",
+            expires_on=timezone.localdate() + timedelta(days=90),
+        )
+    return risk
 
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -61,19 +68,21 @@ def make_risk(plant, user, prob, impact, status="completato", **extra):
 @pytest.mark.django_db
 def test_risk_summary_empty():
     from apps.reporting.services import risk_summary
-    assert risk_summary(None) == {"high": 0, "medium": 0, "low": 0, "total": 0}
+    out = risk_summary(None)
+    assert (out["high"], out["medium"], out["low"], out["total"]) == (0, 0, 0, 0)
 
 
 @pytest.mark.django_db
 def test_risk_summary_buckets(plant, user):
     from apps.reporting.services import risk_summary
-    make_risk(plant, user, 5, 4)   # score 20 → high (>14)
-    make_risk(plant, user, 2, 5)   # score 10 → medium (7<.<=14)
-    make_risk(plant, user, 2, 2)   # score 4  → low (<=7)
+    make_risk(plant, user, 5, 4)   # Critical → rosso
+    make_risk(plant, user, 3, 3)   # Medium → giallo
+    make_risk(plant, user, 2, 2)   # Low → verde
     make_risk(plant, user, 3, 4, status="bozza")  # esclusa (non completato)
 
     out = risk_summary(str(plant.id))
-    assert out == {"high": 1, "medium": 1, "low": 1, "total": 3}
+    assert (out["high"], out["medium"], out["low"], out["total"]) == (1, 1, 1, 3)
+    assert out["by_class"]["critical"] == 1
 
 
 @pytest.mark.django_db
@@ -151,7 +160,7 @@ def test_dashboard_summary_no_plant_counts_active_plants(plant, other_plant):
 def test_dashboard_summary_risk_and_incident_counts(plant, user):
     from apps.reporting.services import dashboard_summary
     make_risk(plant, user, 5, 4)            # red
-    make_risk(plant, user, 2, 5)            # yellow
+    make_risk(plant, user, 3, 3)            # yellow
     make_incident(plant, user, status="aperto", nis2_notifiable="si")
     make_incident(plant, user, status="in_analisi")
     make_incident(plant, user, status="chiuso")  # non aperto/in_analisi → escluso
@@ -264,18 +273,18 @@ def test_owner_report_tasks_by_owner(plant, user):
 @pytest.mark.django_db
 def test_risk_bia_bcp_kpis(plant, user):
     from apps.reporting.services import risk_bia_bcp
-    make_risk(plant, user, 5, 4)                                  # red
-    make_risk(plant, user, 2, 5)                                  # yellow
-    make_risk(plant, user, 5, 4, needs_revaluation=True)          # red + da rivalutare
-    make_risk(plant, user, 2, 2, risk_accepted_formally=True)     # green + accettato
+    make_risk(plant, user, 5, 4)                    # Critical
+    make_risk(plant, user, 3, 3)                    # Medium
+    make_risk(plant, user, 4, 3, accepted=True)     # High, accettato
+    make_risk(plant, user, 2, 2, accepted=True)     # Low, accettato
 
-    out = risk_bia_bcp(str(plant.id))
-    k = out["kpis"]
+    k = risk_bia_bcp(str(plant.id))["kpis"]
     assert k["risks_total"] == 4
     assert k["risks_red"] == 2
     assert k["risks_yellow"] == 1
-    assert k["risks_needs_revaluation"] == 1
-    assert k["risks_formally_accepted"] == 1
+    assert k["risks_accepted"] == 2
+    assert k["risks_untreated_high"] == 1          # solo il Critical non accettato
+    assert k["risks_by_class"]["high"] == 1
 
 
 @pytest.mark.django_db
@@ -287,96 +296,34 @@ def test_risk_bia_bcp_heatmap(plant, user):
 
     out = risk_bia_bcp(str(plant.id))
     assert len(out["heatmap"]) == 25  # griglia 5x5 completa
-    cell = {(c["prob"], c["impact"]): c["count"] for c in out["heatmap"]}
-    assert cell[(3, 4)] == 2
-    assert cell[(1, 1)] == 1
-    assert cell[(5, 5)] == 0
+    cell = {(c["prob"], c["impact"]): c for c in out["heatmap"]}
+    assert cell[(3, 4)]["count"] == 2 and cell[(3, 4)]["class"] == "high"
+    assert cell[(1, 1)]["count"] == 1
+    assert cell[(5, 5)]["count"] == 0
 
 
 @pytest.mark.django_db
-def test_risk_bia_bcp_top_risks_sorted(plant, user):
+def test_risk_bia_bcp_top_risks_sorted_by_class(plant, user):
     from apps.reporting.services import risk_bia_bcp
-    make_risk(plant, user, 2, 2, name="low")    # 4
-    make_risk(plant, user, 5, 4, name="high")   # 20
-    make_risk(plant, user, 2, 5, name="mid")    # 10
+    make_risk(plant, user, 2, 2, name="low")
+    make_risk(plant, user, 5, 4, name="critical")
+    make_risk(plant, user, 3, 3, name="medium")
 
     top = risk_bia_bcp(str(plant.id))["top_risks"]
-    assert [r["name"] for r in top] == ["high", "mid", "low"]
-    assert top[0]["score"] == 20
+    assert [r["name"] for r in top] == ["critical", "medium", "low"]
+    assert top[0]["current_class"] == "critical" and top[0]["current_class_label"] == "Critical"
 
 
 @pytest.mark.django_db
-def test_risk_bia_bcp_ale_total_coverage_and_top_risks(plant, user):
-    """ALE: somma di portafoglio, copertura % e colonna sui top_risks.
-
-    Un rischio collegato a una BIA con downtime_cost_hour valorizzato ha ALE > 0;
-    uno senza processo critico vale 0 e abbassa la copertura."""
-    from apps.bia.models import CriticalProcess
+def test_risk_bia_bcp_excludes_legacy_and_not_applicable(plant, user):
     from apps.reporting.services import risk_bia_bcp
-
-    proc = CriticalProcess.objects.create(
-        plant=plant, name="ProcALE", criticality=4, downtime_cost_hour=1000
-    )
-    # Residua: prob=3, impact=3 → ore_fermo=24, prob_annua=1.0 → 1000*24*1 = 24000.
-    # Inerente (pre-controlli): inherent prob=4, impact=4 → 72h × 3.0/anno → 1000*72*3 = 216000.
-    make_risk(
-        plant, user, 3, 3, name="with_bia", critical_process=proc,
-        inherent_probability=4, inherent_impact=4,
-    )
-    make_risk(plant, user, 5, 4, name="no_bia")  # nessuna BIA → ALE 0
-
-    out = risk_bia_bcp(str(plant.id))
-    k = out["kpis"]
-    assert k["ale_total"] == 24000.0
-    assert k["ale_total_inherent"] == 216000.0
-    assert k["ale_saved"] == 192000.0          # rischio abbattuto dai controlli
-    assert k["ale_saved_pct"] == 88.9
-    assert k["ale_valued_count"] == 1
-    assert k["ale_coverage_pct"] == 50.0
-
-    row = {r["name"]: r for r in out["top_risks"]}
-    assert row["with_bia"]["ale"] == 24000.0
-    assert row["with_bia"]["ale_inherent"] == 216000.0
-    assert row["no_bia"]["ale"] == 0
-    assert row["no_bia"]["ale_inherent"] == 0
-
-
-@pytest.mark.django_db
-def test_risk_bia_bcp_treatment_rosi(plant, user):
-    """ROSI: ALE evitata vs costo annualizzato (CapEx ammortizzato su 3 anni) + payback."""
-    from apps.bia.models import CriticalProcess, TreatmentOption
-    from apps.reporting.services import risk_bia_bcp
-
-    proc = CriticalProcess.objects.create(
-        plant=plant, name="ProcROSI", criticality=4, downtime_cost_hour=1000
-    )
-    # ALE residua processo: prob=3, impact=3 → 1000*24*1 = 24000.
-    make_risk(plant, user, 3, 3, name="r_rosi", critical_process=proc)
-    # Trattamento: abbatte il 50% → ALE evitata 12000/anno.
-    # annual_cost = cost_annual 2000 + cost_implementation 12000 / 3 = 6000.
-    # net = 12000-6000 = 6000 → ROSI 100%. payback = 12000 / (12000-2000) * 12 = 14.4 mesi.
-    TreatmentOption.objects.create(
-        process=proc, title="EDR", cost_implementation=12000,
-        cost_annual=2000, ale_reduction_pct=50,
-    )
-
-    out = risk_bia_bcp(str(plant.id))
-    tr = out["treatments"]
-    assert len(tr) == 1
-    row = tr[0]
-    assert row["ale_avoided"] == 12000.0
-    assert row["annual_cost"] == 6000.0
-    assert row["net_annual"] == 6000.0
-    assert row["rosi_pct"] == 100.0
-    assert row["payback_months"] == 14.4
-    assert row["worth_it"] is True
-
-    tot = out["treatments_totals"]
-    assert tot["count"] == 1
-    assert tot["ale_avoided"] == 12000.0
-    assert tot["annual_cost"] == 6000.0
-    assert tot["rosi_pct"] == 100.0
-    assert tot["amort_years"] == 3
+    from apps.risk.models import RiskAssessmentCycle
+    legacy = RiskAssessmentCycle.objects.create(plant=plant, kind="legacy", status="archiviato",
+                                                started_at=timezone.now())
+    make_risk(plant, user, 5, 5, cycle=legacy)
+    make_risk(plant, user, 5, 5, applicable=False)
+    make_risk(plant, user, 3, 3)
+    assert risk_bia_bcp(str(plant.id))["kpis"]["risks_total"] == 1
 
 
 @pytest.mark.django_db
@@ -577,49 +524,8 @@ def test_weekly_snapshot_counts_critical_incidents(plant, user):
 
 
 # ───────────────────────────────────────────────────────────────────────────
-# risk_bia_bcp — propensione al rischio e copertura BCP
+# risk_bia_bcp — copertura BCP
 # ───────────────────────────────────────────────────────────────────────────
-def _appetite(plant=None, score=14, max_red=3):
-    from apps.risk.models import RiskAppetitePolicy
-    return RiskAppetitePolicy.objects.create(
-        plant=plant, max_acceptable_score=score, max_red_risks_count=max_red,
-        valid_from=timezone.localdate() - timedelta(days=1),
-    )
-
-
-@pytest.mark.django_db
-def test_risk_over_appetite_uses_site_policy(plant, other_plant, user):
-    from apps.reporting.services import risk_bia_bcp
-    _appetite(None, score=14)          # organizzazione
-    _appetite(plant, score=9)          # sito A più severo
-    make_risk(plant, user, 2, 5)       # 10: oltre la soglia del sito A (9)
-    make_risk(plant, user, 2, 4)       # 8: sotto
-    make_risk(other_plant, user, 3, 4)  # 12: sotto la soglia di organizzazione (14)
-    make_risk(other_plant, user, 3, 5)  # 15: oltre
-
-    site = risk_bia_bcp(str(plant.id))
-    assert site["kpis"]["risks_over_appetite"] == 1
-    assert site["appetite"]["max_acceptable_score"] == 9
-    assert site["appetite"]["defined"] is True
-    assert [r["over_appetite"] for r in site["top_risks"]] == [True, False]
-
-    org = risk_bia_bcp(None)
-    assert org["kpis"]["risks_over_appetite"] == 2
-    assert org["appetite"]["max_acceptable_score"] == 14
-    assert org["appetite"]["per_plant"] is True
-
-
-@pytest.mark.django_db
-def test_risk_appetite_default_when_no_policy(plant, user):
-    from apps.reporting.services import risk_bia_bcp
-    from apps.risk.services import DEFAULT_ACCEPTABLE_SCORE as DEFAULT_APPETITE_SCORE
-    make_risk(plant, user, 3, 5)  # 15
-    out = risk_bia_bcp(str(plant.id))
-    assert out["appetite"]["defined"] is False
-    assert out["appetite"]["max_acceptable_score"] == DEFAULT_APPETITE_SCORE
-    assert out["kpis"]["risks_over_appetite"] == 1
-
-
 @pytest.mark.django_db
 def test_bcp_coverage_only_approved_and_m2m_link(plant, user):
     """Copre solo un piano approvato, anche se collegato dall'elenco processi

@@ -292,10 +292,15 @@ class TestNewAdvisors:
         from apps.risk.models import RiskAssessment
         from apps.cockpit.advisors_builtin import risk_open_high_advisor
         plant = Plant.objects.create(code="CKH1", name="RiskPlant", country="IT", nis2_scope="essenziale", status="attivo")
-        # score 20 → weighted_score rosso (>14), aperto, non accettato formalmente.
-        RiskAssessment.objects.create(plant=plant, status="completato", score=20, risk_accepted_formally=False)
-        # Un rischio rosso accettato formalmente NON deve comparire.
-        RiskAssessment.objects.create(plant=plant, status="completato", score=20, risk_accepted_formally=True)
+        from datetime import timedelta
+        from django.utils import timezone
+        from apps.risk.models import RiskAcceptance
+        # Critical valutato, senza accettazione attiva.
+        RiskAssessment.objects.create(plant=plant, status="completato", current_class="critical")
+        # Un High accettato NON deve comparire.
+        accepted = RiskAssessment.objects.create(plant=plant, status="completato", current_class="high")
+        RiskAcceptance.objects.create(risk=accepted, risk_class="high", status="active", rationale="ok",
+                                      expires_on=timezone.localdate() + timedelta(days=30))
         out = risk_open_high_advisor(AdvisorContext())
         match = [i for i in out if i.code == "risk.open_high" and i.plant_id == str(plant.pk)]
         assert len(match) == 1
@@ -307,10 +312,10 @@ class TestNewAdvisors:
         from apps.cockpit.advisors_builtin import risk_acceptance_expiring_advisor
         from django.utils import timezone
         plant = Plant.objects.create(code="CKA1", name="AccPlant", country="IT", nis2_scope="essenziale", status="attivo")
-        RiskAssessment.objects.create(
-            plant=plant, status="completato", score=10,
-            risk_accepted_formally=True, risk_acceptance_expiry=timezone.localdate(),
-        )
+        from apps.risk.models import RiskAcceptance
+        risk = RiskAssessment.objects.create(plant=plant, status="completato", current_class="medium")
+        RiskAcceptance.objects.create(risk=risk, risk_class="medium", status="active", rationale="ok",
+                                      expires_on=timezone.localdate())
         out = risk_acceptance_expiring_advisor(AdvisorContext())
         assert any(i.code == "risk.acceptance_expiring" and i.plant_id == str(plant.pk) and i.params["count"] == 1 for i in out)
 

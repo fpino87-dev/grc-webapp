@@ -294,15 +294,10 @@ def close_cycle(cycle, user, act_description: str = "") -> PdcaCycle:
         ]
     )
 
-    # Aggiorna modulo sorgente
-    if cycle.trigger_type == "risk_rosso":
-        from apps.risk.models import RiskAssessment
-
-        ra = RiskAssessment.objects.filter(pk=cycle.trigger_source_id).first()
-        if ra:
-            ra.risk_accepted = True
-            ra.save(update_fields=["risk_accepted", "updated_at"])
-
+    # Aggiorna modulo sorgente. Un PDCA nato da un rischio non accetta il
+    # rischio alla chiusura: la classe scende solo con le misure del piano di
+    # trattamento verificate e l'accettazione segue le regole della procedura
+    # di risk management (autorità per classe).
     if cycle.trigger_type == "gap_controllo":
         from apps.controls.models import ControlInstance
 

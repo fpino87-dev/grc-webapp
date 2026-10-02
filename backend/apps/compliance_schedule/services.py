@@ -223,15 +223,18 @@ def get_activity_schedule(plant=None, months_ahead: int = 6) -> list[dict]:
 
     # Risk assessments — next review due
     try:
-        from apps.risk.models import RiskAssessment
+        from apps.risk.models import RiskAssessmentCycle
 
-        risk_qs = RiskAssessment.objects.filter(status="completato", assessed_at__isnull=False)
+        # Revisione del registro rischi: dalla valutazione approvata vigente
+        # di ciascun registro (sito o gruppo), procedura §11.1.
+        cycle_qs = RiskAssessmentCycle.objects.filter(status="approvato", approved_at__isnull=False)
         if plant:
-            risk_qs = risk_qs.filter(**plant_filter)
+            cycle_qs = cycle_qs.filter(**plant_filter)
         freq_val, freq_unit, _ = _get_rule("risk_assessment", plant)
-        for ra in risk_qs:
-            next_due = _add_duration(ra.assessed_at.date(), freq_val, freq_unit)
-            _add("risk_assessment", f"Rischio: {ra.name}", next_due, ra.status, str(ra.id))
+        for cycle in cycle_qs.select_related("plant"):
+            next_due = _add_duration(cycle.approved_at.date(), freq_val, freq_unit)
+            label = cycle.plant.name if cycle.plant else "Gruppo"
+            _add("risk_assessment", f"Risk assessment: {label}", next_due, cycle.status, str(cycle.id))
     except Exception:
         logger.exception("Errore nel calcolo delle scadenze risk assessment", exc_info=True)
 

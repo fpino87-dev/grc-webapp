@@ -368,8 +368,57 @@ def _document_blocks(snap, ctx=None) -> list:
     return blocks
 
 
+RISK_CLASS = {"very_low": "Very Low", "low": "Low", "medium": "Medium", "high": "High", "critical": "Critical"}
+CYCLE_KIND = {"primo": _("Primo risk assessment"), "periodico": _("Revisione periodica"),
+              "straordinario": _("Revisione straordinaria")}
+CYCLE_STATUS = {"in_corso": _("In corso"), "in_approvazione": _("In approvazione"), "approvato": _("Approvato")}
+
+
+def _risk_class_blocks(r) -> list:
+    """Snapshot con le classi della procedura D-ITA-INF-23 (regola 3)."""
+    by_class = r.get("by_class") or {}
+    blocks = [
+        _kpis((_("High/Critical non accettati"), r.get("oltre_soglia", 0), "red"),
+              (_("di cui senza piano"), r.get("senza_piano", 0), "red"),
+              (_("Misure in ritardo"), r.get("misure_in_ritardo", 0), "orange"),
+              (_("Accettazioni attive"), r.get("accettati_formalmente", 0), None)),
+        _kpis(*[(label, by_class.get(key, 0), tone) for key, label, tone in (
+            ("critical", "Critical", "red"), ("high", "High", "red"), ("medium", "Medium", "orange"),
+            ("low", "Low", "green"), ("very_low", "Very Low", "green"))]),
+    ]
+    if r.get("valutazioni"):
+        blocks.append(_table(
+            _("Valutazioni dei rischi"), [_("Registro"), _("Tipo"), _("Stato"), _("Approvata il")],
+            [[x.get("plant") or _("Gruppo"), CYCLE_KIND.get(x.get("kind"), _dash(x.get("kind"))),
+              CYCLE_STATUS.get(x.get("status"), _dash(x.get("status"))), fmt_date(x.get("approved_at"))]
+             for x in r["valutazioni"]],
+        ))
+    blocks += [
+        _table(_("Rischi High/Critical non accettati"),
+               [_("Rischio"), _("Asset / processo"), _("Attuale → atteso"), _("Trattamento"), _("Owner"), _("Piano")],
+               [[x.get("name"), _dash(x.get("asset") or x.get("process")),
+                 f"{RISK_CLASS.get(x.get('current_class'), '—')} → {RISK_CLASS.get(x.get('expected_class'), '—')}",
+                 TREATMENT.get(x.get("treatment"), _dash(x.get("treatment"))), _dash(x.get("owner")),
+                 {"text": _("Sì") if x.get("has_plan") else _("No"),
+                  "tone": None if x.get("has_plan") else "red", "bold": not x.get("has_plan")}]
+                for x in r.get("top_critici", [])],
+               r.get("oltre_soglia")),
+        _table(_("Rischi accettati"),
+               [_("Rischio"), _("Classe"), _("Firme"), _("Organo"), _("Scadenza accettazione")],
+               [[x.get("name"), RISK_CLASS.get(x.get("current_class"), "—"), ", ".join(x.get("signatures") or []) or "—",
+                 _dash(x.get("body")), fmt_date(x.get("acceptance_expiry"))]
+                for x in r.get("elenco_accettati", [])],
+               r.get("accettati_formalmente")),
+    ]
+    return blocks
+
+
 def _risk_blocks(snap) -> list:
     r = snap.get("rischi") or {}
+    if r.get("metodo") == "classi":
+        return _risk_class_blocks(r) + _bcp_blocks(snap)
+    # Snapshot precedenti alla metodologia D-ITA-INF-23: si rendono come
+    # sono stati congelati (punteggi e soglia di accettabilità).
     # Snapshot con la soglia di accettabilità (regole condivise con il
     # Reporting): "senza piano" e l'elenco riguardano i rischi oltre soglia.
     by_appetite = "oltre_soglia" in r
@@ -416,6 +465,11 @@ def _risk_blocks(snap) -> list:
                     for x in r.get("elenco_accettati", [])],
                    r.get("accettati_formalmente")),
         ]
+    return blocks + _bcp_blocks(snap)
+
+
+def _bcp_blocks(snap) -> list:
+    blocks = []
     bcp = snap.get("bcp") or {}
     if bcp.get("processi_critici_senza_bcp"):
         blocks.append({"type": "paragraph", "label": _("Continuità operativa"),

@@ -53,7 +53,8 @@ def register_change(asset, user, change_ref: str,
       - ControlInstance del plant (compliant/parziale/na) — aggancio a livello
         plant: ControlInstance non ha ancora un legame diretto con asset/processo
         (vedi budnewsfix P1 per il narrowing);
-      - RiskAssessment collegati all'asset.
+      - RiskAssessment collegati all'asset (conteggio: il change compare fra
+        gli eventi di rivalutazione del registro rischi).
     Atomico: o si aggiornano asset + cascate + audit insieme, o niente.
     """
     asset.last_change_ref = change_ref
@@ -94,20 +95,10 @@ def register_change(asset, user, change_ref: str,
     affected["controls"] = len(cis)
     affected["controls_scope"] = "asset" if narrowed else "plant"
 
-    # Propaga a RiskAssessment collegati all'asset
-    from apps.risk.models import RiskAssessment
-    risks = RiskAssessment.objects.filter(
-        asset=asset,
-        status="completato",
-        deleted_at__isnull=True,
-    )
-    for ra in risks:
-        ra.needs_revaluation = True
-        ra.needs_revaluation_since = today
-        ra.save(update_fields=[
-            "needs_revaluation", "needs_revaluation_since", "updated_at",
-        ])
-        affected["risks"] += 1
+    # Rischi collegati all'asset: il change è un evento di rivalutazione del
+    # registro (risk.services.revaluation_triggers), non un flag sul rischio.
+    from apps.risk.services import register_queryset
+    affected["risks"] = register_queryset(asset.plant).filter(asset=asset, status="completato").count()
 
     log_action(
         user=user,
@@ -255,18 +246,11 @@ def delete_asset(asset: Asset, user) -> None:
     from django.db.models import Q
     from django.utils.translation import gettext as _
 
-    from apps.risk.models import RiskAssessment, RiskScenario
+    from apps.risk.services import register_queryset
 
-    if RiskAssessment.objects.filter(asset=asset, deleted_at__isnull=True).exclude(
-        status="archiviato"
-    ).exists():
+    if register_queryset(asset.plant).filter(asset=asset).exists():
         raise ValidationError(
             _("Impossibile eliminare: esistono valutazioni rischio attive collegate all'asset.")
-        )
-
-    if RiskScenario.objects.filter(asset=asset, deleted_at__isnull=True).exists():
-        raise ValidationError(
-            _("Impossibile eliminare: esistono scenari di rischio collegati all'asset.")
         )
 
     if AssetDependency.objects.filter(

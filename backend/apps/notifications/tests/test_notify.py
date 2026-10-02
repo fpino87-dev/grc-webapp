@@ -32,7 +32,7 @@ def test_notify_finding_major():
 
 def test_notify_risk_red():
     asset = _ns(name="Server")
-    assessment = _ns(name="R1", asset=asset, plant=_ns(name="P1"), score=20)
+    assessment = _ns(name="R1", asset=asset, plant=_ns(name="P1"), current_class="critical", asset_group_label="")
     _call(S.notify_risk_red, assessment, REC)
 
 

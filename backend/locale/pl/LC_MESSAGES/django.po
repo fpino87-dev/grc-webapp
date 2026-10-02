@@ -3230,3 +3230,245 @@ msgstr "Procesy muszą należeć do zakładu klasy informacji."
 
 msgid "Sito inesistente."
 msgstr "Zakład nie istnieje."
+
+msgid "Primo risk assessment"
+msgstr "Pierwsza ocena ryzyka"
+
+msgid "Revisione periodica"
+msgstr "Przegląd okresowy"
+
+msgid "Revisione straordinaria"
+msgstr "Przegląd nadzwyczajny"
+
+msgid "High/Critical non accettati"
+msgstr "High/Critical niezaakceptowane"
+
+msgid "di cui senza piano"
+msgstr "w tym bez planu"
+
+msgid "Misure in ritardo"
+msgstr "Opóźnione działania"
+
+msgid "Accettazioni attive"
+msgstr "Aktywne akceptacje"
+
+msgid "Valutazioni dei rischi"
+msgstr "Oceny ryzyka"
+
+msgid "Approvata il"
+msgstr "Zatwierdzona dnia"
+
+msgid "Gruppo"
+msgstr "Grupa"
+
+msgid "Rischi High/Critical non accettati"
+msgstr "Niezaakceptowane ryzyka High/Critical"
+
+msgid "Attuale → atteso"
+msgstr "Obecne → oczekiwane"
+
+msgid "Rischi accettati"
+msgstr "Zaakceptowane ryzyka"
+
+msgid "Classe"
+msgstr "Klasa"
+
+msgid "Firme"
+msgstr "Podpisy"
+
+msgid "Il controllo deve essere del sito del registro."
+msgstr "Zabezpieczenie musi należeć do zakładu rejestru."
+
+msgid "La valutazione si modifica solo con una valutazione in corso sul registro."
+msgstr "Ocenę można zmieniać tylko podczas trwającej oceny rejestru."
+
+msgid "Il rischio appartiene alla valutazione precedente (metodo superato): è in sola lettura."
+msgstr "Ryzyko należy do poprzedniej oceny (metoda zastąpiona): tylko do odczytu."
+
+msgid "La minaccia scelta non è più attiva nel catalogo."
+msgstr "Wybrane zagrożenie nie jest już aktywne w katalogu."
+
+msgid "La minaccia scelta non si applica a questa tipologia di asset."
+msgstr "Wybrane zagrożenie nie dotyczy tego typu zasobu."
+
+msgid "L'asset deve appartenere al sito del registro."
+msgstr "Zasób musi należeć do zakładu rejestru."
+
+msgid "Il processo deve appartenere al sito del registro."
+msgstr "Proces musi należeć do zakładu rejestru."
+
+msgid "Il fornitore deve operare per il sito del registro."
+msgstr "Dostawca musi działać dla zakładu rejestru."
+
+msgid "Le classi di informazioni devono essere del sito del registro o di gruppo."
+msgstr "Klasy informacji muszą należeć do zakładu rejestru lub do grupy."
+
+msgid "Solo i rischi di gruppo indicano i siti che li ereditano."
+msgstr "Tylko ryzyka grupy wskazują zakłady, które je dziedziczą."
+
+msgid "L'override della classe può spostare al massimo di un livello."
+msgstr "Korekta klasy może przesunąć najwyżej o jeden poziom."
+
+msgid "La classe del rischio è cambiata."
+msgstr "Klasa ryzyka uległa zmianie."
+
+msgid "Indica la tipologia di asset e la minaccia del catalogo."
+msgstr "Podaj typ zasobu i zagrożenie z katalogu."
+
+msgid "Motiva perché la minaccia non è applicabile."
+msgstr "Uzasadnij, dlaczego zagrożenie nie ma zastosowania."
+
+msgid "Indica la probabilità e la sua motivazione."
+msgstr "Podaj prawdopodobieństwo i jego uzasadnienie."
+
+msgid "Indica almeno una dimensione d'impatto e la motivazione."
+msgstr "Podaj co najmniej jeden wymiar wpływu i uzasadnienie."
+
+msgid "Motiva lo spostamento della classe."
+msgstr "Uzasadnij korektę klasy."
+
+msgid "Indica il Risk Owner."
+msgstr "Wskaż właściciela ryzyka."
+
+msgid "Scegli il trattamento."
+msgstr "Wybierz sposób postępowania z ryzykiem."
+
+msgid "Per un rischio High o Critical non trattato serve la motivazione (analisi costi/benefici)."
+msgstr "Nieobsłużone ryzyko High lub Critical wymaga uzasadnienia (analiza kosztów i korzyści)."
+
+msgid "Indica il rischio atteso dopo il trattamento."
+msgstr "Podaj oczekiwane ryzyko po postępowaniu."
+
+msgid "Si conferma solo un rischio con valutazione completata."
+msgstr "Potwierdzić można tylko ryzyko z zakończoną oceną."
+
+msgid "Rischio eliminato dal registro."
+msgstr "Ryzyko usunięte z rejestru."
+
+#, python-format
+msgid "Piano di trattamento rischio %(cls)s — %(name)s"
+msgstr "Plan postępowania z ryzykiem %(cls)s — %(name)s"
+
+msgid "Si verifica solo una misura completata."
+msgstr "Zweryfikować można tylko zakończone działanie."
+
+msgid "Il rischio atteso si applica solo con tutte le misure completate e verificate."
+msgstr "Oczekiwane ryzyko można zastosować dopiero po zakończeniu i weryfikacji wszystkich działań."
+
+msgid "Si accetta solo un rischio applicabile con valutazione completata."
+msgstr "Zaakceptować można tylko ryzyko mające zastosowanie, z zakończoną oceną."
+
+msgid "Il rischio comporta una violazione di legge, di requisiti VDA ISA o di obblighi di riservatezza: non è accettabile."
+msgstr "Ryzyko oznacza naruszenie prawa, wymagań VDA ISA lub obowiązków poufności: nie może zostać zaakceptowane."
+
+msgid "C'è già un'accettazione in corso o attiva per questo rischio."
+msgstr "Dla tego ryzyka istnieje już akceptacja w toku lub aktywna."
+
+msgid "La motivazione dell'accettazione è obbligatoria."
+msgstr "Uzasadnienie akceptacji jest obowiązkowe."
+
+#, python-format
+msgid "La scadenza dell'accettazione deve essere futura ed entro %(months)s mesi."
+msgstr "Termin akceptacji musi przypadać w przyszłości, w ciągu %(months)s miesięcy."
+
+#, python-format
+msgid "Parere sull'accettazione del rischio — %(name)s"
+msgstr "Opinia w sprawie akceptacji ryzyka — %(name)s"
+
+#, python-format
+msgid "Informativa: accettazione del rischio — %(name)s"
+msgstr "Do wiadomości: akceptacja ryzyka — %(name)s"
+
+msgid "L'accettazione non è più in approvazione."
+msgstr "Akceptacja nie oczekuje już na zatwierdzenie."
+
+msgid "Non hai un ruolo che possa firmare questa accettazione."
+msgstr "Nie masz roli, która może podpisać tę akceptację."
+
+msgid "Questa accettazione non attende una delibera dell'organo."
+msgstr "Ta akceptacja nie oczekuje na uchwałę organu."
+
+msgid "Indica l'organo e il riferimento della delibera."
+msgstr "Podaj organ i numer uchwały."
+
+msgid "Questa accettazione non attende un parere."
+msgstr "Ta akceptacja nie oczekuje na opinię."
+
+msgid "Il parere spetta al CISO."
+msgstr "Opinię wydaje CISO."
+
+msgid "Motiva il parere contrario."
+msgstr "Uzasadnij negatywną opinię."
+
+msgid "L'accettazione è già chiusa."
+msgstr "Akceptacja jest już zamknięta."
+
+msgid "Indica il motivo della revoca."
+msgstr "Podaj powód odwołania."
+
+msgid "Accettazione scaduta."
+msgstr "Akceptacja wygasła."
+
+#, python-format
+msgid "Accettazione scaduta: trattare o riaccettare il rischio — %(name)s"
+msgstr "Akceptacja wygasła: obsłuż lub ponownie zaakceptuj ryzyko — %(name)s"
+
+#, python-format
+msgid "Accettazione del rischio in scadenza il %(date)s — %(name)s"
+msgstr "Akceptacja ryzyka wygasa dnia %(date)s — %(name)s"
+
+#, python-format
+msgid "Escalation: misura in ritardo di %(days)s giorni — %(name)s"
+msgstr "Eskalacja: działanie opóźnione o %(days)s dni — %(name)s"
+
+#, python-format
+msgid "Misura del piano di trattamento in ritardo — %(name)s"
+msgstr "Opóźnione działanie planu postępowania — %(name)s"
+
+msgid "Si segnala l'impatto locale solo di un rischio di gruppo ereditato dal sito."
+msgstr "Wpływ lokalny można zgłosić tylko dla ryzyka grupy dziedziczonego przez zakład."
+
+msgid "Indica l'impatto locale (1–5) e la motivazione."
+msgstr "Podaj wpływ lokalny (1–5) i uzasadnienie."
+
+msgid "La segnalazione è già stata recepita."
+msgstr "Zgłoszenie zostało już przyjęte."
+
+msgid "Ci sono rischi con valutazione non completata."
+msgstr "Istnieją ryzyka z niezakończoną oceną."
+
+msgid "Ci sono rischi non ancora valutati o confermati in questa valutazione."
+msgstr "Niektóre ryzyka nie zostały jeszcze ocenione ani potwierdzone w tej ocenie."
+
+msgid "La copertura del catalogo minacce non è completa."
+msgstr "Pokrycie katalogu zagrożeń nie jest pełne."
+
+msgid "Si invia in approvazione solo una valutazione in corso."
+msgstr "Do zatwierdzenia można przesłać tylko trwającą ocenę."
+
+msgid "La valutazione non è in approvazione."
+msgstr "Ocena nie oczekuje na zatwierdzenie."
+
+msgid "Indica il motivo del rinvio."
+msgstr "Podaj powód zwrotu."
+
+msgid "Si approva solo una valutazione inviata in approvazione."
+msgstr "Zatwierdzić można tylko ocenę przesłaną do zatwierdzenia."
+
+msgid "Indica l'organo che approva la valutazione."
+msgstr "Wskaż organ zatwierdzający ocenę."
+
+msgid "Minaccia inesistente."
+msgstr "Zagrożenie nie istnieje."
+
+msgid "Il piano non è ancora completato."
+msgstr "Plan nie został jeszcze zakończony."
+
+msgid "Rischio inesistente."
+msgstr "Ryzyko nie istnieje."
+
+msgid "Data non valida."
+msgstr "Nieprawidłowa data."
+
+msgid "Indica il rischio di gruppo e il sito."
+msgstr "Podaj ryzyko grupy i zakład."

@@ -178,8 +178,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.tasks.tasks.generate_scheduled_checklists",
         "schedule": crontab(hour=7, minute=0),  # ogni mattina alle 07:00
     },
-    "check-expiring-risk-acceptances-daily": {
-        "task": "apps.risk.tasks.check_expiring_risk_acceptances",
+    "check-risk-treatments-daily": {
+        "task": "apps.risk.tasks.check_risk_treatments",
         "schedule": crontab(hour=7, minute=20),  # 07:20 — scaglionato da generate-scheduled-checklists (07:00)
     },
     "notify-expiring-documents": {

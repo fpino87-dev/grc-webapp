@@ -178,14 +178,19 @@ def notify_finding_major(finding, recipients: list[str]):
 
 
 def notify_risk_red(assessment, recipients: list[str]):
+    from apps.risk.services import CLASS_LABELS, treatment_rule
+
+    rule = treatment_rule(assessment.current_class) or {}
+    register = assessment.plant.name if assessment.plant else "Gruppo"
     send_grc_email(
-        subject=f"[GRC] 🔴 Rischio critico: {assessment.name or assessment.asset}",
+        subject=f"[GRC] 🔴 Rischio {CLASS_LABELS.get(assessment.current_class, '')}: {assessment.name}",
         body=(
-            "Risk assessment ha superato la soglia critica.\n\n"
-            f"Plant:  {assessment.plant.name}\n"
-            f"Score:  {assessment.score}/25\n"
-            f"Asset:  {assessment.asset.name if assessment.asset else '—'}\n\n"
-            "Definire piano di mitigazione entro 15 giorni."
+            "Valutazione completata con un rischio High o Critical.\n\n"
+            f"Registro: {register}\n"
+            f"Classe:   {CLASS_LABELS.get(assessment.current_class, '—')}\n"
+            f"Asset:    {assessment.asset.name if assessment.asset else (assessment.asset_group_label or '—')}\n\n"
+            f"Il trattamento va completato entro {rule.get('months', '—')} mesi "
+            "(procedura di risk management, regole per classe)."
         ),
         recipients=recipients,
     )

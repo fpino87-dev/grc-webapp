@@ -43,14 +43,15 @@ def test_score_grc_counts_open_risks():
     from apps.osint.scoring import _score_grc
 
     plant = Plant.objects.create(code="GRC-R", name="R", country="IT", nis2_scope="non_soggetto", status="attivo")
-    RiskAssessment.objects.create(plant=plant, name="r1", status="completato", risk_accepted=False, probability=4, impact=4)
+    RiskAssessment.objects.create(plant=plant, name="r1", status="completato", probability=4, impact=4,
+                                  current_class="critical")
 
     entity = OsintEntity.objects.create(
         entity_type=EntityType.MY_DOMAIN, source_module=SourceModule.SITES,
         source_id=plant.id, domain="r.example.com", display_name="R",
     )
     scan = OsintScan.objects.create(entity=entity)
-    # is_nis2_critical False, 1 rischio aperto non accettato → +20.
+    # is_nis2_critical False, 1 rischio Critical non accettato → +20.
     assert _score_grc(entity, scan) >= 20
 
 

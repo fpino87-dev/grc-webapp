@@ -1,33 +1,7 @@
-from decimal import Decimal
-
 from django.db import transaction
 from django.utils import timezone
 
 from .models import RiskAssessment
-
-
-def mark_needs_revaluation_if_risk_changed(assessment: RiskAssessment, changed_fields: set[str]) -> None:
-    """
-    Se l'utente modifica campi che impattano score/ALE, segnala che serve rivalutazione.
-    """
-    if assessment.status == "archiviato":
-        return
-
-    risk_fields = {
-        "assessment_type",
-        "critical_process",
-        "treatment",
-        "probability",
-        "impact",
-        "inherent_probability",
-        "inherent_impact",
-    }
-    if not (risk_fields & changed_fields):
-        return
-
-    assessment.needs_revaluation = True
-    assessment.needs_revaluation_since = timezone.localdate()
-    assessment.save(update_fields=["needs_revaluation", "needs_revaluation_since", "updated_at"])
 
 
 def normalize_mixed_owner(attrs: dict, user_field: str, text_field: str) -> dict:
@@ -54,433 +28,28 @@ def mixed_owner_name(user, external: str) -> str | None:
     return external or None
 
 
-IT_WEIGHTS = {
-    "esposizione": 0.30,
-    "cve": 0.25,
-    "minaccia": 0.25,
-    "gap_controlli": 0.20,
-}
-OT_WEIGHTS = {
-    "purdue_connettivita": 0.25,
-    "patchability": 0.20,
-    "impatto_fisico": 0.25,
-    "segmentazione": 0.15,
-    "rilevabilita": 0.15,
-}
-
-
-def calc_score(assessment: RiskAssessment) -> int:
-    dims = {d.dimension_code: d.value for d in assessment.dimensions.all()}
-    weights = IT_WEIGHTS if assessment.assessment_type == "IT" else OT_WEIGHTS
-    weighted = sum(dims.get(k, 3) * w for k, w in weights.items())
-    prob = min(5, round(weighted))
-    impact = min(5, round(weighted))
-    return min(25, prob * impact)
-
-
-def calc_ale(assessment: RiskAssessment, inherent: bool = False) -> Decimal:
-    """
-    Calcola ALE annuo partendo dai dati BIA del processo critico collegato.
-    Formula: downtime_cost_hour × ore_fermo_stimato × probabilità_annua
-    Se non c'è processo BIA collegato restituisce Decimal("0").
-
-    inherent=False (default) → ALE residua: usa probabilità/impatto post-controlli
-    (i campi correnti dell'assessment). inherent=True → ALE inerente: usa i campi
-    inherent_* (rischio prima dei controlli); se non valorizzati ricade sui residui,
-    così l'ALE inerente non risulta mai inferiore alla residua per dati mancanti.
-    La differenza inerente − residua quantifica in € il rischio abbattuto dai controlli.
-    """
-    if not assessment.critical_process:
-        return Decimal("0")
-    cp = assessment.critical_process
-    if not cp.downtime_cost_hour:
-        return Decimal("0")
-    ore_fermo_map = {1: 1, 2: 4, 3: 24, 4: 72, 5: 168}
-    prob_annua_map = {1: 0.1, 2: 0.3, 3: 1.0, 4: 3.0, 5: 10.0}
-    if inherent:
-        impact = assessment.inherent_impact or assessment.impact or 3
-        prob = assessment.inherent_probability or assessment.probability or 3
-    else:
-        impact = assessment.impact or 3
-        prob = assessment.probability or 3
-    ore = ore_fermo_map.get(impact, 24)
-    prob_a = prob_annua_map.get(prob, 1.0)
-    ale = Decimal(str(cp.downtime_cost_hour)) * Decimal(str(ore)) * Decimal(str(prob_a))
-    extra = Decimal("1.0")
-    if cp.danno_reputazionale >= 4:
-        extra += Decimal("0.3")
-    if cp.danno_normativo >= 4:
-        extra += Decimal("0.2")
-    return (ale * extra).quantize(Decimal("0.01"))
-
-
-def calc_score_from_dimensions(assessment: RiskAssessment) -> int:
-    """Score pesato con RiskDimension IT/OT — usato quando disponibili."""
-    dims = {d.dimension_code: d.value for d in assessment.dimensions.all()}
-    if not dims:
-        p = assessment.probability or 1
-        i = assessment.impact or 1
-        return min(25, p * i)
-    weights = IT_WEIGHTS if assessment.assessment_type == "IT" else OT_WEIGHTS
-    weighted = sum(dims.get(k, 3) * w for k, w in weights.items())
-    prob = min(5, round(weighted))
-    impact = min(5, round(weighted))
-    return min(25, prob * impact)
-
-
-def suggest_residual_score(assessment) -> dict:
-    """
-    Suggerisce il rischio residuo in base ai controlli compliant collegati al sito.
-    Logica:
-    - parte dal rischio inerente
-    - applica riduzione per controlli compliant (-2%, max 60%)
-    - applica una riduzione extra per un BCP valido "best-match" al processo BIA
-      (+10 / +5 / +0), scegliendo il piano migliore tra quelli approvati e non scaduti.
-    """
-    if not assessment.inherent_score:
-        return {"suggested": None, "reason": "Rischio inerente non definito"}
-
-    if not assessment.critical_process:
-        return {
-            "suggested": assessment.inherent_score,
-            "reason": "Nessun processo BIA collegato — nessuna riduzione applicata",
-        }
-
-    from apps.controls.models import ControlInstance
-    plant_controls = ControlInstance.objects.filter(
-        plant=assessment.plant,
-        status="compliant",
-        deleted_at__isnull=True,
-    )
-    compliant_count = plant_controls.count()
-    reduction_pct = min(60, compliant_count * 2)
-
-    # ─── BCP contribution (best valid plan for this process) ─────────────────
-    bcp_extra_pct = 0
-    best_bcp_title = None
-    best_bcp_strength = 0.0
-
-    try:
-        import datetime
-        from django.db.models import Q
-        from django.utils import timezone
-
-        from apps.bcp.models import BcpPlan
-
-        process = assessment.critical_process
-        today = timezone.localdate()
-        rto_target = process.rto_target_hours
-        rpo_target = process.rpo_target_hours
-
-        # Considero solo piani BCP approvati e non scaduti, collegati al processo BIA.
-        # Nota: nel tuo modello esistono sia FK (critical_process) sia M2M (critical_processes).
-        valid_plans_qs = (
-            BcpPlan.objects.filter(
-                deleted_at__isnull=True,
-                status="approvato",
-                next_test_date__isnull=False,
-                next_test_date__gte=today,
-            )
-            .filter(Q(critical_process=process) | Q(critical_processes=process))
-            .distinct()
-        )
-
-        best_key = None
-
-        for plan in valid_plans_qs:
-            last_test = (
-                plan.tests.filter(deleted_at__isnull=True).order_by("-test_date").first()
-            )
-
-            rto_ok = None
-            rpo_ok = None
-
-            if rto_target is not None:
-                if last_test and last_test.rto_achieved_hours is not None:
-                    rto_ok = last_test.rto_achieved_hours <= rto_target
-                elif plan.rto_hours is not None:
-                    rto_ok = plan.rto_hours <= rto_target
-
-            if rpo_target is not None:
-                if last_test and last_test.rpo_achieved_hours is not None:
-                    rpo_ok = last_test.rpo_achieved_hours <= rpo_target
-                elif plan.rpo_hours is not None:
-                    rpo_ok = plan.rpo_hours <= rpo_target
-
-            known = sum(v is not None for v in (rto_ok, rpo_ok))
-            strength = ((1 if rto_ok else 0) + (1 if rpo_ok else 0)) / known if known else 0.0
-
-            achieved_data_count = 0
-            if last_test:
-                achieved_data_count = int(
-                    (last_test.rto_achieved_hours is not None)
-                    + (last_test.rpo_achieved_hours is not None)
-                )
-
-            # Tie-breakers: strength -> test più recente -> presenza dati achieved
-            last_test_date = last_test.test_date if last_test else datetime.date.min
-            key = (strength, last_test_date, achieved_data_count)
-
-            if best_key is None or key > best_key:
-                best_key = key
-                best_bcp_strength = strength
-                best_bcp_title = plan.title
-
-        if best_bcp_title:
-            if best_bcp_strength >= 1.0:
-                bcp_extra_pct = 10
-            elif best_bcp_strength >= 0.5:
-                bcp_extra_pct = 5
-            else:
-                bcp_extra_pct = 0
-
-    except Exception:
-        # Non deve bloccare la UI: se BCP non è disponibile o qualche campo è mancante,
-        # continuiamo con la sola riduzione da controlli.
-        bcp_extra_pct = 0
-
-    total_reduction_pct = min(70, reduction_pct + bcp_extra_pct)
-    suggested = max(1, round(assessment.inherent_score * (1 - total_reduction_pct / 100)))
-
-    return {
-        "suggested": suggested,
-        "reduction_pct": reduction_pct,
-        "compliant_controls": compliant_count,
-        "bcp_extra_pct": bcp_extra_pct,
-        "best_bcp_strength": best_bcp_strength,
-        "reason": (
-            f"{compliant_count} controlli compliant → "
-            f"riduzione controlli {reduction_pct}% "
-            f"(extra BCP {bcp_extra_pct}%) → "
-            f"score residuo suggerito: {suggested}"
-        ),
-    }
-
-
-def accept_risk(assessment, user, note: str, expiry_date=None) -> None:
-    """Accettazione formale del rischio residuo. Richiede nota obbligatoria."""
-    from django.core.exceptions import ValidationError
-    from django.utils import timezone
-    from django.utils.translation import gettext as _
-    from core.audit import log_action
-
-    risk_lv = assessment.risk_level
-    # La validazione precede ogni scrittura: resta fuori dalla transazione.
-    if risk_lv != "rosso" and not note:
-        raise ValidationError(_("La nota è obbligatoria per l'accettazione formale del rischio."))
-    if risk_lv == "rosso" and len(note.strip()) < 50:
-        raise ValidationError(
-            _("Per rischi critici (rosso) la nota di accettazione deve essere di almeno 50 caratteri.")
-        )
-
-    # Accettazione formale (L1) + audit: insieme, per non lasciare un'accettazione
-    # senza la sua traccia append-only (o viceversa).
-    with transaction.atomic():
-        assessment.risk_accepted_formally = True
-        assessment.risk_accepted = True  # allineato al flag semplice usato da PDCA/notifiche
-        assessment.risk_accepted_by = user
-        assessment.risk_accepted_at = timezone.now()
-        assessment.risk_acceptance_note = note
-        assessment.risk_acceptance_expiry = expiry_date
-        assessment.save(update_fields=[
-            "risk_accepted_formally", "risk_accepted",
-            "risk_accepted_by", "risk_accepted_at",
-            "risk_acceptance_note", "risk_acceptance_expiry", "updated_at",
-        ])
-
-        log_action(
-            user=user,
-            action_code="risk.accepted_formally",
-            level="L1",
-            entity=assessment,
-            payload={
-                "score": assessment.score,
-                "level": risk_lv,
-                "note": note[:100],
-                "expiry": str(expiry_date) if expiry_date else None,
-            },
-        )
-
-
-def get_active_appetite(plant=None, framework_code: str = ""):
-    """
-    Recupera la policy di risk appetite attiva.
-    Priorita': plant-specific > org-wide.
-    """
-    from django.db.models import Q
-    from .models import RiskAppetitePolicy
-
-    today = timezone.localdate()
-    base_qs = RiskAppetitePolicy.objects.filter(
-        valid_from__lte=today,
-        deleted_at__isnull=True,
-    ).filter(
-        Q(valid_until__isnull=True) | Q(valid_until__gte=today)
-    )
-
-    if plant and framework_code:
-        policy = base_qs.filter(plant=plant, framework_code=framework_code).first()
-        if policy:
-            return policy
-
-    if plant:
-        policy = base_qs.filter(plant=plant, framework_code="").first()
-        if policy:
-            return policy
-
-    return base_qs.filter(plant__isnull=True).first()
-
-
-# Soglia di accettabilità se non c'è una RiskAppetitePolicy attiva.
-DEFAULT_ACCEPTABLE_SCORE = 14
-
-
-class AppetiteThresholds:
-    """Soglia di accettabilità per sito, con cache: policy del sito, altrimenti
-    di organizzazione, altrimenti DEFAULT_ACCEPTABLE_SCORE. Regola unica per
-    escalation, Reporting e riesame di direzione (M13)."""
-
-    def __init__(self):
-        self._cache: dict = {}
-
-    def for_plant(self, plant_id) -> int:
-        from apps.plants.models import Plant
-
-        if plant_id not in self._cache:
-            plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
-            policy = get_active_appetite(plant=plant)
-            self._cache[plant_id] = policy.max_acceptable_score if policy else DEFAULT_ACCEPTABLE_SCORE
-        return self._cache[plant_id]
-
-    def is_over(self, plant_id, score) -> bool:
-        return score is not None and score > self.for_plant(plant_id)
-
-    def over_ids(self, risk_qs) -> list:
-        """ID dei rischi del queryset oltre la soglia del proprio sito."""
-        return [
-            pk for pk, plant_id, score in risk_qs.values_list("pk", "plant_id", "score")
-            if self.is_over(plant_id, score)
-        ]
-
-    def thresholds_seen(self) -> set:
-        return set(self._cache.values())
-
-
-def appetite_summary(plant_id, thresholds: "AppetiteThresholds | None" = None) -> dict:
-    """Soglia da mostrare per il perimetro (sito, o organizzazione se None)."""
-    from apps.plants.models import Plant
-
-    plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
-    policy = get_active_appetite(plant=plant)
-    return {
-        "defined": policy is not None,
-        "max_acceptable_score": policy.max_acceptable_score if policy else DEFAULT_ACCEPTABLE_SCORE,
-        "max_red_risks_count": policy.max_red_risks_count if policy else None,
-        "max_unacceptable_score": policy.max_unacceptable_score if policy else None,
-        # Senza sito le soglie possono variare fra siti: quella mostrata è di
-        # organizzazione, i conteggi usano quella di ciascun sito.
-        "per_plant": not plant_id and thresholds is not None and len(thresholds.thresholds_seen()) > 1,
-    }
-
-
-def escalate_red_risk(assessment: RiskAssessment, user):
-    from apps.tasks.services import create_task
-
-    appetite = get_active_appetite(plant=assessment.plant)
-    threshold = appetite.max_acceptable_score if appetite else DEFAULT_ACCEPTABLE_SCORE
-
-    if not assessment.score or assessment.score <= threshold:
-        return
-
-    # Creazione task di escalation atomica: i due task (mitigazione + soglia CISO)
-    # si committano insieme. Se chiamata dentro un'altra transazione (es. risk.complete)
-    # diventa un savepoint, restando coerente con la scrittura dell'assessment.
-    with transaction.atomic():
-        create_task(
-            plant=assessment.plant,
-            title=f"Piano mitigazione rischio critico — {assessment.asset}",
-            priority="critica",
-            source_module="M06",
-            source_id=assessment.pk,
-            due_date=timezone.localdate() + timezone.timedelta(days=15),
-            assign_type="role",
-            assign_value="risk_manager",
-        )
-
-        # Notifica CISO se troppi rischi rossi
-        if appetite:
-            red_count = assessment.__class__.objects.filter(
-                plant=assessment.plant,
-                score__gt=threshold,
-                deleted_at__isnull=True,
-            ).count()
-            if red_count > appetite.max_red_risks_count:
-                create_task(
-                    plant=assessment.plant,
-                    title=f"Soglia rischi critici superata ({red_count} rischi)",
-                    priority="critica",
-                    source_module="M06",
-                    source_id=assessment.pk,
-                    due_date=timezone.localdate() + timezone.timedelta(days=7),
-                    assign_type="role",
-                    assign_value="ciso",
-                )
-
-    # Notifica via email best-effort: schedulata su on_commit così parte solo dopo
-    # il commit della transazione (niente email per un'escalation poi annullata),
-    # e mai blocca la logica principale.
-    def _notify_risk_red():
-        try:
-            from apps.notifications.resolver import fire_notification
-
-            fire_notification(
-                "risk_red",
-                plant=assessment.plant,
-                context={"assessment": assessment},
-            )
-        except Exception:
-            pass
-
-    transaction.on_commit(_notify_risk_red)
-
-
 def get_risk_bia_bcp_context(assessment: RiskAssessment) -> dict:
-    """
-    Vista integrata per una singola valutazione di rischio:
-    Rischio + BIA del processo collegato + BCP che coprono quel processo.
-    Nessun side-effect, solo read-model.
-    """
-    from apps.bia.models import CriticalProcess
+    """Vista integrata di un rischio: processo BIA collegato e BCP che lo coprono."""
+    from django.db.models import Q
+
     from apps.bcp.models import BcpPlan
 
     risk_data = {
         "id": str(assessment.pk),
         "name": assessment.name,
-        "assessment_type": assessment.assessment_type,
+        "asset_type": assessment.asset_type,
         "asset_id": str(assessment.asset_id) if assessment.asset_id else None,
         "probability": assessment.probability,
         "impact": assessment.impact,
-        "score": assessment.score,
-        "inherent_probability": assessment.inherent_probability,
-        "inherent_impact": assessment.inherent_impact,
-        "inherent_score": assessment.inherent_score,
-        "residual_score": assessment.residual_score,
-        "risk_level": assessment.risk_level,
-        "inherent_risk_level": assessment.inherent_risk_level,
-        "risk_reduction_pct": assessment.risk_reduction_pct,
+        "current_class": assessment.current_class,
+        "expected_class": assessment.expected_class,
         "status": assessment.status,
         "treatment": assessment.treatment,
-        "risk_accepted_formally": assessment.risk_accepted_formally,
-        "risk_acceptance_expiry": assessment.risk_acceptance_expiry,
-        "needs_revaluation": assessment.needs_revaluation,
-        "needs_revaluation_since": assessment.needs_revaluation_since,
     }
-
     bia_data = None
     bcp_plans = []
     bcp_summary = None
-
-    process: CriticalProcess | None = assessment.critical_process
+    process = assessment.critical_process
     if process:
         bia_data = {
             "process_id": str(process.pk),
@@ -490,238 +59,22 @@ def get_risk_bia_bcp_context(assessment: RiskAssessment) -> dict:
             "mtpd_hours": process.mtpd_hours,
             "rto_target_hours": process.rto_target_hours,
             "rpo_target_hours": process.rpo_target_hours,
-            "downtime_cost_hour": process.downtime_cost_hour,
-            "danno_reputazionale": process.danno_reputazionale,
-            "danno_normativo": process.danno_normativo,
-            "danno_operativo": process.danno_operativo,
             "status": process.status,
         }
-
-        direct_plans = BcpPlan.objects.filter(
-            deleted_at__isnull=True,
-            critical_process=process,
-        )
-        m2m_plans = BcpPlan.objects.filter(
-            deleted_at__isnull=True,
-            critical_processes=process,
-        ).exclude(pk__in=direct_plans.values_list("pk", flat=True))
-
-        # union() non supporta select_related — si usa values() per evitare query N+1
-        combined_ids = list(direct_plans.values_list("pk", flat=True)) + list(m2m_plans.values_list("pk", flat=True))
-        plans_qs = BcpPlan.objects.filter(pk__in=combined_ids).select_related("plant")
-
-        for p in plans_qs:
-            bcp_plans.append(
-                {
-                    "id": str(p.pk),
-                    "title": p.title,
-                    "plant_id": str(p.plant_id),
-                    "status": p.status,
-                    "rto_hours": p.rto_hours,
-                    "rpo_hours": p.rpo_hours,
-                    "last_test_date": p.last_test_date,
-                    "next_test_date": p.next_test_date,
-                }
-            )
-
+        plans = BcpPlan.objects.filter(deleted_at__isnull=True).filter(
+            Q(critical_process=process) | Q(critical_processes=process)
+        ).distinct()
+        for p in plans:
+            bcp_plans.append({
+                "id": str(p.pk), "title": p.title, "plant_id": str(p.plant_id), "status": p.status,
+                "rto_hours": p.rto_hours, "rpo_hours": p.rpo_hours,
+                "last_test_date": p.last_test_date, "next_test_date": p.next_test_date,
+            })
         bcp_summary = {
-            "has_bcp_covering_process": len(bcp_plans) > 0,
+            "has_bcp_covering_process": bool(bcp_plans),
             "best_rto_vs_mtpd_status": process.rto_bcp_status,
         }
-
-    return {
-        "risk": risk_data,
-        "bia": bia_data,
-        "bcp_plans": bcp_plans,
-        "bcp_summary": bcp_summary,
-    }
-
-
-@transaction.atomic
-def delete_risk_assessment(assessment: RiskAssessment, user) -> None:
-    """
-    Soft delete del RiskAssessment e delle sue entità dipendenti (dimensions, mitigation_plans).
-
-    Atomica: il soft-delete a cascata (dimensions + mitigation_plans + assessment) e i
-    relativi audit log devono committarsi insieme, altrimenti restano entità orfane
-    parzialmente cancellate o audit trail incoerente.
-    """
-    from core.audit import log_action
-
-    # Dimensions + mitigation plans sono collegate via FK e soft delete rispettando l'audit trail.
-    for dim in assessment.dimensions.all():
-        dim.soft_delete()
-        log_action(
-            user=user,
-            action_code="risk.dimension.deleted",
-            level="L2",
-            entity=dim,
-            payload={"id": str(dim.id), "dimension_code": dim.dimension_code},
-        )
-
-    for mp in assessment.mitigation_plans.all():
-        mp.soft_delete()
-        log_action(
-            user=user,
-            action_code="risk.mitigation_plan.deleted",
-            level="L2",
-            entity=mp,
-            payload={"id": str(mp.id), "due_date": str(mp.due_date)},
-        )
-
-    assessment.soft_delete()
-    log_action(
-        user=user,
-        action_code="risk.assessment.deleted",
-        level="L2",
-        entity=assessment,
-        payload={"id": str(assessment.id), "name": assessment.name},
-    )
-
-
-def generate_risk_excel(plant_id=None, include_draft: bool = False) -> bytes:
-    """
-    Genera il Risk Register in formato Excel (.xlsx) e restituisce i bytes.
-    Riutilizzato sia dall'endpoint di export che dall'AuditPackageView.
-    """
-    import io
-    from django.db.models import Prefetch
-    from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment
-    from .models import NIS2_ART21_CHOICES, NIS2_RELEVANCE_CHOICES, RiskMitigationPlan
-
-    plans_prefetch = Prefetch(
-        "mitigation_plans",
-        queryset=RiskMitigationPlan.objects.select_related("owner").order_by("due_date"),
-    )
-    qs = (
-        RiskAssessment.objects
-        .select_related("plant", "owner", "treatment_owner", "risk_accepted_by", "critical_process")
-        .prefetch_related(plans_prefetch)
-        .filter(deleted_at__isnull=True)
-    )
-    if plant_id:
-        qs = qs.filter(plant_id=plant_id)
-    if not include_draft:
-        qs = qs.filter(status="completato")
-
-    art21_map = dict(NIS2_ART21_CHOICES)
-    relevance_map = dict(NIS2_RELEVANCE_CHOICES)
-    prob_labels = {1: "Molto bassa", 2: "Bassa", 3: "Media", 4: "Alta", 5: "Molto alta"}
-    impact_labels = {1: "Trascurabile", 2: "Minore", 3: "Moderato", 4: "Grave", 5: "Critico"}
-    level_labels = {"verde": "Basso", "giallo": "Medio", "rosso": "Alto/Critico"}
-    treatment_labels = {
-        "mitigare": "Mitigare", "accettare": "Accettare",
-        "trasferire": "Trasferire", "evitare": "Evitare",
-    }
-
-    headers = [
-        "Nome / Scenario", "Causa", "Conseguenza",
-        "Tipo (IT/OT)", "Categoria minaccia", "Owner", "Responsabile trattamento",
-        "Prob. inerente", "Impatto inerente", "Score inerente",
-        "Probabilità residua", "Impatto residuo", "Score residuo", "Livello rischio",
-        "ALE (€)",
-        "Trattamento", "Scadenza piano",
-        "Azioni di mitigazione",
-        "Rischio accettato (Art.20)", "Accettato da", "Data accettazione",
-        "Scadenza accettazione", "Nota accettazione",
-        "Sistemi impattati (NIS2)", "Art.21 NIS2", "Rilevanza NIS2",
-        "Processo BIA", "Plant", "Stato",
-    ]
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Risk Register"
-
-    header_fill = PatternFill("solid", fgColor="1E3A5F")
-    accept_fill = PatternFill("solid", fgColor="1A5276")
-    nis2_fill   = PatternFill("solid", fgColor="0F5E3A")
-    header_font = Font(color="FFFFFF", bold=True, size=10)
-    nis2_cols   = {headers.index(h) for h in ("Sistemi impattati (NIS2)", "Art.21 NIS2", "Rilevanza NIS2")}
-    accept_cols = {headers.index(h) for h in (
-        "Rischio accettato (Art.20)", "Accettato da", "Data accettazione",
-        "Scadenza accettazione", "Nota accettazione",
-    )}
-
-    for col_idx, header in enumerate(headers, 1):
-        i = col_idx - 1
-        cell = ws.cell(row=1, column=col_idx, value=header)
-        cell.font = header_font
-        cell.fill = nis2_fill if i in nis2_cols else (accept_fill if i in accept_cols else header_fill)
-        cell.alignment = Alignment(horizontal="center", wrap_text=True)
-
-    level_colors = {"verde": "C6EFCE", "giallo": "FFEB9C", "rosso": "FFC7CE"}
-
-    for row_idx, risk in enumerate(qs.order_by("created_at"), 2):
-        def _name(u):
-            if not u:
-                return ""
-            return f"{u.first_name} {u.last_name}".strip() or u.email
-
-        plans_text = "\n".join(
-            f"• {p.action}"
-            + (f" [{mixed_owner_name(p.owner, p.owner_external)}]" if (p.owner or p.owner_external) else "")
-            + f" — Scad: {p.due_date} — {'✓ Completato' if p.completed_at else 'In corso'}"
-            for p in risk.mitigation_plans.all()
-        )
-
-        ale_val = calc_ale(risk)
-        ale_str = str(ale_val) if ale_val else (str(risk.ale_annuo) if risk.ale_annuo else "")
-
-        row = [
-            risk.name, risk.cause, risk.consequence,
-            risk.assessment_type,
-            risk.get_threat_category_display() if risk.threat_category else "",
-            _name(risk.owner),
-            mixed_owner_name(risk.treatment_owner, risk.treatment_owner_external) or "",
-            prob_labels.get(risk.inherent_probability, ""),
-            impact_labels.get(risk.inherent_impact, ""),
-            risk.inherent_score or "",
-            prob_labels.get(risk.probability, ""),
-            impact_labels.get(risk.impact, ""),
-            risk.score or "",
-            level_labels.get(risk.risk_level, ""),
-            ale_str,
-            treatment_labels.get(risk.treatment, risk.treatment),
-            str(risk.plan_due_date) if risk.plan_due_date else "",
-            plans_text,
-            "Sì" if risk.risk_accepted_formally else (
-                "In attesa" if risk.treatment == "accettare" else "No"
-            ),
-            _name(risk.risk_accepted_by),
-            str(risk.risk_accepted_at.date()) if risk.risk_accepted_at else "",
-            str(risk.risk_acceptance_expiry) if risk.risk_acceptance_expiry else "",
-            risk.risk_acceptance_note,
-            risk.impacted_systems,
-            art21_map.get(risk.nis2_art21_category, ""),
-            relevance_map.get(risk.nis2_relevance, ""),
-            risk.critical_process.name if risk.critical_process else "",
-            risk.plant.name if risk.plant else "",
-            risk.status,
-        ]
-
-        for col_idx, value in enumerate(row, 1):
-            ws.cell(row=row_idx, column=col_idx, value=value)\
-              .alignment = Alignment(wrap_text=True, vertical="top")
-
-        color = level_colors.get(risk.risk_level)
-        if color:
-            level_col = headers.index("Livello rischio") + 1
-            ws.cell(row=row_idx, column=level_col).fill = PatternFill("solid", fgColor=color)
-
-    col_widths = [
-        35, 40, 40, 10, 22, 20, 22, 16, 16, 12, 16, 16, 12, 14, 14,
-        12, 14, 50, 18, 20, 18, 16, 40, 35, 35, 22, 22, 20, 12,
-    ]
-    for col_idx, width in enumerate(col_widths, 1):
-        ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = width
-
-    ws.freeze_panes = "A2"
-    ws.auto_filter.ref = ws.dimensions
-
-    buf = io.BytesIO()
-    wb.save(buf)
-    return buf.getvalue()
+    return {"risk": risk_data, "bia": bia_data, "bcp_plans": bcp_plans, "bcp_summary": bcp_summary}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1246,3 +599,1326 @@ def start_cycle(user, plant, kind: str, trigger_reason: str = ""):
             payload={"plant_id": str(plant.pk) if plant else None, "kind": kind},
         )
     return cycle
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Registro, valutazione e monitoraggio (procedura §5–§11)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Campi che costituiscono la valutazione: si modificano solo con un ciclo in
+# corso sul registro. Piani, verifiche, accettazioni sono monitoraggio.
+EVALUATION_FIELDS = (
+    "name", "asset_type", "asset", "asset_group_label", "supplier", "threat",
+    "critical_process", "vulnerability", "consequence",
+    "probability", "probability_method", "probability_rationale",
+    "impact_economic", "impact_legal", "impact_customer", "impact_reputational",
+    "impact_people", "impact_operational", "impact_rationale",
+    "class_override", "override_rationale", "legal_or_contract_violation",
+    "treatment", "treatment_rationale", "expected_probability", "expected_impact",
+    "owner", "treatment_owner", "treatment_owner_external", "plan_due_date",
+    "nis2_in_scope", "nis2_art21_category", "impacted_systems",
+    "significant_incident_potential", "significant_incident_note",
+)
+EVALUATION_M2M = ("information_classes", "affected_plants")
+
+
+def _err(message, **params):
+    from django.core.exceptions import ValidationError
+
+    return ValidationError(message % params if params else message)
+
+
+def is_legacy(risk) -> bool:
+    return risk.cycle_id is not None and risk.cycle.kind == "legacy"
+
+
+def register_queryset(plant=None, include_inherited: bool = False):
+    """Rischi del registro corrente (sito o gruppo), esclusi quelli legacy.
+
+    Con `include_inherited` il registro di un sito comprende anche i rischi di
+    gruppo che il sito eredita (in sola lettura, procedura §4.3).
+    """
+    from django.db.models import Q
+
+    base = RiskAssessment.objects.exclude(cycle__kind="legacy")
+    if plant is None:
+        return base.filter(plant__isnull=True)
+    q = Q(plant=plant)
+    if include_inherited:
+        q |= Q(plant__isnull=True, affected_plants=plant)
+    return base.filter(q).distinct()
+
+
+def require_register_write(user, plant) -> None:
+    """Scrittura sul registro: per il gruppo serve lo scope di organizzazione."""
+    from core.scoping import require_org_scope_for_org_wide, require_plant_access
+
+    if plant is None:
+        require_org_scope_for_org_wide(user, None)
+    else:
+        require_plant_access(user, plant)
+
+
+def _require_evaluation_cycle(plant):
+    from django.utils.translation import gettext as _
+
+    cycle = open_cycle(plant)
+    if cycle is None or cycle.status != "in_corso":
+        raise _err(_("La valutazione si modifica solo con una valutazione in corso sul registro."))
+    return cycle
+
+
+def _require_not_legacy(risk) -> None:
+    from django.utils.translation import gettext as _
+
+    if is_legacy(risk):
+        raise _err(_("Il rischio appartiene alla valutazione precedente (metodo superato): è in sola lettura."))
+
+
+def recompute_risk(risk) -> None:
+    """Ricalcola impatto, classe attuale e classe attesa con le regole uniche.
+
+    Le classi di informazioni (M2M) contano solo a rischio salvato.
+    """
+    dims = {d: getattr(risk, f"impact_{d}") for d in IMPACT_DIMENSIONS}
+    floor = None
+    if risk.pk and risk.threat_id and "C" in (risk.threat.cia or []):
+        floor = confidentiality_floor(risk.information_classes.values_list("confidentiality", flat=True))
+    risk.impact = overall_impact(dims, floor)
+    risk.matrix_class = risk_class(risk.probability, risk.impact) or ""
+    if risk.matrix_class:
+        floor_cls = risk_class(risk.probability, floor) if floor else None
+        risk.current_class = shift_class(risk.matrix_class, int(risk.class_override or 0), floor_cls)
+    else:
+        risk.current_class = ""
+    risk.expected_class = risk_class(risk.expected_probability, risk.expected_impact) or ""
+
+
+def _validate_risk_links(risk, information_classes, affected_plants) -> None:
+    """Coerenza fra registro, tipologia, minaccia e oggetti collegati."""
+    from django.utils.translation import gettext as _
+
+    from .models import ASSET_TYPES
+
+    plant = risk.plant
+    if risk.asset_type and risk.asset_type not in ASSET_TYPES:
+        raise _err(_("Tipologie di asset non valide."))
+    if risk.threat_id:
+        if not risk.threat.active:
+            raise _err(_("La minaccia scelta non è più attiva nel catalogo."))
+        if risk.asset_type and risk.asset_type not in risk.threat.asset_types:
+            raise _err(_("La minaccia scelta non si applica a questa tipologia di asset."))
+    if risk.asset_id and plant is not None and risk.asset.plant_id != plant.pk:
+        raise _err(_("L'asset deve appartenere al sito del registro."))
+    if risk.critical_process_id and plant is not None and risk.critical_process.plant_id != plant.pk:
+        raise _err(_("Il processo deve appartenere al sito del registro."))
+    if risk.supplier_id and plant is not None and not risk.supplier.plants.filter(pk=plant.pk).exists():
+        raise _err(_("Il fornitore deve operare per il sito del registro."))
+    for ic in information_classes or []:
+        if ic.plant_id is not None and (plant is None or ic.plant_id != plant.pk):
+            raise _err(_("Le classi di informazioni devono essere del sito del registro o di gruppo."))
+    if affected_plants and plant is not None:
+        raise _err(_("Solo i rischi di gruppo indicano i siti che li ereditano."))
+    if risk.class_override not in (-1, 0, 1):
+        raise _err(_("L'override della classe può spostare al massimo di un livello."))
+
+
+def _apply_fields(risk, data: dict) -> dict:
+    """Copia i campi di valutazione presenti in `data`; ritorna le M2M."""
+    for field in EVALUATION_FIELDS:
+        if field in data:
+            setattr(risk, field, data[field])
+    normalize_mixed_owner_obj(risk)
+    return {field: data[field] for field in EVALUATION_M2M if field in data}
+
+
+def normalize_mixed_owner_obj(risk) -> None:
+    """Responsabile del trattamento: utente del portale OPPURE testo libero."""
+    if risk.treatment_owner_id:
+        risk.treatment_owner_external = ""
+
+
+def _default_nis2_scope(risk, affected_plants) -> bool:
+    if risk.plant is not None:
+        return risk.plant.is_nis2_subject
+    return any(p.is_nis2_subject for p in (affected_plants or []))
+
+
+def _close_stale_acceptance(user, risk) -> None:
+    """Un'accettazione vale per la classe accettata: se la classe cambia decade."""
+    from django.utils.translation import gettext as _
+
+    for acc in risk.acceptances.filter(status__in=("pending", "active")):
+        if acc.risk_class != risk.current_class:
+            _close_acceptance(user, acc, "revoked", _("La classe del rischio è cambiata."))
+
+
+def create_risk(user, plant, data: dict):
+    """Nuovo rischio nel registro di `plant` (None = gruppo), dentro il ciclo in corso."""
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    require_register_write(user, plant)
+    cycle = _require_evaluation_cycle(plant)
+    risk = RiskAssessment(plant=plant, cycle=cycle, evaluated_in_cycle=cycle, status="bozza", created_by=user)
+    m2m = _apply_fields(risk, data)
+    if not risk.asset_type or not risk.threat_id:
+        raise _err(_("Indica la tipologia di asset e la minaccia del catalogo."))
+    _validate_risk_links(risk, m2m.get("information_classes"), m2m.get("affected_plants"))
+    if not risk.name:
+        risk.name = risk.threat.get_title()
+    if "nis2_in_scope" not in data:
+        risk.nis2_in_scope = _default_nis2_scope(risk, m2m.get("affected_plants"))
+    with transaction.atomic():
+        recompute_risk(risk)
+        risk.save()
+        for field, values in m2m.items():
+            getattr(risk, field).set(values)
+        recompute_risk(risk)
+        risk.save()
+        log_action(
+            user=user, action_code="risk.created", level="L2", entity=risk,
+            payload={"cycle_id": str(cycle.pk), "threat": risk.threat.code, "asset_type": risk.asset_type},
+        )
+    return risk
+
+
+def update_risk(user, risk, data: dict):
+    """Modifica della valutazione: rimette il rischio in bozza nel ciclo in corso."""
+    from core.audit import log_action
+
+    _require_not_legacy(risk)
+    require_register_write(user, risk.plant)
+    cycle = _require_evaluation_cycle(risk.plant)
+    m2m = _apply_fields(risk, data)
+    _validate_risk_links(
+        risk,
+        m2m.get("information_classes", list(risk.information_classes.all())),
+        m2m.get("affected_plants", list(risk.affected_plants.all())) if risk.plant is None
+        else m2m.get("affected_plants"),
+    )
+    before = risk.current_class
+    with transaction.atomic():
+        for field, values in m2m.items():
+            getattr(risk, field).set(values)
+        recompute_risk(risk)
+        risk.status = "bozza"
+        risk.evaluated_in_cycle = cycle
+        risk.save()
+        log_action(
+            user=user, action_code="risk.updated", level="L2", entity=risk,
+            payload={"fields": sorted(k for k in data if k in EVALUATION_FIELDS or k in EVALUATION_M2M),
+                     "class_before": before, "class_after": risk.current_class},
+        )
+    return risk
+
+
+def risk_completeness_errors(risk) -> list:
+    """Cosa manca per completare la valutazione (procedura §7–§9)."""
+    from django.utils.translation import gettext as _
+
+    errors = []
+    if not risk.applicable:
+        if not risk.not_applicable_reason.strip():
+            errors.append(_("Motiva perché la minaccia non è applicabile."))
+        return errors
+    if not risk.probability or not risk.probability_rationale.strip():
+        errors.append(_("Indica la probabilità e la sua motivazione."))
+    if not risk.impact or not risk.impact_rationale.strip():
+        errors.append(_("Indica almeno una dimensione d'impatto e la motivazione."))
+    if risk.class_override and not risk.override_rationale.strip():
+        errors.append(_("Motiva lo spostamento della classe."))
+    if not risk.owner_id:
+        errors.append(_("Indica il Risk Owner."))
+    if not risk.treatment:
+        errors.append(_("Scegli il trattamento."))
+    rule = treatment_rule(risk.current_class) or {}
+    if risk.treatment == "accettare" and rule.get("rule") in ("mandatory", "evaluate") \
+            and not risk.treatment_rationale.strip():
+        errors.append(_("Per un rischio High o Critical non trattato serve la motivazione (analisi costi/benefici)."))
+    if risk.treatment in ("mitigare", "evitare", "trasferire") and not risk.expected_class:
+        errors.append(_("Indica il rischio atteso dopo il trattamento."))
+    return errors
+
+
+def complete_risk(user, risk):
+    """Chiude la valutazione del rischio nel ciclo in corso."""
+    from core.audit import log_action
+
+    _require_not_legacy(risk)
+    require_register_write(user, risk.plant)
+    cycle = _require_evaluation_cycle(risk.plant)
+    recompute_risk(risk)
+    errors = risk_completeness_errors(risk)
+    if errors:
+        raise _err(errors[0])
+    with transaction.atomic():
+        risk.status = "completato"
+        risk.assessed_by = user
+        risk.assessed_at = timezone.now()
+        risk.evaluated_in_cycle = cycle
+        if risk.applicable and not risk.plan_due_date and treatment_rule(risk.current_class):
+            months = treatment_rule(risk.current_class)["months"]
+            risk.plan_due_date = timezone.localdate() + timezone.timedelta(days=30 * months)
+        risk.save()
+        _close_stale_acceptance(user, risk)
+        log_action(
+            user=user, action_code="risk.completed", level="L2", entity=risk,
+            payload={"class": risk.current_class, "treatment": risk.treatment, "applicable": risk.applicable},
+        )
+        if risk.applicable and risk.current_class in ("high", "critical"):
+            _escalate_high_risk(risk)
+    return risk
+
+
+def confirm_risk(user, risk):
+    """Revisione periodica: conferma un rischio valutato senza modificarlo."""
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    _require_not_legacy(risk)
+    require_register_write(user, risk.plant)
+    cycle = _require_evaluation_cycle(risk.plant)
+    if risk.status != "completato":
+        raise _err(_("Si conferma solo un rischio con valutazione completata."))
+    with transaction.atomic():
+        risk.evaluated_in_cycle = cycle
+        risk.assessed_by = user
+        risk.assessed_at = timezone.now()
+        risk.save(update_fields=["evaluated_in_cycle", "assessed_by", "assessed_at", "updated_at"])
+        log_action(user=user, action_code="risk.confirmed", level="L2", entity=risk,
+                   payload={"cycle_id": str(cycle.pk), "class": risk.current_class})
+    return risk
+
+
+def reopen_risk(user, risk):
+    from core.audit import log_action
+
+    _require_not_legacy(risk)
+    require_register_write(user, risk.plant)
+    _require_evaluation_cycle(risk.plant)
+    with transaction.atomic():
+        risk.status = "bozza"
+        risk.save(update_fields=["status", "updated_at"])
+        log_action(user=user, action_code="risk.reopened", level="L2", entity=risk, payload={})
+    return risk
+
+
+def mark_not_applicable(user, plant, asset_type: str, threat, reason: str):
+    """Copertura (§6.5): la coppia tipologia × minaccia non si applica al registro."""
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    if not (reason or "").strip():
+        raise _err(_("Motiva perché la minaccia non è applicabile."))
+    require_register_write(user, plant)
+    cycle = _require_evaluation_cycle(plant)
+    risk = RiskAssessment(
+        plant=plant, cycle=cycle, evaluated_in_cycle=cycle, asset_type=asset_type, threat=threat,
+        name=threat.get_title(), applicable=False, not_applicable_reason=reason.strip(),
+        status="completato", assessed_by=user, assessed_at=timezone.now(), created_by=user,
+    )
+    _validate_risk_links(risk, [], [])
+    with transaction.atomic():
+        risk.save()
+        log_action(user=user, action_code="risk.marked_not_applicable", level="L2", entity=risk,
+                   payload={"threat": threat.code, "asset_type": asset_type})
+    return risk
+
+
+def delete_risk(user, risk) -> None:
+    """Toglie un rischio dal registro durante una valutazione in corso."""
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    _require_not_legacy(risk)
+    require_register_write(user, risk.plant)
+    _require_evaluation_cycle(risk.plant)
+    with transaction.atomic():
+        for acc in risk.acceptances.filter(status__in=("pending", "active")):
+            _close_acceptance(user, acc, "revoked", _("Rischio eliminato dal registro."))
+        for plan in risk.mitigation_plans.all():
+            plan.soft_delete()
+        for measure in risk.existing_measures.all():
+            measure.soft_delete()
+        risk.soft_delete()
+        log_action(user=user, action_code="risk.deleted", level="L2", entity=risk,
+                   payload={"class": risk.current_class})
+
+
+def _escalate_high_risk(risk) -> None:
+    """High/Critical completato: task per il piano di trattamento se manca e
+    notifica "rischio critico" (dopo il commit)."""
+    from django.utils.translation import gettext as _
+
+    from apps.auth_grc.models import GrcRole
+    from apps.tasks.services import create_task
+
+    if risk.treatment in ("mitigare", "evitare", "trasferire") and not risk.mitigation_plans.exists():
+        months = treatment_rule(risk.current_class)["months"]
+        create_task(
+            plant=risk.plant,
+            title=_("Piano di trattamento rischio %(cls)s — %(name)s") % {
+                "cls": risk.current_class, "name": risk.name},
+            priority="critica" if risk.current_class == "critical" else "alta",
+            source_module="M06",
+            source_id=risk.pk,
+            due_date=timezone.localdate() + timezone.timedelta(days=min(30, 30 * months)),
+            assign_type="role",
+            assign_value=GrcRole.RISK_MANAGER,
+        )
+
+    def _notify():
+        try:
+            from apps.notifications.resolver import fire_notification
+
+            fire_notification("risk_red", plant=risk.plant, context={"assessment": risk})
+        except Exception:  # noqa: BLE001 — la notifica non blocca mai la valutazione
+            pass
+
+    transaction.on_commit(_notify)
+
+
+# ── Misure esistenti, piani e verifica ───────────────────────────────────────
+
+def save_existing_measure(user, risk, data: dict, measure=None):
+    from core.audit import log_action
+
+    from .models import RiskExistingMeasure
+
+    _require_not_legacy(risk)
+    require_register_write(user, risk.plant)
+    _require_evaluation_cycle(risk.plant)
+    ci = data.get("control_instance")
+    if ci is not None and risk.plant is not None and ci.plant_id != risk.plant_id:
+        from django.utils.translation import gettext as _
+
+        raise _err(_("Il controllo deve essere del sito del registro."))
+    with transaction.atomic():
+        measure = measure or RiskExistingMeasure(risk=risk, created_by=user)
+        for field in ("control_instance", "description", "effectiveness"):
+            if field in data:
+                setattr(measure, field, data[field])
+        measure.save()
+        log_action(user=user, action_code="risk.existing_measure.saved", level="L2", entity=risk,
+                   payload={"measure_id": str(measure.pk)})
+    return measure
+
+
+def delete_existing_measure(user, measure) -> None:
+    from core.audit import log_action
+
+    _require_not_legacy(measure.risk)
+    require_register_write(user, measure.risk.plant)
+    _require_evaluation_cycle(measure.risk.plant)
+    with transaction.atomic():
+        measure.soft_delete()
+        log_action(user=user, action_code="risk.existing_measure.deleted", level="L2", entity=measure.risk,
+                   payload={"measure_id": str(measure.pk)})
+
+
+def require_plan_write(user, risk) -> None:
+    """Piani di trattamento: monitoraggio, ammesso fuori dai cicli ma non sul legacy."""
+    _require_not_legacy(risk)
+    require_register_write(user, risk.plant)
+
+
+def verify_mitigation_plan(user, plan, note: str = ""):
+    """Verifica di efficacia di una misura completata (§9.4)."""
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    require_plan_write(user, plan.assessment)
+    if not plan.completed_at:
+        raise _err(_("Si verifica solo una misura completata."))
+    with transaction.atomic():
+        plan.verified_at = timezone.now()
+        plan.verified_by = user
+        plan.verification_note = (note or "").strip()
+        plan.save(update_fields=["verified_at", "verified_by", "verification_note", "updated_at"])
+        log_action(user=user, action_code="risk.mitigation.verified", level="L1", entity=plan,
+                   payload={"risk_id": str(plan.assessment_id)})
+    return plan
+
+
+def can_apply_expected(risk) -> bool:
+    plans = list(risk.mitigation_plans.all())
+    return bool(
+        risk.expected_class and plans
+        and all(p.completed_at and p.verified_at for p in plans)
+    )
+
+
+def apply_expected_risk(user, risk, note: str = ""):
+    """Misure attuate e verificate: il rischio atteso diventa rischio attuale.
+
+    La probabilità prende quella attesa; ogni dimensione d'impatto viene
+    limitata all'impatto atteso (la soglia di riservatezza resta valida).
+    """
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    require_plan_write(user, risk)
+    if not can_apply_expected(risk):
+        raise _err(_("Il rischio atteso si applica solo con tutte le misure completate e verificate."))
+    before = risk.current_class
+    with transaction.atomic():
+        risk.probability = risk.expected_probability
+        for dim in IMPACT_DIMENSIONS:
+            value = getattr(risk, f"impact_{dim}")
+            if value:
+                setattr(risk, f"impact_{dim}", min(value, risk.expected_impact))
+        risk.class_override = 0
+        recompute_risk(risk)
+        risk.save()
+        _close_stale_acceptance(user, risk)
+        log_action(user=user, action_code="risk.expected_applied", level="L1", entity=risk,
+                   payload={"class_before": before, "class_after": risk.current_class,
+                            "note": (note or "")[:200]})
+    return risk
+
+
+# ── Accettazione (§10) ───────────────────────────────────────────────────────
+
+def user_holds_role(user, role: str, plant) -> bool:
+    """Il ruolo (GRC o normativo) copre il sito? Lo scope org copre tutti."""
+    from django.db.models import Q
+
+    from apps.auth_grc.models import UserPlantAccess
+    from apps.governance.models import RoleAssignment
+    from core.scoping import user_can_access_plant
+
+    today = timezone.localdate()
+    assignments = RoleAssignment.objects.filter(
+        user=user, role=role, valid_from__lte=today,
+    ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+    if assignments.filter(scope_type="org").exists():
+        return True
+    if plant is not None and assignments.filter(scope_type="plant", scope_id=plant.pk).exists():
+        return True
+    access = UserPlantAccess.objects.filter(user=user, role=role)
+    if access.filter(scope_type="org").exists():
+        return True
+    return plant is not None and access.exists() and user_can_access_plant(user, plant)
+
+
+def can_give_opinion(user) -> bool:
+    """Parere del livello superiore: CISO nominato con scope organizzazione;
+    senza un CISO nominato, un Compliance Officer di organizzazione."""
+    from django.db.models import Q
+
+    from apps.auth_grc.models import GrcRole, UserPlantAccess
+    from apps.governance.models import NormativeRole, RoleAssignment
+
+    today = timezone.localdate()
+    active_ciso = RoleAssignment.objects.filter(
+        role=NormativeRole.CISO, scope_type="org", valid_from__lte=today,
+    ).filter(Q(valid_until__isnull=True) | Q(valid_until__gte=today))
+    if active_ciso.exists():
+        return active_ciso.filter(user=user).exists()
+    return UserPlantAccess.objects.filter(
+        user=user, role=GrcRole.COMPLIANCE_OFFICER, scope_type="org",
+    ).exists()
+
+
+def acceptance_requirements(risk) -> dict:
+    """Chi deve firmare, se serve l'organo, il parere e la validità massima."""
+    policy = resolve_policy(risk.plant)
+    cls = risk.current_class
+    rule = policy["acceptance_matrix"].get(cls) or {}
+    roles = list(rule.get("roles", []))
+    # Chi ha valutato e tratta da solo il proprio rischio non lo accetta da
+    # solo: serve il livello superiore (§10).
+    self_managed = (
+        risk.owner_id is not None and risk.owner_id == risk.assessed_by_id
+        and risk.treatment_owner_id in (None, risk.owner_id)
+    )
+    if self_managed and "plant_manager" not in roles and not rule.get("requires_body"):
+        roles.append("plant_manager")
+    return {
+        "class": cls,
+        "roles": roles,
+        "scope": rule.get("scope", "plant"),
+        "requires_body": bool(rule.get("requires_body")),
+        "notify": list(rule.get("notify", [])),
+        "upper_opinion": policy["upper_opinion"].get(cls, "none"),
+        "max_months": int(policy["acceptance_max_months"].get(cls, 12)),
+        "not_acceptable": risk.legal_or_contract_violation,
+    }
+
+
+def signable_roles(user, acceptance) -> list:
+    risk = acceptance.risk
+    signed_roles = {s["role"] for s in acceptance.signatures}
+    signed_users = {s["user_id"] for s in acceptance.signatures}
+    if user.pk in signed_users:
+        return []
+    out = []
+    for role in acceptance.required_roles:
+        if role in signed_roles:
+            continue
+        if role == "risk_owner":
+            if risk.owner_id == user.pk:
+                out.append(role)
+        elif user_holds_role(user, role, risk.plant):
+            out.append(role)
+    return out
+
+
+def request_acceptance(user, risk, *, rationale: str, expires_on=None, body=None, body_resolution_ref: str = ""):
+    """Avvia l'accettazione del rischio attuale secondo la policy (§10)."""
+    import datetime
+
+    from django.utils.translation import gettext as _
+
+    from apps.auth_grc.models import GrcRole
+    from apps.tasks.services import create_task
+    from core.audit import log_action
+
+    from .models import RiskAcceptance
+
+    require_plan_write(user, risk)
+    if risk.status != "completato" or not risk.applicable or not risk.current_class:
+        raise _err(_("Si accetta solo un rischio applicabile con valutazione completata."))
+    req = acceptance_requirements(risk)
+    if req["not_acceptable"]:
+        raise _err(_("Il rischio comporta una violazione di legge, di requisiti VDA ISA o di obblighi di riservatezza: non è accettabile."))
+    if risk.acceptances.filter(status__in=("pending", "active")).exists():
+        raise _err(_("C'è già un'accettazione in corso o attiva per questo rischio."))
+    if not (rationale or "").strip():
+        raise _err(_("La motivazione dell'accettazione è obbligatoria."))
+    today = timezone.localdate()
+    limit = today + datetime.timedelta(days=30 * req["max_months"])
+    expires_on = expires_on or limit
+    if expires_on > limit or expires_on <= today:
+        raise _err(_("La scadenza dell'accettazione deve essere futura ed entro %(months)s mesi."),
+                   months=req["max_months"])
+    if req["requires_body"] and req["scope"] == "org":
+        from core.scoping import require_org_scope_for_org_wide
+
+        require_org_scope_for_org_wide(user, None)
+
+    with transaction.atomic():
+        acc = RiskAcceptance.objects.create(
+            risk=risk, risk_class=req["class"], required_roles=req["roles"],
+            requires_body=req["requires_body"], body=body, body_resolution_ref=(body_resolution_ref or "").strip(),
+            rationale=rationale.strip(), expires_on=expires_on,
+            upper_opinion="pending" if req["upper_opinion"] == "binding" else "not_required",
+            created_by=user,
+        )
+        for role in signable_roles(user, acc)[:1]:
+            acc.signatures = [{"role": role, "user_id": user.pk, "at": timezone.now().isoformat()}]
+            acc.save(update_fields=["signatures", "updated_at"])
+        log_action(user=user, action_code="risk.acceptance.requested", level="L1", entity=risk,
+                   payload={"acceptance_id": str(acc.pk), "class": acc.risk_class,
+                            "expires_on": str(expires_on)})
+        if req["upper_opinion"] in ("binding", "notify"):
+            create_task(
+                plant=risk.plant,
+                title=(_("Parere sull'accettazione del rischio — %(name)s") if req["upper_opinion"] == "binding"
+                       else _("Informativa: accettazione del rischio — %(name)s")) % {"name": risk.name},
+                priority="alta" if req["upper_opinion"] == "binding" else "bassa",
+                source_module="M06", source_id=risk.pk,
+                due_date=today + datetime.timedelta(days=14),
+                assign_type="role", assign_value=GrcRole.COMPLIANCE_OFFICER,
+            )
+        if req["notify"]:
+            create_task(
+                plant=risk.plant,
+                title=_("Informativa: accettazione del rischio — %(name)s") % {"name": risk.name},
+                priority="bassa", source_module="M06", source_id=risk.pk,
+                due_date=today + datetime.timedelta(days=14),
+                assign_type="role", assign_value=GrcRole.RISK_MANAGER,
+            )
+        _try_activate(user, acc)
+    return acc
+
+
+def sign_acceptance(user, acceptance):
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    if acceptance.status != "pending":
+        raise _err(_("L'accettazione non è più in approvazione."))
+    roles = signable_roles(user, acceptance)
+    if not roles:
+        raise _err(_("Non hai un ruolo che possa firmare questa accettazione."))
+    with transaction.atomic():
+        acceptance.signatures = [*acceptance.signatures,
+                                 {"role": roles[0], "user_id": user.pk, "at": timezone.now().isoformat()}]
+        acceptance.save(update_fields=["signatures", "updated_at"])
+        log_action(user=user, action_code="risk.acceptance.signed", level="L1", entity=acceptance.risk,
+                   payload={"acceptance_id": str(acceptance.pk), "role": roles[0]})
+        _try_activate(user, acceptance)
+    return acceptance
+
+
+def record_body_decision(user, acceptance, *, body, resolution_ref: str):
+    """Delibera dell'organo per un'accettazione che la richiede (Critical)."""
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    if acceptance.status != "pending" or not acceptance.requires_body:
+        raise _err(_("Questa accettazione non attende una delibera dell'organo."))
+    if body is None or not (resolution_ref or "").strip():
+        raise _err(_("Indica l'organo e il riferimento della delibera."))
+    plant = None if resolve_policy(acceptance.risk.plant)["acceptance_matrix"].get(
+        acceptance.risk_class, {}).get("scope") == "org" else acceptance.risk.plant
+    require_register_write(user, plant)
+    with transaction.atomic():
+        acceptance.body = body
+        acceptance.body_resolution_ref = resolution_ref.strip()
+        acceptance.save(update_fields=["body", "body_resolution_ref", "updated_at"])
+        log_action(user=user, action_code="risk.acceptance.body_decision", level="L1",
+                   entity=acceptance.risk, payload={"acceptance_id": str(acceptance.pk)})
+        _try_activate(user, acceptance)
+    return acceptance
+
+
+def give_opinion(user, acceptance, *, favorable: bool, note: str = ""):
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    if acceptance.status != "pending" or acceptance.upper_opinion != "pending":
+        raise _err(_("Questa accettazione non attende un parere."))
+    if not can_give_opinion(user):
+        raise _err(_("Il parere spetta al CISO."))
+    if not favorable and not (note or "").strip():
+        raise _err(_("Motiva il parere contrario."))
+    with transaction.atomic():
+        acceptance.upper_opinion = "favorable" if favorable else "unfavorable"
+        acceptance.opinion_by = user
+        acceptance.opinion_at = timezone.now()
+        acceptance.opinion_note = (note or "").strip()
+        acceptance.save(update_fields=["upper_opinion", "opinion_by", "opinion_at", "opinion_note", "updated_at"])
+        log_action(user=user, action_code="risk.opinion.given", level="L1", entity=acceptance.risk,
+                   payload={"acceptance_id": str(acceptance.pk), "favorable": favorable})
+        if favorable:
+            _try_activate(user, acceptance)
+        else:
+            _close_acceptance(user, acceptance, "rejected", acceptance.opinion_note)
+    return acceptance
+
+
+def revoke_acceptance(user, acceptance, reason: str):
+    from django.utils.translation import gettext as _
+
+    if acceptance.status not in ("pending", "active"):
+        raise _err(_("L'accettazione è già chiusa."))
+    if not (reason or "").strip():
+        raise _err(_("Indica il motivo della revoca."))
+    require_plan_write(user, acceptance.risk)
+    _close_acceptance(user, acceptance, "revoked", reason.strip())
+    return acceptance
+
+
+def _close_acceptance(user, acceptance, status: str, reason: str) -> None:
+    from core.audit import log_action
+
+    acceptance.status = status
+    acceptance.closed_at = timezone.now()
+    acceptance.close_reason = reason or ""
+    acceptance.save(update_fields=["status", "closed_at", "close_reason", "updated_at"])
+    log_action(user=user, action_code=f"risk.acceptance.{status}", level="L1", entity=acceptance.risk,
+               payload={"acceptance_id": str(acceptance.pk)})
+
+
+def _try_activate(user, acceptance) -> None:
+    from core.audit import log_action
+
+    signed = {s["role"] for s in acceptance.signatures}
+    if not set(acceptance.required_roles) <= signed:
+        return
+    if acceptance.requires_body and not (acceptance.body_id and acceptance.body_resolution_ref):
+        return
+    if acceptance.upper_opinion == "pending":
+        return
+    acceptance.status = "active"
+    acceptance.activated_at = timezone.now()
+    acceptance.save(update_fields=["status", "activated_at", "updated_at"])
+    log_action(user=user, action_code="risk.acceptance.granted", level="L1", entity=acceptance.risk,
+               payload={"acceptance_id": str(acceptance.pk), "class": acceptance.risk_class,
+                        "expires_on": str(acceptance.expires_on)})
+
+
+def expire_acceptances(today=None) -> dict:
+    """Scadenze delle accettazioni: avviso a 30 giorni, scadenza il giorno dopo."""
+    import datetime
+
+    from django.contrib.auth import get_user_model
+    from django.utils.translation import gettext as _
+
+    from apps.auth_grc.models import GrcRole
+    from apps.tasks.services import create_task
+
+    from .models import RiskAcceptance
+
+    today = today or timezone.localdate()
+    system_user = get_user_model().objects.filter(is_superuser=True).first()
+    counts = {"warned": 0, "expired": 0}
+    active = RiskAcceptance.objects.filter(status="active").select_related("risk", "risk__plant")
+    for acc in active.filter(expires_on__lt=today):
+        with transaction.atomic():
+            if system_user:
+                _close_acceptance(system_user, acc, "expired", _("Accettazione scaduta."))
+            else:
+                acc.status, acc.closed_at = "expired", timezone.now()
+                acc.save(update_fields=["status", "closed_at", "updated_at"])
+            create_task(
+                plant=acc.risk.plant,
+                title=_("Accettazione scaduta: trattare o riaccettare il rischio — %(name)s") % {"name": acc.risk.name},
+                priority="alta", source_module="M06", source_id=acc.risk_id,
+                due_date=today + datetime.timedelta(days=7),
+                assign_type="role", assign_value=GrcRole.RISK_MANAGER,
+            )
+        counts["expired"] += 1
+    for acc in active.filter(expires_on__gte=today, expires_on__lte=today + datetime.timedelta(days=30),
+                             expiry_warned_at__isnull=True):
+        with transaction.atomic():
+            create_task(
+                plant=acc.risk.plant,
+                title=_("Accettazione del rischio in scadenza il %(date)s — %(name)s") % {
+                    "date": acc.expires_on.isoformat(), "name": acc.risk.name},
+                priority="media", source_module="M06", source_id=acc.risk_id,
+                due_date=acc.expires_on,
+                assign_type="role", assign_value=GrcRole.RISK_MANAGER,
+            )
+            acc.expiry_warned_at = timezone.now()
+            acc.save(update_fields=["expiry_warned_at", "updated_at"])
+        counts["warned"] += 1
+    return counts
+
+
+def escalate_overdue_plans(today=None) -> dict:
+    """Misure in ritardo (§11.3): avviso al Risk Manager, poi escalation al
+    livello di organizzazione oltre la soglia della policy (subito per i Critical)."""
+    from django.utils.translation import gettext as _
+
+    from apps.auth_grc.models import GrcRole
+    from apps.tasks.services import create_task
+
+    from .models import RiskMitigationPlan
+
+    today = today or timezone.localdate()
+    counts = {"notified": 0, "escalated": 0}
+    overdue = (
+        RiskMitigationPlan.objects.filter(completed_at__isnull=True, due_date__lt=today)
+        .exclude(assessment__cycle__kind="legacy")
+        .filter(assessment__deleted_at__isnull=True)
+        .select_related("assessment", "assessment__plant")
+    )
+    for plan in overdue:
+        risk = plan.assessment
+        days_late = (today - plan.due_date).days
+        threshold = resolve_policy(risk.plant)["overdue_escalation_days"]
+        critical = risk.current_class == "critical"
+        if plan.escalation_level < 2 and (critical or days_late > threshold):
+            create_task(
+                plant=risk.plant,
+                title=_("Escalation: misura in ritardo di %(days)s giorni — %(name)s") % {
+                    "days": days_late, "name": risk.name},
+                priority="critica" if critical else "alta",
+                source_module="M06", source_id=risk.pk, due_date=today + timezone.timedelta(days=7),
+                assign_type="role", assign_value=GrcRole.COMPLIANCE_OFFICER,
+            )
+            plan.escalation_level = 2
+            plan.save(update_fields=["escalation_level", "updated_at"])
+            counts["escalated"] += 1
+        elif plan.escalation_level == 0:
+            create_task(
+                plant=risk.plant,
+                title=_("Misura del piano di trattamento in ritardo — %(name)s") % {"name": risk.name},
+                priority="media", source_module="M06", source_id=risk.pk,
+                due_date=today + timezone.timedelta(days=7),
+                assign_type="role", assign_value=GrcRole.RISK_MANAGER,
+            )
+            plan.escalation_level = 1
+            plan.save(update_fields=["escalation_level", "updated_at"])
+            counts["notified"] += 1
+    return counts
+
+
+# ── Rischi ereditati (§4.3) ──────────────────────────────────────────────────
+
+def report_local_impact(user, risk, plant, *, local_impact: int, note: str):
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+    from core.scoping import require_plant_access
+
+    from .models import RiskLocalImpactReport
+
+    require_plant_access(user, plant)
+    if risk.plant_id is not None or not risk.affected_plants.filter(pk=plant.pk).exists():
+        raise _err(_("Si segnala l'impatto locale solo di un rischio di gruppo ereditato dal sito."))
+    if not (note or "").strip() or local_impact not in range(1, 6):
+        raise _err(_("Indica l'impatto locale (1–5) e la motivazione."))
+    with transaction.atomic():
+        report = RiskLocalImpactReport.objects.create(
+            risk=risk, plant=plant, local_impact=local_impact, note=note.strip(), created_by=user,
+        )
+        log_action(user=user, action_code="risk.local_impact.reported", level="L2", entity=risk,
+                   payload={"plant_id": str(plant.pk), "local_impact": local_impact})
+    return report
+
+
+def acknowledge_local_impact(user, report):
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+    from core.scoping import require_org_scope_for_org_wide
+
+    require_org_scope_for_org_wide(user, None)
+    if report.status != "aperta":
+        raise _err(_("La segnalazione è già stata recepita."))
+    with transaction.atomic():
+        report.status = "recepita"
+        report.acknowledged_by = user
+        report.acknowledged_at = timezone.now()
+        report.save(update_fields=["status", "acknowledged_by", "acknowledged_at", "updated_at"])
+        log_action(user=user, action_code="risk.local_impact.acknowledged", level="L2", entity=report.risk,
+                   payload={"report_id": str(report.pk)})
+    return report
+
+
+# ── Copertura, invio e approvazione dei cicli ────────────────────────────────
+
+def register_coverage(plant=None) -> dict:
+    """Copertura del registro (§6.5): ogni minaccia applicabile a ogni
+    tipologia presente va valutata o dichiarata non applicabile."""
+    from .models import ThreatCatalogEntry
+
+    types = asset_types_present(plant)
+    threats = list(ThreatCatalogEntry.objects.filter(active=True))
+    risks = list(register_queryset(plant).filter(threat__isnull=False).values(
+        "id", "asset_type", "threat_id", "applicable", "status", "current_class",
+    ))
+    by_pair: dict = {}
+    for r in risks:
+        by_pair.setdefault((r["asset_type"], r["threat_id"]), []).append(r)
+    pairs = []
+    for asset_type in types:
+        for threat in threats:
+            if asset_type not in threat.asset_types:
+                continue
+            found = by_pair.get((asset_type, threat.pk), [])
+            if not found:
+                state = "missing"
+            elif any(r["status"] != "completato" for r in found):
+                state = "draft"
+            elif any(r["applicable"] for r in found):
+                state = "evaluated"
+            else:
+                state = "not_applicable"
+            pairs.append({
+                "asset_type": asset_type, "threat_id": str(threat.pk), "threat_code": threat.code,
+                "state": state, "risk_ids": [str(r["id"]) for r in found],
+                "worst_class": max((r["current_class"] for r in found if r["applicable"]),
+                                   key=class_rank, default=""),
+            })
+    total = len(pairs)
+    closed = sum(1 for p in pairs if p["state"] in ("evaluated", "not_applicable"))
+    return {
+        "asset_types": types,
+        "pairs": pairs,
+        "total": total,
+        "closed": closed,
+        "missing": sum(1 for p in pairs if p["state"] == "missing"),
+        "pct": round(closed / total * 100, 1) if total else 100.0,
+    }
+
+
+def cycle_submission_errors(cycle) -> list:
+    from django.utils.translation import gettext as _
+
+    errors = []
+    register = register_queryset(cycle.plant)
+    if register.filter(status="bozza").exists():
+        errors.append(_("Ci sono rischi con valutazione non completata."))
+    if cycle.kind in ("primo", "periodico"):
+        if register.filter(applicable=True).exclude(evaluated_in_cycle=cycle).exists():
+            errors.append(_("Ci sono rischi non ancora valutati o confermati in questa valutazione."))
+        coverage = register_coverage(cycle.plant)
+        if coverage["closed"] < coverage["total"]:
+            errors.append(_("La copertura del catalogo minacce non è completa."))
+    return errors
+
+
+def submit_cycle(user, cycle):
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    require_register_write(user, cycle.plant)
+    if cycle.status != "in_corso":
+        raise _err(_("Si invia in approvazione solo una valutazione in corso."))
+    errors = cycle_submission_errors(cycle)
+    if errors:
+        raise _err(errors[0])
+    with transaction.atomic():
+        cycle.status = "in_approvazione"
+        cycle.save(update_fields=["status", "updated_at"])
+        log_action(user=user, action_code="risk.cycle.submitted", level="L1", entity=cycle,
+                   payload={"plant_id": str(cycle.plant_id) if cycle.plant_id else None})
+    return cycle
+
+
+def return_cycle(user, cycle, reason: str):
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    require_register_write(user, cycle.plant)
+    if cycle.status != "in_approvazione":
+        raise _err(_("La valutazione non è in approvazione."))
+    if not (reason or "").strip():
+        raise _err(_("Indica il motivo del rinvio."))
+    with transaction.atomic():
+        cycle.status = "in_corso"
+        cycle.save(update_fields=["status", "updated_at"])
+        log_action(user=user, action_code="risk.cycle.returned", level="L1", entity=cycle,
+                   payload={"reason": reason.strip()[:200]})
+    return cycle
+
+
+def _cycle_approver_plant(cycle):
+    """Chi approva: nel modello centralizzato e per il gruppo decide
+    l'organizzazione; altrimenti chi ha accesso al sito (§1, §10)."""
+    if cycle.plant is None or resolve_policy(cycle.plant)["preset"] == "centralizzato":
+        return None
+    return cycle.plant
+
+
+def build_register_snapshot(plant, cycle) -> dict:
+    """Fotografia del registro all'approvazione: storico per audit ed export."""
+    from .models import RiskAcceptance
+
+    risks = (
+        register_queryset(plant)
+        .select_related("threat", "owner", "asset", "supplier", "critical_process")
+        .prefetch_related("mitigation_plans", "affected_plants")
+        .order_by("asset_type", "threat__code")
+    )
+    active_acc = {
+        a.risk_id: a for a in RiskAcceptance.objects.filter(risk__in=risks, status="active")
+    }
+    items = []
+    for r in risks:
+        acc = active_acc.get(r.pk)
+        items.append({
+            "id": str(r.pk),
+            "name": r.name,
+            "asset_type": r.asset_type,
+            "threat": r.threat.code if r.threat else None,
+            "applicable": r.applicable,
+            "not_applicable_reason": r.not_applicable_reason,
+            "asset": r.asset.name if r.asset else (r.asset_group_label or None),
+            "supplier": r.supplier.name if r.supplier else None,
+            "process": r.critical_process.name if r.critical_process else None,
+            "probability": r.probability,
+            "impact": r.impact,
+            "impacts": {d: getattr(r, f"impact_{d}") for d in IMPACT_DIMENSIONS},
+            "current_class": r.current_class,
+            "expected_class": r.expected_class,
+            "treatment": r.treatment,
+            "owner_id": r.owner_id,
+            "plans": [{"action": p.action, "due_date": str(p.due_date),
+                       "completed": bool(p.completed_at), "verified": bool(p.verified_at)}
+                      for p in r.mitigation_plans.all()],
+            "acceptance": {"class": acc.risk_class, "expires_on": str(acc.expires_on)} if acc else None,
+            "affected_plants": [str(p.pk) for p in r.affected_plants.all()],
+        })
+    return {
+        "taken_at": timezone.now().isoformat(),
+        "kind": cycle.kind,
+        "risks": items,
+        "coverage": {k: v for k, v in register_coverage(plant).items() if k != "pairs"},
+        "policy": resolve_policy(plant),
+    }
+
+
+def approve_cycle(user, cycle, *, body, review=None, local_adoption_ref: str = ""):
+    """Approvazione dell'organo: congela il registro e archivia la valutazione precedente."""
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    from .models import RiskAssessmentCycle
+
+    if cycle.status != "in_approvazione":
+        raise _err(_("Si approva solo una valutazione inviata in approvazione."))
+    if body is None:
+        raise _err(_("Indica l'organo che approva la valutazione."))
+    require_register_write(user, _cycle_approver_plant(cycle))
+    with transaction.atomic():
+        RiskAssessmentCycle.objects.filter(plant=cycle.plant, status="approvato").exclude(pk=cycle.pk).update(
+            status="archiviato", closed_at=timezone.now(),
+        )
+        cycle.snapshot = build_register_snapshot(cycle.plant, cycle)
+        cycle.status = "approvato"
+        cycle.approved_by_body = body
+        cycle.approval_review = review
+        cycle.approved_at = timezone.now()
+        cycle.closed_at = cycle.approved_at
+        cycle.local_adoption_ref = (local_adoption_ref or "").strip()
+        cycle.save()
+        log_action(user=user, action_code="risk.cycle.approved", level="L1", entity=cycle,
+                   payload={"plant_id": str(cycle.plant_id) if cycle.plant_id else None,
+                            "risks": len(cycle.snapshot["risks"])})
+    return cycle
+
+
+def revaluation_triggers(plant) -> list:
+    """Eventi dopo l'ultima approvazione che suggeriscono una revisione
+    straordinaria (procedura §11.2). Calcolati, non memorizzati."""
+    from apps.assets.models import Asset
+    from apps.audit_prep.models import AuditFinding
+    from apps.controls.models import ControlInstance
+    from apps.incidents.models import Incident
+
+    from .models import RiskMitigationPlan
+
+    approved = approved_cycle(plant)
+    since = approved.approved_at if approved else None
+    out = []
+    today = timezone.localdate()
+    overdue = RiskMitigationPlan.objects.filter(
+        assessment__in=register_queryset(plant), completed_at__isnull=True, due_date__lt=today,
+    ).count()
+    if overdue:
+        out.append({"kind": "overdue_measures", "count": overdue})
+    if since is None or plant is None:
+        return out
+    incidents = Incident.objects.filter(plant=plant, created_at__gt=since).filter(
+        models_q_significant_incident(),
+    ).count()
+    if incidents:
+        out.append({"kind": "significant_incidents", "count": incidents})
+    new_assets = Asset.objects.filter(plant=plant, created_at__gt=since, criticality__gte=4).count()
+    if new_assets:
+        out.append({"kind": "new_critical_assets", "count": new_assets})
+    changed = Asset.objects.filter(
+        plant=plant, last_change_date__gt=since.date(), risk_assessments__in=register_queryset(plant),
+    ).distinct().count()
+    if changed:
+        out.append({"kind": "changed_assets", "count": changed})
+    findings = AuditFinding.objects.filter(
+        audit_prep__plant=plant, created_at__gt=since, finding_type="major_nc",
+    ).count()
+    if findings:
+        out.append({"kind": "major_findings", "count": findings})
+    gaps = ControlInstance.objects.filter(plant=plant, status="gap", updated_at__gt=since).count()
+    if gaps:
+        out.append({"kind": "control_gaps", "count": gaps})
+    return out
+
+
+def models_q_significant_incident():
+    from django.db.models import Q
+
+    return Q(is_significant=True) | Q(nis2_notifiable="si") | Q(severity="critica")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Letture per i moduli collegati (Reporting, Riesame, Cockpit, Asset, BIA, …).
+# Un rischio "valutato" è del registro corrente, applicabile e completato.
+# ─────────────────────────────────────────────────────────────────────────────
+
+HIGH_CLASSES = ("high", "critical")
+CLASS_LABELS = {
+    "very_low": "Very Low", "low": "Low", "medium": "Medium", "high": "High", "critical": "Critical",
+}
+
+
+def evaluated_risks(plant_id=None):
+    """Rischi valutati: del sito se `plant_id`, altrimenti di tutta
+    l'organizzazione (siti + gruppo). I rischi di gruppo non si sommano ai
+    siti che li ereditano, così i totali non contano due volte."""
+    qs = (
+        RiskAssessment.objects.exclude(cycle__kind="legacy")
+        .filter(applicable=True, status="completato")
+    )
+    return qs.filter(plant_id=plant_id) if plant_id else qs
+
+
+def class_counts(qs) -> dict:
+    """Conteggio per classe e per semaforo (verde/giallo/rosso)."""
+    from django.db.models import Count
+
+    by_class = {c: 0 for c in RISK_CLASSES}
+    for row in qs.values("current_class").annotate(n=Count("id")):
+        if row["current_class"] in by_class:
+            by_class[row["current_class"]] = row["n"]
+    return {
+        **by_class,
+        "verde": by_class["very_low"] + by_class["low"],
+        "giallo": by_class["medium"],
+        "rosso": by_class["high"] + by_class["critical"],
+        "total": sum(by_class.values()),
+    }
+
+
+def active_acceptance_risk_ids(qs) -> set:
+    from .models import RiskAcceptance
+
+    return set(RiskAcceptance.objects.filter(risk__in=qs, status="active").values_list("risk_id", flat=True))
+
+
+def untreated_high_risks(qs):
+    """High/Critical senza accettazione attiva: oltre la soglia di accettazione
+    e non ancora ricondotti (procedura §9.2, §10)."""
+    high = qs.filter(current_class__in=HIGH_CLASSES)
+    return high.exclude(pk__in=active_acceptance_risk_ids(high))
+
+
+def worst_class(classes) -> str:
+    return max((c for c in classes if c), key=class_rank, default="")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Export Excel del registro (procedura §12)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def generate_risk_excel(plant=None) -> bytes:
+    """Registro corrente del sito (o del gruppo se `plant` è None) in Excel:
+    fogli Registro, Piano di trattamento, Accettazioni, Copertura, Criteri."""
+    import io
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+
+    from .models import NIS2_ART21_CHOICES, RiskAcceptance, RiskMitigationPlan
+
+    header_fill = PatternFill("solid", fgColor="1E3A5F")
+    header_font = Font(color="FFFFFF", bold=True, size=10)
+    class_fill = {
+        "very_low": "C6EFCE", "low": "E2F0D9", "medium": "FFEB9C", "high": "F8CBAD", "critical": "FFC7CE",
+    }
+
+    def sheet(wb, title, headers, first=False):
+        ws = wb.active if first else wb.create_sheet()
+        ws.title = title
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.fill, cell.font = header_fill, header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ws.column_dimensions[cell.column_letter].width = 18
+        ws.freeze_panes = "A2"
+        return ws
+
+    def name(user):
+        return (f"{user.first_name} {user.last_name}".strip() or user.username) if user else ""
+
+    risks = list(
+        register_queryset(plant, include_inherited=plant is not None)
+        .select_related("plant", "threat", "asset", "supplier", "critical_process", "owner", "treatment_owner")
+        .prefetch_related("information_classes", "existing_measures__control_instance__control")
+        .order_by("asset_type", "threat__code")
+    )
+    art21 = dict(NIS2_ART21_CHOICES)
+    wb = Workbook()
+    ws = sheet(wb, "Registro", [
+        "Registro", "Tipologia", "Codice minaccia", "Minaccia", "Scenario", "Asset / gruppo", "Fornitore",
+        "Processo BIA", "Informazioni", "Vulnerabilità", "Conseguenza", "Applicabile", "Motivo non applicabile",
+        "Misure esistenti", "Probabilità", "Motivazione probabilità",
+        "Imp. economico", "Imp. legale", "Imp. cliente", "Imp. reputazionale", "Imp. persone", "Imp. operativo",
+        "Impatto", "Motivazione impatto", "Classe matrice", "Override", "Motivazione override", "Classe attuale",
+        "Non accettabile", "Trattamento", "Motivazione trattamento", "Prob. attesa", "Imp. atteso", "Classe attesa",
+        "Risk Owner", "Responsabile trattamento", "Scadenza piano", "NIS2 in perimetro", "Art. 21 NIS2",
+        "Sistemi impattati", "Possibile incidente significativo", "Stato", "Valutato il",
+    ], first=True)
+    for row, r in enumerate(risks, 2):
+        measures = "; ".join(
+            f"{(m.control_instance.control.external_id + ' ') if m.control_instance else ''}{m.description} ({m.effectiveness})"
+            for m in r.existing_measures.all()
+        )
+        values = [
+            r.plant.name if r.plant else "Gruppo", r.asset_type, r.threat.code if r.threat else "",
+            r.threat.get_title() if r.threat else "", r.name,
+            r.asset.name if r.asset else r.asset_group_label, r.supplier.name if r.supplier else "",
+            r.critical_process.name if r.critical_process else "",
+            ", ".join(ic.name for ic in r.information_classes.all()), r.vulnerability, r.consequence,
+            "Sì" if r.applicable else "No", r.not_applicable_reason, measures,
+            r.probability, r.probability_rationale,
+            r.impact_economic, r.impact_legal, r.impact_customer, r.impact_reputational, r.impact_people,
+            r.impact_operational, r.impact, r.impact_rationale, CLASS_LABELS.get(r.matrix_class, ""),
+            r.class_override or "", r.override_rationale, CLASS_LABELS.get(r.current_class, ""),
+            "Sì" if r.legal_or_contract_violation else "", r.treatment, r.treatment_rationale,
+            r.expected_probability, r.expected_impact, CLASS_LABELS.get(r.expected_class, ""),
+            name(r.owner), mixed_owner_name(r.treatment_owner, r.treatment_owner_external) or "",
+            r.plan_due_date, "Sì" if r.nis2_in_scope else "No", art21.get(r.nis2_art21_category, ""),
+            r.impacted_systems, "Sì" if r.significant_incident_potential else "No", r.status,
+            r.assessed_at.date() if r.assessed_at else None,
+        ]
+        for col, value in enumerate(values, 1):
+            cell = ws.cell(row=row, column=col, value=value)
+            cell.alignment = Alignment(vertical="top", wrap_text=True)
+        cls_col = 28
+        if r.current_class in class_fill:
+            ws.cell(row=row, column=cls_col).fill = PatternFill("solid", fgColor=class_fill[r.current_class])
+
+    ws = sheet(wb, "Piano di trattamento", [
+        "Rischio", "Classe attuale", "Classe attesa", "Misura", "Effetto atteso", "Controllo",
+        "Responsabile", "Scadenza", "Completata il", "Verificata il", "Nota verifica",
+    ])
+    plans = RiskMitigationPlan.objects.filter(assessment__in=risks).select_related(
+        "assessment", "owner", "control_instance__control",
+    ).order_by("due_date")
+    for row, p in enumerate(plans, 2):
+        for col, value in enumerate([
+            p.assessment.name, CLASS_LABELS.get(p.assessment.current_class, ""),
+            CLASS_LABELS.get(p.assessment.expected_class, ""), p.action, p.expected_effect,
+            p.control_instance.control.external_id if p.control_instance else "",
+            mixed_owner_name(p.owner, p.owner_external) or "", p.due_date,
+            p.completed_at.date() if p.completed_at else None,
+            p.verified_at.date() if p.verified_at else None, p.verification_note,
+        ], 1):
+            ws.cell(row=row, column=col, value=value)
+
+    ws = sheet(wb, "Accettazioni", [
+        "Rischio", "Classe", "Stato", "Ruoli richiesti", "Firme", "Organo", "Delibera", "Parere",
+        "Motivazione", "Scadenza", "Attiva dal",
+    ])
+    accs = RiskAcceptance.objects.filter(risk__in=risks).select_related("risk", "body").order_by("-created_at")
+    for row, a in enumerate(accs, 2):
+        for col, value in enumerate([
+            a.risk.name, CLASS_LABELS.get(a.risk_class, ""), a.status, ", ".join(a.required_roles),
+            ", ".join(s["role"] for s in a.signatures), a.body.name if a.body else "", a.body_resolution_ref,
+            a.upper_opinion, a.rationale, a.expires_on, a.activated_at.date() if a.activated_at else None,
+        ], 1):
+            ws.cell(row=row, column=col, value=value)
+
+    ws = sheet(wb, "Copertura", ["Tipologia", "Codice minaccia", "Stato", "Classe peggiore"])
+    for row, pair in enumerate(register_coverage(plant)["pairs"], 2):
+        for col, value in enumerate([
+            pair["asset_type"], pair["threat_code"], pair["state"], CLASS_LABELS.get(pair["worst_class"], ""),
+        ], 1):
+            ws.cell(row=row, column=col, value=value)
+
+    ws = sheet(wb, "Criteri", ["Probabilità \\ Impatto", "1", "2", "3", "4", "5"])
+    for row, p in enumerate(range(5, 0, -1), 2):
+        ws.cell(row=row, column=1, value=p)
+        for i in range(1, 6):
+            cls = risk_class(p, i)
+            cell = ws.cell(row=row, column=i + 1, value=CLASS_LABELS[cls])
+            cell.fill = PatternFill("solid", fgColor=class_fill[cls])
+    policy = resolve_policy(plant)
+    ws.cell(row=8, column=1, value="Soglie economiche (€, limite inferiore del livello)")
+    for offset, level in enumerate(("2", "3", "4", "5")):
+        ws.cell(row=9 + offset, column=1, value=f"Livello {level}")
+        ws.cell(row=9 + offset, column=2, value=policy["economic_thresholds"][level])
+    ws.cell(row=14, column=1, value="Modello di governo")
+    ws.cell(row=14, column=2, value=policy["preset"])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()

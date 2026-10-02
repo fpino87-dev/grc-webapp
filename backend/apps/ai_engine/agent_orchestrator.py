@@ -25,7 +25,9 @@ PRIORITY_BASE = {
     "control_status_partial":       60,
     "control_not_evaluated":        50,
     "risk_expired":                 75,
-    "risk_needs_revaluation":       85,
+    "risk_no_assessment":           80,
+    "risk_acceptance_expired":      85,
+    "risk_acceptance_expiring":     65,
     "supplier_never_assessed":      80,
     "supplier_assessment_expired":  70,
 }
@@ -105,8 +107,15 @@ def build_gaps(user, plant_id) -> tuple[list[dict], int]:
         })
 
     # 3. Risk assessment
+    _risk_subtitles = {
+        "assessment_expired": ("risk_expired", "Risk assessment scaduto da {days} giorni"),
+        "no_assessment": ("risk_no_assessment", "Nessun risk assessment approvato con il metodo attuale"),
+        "assessment_in_progress": ("risk_no_assessment", "Primo risk assessment in corso, non ancora approvato"),
+        "acceptance_expired": ("risk_acceptance_expired", "Accettazione del rischio scaduta da {days} giorni"),
+        "acceptance_expiring": ("risk_acceptance_expiring", "Accettazione del rischio in scadenza il {due}"),
+    }
     for r in get_expired_risk_assessments(user, plant_id, today):
-        kind = "risk_needs_revaluation" if r["reason"] == "needs_revaluation" else "risk_expired"
+        kind, subtitle = _risk_subtitles.get(r["reason"], ("risk_expired", r["reason"]))
         base = PRIORITY_BASE[kind]
         days = r.get("days_overdue") or 0
         gaps.append({
@@ -114,10 +123,7 @@ def build_gaps(user, plant_id) -> tuple[list[dict], int]:
             "category": "risk",
             "ref_id": r["id"],
             "title": r["name"],
-            "subtitle": (
-                "Richiede rivalutazione (change recente)" if kind == "risk_needs_revaluation"
-                else f"Assessment scaduto da {days} giorni"
-            ),
+            "subtitle": subtitle.format(days=days, due=r.get("next_due") or ""),
             "details": r,
             "priority_score": base + min(days, 30),
             "urgency": _urgency(days, base),

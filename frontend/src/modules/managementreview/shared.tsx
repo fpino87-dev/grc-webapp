@@ -44,9 +44,13 @@ export type SnapPendingDoc = {
 };
 export type SnapRisk = {
   id: string; name: string; asset: string | null; process: string | null;
-  inherent_score: number | null; score: number | null; treatment: string | null; owner: string | null;
-  has_plan: boolean; accepted_by: string | null; acceptance_expiry: string | null;
+  // snapshot precedenti alla procedura D-ITA-INF-23 (punteggi)
+  inherent_score?: number | null; score?: number | null; accepted_by?: string | null;
+  // snapshot con le classi della procedura (metodo "classi")
+  current_class?: string; expected_class?: string; signatures?: string[]; body?: string | null;
+  treatment?: string | null; owner?: string | null; has_plan?: boolean; acceptance_expiry: string | null;
 };
+export type SnapRiskCycle = { plant: string | null; kind: string; status: string; approved_at: string | null };
 export type SnapIncident = { id: string; title: string; detected_at: string | null; severity: string; status: string };
 export type SnapTask = { id: string; title: string; priority: string; due_date: string | null; assigned_role: string };
 export type SnapPdca = { id: string; title: string; created_at: string | null };
@@ -77,7 +81,7 @@ export type SnapObjective = {
 export type SnapSite = {
   plant_id: string; code: string; name: string; pct_compliant: number | null;
   rischi_critici: number; incidenti_aperti: number; task_scaduti: number;
-  rischi_oltre_soglia?: number; // snapshot con la soglia di accettabilità
+  rischi_oltre_soglia?: number; // soglia di accettabilità (regola 2) o High/Critical non accettati (regola 3)
 };
 
 // ── Sub-components ──────────────────────────────────────────────────────────

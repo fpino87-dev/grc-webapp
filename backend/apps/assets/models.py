@@ -128,19 +128,21 @@ class Asset(BaseModel):
         return (timezone.localdate() - self.last_change_date).days
 
     @property
-    def risk_score(self):
-        ra = self.risk_assessments.filter(
-            status="completato", deleted_at__isnull=True
-        ).order_by("-assessed_at").first()
-        return ra.weighted_score if ra else None
+    def risk_class(self):
+        """Classe peggiore fra i rischi valutati collegati all'asset."""
+        from apps.risk.services import worst_class
+
+        return worst_class(
+            self.risk_assessments.exclude(cycle__kind="legacy")
+            .filter(applicable=True, status="completato", deleted_at__isnull=True)
+            .values_list("current_class", flat=True)
+        )
 
     @property
     def risk_level(self):
-        s = self.risk_score
-        if s is None:   return "non_valutato"
-        if s <= 7:      return "verde"
-        if s <= 14:     return "giallo"
-        return "rosso"
+        from apps.risk.services import risk_level_bucket
+
+        return risk_level_bucket(self.risk_class) or "non_valutato"
 
     class Meta:
         ordering = ["-criticality", "name"]
