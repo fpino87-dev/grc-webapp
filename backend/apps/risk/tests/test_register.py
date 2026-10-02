@@ -620,3 +620,15 @@ def test_policy_upper_opinion_none_for_single_site(org_user, plant, threats, cyc
     owner_is_assessor = services.acceptance_requirements(risk)
     assert "plant_manager" in owner_is_assessor["roles"]
     assert owner_is_assessor["upper_opinion"] == "none"
+
+
+@pytest.mark.django_db
+def test_policy_exposes_org_scope_and_untreated_filter(org_user, site_user, plant, threats, cycle):
+    res = _client(site_user).get(f"/api/v1/risk/governance-policies/resolved/?plant={plant.pk}")
+    assert res.json()["user_org_scope"] is False
+    assert _client(org_user).get("/api/v1/risk/governance-policies/resolved/").json()["user_org_scope"] is True
+    high = _completed_risk(org_user, plant, threats["malware"])
+    _completed_risk(org_user, plant, threats["fire"], asset_type="SEDE", probability=2, impact_operational=2,
+                    treatment="accettare", expected_probability=None, expected_impact=None)
+    listed = _client(org_user).get(f"/api/v1/risk/assessments/?plant={plant.pk}&untreated_high=1").json()["results"]
+    assert [x["id"] for x in listed] == [str(high.pk)]

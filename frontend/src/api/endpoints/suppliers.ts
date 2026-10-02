@@ -11,6 +11,7 @@ export type RiskClass = "basso" | "medio" | "alto" | "critico";
 export interface Supplier {
   id: string;
   name: string;
+  plants?: string[]; // siti per cui opera (vuoto = tutti)
   vat_number: string;
   country: string;
   email: string;

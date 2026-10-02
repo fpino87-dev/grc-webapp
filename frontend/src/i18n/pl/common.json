@@ -92,7 +92,11 @@
     "deleting": "Usuwanie...",
     "notes": "Uwagi",
     "save": "Zapisz",
-    "user": "Użytkownik"
+    "user": "Użytkownik",
+    "add": "Dodaj",
+    "confirm": "Potwierdź",
+    "delete": "Usuń",
+    "edit": "Edytuj"
   },
   "help": {
     "open_title": "Pomoc dla tego modułu",
@@ -206,64 +210,13 @@
     },
     "risk": {
       "matrix_title": "Macierz P×I (Prawdopodobieństwo × Wpływ)",
-      "zones": {
-        "green": {
-          "label": "Zielony",
-          "range": "Score 1–7",
-          "desc": "Ryzyko akceptowalne — przegląd roczny"
-        },
-        "yellow": {
-          "label": "Żółty",
-          "range": "Score 8–14",
-          "desc": "Ryzyko umiarkowane — plan mitygacji w 90 dni"
-        },
-        "red": {
-          "label": "Czerwony",
-          "range": "Score 15–25",
-          "desc": "Ryzyko krytyczne — natychmiastowe działanie, zadanie automatyczne, obowiązkowy PDCA"
-        }
-      },
-      "it_dimensions_title": "Wymiary zasobu IT",
-      "it_dimensions": {
-        "exposure": {
-          "label": "Ekspozycja",
-          "desc": "Dostępność z zewnątrz lub niezaufanych sieci"
-        },
-        "cve": {
-          "label": "Wynik CVE",
-          "desc": "Znane niezałatane luki — źródło: baza NVD/CVE"
-        },
-        "threat": {
-          "label": "Zagrożenie",
-          "desc": "Prawdopodobieństwo ataku na podstawie threat intelligence sektora"
-        },
-        "controls_gap": {
-          "label": "Luka w kontrolach",
-          "desc": "Liczba powiązanych kontroli ISO27001/TISAX w statusie Luka"
-        }
-      },
-      "ot_dimensions_title": "Wymiary zasobu OT",
-      "ot_dimensions": {
-        "purdue": {
-          "label": "Łączność Purdue",
-          "desc": "Poziom izolacji w hierarchii Purdue — L0 najbardziej krytyczny"
-        },
-        "patchability": {
-          "label": "Patchability",
-          "desc": "Techniczna możliwość aktualizacji firmware/OS"
-        },
-        "physical_impact": {
-          "label": "Wpływ fizyczny",
-          "desc": "Fizyczne konsekwencje ataku: zatrzymanie linii, uszkodzenia, bezpieczeństwo"
-        },
-        "segmentation": {
-          "label": "Segmentacja",
-          "desc": "Izolacja od sieci IT i internetu"
-        },
-        "detection": {
-          "label": "Wykrywalność",
-          "desc": "Zdolność do wykrycia kompromitacji w czasie rzeczywistym"
-        }
+      "matrix_note": "Klasę odczytuje się z komórki macierzy procedury, a nie z iloczynu prawdopodobieństwa i wpływu.",
+      "impact_title": "Wpływ",
+      "impact_desc": "Wpływ ocenia się w sześciu wymiarach (ekonomiczny, prawny, klient i umowy, reputacja, bezpieczeństwo ludzi, operacyjny): liczy się najgorszy przypadek. Jeśli naruszona jest poufność informacji sklasyfikowanej, wpływ nie spada poniżej jej klasy ochrony.",
+      "rules": {
+        "mandatory": "Postępowanie obowiązkowe w ciągu 3 miesięcy; akceptacja tylko jako tymczasowy wyjątek z uchwałą organu.",
+        "evaluate": "Postępowanie do oceny analizą kosztów i korzyści w ciągu roku; w przeciwnym razie akceptacja z wymaganymi podpisami.",
+        "acceptable": "Akceptowalne przez właściciela ryzyka; można jednak proponować działania doskonalące."
       }
     },
     "risk_module": {
@@ -2782,7 +2735,9 @@
       "config_needed": {
         "1": "Najpierw utwórz Zakłady (M01) i Zasoby (M04)"
       }
-    }
+    },
+    "create_risk": "Utwórz ryzyko",
+    "create_risk_hint": "Otwiera nowe ryzyko w rejestrze zakładu powiązane z tym procesem"
   },
   "assets": {
     "criticality_1_label": "Znikomy",
@@ -3262,40 +3217,11 @@
     }
   },
   "risk": {
-    "no_process_selected": "Nie wybrano procesu",
-    "level_critical": "Krytyczny",
-    "score_inherent": "Nieodłączne: wynik {{score}}",
-    "score_residual": "Resztkowe: wynik {{score}}",
-    "suggest_residual": "💡 Zasugeruj ryzyko resztkowe",
-    "controls_reduction": "Redukcja kontroli:",
-    "bcp_extra": "Dodatkowe BCP:",
-    "total_label": "Łącznie:",
-    "accepted_by_on": "Zaakceptowane przez {{name}} dnia {{date}}",
-    "expired_on": "wygasło dnia",
-    "expires_on": "wygasa dnia",
-    "accept_risk_prompt": "⚠️ Formalnie zaakceptuj ryzyko",
-    "accept_risk_title": "Formalna akceptacja ryzyka resztkowego",
-    "accept_note_label": "Obowiązkowa notatka",
-    "accept_note_critical_hint": "(min 50 znaków dla ryzyk krytycznych)",
-    "confirm_acceptance": "Potwierdź akceptację",
     "treatment_mitigare": "Ograniczć",
     "treatment_accettare": "Zaakceptować",
     "treatment_trasferire": "Przenieść",
     "treatment_trasferire_ext": "Przenieść (np. ubezpieczenie)",
     "treatment_evitare": "Unikać",
-    "filter_all": "Wszystkie",
-    "filter_treatment": "Postępowanie",
-    "filter_completeness": "Kompletność",
-    "filter_incomplete": "Niepełne scenariusze",
-    "status_archiviato": "Zarchiwizowane",
-    "probability_label": "Prawdopodobieństwo *",
-    "impact_label": "Wpływ *",
-    "acceptance_expiry_placeholder": "Wygaśnięcie akceptacji",
-    "action_desc_placeholder": "Opis działania *",
-    "bcp_test_date_placeholder": "Data ostatniego ważnego testu *",
-    "scenario_placeholder": "np. Ransomware na serwerze produkcyjnym MES",
-    "error_generic": "Błąd",
-    "wizard_title": "Kreator BIA → Ryzyko → BCP",
     "registers": {
       "title": "Zintegrowane rejestry ryzyka",
       "attention_count": "{{count}} wymagających uwagi",
@@ -3316,156 +3242,12 @@
         "bcp_marginal": "BCP marginalny"
       }
     },
-    "wizard_subtitle": "Utwórz kolejno: proces krytyczny, scenariusz ryzyka i spójny plan BCP.",
-    "wizard_step_bia": "Proces BIA",
-    "wizard_step_risk": "Scenariusz ryzyka",
-    "wizard_step_bcp": "Plan BCP",
-    "wizard_create_new": "Utwórz nowy",
-    "wizard_bcp_process_label": "Proces:",
-    "wizard_bcp_created": "Plan utworzony i połączony z procesem.",
-    "wizard_criticality_legend": "Krytyczność 1–5:",
-    "wizard_continue_risk": "Kontynuuj z ryzykiem",
-    "wizard_save_risk_continue": "Zapisz ryzyko i kontynuuj",
-    "wizard_create_bcp": "Utwórz plan BCP",
-    "cause_label": "Przyczyna",
-    "cause_placeholder": "Przyczyna lub źródło ryzyka",
-    "consequence_label": "Konsekwencja",
-    "consequence_placeholder": "Oczekiwany wpływ w przypadku realizacji ryzyka",
-    "nis2_section": "Klasyfikacja NIS2",
-    "nis2_art21_label": "Artykuł NIS2 Art.21",
-    "nis2_relevance_label": "Istotność NIS2",
-    "impacted_systems_label": "Systemy / Usługi dotknięte",
-    "impacted_systems_placeholder": "np. ERP / Infrastruktura IT / VPN",
-    "export_excel": "Eksportuj Excel",
-    "renew_acceptance": "Odnów termin ważności",
-    "renew_confirm": "Potwierdź odnowienie",
-    "reset_acceptance": "Ponowna ocena (anuluj akceptację)",
-    "reset_acceptance_confirm": "Anulować formalną akceptację i rozpocząć ponowną ocenę? Akcja jest rejestrowana w dzienniku audytu.",
-    "plan_due_date_label": "Termin planu postępowania",
-    "plan_due_date_help": "Data, do której wybrane postępowanie (ograniczanie/akceptacja/przenoszenie/unikanie) musi zostać zastosowane",
-    "plan_due_date_overdue": "Zaległy",
-    "plan_due_date_soon": "Zbliża się termin",
-    "plan_col_header": "Termin planu",
-    "mitigation_on_time": "Ukończono na czas",
-    "mitigation_late": "Ukończono po terminie",
-    "mitigation_progress": "{{completed}}/{{total}} działań ukończonych",
-    "mitigation_no_plans": "Brak działań naprawczych",
-    "reopen_label": "Wróć do wersji roboczej",
-    "reopen_confirm": "Przywrócić ten scenariusz do wersji roboczej? Status 'ukończony' zostanie cofnięty. Akcja jest śledzona w dzienniku audytu.",
-    "complete_btn": "Ukończ",
-    "plan_complete_btn": "Oznacz jako ukończone",
-    "plan_completed_label": "Ukończone",
-    "plan_uncomplete_label": "Cofnij ukończenie",
-    "plan_uncomplete_confirm": "Cofnąć ukończenie tej akcji? Wróci do stanu 'w toku'. Akcja jest śledzona w dzienniku audytu.",
-    "plan_delete_confirm": "Usunąć tę akcję naprawczą? Tej operacji nie można cofnąć.",
-    "eff_status": {
-      "in_valutazione": "W ocenie",
-      "valutato": "Oceniony",
-      "da_pianificare": "Do zaplanowania",
-      "in_trattamento": "W trakcie leczenia ({{done}}/{{total}})",
-      "in_accettazione": "Oczekuje na akceptację",
-      "accettato_azioni_in_corso": "Zaakceptowany — akcje w toku",
-      "completato": "Ukończony",
-      "archiviato": "Zarchiwizowany",
-      "rivalutare": "Ponowna ocena",
-      "hint_accettazione": "Rozwiń wiersz, aby formalnie zaakceptować"
-    },
-    "new_title": "Nowy scenariusz ryzyka",
-    "edit_title": "Edytuj scenariusz ryzyka",
-    "name_label": "Nazwa scenariusza / ryzyka *",
-    "site_label": "Lokalizacja *",
-    "select_placeholder": "— wybierz —",
-    "threat_category_label": "Kategoria zagrożenia",
-    "asset_type_label": "Typ zasobu",
     "treatment_label": "Planowane postępowanie",
-    "owner_label": "Właściciel ryzyka",
-    "no_owner": "— brak właściciela —",
     "treatment_owner_label": "Odpowiedzialny za postępowanie z ryzykiem",
     "treatment_owner_short": "Post.",
-    "no_treatment_owner": "— brak odpowiedzialnego —",
     "treatment_owner_help": "Kto wdraża środki postępowania z ryzykiem (np. IT/OT lub dostawca). Może to być właściciel ryzyka.",
     "owner_external_option": "Inny (nie użytkownik portalu)…",
     "owner_external_placeholder": "Imię i nazwisko, funkcja lub dostawca",
-    "plan_owner_label": "Odpowiedzialny za działanie",
-    "no_plan_owner": "— brak odpowiedzialnego —",
-    "bia_process_label": "Powiązany proces BIA (opcjonalnie)",
-    "bia_process_edit_label": "Powiązany proces BIA",
-    "no_bia_process": "— brak procesu BIA —",
-    "bia_criticality_bracket": "[krytyczność {{count}}]",
-    "bia_downtime_cost": "Koszt przestoju (godz.):",
-    "bia_criticality_val": "Krytyczność:",
-    "inherent_section": "Ryzyko inherentne (przed kontrolami)",
-    "inherent_hint": "Oceń ryzyko tak, jakby nie istniały żadne mechanizmy kontrolne",
-    "inherent_probability_label": "Inherentne prawdopodobieństwo",
-    "inherent_impact_label": "Inherentny wpływ",
-    "inherent_score_label": "Wynik inherentny:",
-    "residual_section": "Ryzyko rezydualne (P × I po kontrolach)",
-    "ale_label": "ALE obliczone z BIA",
-    "ale_auto_hint": "Obliczone automatycznie z prawdopodobieństwo × wpływ × koszt przestoju BIA",
-    "ale_select_hint": "Wybierz prawdopodobieństwo i wpływ, aby oszacować ALE",
-    "ale_bia_hint": "Połącz proces BIA, aby obliczyć ALE",
-    "create_btn": "Utwórz scenariusz",
-    "new_btn": "Nowy scenariusz",
-    "filter_type": "Typ",
-    "filter_status": "Status",
-    "empty": "Brak zarejestrowanych scenariuszy ryzyka",
-    "create_first": "Utwórz pierwszy scenariusz",
-    "col_scenario": "Scenariusz",
-    "col_threat": "Zagrożenie",
-    "col_inherent": "Ryzyko Inherentne (P×I)",
-    "col_residual": "Ryzyko Rezydualne (P×I)",
-    "col_weighted": "Ważone",
-    "weighted_on_bia": "Ważone wg krytyczności BIA",
-    "col_ale": "ALE (z BIA)",
-    "ale_calculated": "Obliczone z BIA",
-    "ale_estimate": "Szacunek (brakuje danych BIA)",
-    "ale_no_bia": "BIA niepowiązana",
-    "nis2_sig": "Znaczące",
-    "nis2_pot_sig": "Pot. znaczące",
-    "nis2_non_sig": "Nieznaczące",
-    "edit_btn": "Edytuj",
-    "delete_confirm": "Usunąć ten scenariusz ryzyka?",
-    "delete_btn": "Usuń",
-    "no_bcp_option": "Brak BCP",
-    "bcp_valid_until": "ważny do",
-    "add_plan": "Dodaj plan",
-    "last_test": "Ostatni test:",
-    "next_test": "Następny test:",
-    "next_test_no_bcp": "— (połącz BCP)",
-    "appetite_max_score": "Maks. akceptowalny wynik:",
-    "appetite_max_red": "Maks. czerwone ryzyka:",
-    "appetite_valid_until": "Ważne do:",
-    "appetite_approved_by": "Zatwierdzone przez:",
-    "appetite_approved_at": "Data zatwierdzenia:",
-    "appetite_valid_from": "Ważne od:",
-    "appetite_notes": "Uwagi:",
-    "appetite_create_btn": "Utwórz politykę",
-    "appetite_missing": "Brak aktywnej polityki — skonfiguruj przed rozpoczęciem ocen",
-    "appetite_expired": "Wygasła — odnów",
-    "appetite_expiry_warning": "Wygasa wkrótce (≤30 dni)",
-    "guide_btn": "Przewodnik oceny",
-    "bcp_link_label": "Połącz z BCP (opcjonalne)",
-    "no_mitigation_plans": "Brak zarejestrowanych planów mitygacji",
-    "suggest_hint": "(Narzędzie sugestii przelicza od ryzyka inerenta przy użyciu zgodnych kontrolek i ważnych BCP: jeśli wynoszą 0 lub wygasły, sugerowana redukcja może różnić się od wartości bieżącej.)",
-    "threat_cat": {
-      "accesso_non_autorizzato": "Nieautoryzowany dostęp",
-      "malware_ransomware": "Malware / Ransomware",
-      "data_breach": "Naruszenie danych / Wyciek danych",
-      "phishing_social": "Phishing / Inżynieria społeczna",
-      "guasto_hw_sw": "Awaria sprzętu / oprogramowania",
-      "disastro_naturale": "Klęska żywiołowa / środowiskowa",
-      "errore_umano": "Błąd ludzki",
-      "attacco_supply_chain": "Atak na łańcuch dostaw",
-      "ddos": "DoS / DDoS",
-      "insider_threat": "Zagrożenie wewnętrzne",
-      "furto_perdita": "Kradzież / utrata urządzeń",
-      "altro": "Inne"
-    },
-    "nis2_relevance": {
-      "non_significativo": "Nieistotny",
-      "potenzialmente_significativo": "Potencjalnie istotny",
-      "significativo": "Istotny"
-    },
     "nis2_art21": {
       "art21_a": "Art.21(2)(a) – Analiza ryzyka i polityka ISMS",
       "art21_b": "Art.21(2)(b) – Zarządzanie incydentami",
@@ -3478,25 +3260,6 @@
       "art21_i": "Art.21(2)(i) – Kontrola dostępu, IAM i zarządzanie aktywami",
       "art21_j": "Art.21(2)(j) – MFA i bezpieczna komunikacja"
     },
-    "prob": {
-      "1": "1 – Bardzo niska",
-      "2": "2 – Niska",
-      "3": "3 – Średnia",
-      "4": "4 – Wysoka",
-      "5": "5 – Bardzo wysoka"
-    },
-    "impact": {
-      "1": "1 – Zaniedbywalny",
-      "2": "2 – Mniejszy",
-      "3": "3 – Umiarkowany",
-      "4": "4 – Poważny",
-      "5": "5 – Krytyczny"
-    },
-    "appetite_notes_placeholder": "Uwagi do progu: uzasadnienie, uchwała zatwierdzająca, planowany przegląd…",
-    "appetite": {
-      "all_frameworks": "Wszystkie frameworki"
-    },
-    "col_score": "Wynik",
     "classes": {
       "very_low": "Very Low",
       "low": "Low",
@@ -3516,7 +3279,520 @@
       "risk_owner": "Właściciel ryzyka",
       "plant_manager": "Dyrektor zakładu",
       "site_risk_manager": "Kierownik ds. ryzyka zakładu",
-      "ciso": "CISO"
+      "ciso": "CISO",
+      "it_manager": "Kierownik IT",
+      "hr_manager": "Kierownik HR",
+      "purchasing_manager": "Kierownik Zakupów",
+      "production_manager": "Kierownik Produkcji",
+      "engineering_manager": "Kierownik Inżynierii"
+    },
+    "errors": {
+      "generic": "Operacja nie powiodła się."
+    },
+    "page": {
+      "title": "Ocena ryzyka",
+      "register": "Rejestr",
+      "group_register": "Grupa",
+      "export": "Excel",
+      "new_risk": "Nowe ryzyko",
+      "new_needs_cycle": "Wymagana jest trwająca ocena rejestru",
+      "tabs_label": "Sekcje oceny ryzyka",
+      "tabs": {
+        "register": "Rejestr",
+        "matrix": "Macierz",
+        "coverage": "Pokrycie",
+        "plan": "Plan postępowania",
+        "acceptances": "Akceptacje",
+        "cycles": "Oceny",
+        "settings": "Ustawienia"
+      }
+    },
+    "help": {
+      "title": "Ocena ryzyka (M06)",
+      "description": "Moduł stosuje procedurę zarządzania ryzykiem: rejestry zakładów i grupy, zagrożenia z katalogu, klasa z macierzy, akceptacja według uprawnień dla klasy i zatwierdzenie przez organ.",
+      "steps": {
+        "1": "Rozpocznij ocenę rejestru (pierwsza ocena, przegląd okresowy lub nadzwyczajny).",
+        "2": "Na karcie Pokrycie oceń każde mające zastosowanie zagrożenie lub oznacz je jako niemające zastosowania z uzasadnieniem.",
+        "3": "W karcie ryzyka podaj prawdopodobieństwo i wpływ z uzasadnieniem, istniejące zabezpieczenia i sposób postępowania.",
+        "4": "Zakończ ocenę: High i Critical otwierają plan postępowania.",
+        "5": "Prześlij do zatwierdzenia: organ zatwierdza, a rejestr zostaje zamrożony.",
+        "6": "Monitoruj działania, weryfikacje i akceptacje: klasa spada dopiero po weryfikacji działań."
+      },
+      "connections": {
+        "governance": "Role, organy zarządcze i cele bezpieczeństwa",
+        "controls": "Istniejące i planowane działania powiązane z zabezpieczeniami VDA ISA",
+        "assets": "Powiązane zasoby i zmiany sugerujące przegląd",
+        "bia": "Procesy krytyczne, RTO i MTPD dla wpływu operacyjnego",
+        "review": "Coroczne zatwierdzenie rejestru w przeglądzie zarządzania"
+      },
+      "config_needed": {
+        "1": "Polityka zarządzania ryzykiem (Ustawienia)",
+        "2": "Klasy informacji zakładu i wczytany katalog zagrożeń"
+      }
+    },
+    "cycle": {
+      "in_progress": "{{kind}} w toku od {{date}}",
+      "awaiting_approval": "{{kind}} oczekuje na zatwierdzenie przez organ",
+      "approved": "Ocena zatwierdzona {{date}} ({{body}})",
+      "none": "Brak oceny według obecnej metody: rozpocznij pierwszą ocenę ryzyka.",
+      "none_with_legacy": "Poprzedni rejestr jest zarchiwizowany (metoda zastąpiona): rozpocznij pierwszą ocenę nową metodą.",
+      "start_first": "Rozpocznij pierwszą ocenę",
+      "start_review": "Rozpocznij przegląd",
+      "start_title": "Rozpocznij ocenę",
+      "start": "Rozpocznij",
+      "trigger_reason": "Powód przeglądu nadzwyczajnego (zdarzenie, incydent, zmiana)",
+      "submit": "Prześlij do zatwierdzenia",
+      "submit_ready": "Pełne pokrycie i ocenione ryzyka: ocenę można przekazać organowi.",
+      "return": "Zwróć do oceny",
+      "return_reason": "Powód zwrotu",
+      "approve": "Zatwierdź",
+      "approve_hint": "Zatwierdzenie zamraża rejestr i archiwizuje poprzednią ocenę. Wskaż organ, który podjął uchwałę.",
+      "approve_scope_hint": "W modelu scentralizowanym zatwierdza osoba z dostępem do całej organizacji.",
+      "choose_body": "Wybierz organ",
+      "local_adoption": "Uchwała przyjęcia spółki (opcjonalnie)",
+      "triggers_hint": "Rozważ rozpoczęcie przeglądu nadzwyczajnego.",
+      "kinds": {
+        "primo": "Pierwsza ocena ryzyka",
+        "periodico": "Przegląd okresowy",
+        "straordinario": "Przegląd nadzwyczajny",
+        "legacy": "Poprzednia ocena (metoda zastąpiona)"
+      },
+      "kind_hint": {
+        "primo": "Od zera: każde zagrożenie musi zostać ocenione lub oznaczone jako niemające zastosowania.",
+        "periodico": "Każde ryzyko trzeba ocenić ponownie lub potwierdzić; pokrycie musi być pełne.",
+        "straordinario": "Po zdarzeniu (incydent, zmiana, audyt): ocenia się ponownie tylko dotknięte ryzyka."
+      },
+      "triggers": {
+        "overdue_measures": "Opóźnione działania planu: {{count}}",
+        "significant_incidents": "Poważne incydenty od zatwierdzenia: {{count}}",
+        "new_critical_assets": "Nowe zasoby krytyczne: {{count}}",
+        "changed_assets": "Zasoby z zarejestrowanymi zmianami: {{count}}",
+        "major_findings": "Poważne niezgodności z audytów: {{count}}",
+        "control_gaps": "Zabezpieczenia z luką: {{count}}"
+      }
+    },
+    "cycles": {
+      "col_kind": "Rodzaj",
+      "col_status": "Status",
+      "col_started": "Rozpoczęta",
+      "col_approved": "Zatwierdzenie",
+      "col_risks": "Ryzyka",
+      "empty": "Brak ocen dla tego rejestru.",
+      "hint": "Każde zatwierdzenie zachowuje migawkę rejestru (ryzyka, klasy, akceptacje, pokrycie i polityka) do historii i audytu.",
+      "show_legacy": "Pokaż ryzyka",
+      "hide_legacy": "Ukryj",
+      "status": {
+        "in_corso": "W toku",
+        "in_approvazione": "Do zatwierdzenia",
+        "approvato": "Zatwierdzona (obowiązująca)",
+        "archiviato": "Zarchiwizowana"
+      }
+    },
+    "legacy": {
+      "title": "Poprzednia ocena",
+      "hint": "Ryzyko ocenione zastąpioną metodą (punkty): dostępne tylko do odczytu jako dowód.",
+      "name": "Scenariusz",
+      "score": "Wynik rezydualny",
+      "inherent_score": "Wynik inherentny",
+      "probability_impact": "Prawdopodobieństwo × wpływ",
+      "treatment": "Postępowanie",
+      "cause": "Przyczyna",
+      "consequence": "Skutek",
+      "accepted": "Zaakceptowane",
+      "acceptance_note": "Uwaga do akceptacji",
+      "assessed_at": "Oceniono"
+    },
+    "matrix": {
+      "title": "Macierz prawdopodobieństwo × wpływ",
+      "current": "Obecne",
+      "expected": "Oczekiwane",
+      "probability": "Prawdopodobieństwo",
+      "impact": "Wpływ",
+      "note": "Klasa komórki pochodzi z procedury; liczba to ocenione ryzyka.",
+      "pick_cell": "Wybierz komórkę, aby zobaczyć ryzyka",
+      "cell_title": "Ryzyka w P{{p}} × I{{i}}"
+    },
+    "new": {
+      "title": "Nowe ryzyko",
+      "asset_type": "Typ zasobu",
+      "threat": "Zagrożenie z katalogu",
+      "search_threat": "Szukaj po kodzie lub opisie",
+      "name": "Nazwa scenariusza (opcjonalnie)",
+      "affected_plants": "Zakłady dziedziczące ryzyko",
+      "create": "Utwórz i oceń"
+    },
+    "drawer": {
+      "title": "Karta ryzyka",
+      "identification": "Identyfikacja",
+      "name": "Scenariusz",
+      "threat": "Zagrożenie",
+      "asset": "Zasób",
+      "supplier": "Dostawca",
+      "asset_group": "Grupa zasobów (bez konkretnego)",
+      "asset_group_label": "Grupa zasobów",
+      "asset_group_placeholder": "Np. stacje robocze, serwerownia",
+      "process": "Proces krytyczny (BIA)",
+      "information_classes": "Informacje, których dotyczy",
+      "information_classes_hint": "Przy zagrożeniu poufności wpływ nie spada poniżej najwyższej klasy ochrony.",
+      "no_information_classes": "Brak klas informacji: zdefiniuj je w Ustawieniach.",
+      "affected_plants": "Zakłady dziedziczące ryzyko",
+      "vulnerability": "Podatność",
+      "consequence": "Skutek dla celów",
+      "consequence_hint": "Który cel biznesowy jest zagrożony (dostawy OEM, poufność, zgodność…)",
+      "evaluation": "Ocena obecnego ryzyka",
+      "show_criteria": "Pokaż kryteria",
+      "hide_criteria": "Ukryj kryteria",
+      "current_risk": "Obecne ryzyko",
+      "saved_class": "zapisana klasa",
+      "probability": "Prawdopodobieństwo",
+      "probability_method": "Metoda",
+      "method_frequency": "Częstość historyczna",
+      "method_fer": "Współczynnik ekspozycji (FER)",
+      "probability_rationale": "Uzasadnienie prawdopodobieństwa",
+      "impact_dimensions": "Wpływ według wymiaru",
+      "not_relevant": "nie dotyczy",
+      "impact_worst_case": "Wpływ końcowy to najgorszy przypadek spośród wypełnionych wymiarów.",
+      "impact_rationale": "Uzasadnienie wpływu",
+      "override": "Korekta klasy",
+      "override_hint": "Tylko gdy ocena jest na granicy dwóch komórek, z uzasadnieniem.",
+      "override_down": "O poziom niżej",
+      "override_none": "Brak",
+      "override_up": "O poziom wyżej",
+      "override_rationale": "Uzasadnienie korekty",
+      "not_acceptable": "Oznacza naruszenie prawa, wymagań VDA ISA lub obowiązków poufności (nigdy nieakceptowalne)",
+      "treatment": "Postępowanie",
+      "rule_mandatory": "Klasa Critical: postępowanie obowiązkowe, działania w ciągu {{months}} mies.",
+      "rule_evaluate": "Klasa High: postępowanie do oceny analizą kosztów i korzyści, działania w ciągu {{months}} mies.",
+      "rule_acceptable": "Klasa akceptowalna przez właściciela ryzyka; ewentualne działania w ciągu {{months}} mies.",
+      "treatment_option": "Opcja",
+      "plan_due_date": "Termin planu",
+      "treatment_rationale": "Uzasadnienie postępowania",
+      "expected_probability": "Oczekiwane prawdopodobieństwo",
+      "expected_impact": "Oczekiwany wpływ",
+      "expected_risk": "Oczekiwane ryzyko",
+      "owner": "Właściciel ryzyka",
+      "owner_hint": "Kierownik biznesowy będący właścicielem informacji lub procesu",
+      "treatment_owner": "Odpowiedzialny za postępowanie",
+      "nis2": "NIS2",
+      "nis2_in_scope": "Dotyczy systemów lub usług objętych NIS2",
+      "significant_incident": "Gdyby wystąpiło, byłoby poważnym incydentem (art. 23)",
+      "nis2_area": "Obszar art. 21 ust. 2",
+      "impacted_systems": "Systemy i usługi, których dotyczy",
+      "significant_incident_note": "Dlaczego byłby poważny",
+      "existing_measures": "Istniejące zabezpieczenia",
+      "no_measures": "Brak zarejestrowanych zabezpieczeń.",
+      "effectiveness": "Skuteczność",
+      "no_control": "Brak powiązanego zabezpieczenia",
+      "measure_description": "Opis zabezpieczenia",
+      "treatment_plan": "Plan postępowania",
+      "plan_hint": "Klasa spada dopiero, gdy wszystkie działania są zakończone, a ich skuteczność zweryfikowana.",
+      "no_plans": "Brak zaplanowanych działań.",
+      "apply_expected": "Zastosuj oczekiwane ryzyko",
+      "due": "termin",
+      "verified": "Zweryfikowane",
+      "completed": "Zakończone",
+      "overdue": "Opóźnione",
+      "open": "Otwarte",
+      "mark_completed": "Oznacz jako zakończone",
+      "reopen_measure": "Otwórz ponownie",
+      "verify": "Zweryfikuj skuteczność",
+      "verification_note": "Jak zweryfikowano (test, dowód, audyt)",
+      "measure_action": "Działanie do wdrożenia",
+      "expected_effect": "Oczekiwany efekt",
+      "measure_owner": "Odpowiedzialny",
+      "add_measure": "Dodaj działanie",
+      "acceptance": "Akceptacja",
+      "acceptance_needs_completion": "Akceptować można tylko ryzyko z zakończoną oceną.",
+      "not_acceptable_notice": "Ryzyko nieakceptowalne: należy je obsłużyć.",
+      "who_accepts": "Klasa {{cls}}: akceptuje {{roles}}.",
+      "governing_body": "organ zarządzający",
+      "opinion_binding": "Wymagana pozytywna opinia CISO.",
+      "opinion_notify": "CISO zostaje poinformowany.",
+      "body_required": "Wymagana uchwała organu.",
+      "max_validity": "Maksymalna ważność: {{months}} mies.",
+      "expires": "wygasa {{date}}",
+      "signatures": "Podpisy",
+      "required": "wymagane",
+      "ciso_opinion": "Opinia CISO",
+      "body": "Organ",
+      "sign": "Podpisz",
+      "opinion_note": "Uwaga do opinii",
+      "favorable": "Pozytywna",
+      "unfavorable": "Negatywna",
+      "resolution_ref": "Numer uchwały",
+      "record_decision": "Zapisz uchwałę",
+      "revoke_reason": "Powód odwołania",
+      "revoke": "Odwołaj",
+      "acceptance_rationale": "Uzasadnienie (dla High: analiza kosztów i korzyści)",
+      "acceptance_expiry": "Termin (puste = maksimum)",
+      "request_acceptance": "Rozpocznij akceptację",
+      "acceptance_history": "Poprzednie akceptacje",
+      "local_impact": "Wpływ lokalny (ryzyko grupy)",
+      "local_impact_value": "wpływ lokalny {{value}}",
+      "local_impact_note": "Dlaczego w zakładzie wpływ jest wyższy",
+      "local_status": {
+        "aperta": "Oczekuje na grupę",
+        "recepita": "Przyjęte przez grupę"
+      },
+      "acknowledge": "Przyjmij",
+      "report": "Zgłoś",
+      "history": "Historia",
+      "assessed": "Ocenił {{who}}, {{when}}",
+      "legacy_badge": "Metoda zastąpiona",
+      "inherited_badge": "Dziedziczone z grupy",
+      "read_only_rights": "Tylko do odczytu: ryzyko należy do innego rejestru lub brak uprawnień.",
+      "read_only_no_cycle": "Ocenę można zmieniać tylko podczas trwającej oceny; plany, weryfikacje i akceptacje pozostają dostępne.",
+      "not_applicable_title": "Zagrożenie nie ma zastosowania",
+      "delete_confirm": "Usunąć to ryzyko z rejestru?",
+      "reopen": "Otwórz ponownie",
+      "confirm": "Potwierdź ocenę",
+      "complete": "Zakończ ocenę"
+    },
+    "register": {
+      "search": "Szukaj",
+      "all_asset_types": "Wszystkie typy",
+      "all_classes": "Wszystkie klasy",
+      "all_treatments": "Wszystkie sposoby postępowania",
+      "only_open": "Do zakończenia lub niezaakceptowane",
+      "show_na": "Pokaż niemające zastosowania",
+      "show_inherited": "Pokaż dziedziczone z grupy",
+      "count": "Ryzyka: {{count}}",
+      "empty": "Brak ryzyk w rejestrze.",
+      "col_threat": "Zagrożenie",
+      "col_scenario": "Scenariusz",
+      "col_owner": "Właściciel",
+      "col_class": "Obecne → oczekiwane",
+      "col_treatment": "Postępowanie",
+      "col_status": "Status",
+      "not_applicable": "Nie dotyczy",
+      "status_done": "Ocenione",
+      "status_draft": "Wersja robocza",
+      "plans_progress": "działania {{done}}/{{total}} (zweryfikowane {{verified}})",
+      "accepted": "zaakceptowane",
+      "acceptance_pending": "akceptacja w toku",
+      "inherited_hint": "Ryzyko grupy dziedziczone przez zakład"
+    },
+    "plan": {
+      "filters": {
+        "open": "Otwarte",
+        "overdue": "Opóźnione",
+        "to_verify": "Do weryfikacji",
+        "all": "Wszystkie"
+      },
+      "count": "Działania: {{count}}",
+      "empty": "Brak działań.",
+      "col_measure": "Działanie",
+      "col_risk": "Ryzyko",
+      "col_owner": "Odpowiedzialny",
+      "col_due": "Termin",
+      "col_status": "Status"
+    },
+    "coverage": {
+      "progress": "Pokrycie: {{closed}} z {{total}} ({{pct}}%)",
+      "only_missing": "Tylko do zamknięcia",
+      "hint": "Każde zagrożenie z katalogu dla typu zasobu w rejestrze należy ocenić lub oznaczyć jako niemające zastosowania z uzasadnieniem (procedura §6.5).",
+      "open": "Otwórz",
+      "evaluate": "Oceń",
+      "not_applicable": "Nie dotyczy",
+      "not_applicable_title": "{{code}} nie ma zastosowania",
+      "not_applicable_reason": "Dlaczego zagrożenie nie dotyczy tego rejestru",
+      "states": {
+        "missing": "Do oceny",
+        "draft": "Wersja robocza",
+        "evaluated": "Ocenione",
+        "not_applicable": "Nie dotyczy"
+      }
+    },
+    "acceptance": {
+      "filters": {
+        "awaiting_me": "Do podpisu lub opinii",
+        "pending": "W zatwierdzaniu",
+        "active": "Aktywne",
+        "closed": "Zamknięte"
+      },
+      "empty": "Brak akceptacji.",
+      "col_risk": "Ryzyko",
+      "col_class": "Klasa",
+      "col_status": "Status",
+      "col_expires": "Termin",
+      "awaiting_opinion": "oczekuje na opinię CISO",
+      "your_turn": "twoja kolej",
+      "status": {
+        "pending": "W zatwierdzaniu",
+        "active": "Aktywna",
+        "rejected": "Odrzucona",
+        "revoked": "Odwołana",
+        "expired": "Wygasła"
+      },
+      "opinion": {
+        "not_required": "niewymagana",
+        "pending": "oczekuje",
+        "favorable": "pozytywna",
+        "unfavorable": "negatywna"
+      }
+    },
+    "settings": {
+      "sections": {
+        "governance": "Zarządzanie ryzykiem",
+        "catalog": "Katalog zagrożeń",
+        "information": "Klasy informacji"
+      },
+      "org_policy": "Polityka organizacji",
+      "configured": "Zatwierdzona i obowiązująca.",
+      "defaults": "Jeszcze nie zapisana: obowiązują domyślne wartości szablonu.",
+      "read_only": "Tylko do odczytu: zasady ustala osoba z dostępem do całej organizacji.",
+      "preset": "Model zarządzania",
+      "presets": {
+        "centralizzato": "Scentralizowany",
+        "federato": "Sfederowany",
+        "sito_singolo": "Pojedynczy zakład"
+      },
+      "preset_hint": {
+        "centralizzato": "Decyduje spółka dominująca: wiążąca opinia dla High, Critical do organu grupy.",
+        "federato": "Zakłady autonomiczne: powiadomienie grupy o High, Critical do organu spółki.",
+        "sito_singolo": "Jeden zakład: bez rejestru grupy, wszystko decyduje zakład."
+      },
+      "escalation_days": "Eskalacja opóźnionych działań (dni)",
+      "review_months": "Przegląd okresowy (miesiące)",
+      "group_register": "Rejestr grupy aktywny (ryzyka usług wspólnych, dziedziczone przez zakłady)",
+      "acceptance_matrix": "Kto akceptuje, według klasy",
+      "col_class": "Klasa",
+      "col_roles": "Wymagane podpisy",
+      "col_scope": "Poziom",
+      "col_body": "Uchwała organu",
+      "col_opinion": "Opinia CISO",
+      "col_months": "Ważność (mies.)",
+      "scope_plant": "Zakład",
+      "scope_org": "Organizacja",
+      "opinion": {
+        "none": "Brak",
+        "notify": "Powiadomienie",
+        "binding": "Wiążąca"
+      },
+      "economic_thresholds": "Progi ekonomiczne (€, dolna granica poziomu wpływu)",
+      "threshold_level": "Poziom {{level}} od",
+      "save": "Zapisz politykę",
+      "saved": "Polityka zapisana.",
+      "site_exception": "Wyjątek dla {{site}}",
+      "site_exception_active": "Zakład stosuje własne progi ekonomiczne zatwierdzone przez organizację.",
+      "site_exception_none": "Zakład stosuje progi organizacji.",
+      "save_site": "Zapisz progi zakładu",
+      "search": "Szukaj",
+      "catalog_count": "Zagrożenia: {{count}}",
+      "col_code": "Kod",
+      "col_title": "Zagrożenie",
+      "col_types": "Typy zasobów",
+      "col_source": "Źródło",
+      "source": {
+        "catalog": "Katalog grupy",
+        "custom": "Własne"
+      },
+      "deactivate": "Dezaktywuj",
+      "reactivate": "Aktywuj ponownie",
+      "new_threat": "Nowe zagrożenie własne",
+      "code_hint": "Wielkie litery, cyfry i podkreślenie, unikalny",
+      "add_threat": "Dodaj do katalogu",
+      "information_hint": "Informacje do ochrony z wymaganym poziomem poufności, integralności i dostępności (VDA ISA 1.3.1, 1.3.2). Te bez zakładu dotyczą grupy.",
+      "no_classes": "Brak klas informacji.",
+      "class_name": "Klasa informacji",
+      "class_description": "Opis",
+      "class_scope": "Zakres",
+      "confidentiality": "Poufność",
+      "integrity": "Integralność",
+      "availability": "Dostępność",
+      "new_class": "Nowa klasa informacji",
+      "edit_class": "Edytuj klasę informacji",
+      "delete_class_confirm": "Usunąć tę klasę informacji?"
+    },
+    "protection": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "very_high": "Very high"
+    },
+    "effectiveness": {
+      "alta": "Wysoka",
+      "media": "Średnia",
+      "bassa": "Niska"
+    },
+    "effect": {
+      "probabilita": "zmniejsza prawdopodobieństwo",
+      "impatto": "zmniejsza wpływ",
+      "entrambi": "zmniejsza prawdopodobieństwo i wpływ"
+    },
+    "dimensions": {
+      "economic": "Ekonomiczny",
+      "legal": "Prawny",
+      "customer": "Klient i umowy",
+      "reputational": "Reputacja",
+      "people": "Bezpieczeństwo ludzi",
+      "operational": "Operacyjny"
+    },
+    "scales": {
+      "economic": {
+        "above": "Powyżej {{from}}",
+        "between": "Od {{from}} do {{to}}",
+        "below": "Mniej niż {{to}}"
+      },
+      "probability": {
+        "5": {
+          "frequency": "Częściej niż raz w roku",
+          "fer": "niezabezpieczone podatności lub nieskuteczne zabezpieczenia"
+        },
+        "4": {
+          "frequency": "Raz na 1–2 lata",
+          "fer": "zabezpieczenia z lukami lub nie w pełni skuteczne"
+        },
+        "3": {
+          "frequency": "Raz na 2–4 lata",
+          "fer": "podatności możliwe do wykorzystania tylko przez ekspertów lub poważne zjawiska naturalne"
+        },
+        "2": {
+          "frequency": "Raz na 4–10 lat",
+          "fer": "brak istotnych podatności: potrzebny bardzo zmotywowany atak celowany lub wyjątkowe zdarzenie"
+        },
+        "1": {
+          "frequency": "Rzadziej niż raz na 10 lat",
+          "fer": "podatności pokryte wieloma zweryfikowanymi zabezpieczeniami, brak wiarygodnego sprawcy"
+        }
+      },
+      "impact": {
+        "legal": {
+          "5": "Sankcje karne dla zarządu; kary NIS2 lub RODO z najwyższego przedziału; zakazy",
+          "4": "Sankcje karne dla pracowników; znaczne kary administracyjne",
+          "3": "Znaczne sankcje cywilne; drobne kary lub upomnienia",
+          "2": "Zwykłe postępowanie prawne; rutynowe spory",
+          "1": "Brak skutków prawnych"
+        },
+        "customer": {
+          "5": "Utrata lub zawieszenie etykiety TISAX; utrata klienta OEM; zatrzymanie linii u klienta",
+          "4": "Znaczne kary umowne; formalna eskalacja; naruszenie NDA dla informacji high lub very high",
+          "3": "Formalna reklamacja klienta; opóźnienia nadrobione dodatkowym kosztem",
+          "2": "Nieformalne zgłoszenie klienta, bez kar",
+          "1": "Brak wpływu na klienta"
+        },
+        "reputational": {
+          "5": "Doniesienia mediów krajowych lub międzynarodowych; trwała utrata zaufania",
+          "4": "Szkoda widoczna dla klientów i branży",
+          "3": "Szkoda znana niektórym klientom lub partnerom, bez trwałych skutków",
+          "2": "Niewielka szkoda, ograniczona do wewnątrz lub nielicznych",
+          "1": "Brak skutków"
+        },
+        "people": {
+          "5": "Zgony lub trwałe obrażenia wielu osób",
+          "4": "Zgon lub trwałe obrażenia jednej osoby",
+          "3": "Lekkie obrażenia jednej lub kilku osób",
+          "2": "Brak obrażeń",
+          "1": "Brak skutków"
+        },
+        "operational": {
+          "5": "Proces krytyczny zatrzymany ponad MTPD; dostawy wstrzymane ponad 24 h; funkcje wewnętrzne ponad 2 dni",
+          "4": "Przerwa ponad RTO, ale w MTPD; mocno opóźnione dostawy; 31–50% funkcji zatrzymanych",
+          "3": "Zakłócenia dostaw w ramach RTO; 11–30% funkcji zatrzymanych",
+          "2": "1–10% funkcji zatrzymanych; brak wpływu na dostawy",
+          "1": "Brak zauważalnych skutków"
+        }
+      }
     }
   },
   "pdca": {

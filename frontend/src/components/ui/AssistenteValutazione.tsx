@@ -4,6 +4,7 @@ import { apiClient } from "../../api/client";
 import { useAuthStore } from "../../store/auth";
 import { useTranslation } from "react-i18next";
 import { fetchAllPages } from "../../api/pagination";
+import { CLASS_CELL, riskClass } from "../../modules/risk/riskClasses";
 
 // ─── Dati statici BIA/Risk (testi via i18n) ──────────────────────────────────
 
@@ -14,14 +15,6 @@ const CRITICALITY_COLORS: Record<number, string> = {
   4: "text-red-600",
   5: "text-red-800 font-bold",
 };
-
-// ─── Helper: cella heatmap ───────────────────────────────────────────────────
-
-function cellColor(score: number): string {
-  if (score >= 15) return "bg-red-500 text-white";
-  if (score >= 8)  return "bg-yellow-400 text-gray-800";
-  return "bg-green-400 text-white";
-}
 
 // ─── TAB 1: BIA ──────────────────────────────────────────────────────────────
 
@@ -115,103 +108,52 @@ function TabBia() {
 
 function TabRisk() {
   const { t } = useTranslation();
-  const riskZones = useMemo(() => ([
-    { key: "green", label: t("eval_assistant.risk.zones.green.label"), range: t("eval_assistant.risk.zones.green.range"), desc: t("eval_assistant.risk.zones.green.desc"), bg: "bg-green-100", text: "text-green-800" },
-    { key: "yellow", label: t("eval_assistant.risk.zones.yellow.label"), range: t("eval_assistant.risk.zones.yellow.range"), desc: t("eval_assistant.risk.zones.yellow.desc"), bg: "bg-yellow-100", text: "text-yellow-800" },
-    { key: "red", label: t("eval_assistant.risk.zones.red.label"), range: t("eval_assistant.risk.zones.red.range"), desc: t("eval_assistant.risk.zones.red.desc"), bg: "bg-red-100", text: "text-red-800" },
-  ]), [t]);
-
-  const itDimensions = useMemo(() => ([
-    { code: "esposizione", label: t("eval_assistant.risk.it_dimensions.exposure.label"), weight: "30%", desc: t("eval_assistant.risk.it_dimensions.exposure.desc") },
-    { code: "cve", label: t("eval_assistant.risk.it_dimensions.cve.label"), weight: "25%", desc: t("eval_assistant.risk.it_dimensions.cve.desc") },
-    { code: "minaccia", label: t("eval_assistant.risk.it_dimensions.threat.label"), weight: "25%", desc: t("eval_assistant.risk.it_dimensions.threat.desc") },
-    { code: "gap_ctrl", label: t("eval_assistant.risk.it_dimensions.controls_gap.label"), weight: "20%", desc: t("eval_assistant.risk.it_dimensions.controls_gap.desc") },
-  ]), [t]);
-
-  const otDimensions = useMemo(() => ([
-    { code: "purdue", label: t("eval_assistant.risk.ot_dimensions.purdue.label"), weight: "25%", desc: t("eval_assistant.risk.ot_dimensions.purdue.desc") },
-    { code: "patchability", label: t("eval_assistant.risk.ot_dimensions.patchability.label"), weight: "20%", desc: t("eval_assistant.risk.ot_dimensions.patchability.desc") },
-    { code: "impatto_fis", label: t("eval_assistant.risk.ot_dimensions.physical_impact.label"), weight: "25%", desc: t("eval_assistant.risk.ot_dimensions.physical_impact.desc") },
-    { code: "segmentaz", label: t("eval_assistant.risk.ot_dimensions.segmentation.label"), weight: "15%", desc: t("eval_assistant.risk.ot_dimensions.segmentation.desc") },
-    { code: "rilevabilita", label: t("eval_assistant.risk.ot_dimensions.detection.label"), weight: "15%", desc: t("eval_assistant.risk.ot_dimensions.detection.desc") },
-  ]), [t]);
-
+  const rules = [
+    { cls: "critical", key: "mandatory" },
+    { cls: "high", key: "evaluate" },
+    { cls: "medium", key: "acceptable" },
+  ] as const;
   return (
     <div className="space-y-5">
-      {/* Heatmap 5×5 */}
+      {/* Matrice della procedura: la classe si legge dalla cella, non dal prodotto P × I */}
       <div>
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.matrix_title")}</p>
-        <div className="overflow-auto">
-          <table className="text-xs border-collapse">
-            <thead>
-              <tr>
-                <th className="w-12 text-right pr-2 text-gray-400 font-normal">P\I</th>
-                {[1,2,3,4,5].map(i => (
-                  <th key={i} className="w-10 h-8 text-center text-gray-500 font-medium">{i}</th>
-                ))}
+        <table className="text-xs border-collapse">
+          <thead>
+            <tr>
+              <th className="w-12 text-right pr-2 text-gray-400 font-normal">P\I</th>
+              {[1, 2, 3, 4, 5].map(i => <th key={i} className="w-16 h-8 text-center text-gray-500 font-medium">{i}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {[5, 4, 3, 2, 1].map(p => (
+              <tr key={p}>
+                <td className="text-right pr-2 text-gray-500 font-medium">{p}</td>
+                {[1, 2, 3, 4, 5].map(i => {
+                  const cls = riskClass(p, i)!;
+                  return (
+                    <td key={i} className={`w-16 h-8 text-center rounded text-[11px] font-semibold border border-white/50 ${CLASS_CELL[cls]}`}>
+                      {t(`risk.classes.${cls}`)}
+                    </td>
+                  );
+                })}
               </tr>
-            </thead>
-            <tbody>
-              {[5,4,3,2,1].map(p => (
-                <tr key={p}>
-                  <td className="text-right pr-2 text-gray-500 font-medium">{p}</td>
-                  {[1,2,3,4,5].map(i => {
-                    const score = p * i;
-                    return (
-                      <td key={i} className={`w-10 h-8 text-center rounded text-xs font-bold border border-white/50 ${cellColor(score)}`}>
-                        {score}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-2 flex gap-2">
-          {riskZones.map(z => (
-            <div key={z.key} className={`flex-1 rounded px-2 py-1.5 text-xs ${z.bg} ${z.text}`}>
-              <span className="font-semibold">{z.label}</span> <span className="opacity-75">{z.range}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-xs text-gray-500 mt-2">{t("eval_assistant.risk.matrix_note")}</p>
       </div>
-
-      {/* Zone e significato */}
       <div className="space-y-2">
-        {riskZones.map(z => (
-          <div key={z.key} className={`rounded-lg px-3 py-2 border ${z.bg} border-opacity-50`}>
-            <span className={`font-semibold text-sm ${z.text}`}>{z.label} — {z.range}</span>
-            <p className="text-xs text-gray-600 mt-0.5">{z.desc}</p>
+        {rules.map(r => (
+          <div key={r.cls} className="rounded-lg px-3 py-2 border bg-gray-50">
+            <span className="font-semibold text-sm">{t(`risk.classes.${r.cls}`)}</span>
+            <p className="text-xs text-gray-600 mt-0.5">{t(`eval_assistant.risk.rules.${r.key}`)}</p>
           </div>
         ))}
       </div>
-
-      {/* Dimensioni IT */}
       <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.it_dimensions_title")}</p>
-        <div className="space-y-1.5">
-          {itDimensions.map(d => (
-            <div key={d.code} className="flex gap-2 items-start bg-blue-50 rounded px-3 py-2">
-              <span className="text-xs font-mono font-bold text-blue-700 shrink-0 w-24">{d.label} <span className="text-blue-400">({d.weight})</span></span>
-              <span className="text-xs text-gray-600">{d.desc}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Dimensioni OT */}
-      <div>
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.ot_dimensions_title")}</p>
-        <div className="space-y-1.5">
-          {otDimensions.map(d => (
-            <div key={d.code} className="flex gap-2 items-start bg-orange-50 rounded px-3 py-2">
-              <span className="text-xs font-mono font-bold text-orange-700 shrink-0 w-24">{d.label} <span className="text-orange-400">({d.weight})</span></span>
-              <span className="text-xs text-gray-600">{d.desc}</span>
-            </div>
-          ))}
-        </div>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("eval_assistant.risk.impact_title")}</p>
+        <p className="text-xs text-gray-600">{t("eval_assistant.risk.impact_desc")}</p>
       </div>
     </div>
   );
@@ -234,7 +176,7 @@ function TabConnessioni() {
   const { data: redRisks } = useQuery({
     queryKey: ["risk-red-no-pdca", plantId],
     queryFn: () => fetchAllPages<unknown>("/risk/assessments/", {
-      risk_level: "rosso", has_pdca: "false", ...(plantId ? { plant: plantId } : {}),
+      untreated_high: "1", ...(plantId ? { plant: plantId } : {}),
     }),
     retry: false,
   });

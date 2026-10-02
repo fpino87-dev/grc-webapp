@@ -112,6 +112,8 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 qs = qs.filter(**{field: params[field]})
         if params.get("applicable") in ("true", "false"):
             qs = qs.filter(applicable=params["applicable"] == "true")
+        if params.get("untreated_high") == "1":
+            qs = services.untreated_high_risks(qs.filter(applicable=True, status="completato"))
         return qs.order_by("asset_type", "threat__code", "created_at")
 
     def create(self, request, *args, **kwargs):
@@ -588,10 +590,14 @@ class RiskGovernancePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ReadOnlyMod
 
         from .services import resolve_policy
 
+        from core.scoping import user_has_org_scope
+
         plant = _plant_from_param(request, request.query_params.get("plant"))
         if plant is not None:
             require_plant_access(request.user, plant)
-        return Response(resolve_policy(plant))
+        # `user_org_scope`: la UI mostra le modifiche di governo e il registro
+        # di gruppo solo a chi può farle (il backend le verifica comunque).
+        return Response({**resolve_policy(plant), "user_org_scope": user_has_org_scope(request.user)})
 
     @action(detail=False, methods=["get"])
     def presets(self, request):

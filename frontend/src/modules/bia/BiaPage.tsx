@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { biaApi, treatmentOptionsApi, type CriticalProcess } from "../../api/endpoints/bia";
 import { plantsApi } from "../../api/endpoints/plants";
@@ -360,6 +361,7 @@ function TreatmentsModal({ process, onClose }: { process: CriticalProcess; onClo
 
 export function BiaPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [showNew, setShowNew] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("");
@@ -502,6 +504,13 @@ export function BiaPage() {
                         className="text-xs text-purple-700 border border-purple-300 rounded px-2 py-0.5 hover:bg-purple-50"
                       >
                         {t("bia.treatments.manage")}
+                      </button>
+                      <button
+                        onClick={() => navigate("/risk", { state: { newRiskFromProcess: { process: p.id, plant: p.plant } } })}
+                        className="text-xs text-orange-700 border border-orange-300 rounded px-2 py-0.5 hover:bg-orange-50"
+                        title={t("bia.create_risk_hint")}
+                      >
+                        {t("bia.create_risk")}
                       </button>
                       {p.status === "bozza" && (
                         <button

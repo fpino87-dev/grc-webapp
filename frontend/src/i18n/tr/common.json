@@ -92,7 +92,11 @@
     "deleting": "Siliniyor...",
     "notes": "Notlar",
     "save": "Kaydet",
-    "user": "Kullanıcı"
+    "user": "Kullanıcı",
+    "add": "Ekle",
+    "confirm": "Onayla",
+    "delete": "Sil",
+    "edit": "Düzenle"
   },
   "help": {
     "open_title": "Bu modül için yardım",
@@ -206,64 +210,13 @@
     },
     "risk": {
       "matrix_title": "P×I matrisi (Olasılık × Etki)",
-      "zones": {
-        "green": {
-          "label": "Yeşil",
-          "range": "Score 1–7",
-          "desc": "Kabul edilebilir risk — yıllık gözden geçirme"
-        },
-        "yellow": {
-          "label": "Sarı",
-          "range": "Score 8–14",
-          "desc": "Orta risk — 90 gün içinde azaltma planı"
-        },
-        "red": {
-          "label": "Kırmızı",
-          "range": "Score 15–25",
-          "desc": "Kritik risk — acil eylem, otomatik görev, zorunlu PDCA"
-        }
-      },
-      "it_dimensions_title": "IT varlık boyutları",
-      "it_dimensions": {
-        "exposure": {
-          "label": "Maruz kalma",
-          "desc": "Dışarıdan veya güvenilmez ağlardan erişilebilirlik"
-        },
-        "cve": {
-          "label": "CVE Puanı",
-          "desc": "Bilinen yamalı olmayan güvenlik açıkları — kaynak: NVD/CVE"
-        },
-        "threat": {
-          "label": "Tehdit",
-          "desc": "Sektör tehdit istihbaratına dayalı saldırı olasılığı"
-        },
-        "controls_gap": {
-          "label": "Kontrol boşluğu",
-          "desc": "Gap durumundaki bağlı ISO27001/TISAX kontrol sayısı"
-        }
-      },
-      "ot_dimensions_title": "OT varlık boyutları",
-      "ot_dimensions": {
-        "purdue": {
-          "label": "Purdue bağlantısı",
-          "desc": "Purdue hiyerarşisinde izolasyon seviyesi — L0 en kritik"
-        },
-        "patchability": {
-          "label": "Patchability",
-          "desc": "Firmware/OS güncelleme teknik kapasitesi"
-        },
-        "physical_impact": {
-          "label": "Fiziksel etki",
-          "desc": "Saldırının fiziksel sonuçları: hat durması, hasar, güvenlik"
-        },
-        "segmentation": {
-          "label": "Segmentasyon",
-          "desc": "BT ağından ve internetten izolasyon"
-        },
-        "detection": {
-          "label": "Tespit edilebilirlik",
-          "desc": "Gerçek zamanlı tehlikeyi tespit etme kapasitesi"
-        }
+      "matrix_note": "Sınıf, olasılık × etki çarpımından değil prosedür matrisinin hücresinden okunur.",
+      "impact_title": "Etki",
+      "impact_desc": "Etki altı boyutta değerlendirilir (ekonomik, hukuki, müşteri ve sözleşme, itibar, kişi güvenliği, operasyonel): en kötü durum geçerlidir. Sınıflandırılmış bir bilginin gizliliği etkilenirse etki, koruma sınıfının altına düşemez.",
+      "rules": {
+        "mandatory": "3 ay içinde işlem zorunlu; kabul yalnızca organ kararıyla geçici bir istisna olarak.",
+        "evaluate": "1 yıl içinde maliyet/fayda analiziyle işlem değerlendirilmeli; aksi halde gerekli imzalarla kabul.",
+        "acceptable": "Risk Sahibi tarafından kabul edilebilir; yine de iyileştirme önlemleri önerilebilir."
       }
     },
     "risk_module": {
@@ -2782,7 +2735,9 @@
       "config_needed": {
         "1": "Önce Tesisleri (M01) ve Varlıkları (M04) oluşturun"
       }
-    }
+    },
+    "create_risk": "Risk oluştur",
+    "create_risk_hint": "Bu sürece bağlı saha kaydında yeni bir risk açar"
   },
   "assets": {
     "criticality_1_label": "İhmal edilebilir",
@@ -3262,40 +3217,11 @@
     }
   },
   "risk": {
-    "no_process_selected": "Hiçbir süreç seçilmedi",
-    "level_critical": "Kritik",
-    "score_inherent": "İçsel: skor {{score}}",
-    "score_residual": "Artık: skor {{score}}",
-    "suggest_residual": "💡 Artık riski öner",
-    "controls_reduction": "Kontrol azaltımı:",
-    "bcp_extra": "Ekstra BCP:",
-    "total_label": "Toplam:",
-    "accepted_by_on": "{{name}} tarafından {{date}} tarihinde kabul edildi",
-    "expired_on": "sona erdi",
-    "expires_on": "sona eriyor",
-    "accept_risk_prompt": "⚠️ Riski resmi olarak kabul et",
-    "accept_risk_title": "Artık riskin resmi kabulü",
-    "accept_note_label": "Zorunlu not",
-    "accept_note_critical_hint": "(kritik riskler için min 50 karakter)",
-    "confirm_acceptance": "Kabulü onayla",
     "treatment_mitigare": "Azalt",
     "treatment_accettare": "Kabul et",
     "treatment_trasferire": "Transfer et",
     "treatment_trasferire_ext": "Transfer et (örn. sigorta)",
     "treatment_evitare": "Kaçın",
-    "filter_all": "Tümü",
-    "filter_treatment": "Yaklaşım",
-    "filter_completeness": "Tamlık",
-    "filter_incomplete": "Eksik senaryolar",
-    "status_archiviato": "Arşivlendi",
-    "probability_label": "Olasılık *",
-    "impact_label": "Etki *",
-    "acceptance_expiry_placeholder": "Kabul son tarihi",
-    "action_desc_placeholder": "Eylem açıklaması *",
-    "bcp_test_date_placeholder": "Son geçerli test tarihi *",
-    "scenario_placeholder": "örn. MES üretim sunucusunda Ransomware",
-    "error_generic": "Hata",
-    "wizard_title": "Sihirbaz BIA → Risk → BCP",
     "registers": {
       "title": "Entegre risk kayıtları",
       "attention_count": "{{count}} yüksek dikkat",
@@ -3316,156 +3242,12 @@
         "bcp_marginal": "BCP marjinal"
       }
     },
-    "wizard_subtitle": "Sırayla oluşturun: kritik süreç, risk senaryosu ve tutarlı BCP planı.",
-    "wizard_step_bia": "BIA Süreci",
-    "wizard_step_risk": "Risk senaryosu",
-    "wizard_step_bcp": "BCP Planı",
-    "wizard_create_new": "Yeni oluştur",
-    "wizard_bcp_process_label": "Süreç:",
-    "wizard_bcp_created": "Plan oluşturuldu ve sürece bağlandı.",
-    "wizard_criticality_legend": "Kritiklik 1–5:",
-    "wizard_continue_risk": "Riskle devam et",
-    "wizard_save_risk_continue": "Riski kaydet ve devam et",
-    "wizard_create_bcp": "BCP planı oluştur",
-    "cause_label": "Neden",
-    "cause_placeholder": "Riskin nedeni veya kaynağı",
-    "consequence_label": "Sonuç",
-    "consequence_placeholder": "Risk gerçekleşirse beklenen etki",
-    "nis2_section": "NIS2 Sınıflandırması",
-    "nis2_art21_label": "NIS2 Madde 21 Kategorisi",
-    "nis2_relevance_label": "NIS2 Önemi",
-    "impacted_systems_label": "Etkilenen Sistemler / Hizmetler",
-    "impacted_systems_placeholder": "örn. ERP / Kurumsal BT / VPN",
-    "export_excel": "Excel'e Aktar",
-    "renew_acceptance": "Son tarihi yenile",
-    "renew_confirm": "Yenilemeyi onayla",
-    "reset_acceptance": "Yeniden değerlendir (kabulü iptal et)",
-    "reset_acceptance_confirm": "Resmi kabulü iptal edip yeniden değerlendirmeyi başlatmak istiyor musunuz? Bu işlem denetim kaydına eklenir.",
-    "plan_due_date_label": "İşlem planı son tarihi",
-    "plan_due_date_help": "Seçilen işlemin (azaltma/kabul/aktarım/kaçınma) uygulanması gereken son tarih",
-    "plan_due_date_overdue": "Süresi geçmiş",
-    "plan_due_date_soon": "Yaklaşan",
-    "plan_col_header": "Plan Son Tarihi",
-    "mitigation_on_time": "Zamanında tamamlandı",
-    "mitigation_late": "Geç tamamlandı",
-    "mitigation_progress": "{{completed}}/{{total}} eylem tamamlandı",
-    "mitigation_no_plans": "Tedavi eylemi yok",
-    "reopen_label": "Taslağa geri al",
-    "reopen_confirm": "Bu senaryoyu taslağa geri almak istiyor musunuz? 'Tamamlandı' durumu geri alınacak. Bu işlem denetim günlüğünde takip edilir.",
-    "complete_btn": "Tamamla",
-    "plan_complete_btn": "Tamamlandı olarak işaretle",
-    "plan_completed_label": "Tamamlandı",
-    "plan_uncomplete_label": "Tamamlamayı geri al",
-    "plan_uncomplete_confirm": "Bu eylemin tamamlanmasını geri almak istiyor musunuz? 'Devam ediyor' durumuna dönecek. Bu işlem denetim günlüğünde takip edilir.",
-    "plan_delete_confirm": "Bu azaltma eylemini silmek istiyor musunuz? Bu işlem geri alınamaz.",
-    "eff_status": {
-      "in_valutazione": "Değerlendiriliyor",
-      "valutato": "Değerlendirildi",
-      "da_pianificare": "Planlanacak",
-      "in_trattamento": "Tedavi ediliyor ({{done}}/{{total}})",
-      "in_accettazione": "Kabul bekliyor",
-      "accettato_azioni_in_corso": "Kabul edildi — eylemler devam ediyor",
-      "completato": "Tamamlandı",
-      "archiviato": "Arşivlendi",
-      "rivalutare": "Yeniden değerlendir",
-      "hint_accettazione": "Resmi kabul için satırı genişletin"
-    },
-    "new_title": "Yeni risk senaryosu",
-    "edit_title": "Risk senaryosunu düzenle",
-    "name_label": "Senaryo / risk adı *",
-    "site_label": "Tesis *",
-    "select_placeholder": "— seçin —",
-    "threat_category_label": "Tehdit kategorisi",
-    "asset_type_label": "Varlık türü",
     "treatment_label": "Planlanan yaklaşım",
-    "owner_label": "Risk sahibi",
-    "no_owner": "— sahip yok —",
     "treatment_owner_label": "Risk işleme sorumlusu",
     "treatment_owner_short": "İşl.",
-    "no_treatment_owner": "— işleme sorumlusu yok —",
     "treatment_owner_help": "İşleme önlemlerini uygulayan kişi (ör. BT/OT veya bir tedarikçi). Risk sahibiyle aynı kişi olabilir.",
     "owner_external_option": "Diğer (portal kullanıcısı değil)…",
     "owner_external_placeholder": "Ad, görev veya tedarikçi",
-    "plan_owner_label": "Eylem sorumlusu",
-    "no_plan_owner": "— sorumlu yok —",
-    "bia_process_label": "Bağlı BIA süreci (isteğe bağlı)",
-    "bia_process_edit_label": "Bağlı BIA süreci",
-    "no_bia_process": "— BIA süreci yok —",
-    "bia_criticality_bracket": "[kritiklik {{count}}]",
-    "bia_downtime_cost": "Saatlik kesinti maliyeti:",
-    "bia_criticality_val": "Kritiklik:",
-    "inherent_section": "İçsel risk (kontroller öncesi)",
-    "inherent_hint": "Riski güvenlik kontrollerinin olmadığı varsayımıyla değerlendirin",
-    "inherent_probability_label": "İçsel olasılık",
-    "inherent_impact_label": "İçsel etki",
-    "inherent_score_label": "İçsel puan:",
-    "residual_section": "Artık risk (P × I kontroller sonrası)",
-    "ale_label": "BIA'dan hesaplanan ALE",
-    "ale_auto_hint": "Olasılık × etki × BIA kesinti maliyetinden otomatik hesaplanır",
-    "ale_select_hint": "ALE tahmin etmek için olasılık ve etki seçin",
-    "ale_bia_hint": "ALE hesaplamak için bir BIA süreci bağlayın",
-    "create_btn": "Senaryo oluştur",
-    "new_btn": "Yeni senaryo",
-    "filter_type": "Tür",
-    "filter_status": "Durum",
-    "empty": "Kayıtlı risk senaryosu yok",
-    "create_first": "İlk senaryoyu oluştur",
-    "col_scenario": "Senaryo",
-    "col_threat": "Tehdit",
-    "col_inherent": "İçsel Risk (P×I)",
-    "col_residual": "Artık Risk (P×I)",
-    "col_weighted": "Ağırlıklı",
-    "weighted_on_bia": "BIA kritikliğine göre ağırlıklı",
-    "col_ale": "ALE (BIA'dan)",
-    "ale_calculated": "BIA'dan hesaplandı",
-    "ale_estimate": "Tahmin (BIA verisi eksik)",
-    "ale_no_bia": "BIA bağlı değil",
-    "nis2_sig": "Önemli",
-    "nis2_pot_sig": "Pot. önemli",
-    "nis2_non_sig": "Önemli değil",
-    "edit_btn": "Düzenle",
-    "delete_confirm": "Bu risk senaryosunu sil?",
-    "delete_btn": "Sil",
-    "no_bcp_option": "BCP yok",
-    "bcp_valid_until": "geçerli tarih",
-    "add_plan": "Plan ekle",
-    "last_test": "Son test:",
-    "next_test": "Sonraki test:",
-    "next_test_no_bcp": "— (BCP bağlayın)",
-    "appetite_max_score": "Maks. kabul edilebilir puan:",
-    "appetite_max_red": "Maks. kırmızı risk:",
-    "appetite_valid_until": "Geçerlilik tarihi:",
-    "appetite_approved_by": "Onaylayan:",
-    "appetite_approved_at": "Onay tarihi:",
-    "appetite_valid_from": "Geçerlilik başlangıcı:",
-    "appetite_notes": "Notlar:",
-    "appetite_create_btn": "Politika oluştur",
-    "appetite_missing": "Aktif politika yok — değerlendirmelere başlamadan önce yapılandırın",
-    "appetite_expired": "Süresi doldu — yenileyin",
-    "appetite_expiry_warning": "Yakında süresi doluyor (≤30 gün)",
-    "guide_btn": "Değerlendirme kılavuzu",
-    "bcp_link_label": "BCP'ye bağla (isteğe bağlı)",
-    "no_mitigation_plans": "Kayıtlı azaltma planı yok",
-    "suggest_hint": "(Öneri aracı, uyumlu kontroller ve geçerli BCP'leri kullanarak doğasında gelen riskten yeniden hesaplar: sıfır veya süresi dolmuşsa, önerilen azalma mevcut değerden farklı olabilir.)",
-    "threat_cat": {
-      "accesso_non_autorizzato": "Yetkisiz erişim",
-      "malware_ransomware": "Malware / Ransomware",
-      "data_breach": "Veri ihlali / Veri sızıntısı",
-      "phishing_social": "Phishing / Sosyal mühendislik",
-      "guasto_hw_sw": "Donanım / yazılım arızası",
-      "disastro_naturale": "Doğal / çevresel felaket",
-      "errore_umano": "İnsan hatası",
-      "attacco_supply_chain": "Tedarik zinciri saldırısı",
-      "ddos": "DoS / DDoS",
-      "insider_threat": "İçeriden tehdit",
-      "furto_perdita": "Cihaz hırsızlığı / kaybı",
-      "altro": "Diğer"
-    },
-    "nis2_relevance": {
-      "non_significativo": "Önemsiz",
-      "potenzialmente_significativo": "Potansiyel olarak önemli",
-      "significativo": "Önemli"
-    },
     "nis2_art21": {
       "art21_a": "Art.21(2)(a) – Risk analizi ve BGYS politikası",
       "art21_b": "Art.21(2)(b) – Olay yönetimi",
@@ -3478,25 +3260,6 @@
       "art21_i": "Art.21(2)(i) – Erişim kontrolü, IAM ve varlık yönetimi",
       "art21_j": "Art.21(2)(j) – MFA ve güvenli iletişim"
     },
-    "prob": {
-      "1": "1 – Çok düşük",
-      "2": "2 – Düşük",
-      "3": "3 – Orta",
-      "4": "4 – Yüksek",
-      "5": "5 – Çok yüksek"
-    },
-    "impact": {
-      "1": "1 – İhmal edilebilir",
-      "2": "2 – Küçük",
-      "3": "3 – Orta",
-      "4": "4 – Ciddi",
-      "5": "5 – Kritik"
-    },
-    "appetite_notes_placeholder": "Eşik notları: gerekçe, onay kararı, planlanan gözden geçirme…",
-    "appetite": {
-      "all_frameworks": "Tüm çerçeveler"
-    },
-    "col_score": "Puan",
     "classes": {
       "very_low": "Very Low",
       "low": "Low",
@@ -3516,7 +3279,520 @@
       "risk_owner": "Risk Sahibi",
       "plant_manager": "Tesis Müdürü",
       "site_risk_manager": "Saha Risk Yöneticisi",
-      "ciso": "CISO"
+      "ciso": "CISO",
+      "it_manager": "BT Müdürü",
+      "hr_manager": "İK Müdürü",
+      "purchasing_manager": "Satın Alma Müdürü",
+      "production_manager": "Üretim Müdürü",
+      "engineering_manager": "Mühendislik Müdürü"
+    },
+    "errors": {
+      "generic": "İşlem başarısız oldu."
+    },
+    "page": {
+      "title": "Risk Değerlendirmesi",
+      "register": "Kayıt",
+      "group_register": "Grup",
+      "export": "Excel",
+      "new_risk": "Yeni risk",
+      "new_needs_cycle": "Kayıtta devam eden bir değerlendirme gerekir",
+      "tabs_label": "Risk değerlendirmesi bölümleri",
+      "tabs": {
+        "register": "Kayıt",
+        "matrix": "Matris",
+        "coverage": "Kapsam",
+        "plan": "İşlem planı",
+        "acceptances": "Kabuller",
+        "cycles": "Değerlendirmeler",
+        "settings": "Ayarlar"
+      }
+    },
+    "help": {
+      "title": "Risk Değerlendirmesi (M06)",
+      "description": "Modül risk yönetimi prosedürünü uygular: saha ve grup kayıtları, katalog tehditleri, matristen sınıf, sınıfa göre yetkiyle kabul ve organ onayı.",
+      "steps": {
+        "1": "Kayıt değerlendirmesini başlatın (ilk değerlendirme, periyodik veya olağanüstü gözden geçirme).",
+        "2": "Kapsam sekmesinde her uygulanabilir tehdidi değerlendirin veya nedeniyle uygulanamaz olarak bildirin.",
+        "3": "Risk kartında gerekçeleriyle olasılık ve etkiyi, mevcut önlemleri ve işlemi girin.",
+        "4": "Değerlendirmeyi tamamlayın: High ve Critical işlem planını açar.",
+        "5": "Onaya gönderin: organ onaylar ve kayıt dondurulur.",
+        "6": "Önlemleri, doğrulamaları ve kabulleri izleyin: sınıf yalnızca doğrulanmış önlemlerle düşer."
+      },
+      "connections": {
+        "governance": "Roller, yönetim organları ve güvenlik hedefleri",
+        "controls": "VDA ISA kontrollerine bağlı mevcut ve planlı önlemler",
+        "assets": "İlgili varlıklar ve gözden geçirme öneren değişiklikler",
+        "bia": "Operasyonel etki için kritik süreçler, RTO ve MTPD",
+        "review": "Yönetim gözden geçirmesinde kaydın yıllık onayı"
+      },
+      "config_needed": {
+        "1": "Risk yönetişimi politikası (Ayarlar)",
+        "2": "Saha bilgi sınıfları ve yüklenmiş tehdit kataloğu"
+      }
+    },
+    "cycle": {
+      "in_progress": "{{kind}} {{date}} tarihinden beri devam ediyor",
+      "awaiting_approval": "{{kind}} organ onayı bekliyor",
+      "approved": "Değerlendirme {{date}} tarihinde onaylandı ({{body}})",
+      "none": "Mevcut yöntemle değerlendirme yok: ilk risk değerlendirmesini başlatın.",
+      "none_with_legacy": "Önceki kayıt arşivlendi (eski yöntem): yeni yöntemle ilk risk değerlendirmesini başlatın.",
+      "start_first": "İlk değerlendirmeyi başlat",
+      "start_review": "Gözden geçirme başlat",
+      "start_title": "Değerlendirme başlat",
+      "start": "Başlat",
+      "trigger_reason": "Olağanüstü gözden geçirmenin nedeni (olay, vaka, değişiklik)",
+      "submit": "Onaya gönder",
+      "submit_ready": "Kapsam tam ve riskler değerlendirildi: değerlendirme organa gidebilir.",
+      "return": "Geri gönder",
+      "return_reason": "Geri gönderme nedeni",
+      "approve": "Onayla",
+      "approve_hint": "Onay kaydı dondurur ve önceki değerlendirmeyi arşivler. Karar veren organı seçin.",
+      "approve_scope_hint": "Merkezi modelde onay, tüm kuruluşa erişimi olanlara aittir.",
+      "choose_body": "Organı seçin",
+      "local_adoption": "Şirket kabul kararı (isteğe bağlı)",
+      "triggers_hint": "Olağanüstü bir gözden geçirme başlatmayı değerlendirin.",
+      "kinds": {
+        "primo": "İlk risk değerlendirmesi",
+        "periodico": "Periyodik gözden geçirme",
+        "straordinario": "Olağanüstü gözden geçirme",
+        "legacy": "Önceki değerlendirme (eski yöntem)"
+      },
+      "kind_hint": {
+        "primo": "Sıfırdan başlanır: her uygulanabilir tehdit değerlendirilmeli veya uygulanamaz bildirilmelidir.",
+        "periodico": "Her risk yeniden değerlendirilmeli veya onaylanmalı; kapsam tam olmalıdır.",
+        "straordinario": "Bir olaydan sonra (vaka, değişiklik, denetim): yalnızca etkilenen riskler yeniden değerlendirilir."
+      },
+      "triggers": {
+        "overdue_measures": "Geciken plan önlemleri: {{count}}",
+        "significant_incidents": "Onaydan sonra önemli olaylar: {{count}}",
+        "new_critical_assets": "Yeni kritik varlıklar: {{count}}",
+        "changed_assets": "Değişiklik kaydedilen varlıklar: {{count}}",
+        "major_findings": "Denetimlerden büyük uygunsuzluklar: {{count}}",
+        "control_gaps": "Açığa düşen kontroller: {{count}}"
+      }
+    },
+    "cycles": {
+      "col_kind": "Tür",
+      "col_status": "Durum",
+      "col_started": "Başlangıç",
+      "col_approved": "Onay",
+      "col_risks": "Riskler",
+      "empty": "Bu kayıt için değerlendirme yok.",
+      "hint": "Her onay, geçmiş ve denetim için kaydın bir anlık görüntüsünü (riskler, sınıflar, kabuller, kapsam ve politika) saklar.",
+      "show_legacy": "Riskleri göster",
+      "hide_legacy": "Gizle",
+      "status": {
+        "in_corso": "Devam ediyor",
+        "in_approvazione": "Onay bekliyor",
+        "approvato": "Onaylı (yürürlükte)",
+        "archiviato": "Arşivlendi"
+      }
+    },
+    "legacy": {
+      "title": "Önceki değerlendirme",
+      "hint": "Eski yöntemle (puanlar) değerlendirilen risk: kanıt olarak salt okunur kalır.",
+      "name": "Senaryo",
+      "score": "Artık puan",
+      "inherent_score": "Doğal puan",
+      "probability_impact": "Olasılık × etki",
+      "treatment": "İşlem",
+      "cause": "Neden",
+      "consequence": "Sonuç",
+      "accepted": "Kabul edildi",
+      "acceptance_note": "Kabul notu",
+      "assessed_at": "Değerlendirme tarihi"
+    },
+    "matrix": {
+      "title": "Olasılık × etki matrisi",
+      "current": "Mevcut",
+      "expected": "Beklenen",
+      "probability": "Olasılık",
+      "impact": "Etki",
+      "note": "Her hücrenin sınıfı prosedürdeki sınıftır; sayı değerlendirilen risklerin adedidir.",
+      "pick_cell": "Riskleri görmek için bir hücre seçin",
+      "cell_title": "O{{p}} × E{{i}} riskleri"
+    },
+    "new": {
+      "title": "Yeni risk",
+      "asset_type": "Varlık türü",
+      "threat": "Katalog tehdidi",
+      "search_threat": "Kod veya açıklamaya göre ara",
+      "name": "Senaryo adı (isteğe bağlı)",
+      "affected_plants": "Riski devralan sahalar",
+      "create": "Oluştur ve değerlendir"
+    },
+    "drawer": {
+      "title": "Risk kartı",
+      "identification": "Tanımlama",
+      "name": "Senaryo",
+      "threat": "Tehdit",
+      "asset": "Varlık",
+      "supplier": "Tedarikçi",
+      "asset_group": "Varlık grubu (belirli değil)",
+      "asset_group_label": "Varlık grubu",
+      "asset_group_placeholder": "Örn. iş istasyonları, sunucu odası",
+      "process": "Kritik süreç (BIA)",
+      "information_classes": "Etkilenen bilgiler",
+      "information_classes_hint": "Gizlilik tehdidinde etki en yüksek koruma sınıfının altına düşemez.",
+      "no_information_classes": "Bilgi sınıfı yok: Ayarlar'da tanımlayın.",
+      "affected_plants": "Riski devralan sahalar",
+      "vulnerability": "Zafiyet",
+      "consequence": "Hedeflere etkisi",
+      "consequence_hint": "Hangi iş hedefi tehlikeye girer (OEM teslimatları, gizlilik, uyum…)",
+      "evaluation": "Mevcut risk değerlendirmesi",
+      "show_criteria": "Kriterleri göster",
+      "hide_criteria": "Kriterleri gizle",
+      "current_risk": "Mevcut risk",
+      "saved_class": "kayıtlı sınıf",
+      "probability": "Olasılık",
+      "probability_method": "Yöntem",
+      "method_frequency": "Geçmiş sıklık",
+      "method_fer": "Maruziyet faktörü (FER)",
+      "probability_rationale": "Olasılık gerekçesi",
+      "impact_dimensions": "Boyuta göre etki",
+      "not_relevant": "ilgili değil",
+      "impact_worst_case": "Nihai etki, doldurulan boyutlar arasındaki en kötü durumdur.",
+      "impact_rationale": "Etki gerekçesi",
+      "override": "Sınıf düzeltmesi",
+      "override_hint": "Yalnızca değerlendirme iki hücre sınırındaysa, gerekçeyle.",
+      "override_down": "Bir seviye aşağı",
+      "override_none": "Yok",
+      "override_up": "Bir seviye yukarı",
+      "override_rationale": "Düzeltme gerekçesi",
+      "not_acceptable": "Yasa, VDA ISA gereklilikleri veya gizlilik yükümlülüklerinin ihlalini içerir (asla kabul edilemez)",
+      "treatment": "İşlem",
+      "rule_mandatory": "Critical sınıfı: işlem zorunlu, önlemler {{months}} ay içinde.",
+      "rule_evaluate": "High sınıfı: maliyet/fayda analiziyle işlem değerlendirilmeli, önlemler {{months}} ay içinde.",
+      "rule_acceptable": "Risk Sahibince kabul edilebilir sınıf; varsa önlemler {{months}} ay içinde.",
+      "treatment_option": "Seçenek",
+      "plan_due_date": "Plan son tarihi",
+      "treatment_rationale": "İşlem gerekçesi",
+      "expected_probability": "Beklenen olasılık",
+      "expected_impact": "Beklenen etki",
+      "expected_risk": "Beklenen risk",
+      "owner": "Risk Sahibi",
+      "owner_hint": "Bilginin veya sürecin sahibi olan iş yöneticisi",
+      "treatment_owner": "İşlem sorumlusu",
+      "nis2": "NIS2",
+      "nis2_in_scope": "NIS2 kapsamındaki sistem veya hizmetleri ilgilendirir",
+      "significant_incident": "Gerçekleşirse önemli bir olay olur (md. 23)",
+      "nis2_area": "Md. 21(2) alanı",
+      "impacted_systems": "Etkilenen sistem ve hizmetler",
+      "significant_incident_note": "Neden önemli olurdu",
+      "existing_measures": "Mevcut önlemler",
+      "no_measures": "Kayıtlı mevcut önlem yok.",
+      "effectiveness": "Etkinlik",
+      "no_control": "Bağlı kontrol yok",
+      "measure_description": "Önlem açıklaması",
+      "treatment_plan": "İşlem planı",
+      "plan_hint": "Sınıf yalnızca tüm önlemler tamamlanıp etkinlikleri doğrulandığında düşer.",
+      "no_plans": "Planlanmış önlem yok.",
+      "apply_expected": "Beklenen riski uygula",
+      "due": "son tarih",
+      "verified": "Doğrulandı",
+      "completed": "Tamamlandı",
+      "overdue": "Gecikmiş",
+      "open": "Açık",
+      "mark_completed": "Tamamlandı olarak işaretle",
+      "reopen_measure": "Yeniden aç",
+      "verify": "Etkinliği doğrula",
+      "verification_note": "Nasıl doğrulandı (test, kanıt, denetim)",
+      "measure_action": "Uygulanacak önlem",
+      "expected_effect": "Beklenen etki",
+      "measure_owner": "Sorumlu",
+      "add_measure": "Önlem ekle",
+      "acceptance": "Kabul",
+      "acceptance_needs_completion": "Yalnızca değerlendirmesi tamamlanmış bir risk kabul edilebilir.",
+      "not_acceptable_notice": "Risk kabul edilemez: işlem görmelidir.",
+      "who_accepts": "{{cls}} sınıfı: kabul eden {{roles}}.",
+      "governing_body": "yönetim organı",
+      "opinion_binding": "CISO'nun olumlu görüşü gerekir.",
+      "opinion_notify": "CISO bilgilendirilir.",
+      "body_required": "Organ kararı gerekir.",
+      "max_validity": "Azami geçerlilik: {{months}} ay.",
+      "expires": "{{date}} tarihinde sona erer",
+      "signatures": "İmzalar",
+      "required": "gerekli",
+      "ciso_opinion": "CISO görüşü",
+      "body": "Organ",
+      "sign": "İmzala",
+      "opinion_note": "Görüş notu",
+      "favorable": "Olumlu",
+      "unfavorable": "Olumsuz",
+      "resolution_ref": "Karar referansı",
+      "record_decision": "Kararı kaydet",
+      "revoke_reason": "İptal nedeni",
+      "revoke": "İptal et",
+      "acceptance_rationale": "Gerekçe (High için: maliyet/fayda analizi)",
+      "acceptance_expiry": "Bitiş (boş = izin verilen azami)",
+      "request_acceptance": "Kabulü başlat",
+      "acceptance_history": "Önceki kabuller",
+      "local_impact": "Yerel etki (grup riski)",
+      "local_impact_value": "yerel etki {{value}}",
+      "local_impact_note": "Sahada etki neden daha yüksek",
+      "local_status": {
+        "aperta": "Grubun yanıtı bekleniyor",
+        "recepita": "Grup tarafından dikkate alındı"
+      },
+      "acknowledge": "Dikkate al",
+      "report": "Bildir",
+      "history": "Geçmiş",
+      "assessed": "{{who}} tarafından {{when}} tarihinde değerlendirildi",
+      "legacy_badge": "Eski yöntem",
+      "inherited_badge": "Gruptan devralındı",
+      "read_only_rights": "Salt okunur: risk başka bir kayda ait veya düzenleme yetkiniz yok.",
+      "read_only_no_cycle": "Değerlendirme yalnızca devam eden bir değerlendirmede düzenlenebilir; planlar, doğrulamalar ve kabuller yönetilebilir.",
+      "not_applicable_title": "Tehdit uygulanamaz",
+      "delete_confirm": "Bu risk kayıttan çıkarılsın mı?",
+      "reopen": "Yeniden aç",
+      "confirm": "Değerlendirmeyi onayla",
+      "complete": "Değerlendirmeyi tamamla"
+    },
+    "register": {
+      "search": "Ara",
+      "all_asset_types": "Tüm türler",
+      "all_classes": "Tüm sınıflar",
+      "all_treatments": "Tüm işlemler",
+      "only_open": "Tamamlanacak veya kabul edilmemiş",
+      "show_na": "Uygulanamazları göster",
+      "show_inherited": "Gruptan devralınanları göster",
+      "count": "Riskler: {{count}}",
+      "empty": "Kayıtta risk yok.",
+      "col_threat": "Tehdit",
+      "col_scenario": "Senaryo",
+      "col_owner": "Risk Sahibi",
+      "col_class": "Mevcut → beklenen",
+      "col_treatment": "İşlem",
+      "col_status": "Durum",
+      "not_applicable": "Uygulanamaz",
+      "status_done": "Değerlendirildi",
+      "status_draft": "Taslak",
+      "plans_progress": "önlemler {{done}}/{{total}} ({{verified}} doğrulandı)",
+      "accepted": "kabul edildi",
+      "acceptance_pending": "kabul sürüyor",
+      "inherited_hint": "Saha tarafından devralınan grup riski"
+    },
+    "plan": {
+      "filters": {
+        "open": "Açık",
+        "overdue": "Gecikmiş",
+        "to_verify": "Doğrulanacak",
+        "all": "Tümü"
+      },
+      "count": "Önlemler: {{count}}",
+      "empty": "Önlem yok.",
+      "col_measure": "Önlem",
+      "col_risk": "Risk",
+      "col_owner": "Sorumlu",
+      "col_due": "Son tarih",
+      "col_status": "Durum"
+    },
+    "coverage": {
+      "progress": "Kapsam: {{total}} içinden {{closed}} (%{{pct}})",
+      "only_missing": "Yalnızca kapatılacaklar",
+      "hint": "Kayıttaki bir varlık türüne uygulanabilen her katalog tehdidi değerlendirilmeli veya nedeniyle uygulanamaz bildirilmelidir (prosedür §6.5).",
+      "open": "Aç",
+      "evaluate": "Değerlendir",
+      "not_applicable": "Uygulanamaz",
+      "not_applicable_title": "{{code}} uygulanamaz",
+      "not_applicable_reason": "Tehdit bu kayda neden uygulanmaz",
+      "states": {
+        "missing": "Değerlendirilecek",
+        "draft": "Taslak",
+        "evaluated": "Değerlendirildi",
+        "not_applicable": "Uygulanamaz"
+      }
+    },
+    "acceptance": {
+      "filters": {
+        "awaiting_me": "İmza veya görüş bekleyen",
+        "pending": "Onay bekliyor",
+        "active": "Etkin",
+        "closed": "Kapalı"
+      },
+      "empty": "Kabul yok.",
+      "col_risk": "Risk",
+      "col_class": "Sınıf",
+      "col_status": "Durum",
+      "col_expires": "Bitiş",
+      "awaiting_opinion": "CISO görüşü bekleniyor",
+      "your_turn": "sıra sizde",
+      "status": {
+        "pending": "Onay bekliyor",
+        "active": "Etkin",
+        "rejected": "Reddedildi",
+        "revoked": "İptal edildi",
+        "expired": "Süresi doldu"
+      },
+      "opinion": {
+        "not_required": "gerekmez",
+        "pending": "bekliyor",
+        "favorable": "olumlu",
+        "unfavorable": "olumsuz"
+      }
+    },
+    "settings": {
+      "sections": {
+        "governance": "Risk yönetişimi",
+        "catalog": "Tehdit kataloğu",
+        "information": "Bilgi sınıfları"
+      },
+      "org_policy": "Kuruluş politikası",
+      "configured": "Onaylı ve yürürlükte.",
+      "defaults": "Henüz kaydedilmedi: ön ayar varsayılanları geçerli.",
+      "read_only": "Salt okunur: kuralları tüm kuruluşa erişimi olanlar belirler.",
+      "preset": "Yönetişim modeli",
+      "presets": {
+        "centralizzato": "Merkezi",
+        "federato": "Federe",
+        "sito_singolo": "Tek saha"
+      },
+      "preset_hint": {
+        "centralizzato": "Ana şirket karar verir: High için bağlayıcı görüş, Critical grup organına.",
+        "federato": "Özerk sahalar: High için gruba bildirim, Critical şirket organına.",
+        "sito_singolo": "Tek saha: grup kaydı yok, her şey sahada kararlaştırılır."
+      },
+      "escalation_days": "Geciken önlem eskalasyonu (gün)",
+      "review_months": "Periyodik gözden geçirme (ay)",
+      "group_register": "Grup kaydı etkin (paylaşılan hizmet riskleri, sahalarca devralınır)",
+      "acceptance_matrix": "Sınıfa göre kim kabul eder",
+      "col_class": "Sınıf",
+      "col_roles": "Gerekli imzalar",
+      "col_scope": "Seviye",
+      "col_body": "Organ kararı",
+      "col_opinion": "CISO görüşü",
+      "col_months": "Geçerlilik (ay)",
+      "scope_plant": "Saha",
+      "scope_org": "Kuruluş",
+      "opinion": {
+        "none": "Yok",
+        "notify": "Bildirim",
+        "binding": "Bağlayıcı"
+      },
+      "economic_thresholds": "Ekonomik eşikler (€, etki seviyesinin alt sınırı)",
+      "threshold_level": "Seviye {{level}} itibaren",
+      "save": "Politikayı kaydet",
+      "saved": "Politika kaydedildi.",
+      "site_exception": "{{site}} için istisna",
+      "site_exception_active": "Saha, kuruluşça onaylanmış kendi ekonomik eşiklerini kullanır.",
+      "site_exception_none": "Saha kuruluş eşiklerini kullanır.",
+      "save_site": "Saha eşiklerini kaydet",
+      "search": "Ara",
+      "catalog_count": "Tehditler: {{count}}",
+      "col_code": "Kod",
+      "col_title": "Tehdit",
+      "col_types": "Varlık türleri",
+      "col_source": "Kaynak",
+      "source": {
+        "catalog": "Grup kataloğu",
+        "custom": "Özel"
+      },
+      "deactivate": "Devre dışı bırak",
+      "reactivate": "Yeniden etkinleştir",
+      "new_threat": "Yeni özel tehdit",
+      "code_hint": "Büyük harf, rakam ve alt çizgi, benzersiz",
+      "add_threat": "Kataloğa ekle",
+      "information_hint": "Gizlilik, bütünlük ve erişilebilirlik için gerekli seviyeyle korunacak bilgiler (VDA ISA 1.3.1, 1.3.2). Sahasız olanlar grup için geçerlidir.",
+      "no_classes": "Bilgi sınıfı yok.",
+      "class_name": "Bilgi sınıfı",
+      "class_description": "Açıklama",
+      "class_scope": "Kapsam",
+      "confidentiality": "Gizlilik",
+      "integrity": "Bütünlük",
+      "availability": "Erişilebilirlik",
+      "new_class": "Yeni bilgi sınıfı",
+      "edit_class": "Bilgi sınıfını düzenle",
+      "delete_class_confirm": "Bu bilgi sınıfı silinsin mi?"
+    },
+    "protection": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "very_high": "Very high"
+    },
+    "effectiveness": {
+      "alta": "Yüksek",
+      "media": "Orta",
+      "bassa": "Düşük"
+    },
+    "effect": {
+      "probabilita": "olasılığı azaltır",
+      "impatto": "etkiyi azaltır",
+      "entrambi": "olasılık ve etkiyi azaltır"
+    },
+    "dimensions": {
+      "economic": "Ekonomik",
+      "legal": "Hukuki",
+      "customer": "Müşteri ve sözleşme",
+      "reputational": "İtibar",
+      "people": "Kişi güvenliği",
+      "operational": "Operasyonel"
+    },
+    "scales": {
+      "economic": {
+        "above": "{{from}} üzeri",
+        "between": "{{from}} ile {{to}} arası",
+        "below": "{{to}} altı"
+      },
+      "probability": {
+        "5": {
+          "frequency": "Yılda birden fazla",
+          "fer": "ele alınmamış zafiyetler veya etkisiz kontroller"
+        },
+        "4": {
+          "frequency": "1–2 yılda bir",
+          "fer": "eksikleri olan veya tam etkili olmayan kontroller"
+        },
+        "3": {
+          "frequency": "2–4 yılda bir",
+          "fer": "yalnızca uzmanlarca veya büyük doğal olaylarla istismar edilebilen zafiyetler"
+        },
+        "2": {
+          "frequency": "4–10 yılda bir",
+          "fer": "önemli zafiyet yok: çok motive hedefli saldırı veya istisnai bir olay gerekir"
+        },
+        "1": {
+          "frequency": "10 yılda birden az",
+          "fer": "çoklu doğrulanmış kontrollerle korunan zafiyetler, inandırıcı tehdit aktörü yok"
+        }
+      },
+      "impact": {
+        "legal": {
+          "5": "Yöneticilere cezai yaptırım; en üst kademe NIS2 veya GDPR cezası; yasaklayıcı tedbirler",
+          "4": "Çalışanlara cezai yaptırım; önemli idari para cezaları",
+          "3": "Önemli hukuki yaptırımlar; küçük idari cezalar veya uyarılar",
+          "2": "Olağan yasal süreç; rutin anlaşmazlıklar",
+          "1": "Hukuki sonuç yok"
+        },
+        "customer": {
+          "5": "TISAX etiketinin kaybı veya askıya alınması; bir OEM müşterisinin kaybı; müşteride hat duruşu",
+          "4": "Önemli sözleşme cezaları; resmi eskalasyon; high veya very high bilgide NDA ihlali",
+          "3": "Resmi müşteri şikayeti; ek maliyetle telafi edilen gecikmeler",
+          "2": "Cezasız gayri resmi müşteri bildirimi",
+          "1": "Müşteriye etkisi yok"
+        },
+        "reputational": {
+          "5": "Ulusal veya uluslararası medyada haber; kalıcı güven kaybı",
+          "4": "Müşterilere ve sektöre görünür zarar",
+          "3": "Bazı müşteri veya ortaklarca bilinen, kalıcı olmayan zarar",
+          "2": "İç ortamla veya az sayıda tarafla sınırlı hafif zarar",
+          "1": "Etkisi yok"
+        },
+        "people": {
+          "5": "Birden fazla kişide ölüm veya kalıcı yaralanma",
+          "4": "Bir kişide ölüm veya kalıcı yaralanma",
+          "3": "Bir veya daha fazla kişide hafif yaralanma",
+          "2": "Yaralanma yok",
+          "1": "Etkisi yok"
+        },
+        "operational": {
+          "5": "Kritik süreç MTPD'yi aşacak şekilde durdu; teslimatlar 24 saatten fazla durdu; iç işlevler 2 günden fazla durdu",
+          "4": "RTO'yu aşan ama MTPD içinde kesinti; ciddi gecikmeli teslimatlar; işlevlerin %31–50'si durdu",
+          "3": "RTO içinde teslimat aksaklığı; işlevlerin %11–30'u durdu",
+          "2": "İşlevlerin %1–10'u durdu; teslimatlara etkisi yok",
+          "1": "Kayda değer etkisi yok"
+        }
+      }
     }
   },
   "pdca": {

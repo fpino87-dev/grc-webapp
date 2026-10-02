@@ -226,7 +226,11 @@
     "deleting": "Eliminazione...",
     "notes": "Note",
     "save": "Salva",
-    "user": "Utente"
+    "user": "Utente",
+    "add": "Aggiungi",
+    "confirm": "Conferma",
+    "delete": "Elimina",
+    "edit": "Modifica"
   },
   "help": {
     "open_title": "Aiuto su questo modulo",
@@ -301,64 +305,13 @@
     },
     "risk": {
       "matrix_title": "Matrice P×I (Probabilità × Impatto)",
-      "zones": {
-        "green": {
-          "label": "Verde",
-          "range": "Score 1–7",
-          "desc": "Rischio accettabile — monitora annualmente"
-        },
-        "yellow": {
-          "label": "Giallo",
-          "range": "Score 8–14",
-          "desc": "Rischio moderato — piano di mitigazione entro 90 giorni"
-        },
-        "red": {
-          "label": "Rosso",
-          "range": "Score 15–25",
-          "desc": "Rischio critico — azione immediata, task autogenerato, PDCA obbligatorio"
-        }
-      },
-      "it_dimensions_title": "Dimensioni asset IT",
-      "it_dimensions": {
-        "exposure": {
-          "label": "Esposizione",
-          "desc": "Quanto è raggiungibile dall'esterno o da reti non fidate"
-        },
-        "cve": {
-          "label": "CVE Score",
-          "desc": "Vulnerabilità note non patchate — fonte: NVD/CVE database"
-        },
-        "threat": {
-          "label": "Minaccia",
-          "desc": "Probabilità di attacco basata su threat intelligence di settore"
-        },
-        "controls_gap": {
-          "label": "Gap Controlli",
-          "desc": "Quanti controlli ISO27001/TISAX collegati sono in stato Gap"
-        }
-      },
-      "ot_dimensions_title": "Dimensioni asset OT",
-      "ot_dimensions": {
-        "purdue": {
-          "label": "Connettività Purdue",
-          "desc": "Livello di isolamento nella gerarchia Purdue — L0 più critico"
-        },
-        "patchability": {
-          "label": "Patchability",
-          "desc": "Possibilità tecnica di aggiornare il firmware/OS"
-        },
-        "physical_impact": {
-          "label": "Impatto fisico",
-          "desc": "Conseguenze fisiche di un attacco: fermo linea, danni, safety"
-        },
-        "segmentation": {
-          "label": "Segmentazione",
-          "desc": "Isolamento dalla rete IT e da internet"
-        },
-        "detection": {
-          "label": "Rilevabilità",
-          "desc": "Capacità di rilevare una compromissione in tempo reale"
-        }
+      "matrix_note": "La classe si legge dalla cella della matrice della procedura di risk management, non dal prodotto probabilità × impatto.",
+      "impact_title": "Impatto",
+      "impact_desc": "L'impatto si valuta su sei dimensioni (economico, legale, cliente e contrattuale, reputazionale, sicurezza delle persone, operativo): vale il caso peggiore. Se è colpita la riservatezza di un'informazione classificata, l'impatto non scende sotto la sua classe di protezione.",
+      "rules": {
+        "mandatory": "Trattamento obbligatorio entro 3 mesi; accettazione solo come eccezione temporanea con delibera dell'organo.",
+        "evaluate": "Trattamento da valutare con analisi costi/benefici entro 1 anno; altrimenti accettazione con le firme previste.",
+        "acceptable": "Accettabile dal Risk Owner; si possono comunque proporre misure di miglioramento."
       }
     },
     "risk_module": {
@@ -2782,7 +2735,9 @@
       "config_needed": {
         "1": "Creare prima i Plant (M01) e gli Asset (M04)"
       }
-    }
+    },
+    "create_risk": "Crea rischio",
+    "create_risk_hint": "Apre un nuovo rischio nel registro del sito collegato a questo processo"
   },
   "assets": {
     "criticality_1_label": "Trascurabile",
@@ -3262,40 +3217,11 @@
     }
   },
   "risk": {
-    "no_process_selected": "Nessun processo selezionato",
-    "level_critical": "Critico",
-    "score_inherent": "Inerente: score {{score}}",
-    "score_residual": "Residuo: score {{score}}",
-    "suggest_residual": "💡 Suggerisci rischio residuo",
-    "controls_reduction": "Riduzione controlli:",
-    "bcp_extra": "Extra BCP:",
-    "total_label": "Totale:",
-    "accepted_by_on": "Accettato da {{name}} il {{date}}",
-    "expired_on": "scaduto il",
-    "expires_on": "scade il",
-    "accept_risk_prompt": "⚠️ Accetta rischio formalmente",
-    "accept_risk_title": "Accettazione formale del rischio residuo",
-    "accept_note_label": "Nota obbligatoria",
-    "accept_note_critical_hint": "(min 50 caratteri per rischi critici)",
-    "confirm_acceptance": "Conferma accettazione",
     "treatment_mitigare": "Mitigare",
     "treatment_accettare": "Accettare",
     "treatment_trasferire": "Trasferire",
     "treatment_trasferire_ext": "Trasferire (es. assicurazione)",
     "treatment_evitare": "Evitare",
-    "filter_all": "Tutti",
-    "filter_treatment": "Trattamento",
-    "filter_completeness": "Completezza",
-    "filter_incomplete": "Scenari incompleti",
-    "status_archiviato": "Archiviato",
-    "probability_label": "Probabilità *",
-    "impact_label": "Impatto *",
-    "acceptance_expiry_placeholder": "Scadenza accettazione",
-    "action_desc_placeholder": "Descrizione azione *",
-    "bcp_test_date_placeholder": "Data ultimo test valido *",
-    "scenario_placeholder": "es. Ransomware su server di produzione MES",
-    "error_generic": "Errore",
-    "wizard_title": "Wizard BIA → Rischio → BCP",
     "registers": {
       "title": "Registri rischi integrati",
       "attention_count": "{{count}} ad alta attenzione",
@@ -3316,156 +3242,12 @@
         "bcp_marginal": "BCP marginale"
       }
     },
-    "wizard_subtitle": "Crea in sequenza processo critico, scenario di rischio e piano BCP coerente.",
-    "wizard_step_bia": "Processo BIA",
-    "wizard_step_risk": "Scenario di rischio",
-    "wizard_step_bcp": "Piano BCP",
-    "wizard_create_new": "Crea nuovo",
-    "wizard_bcp_process_label": "Processo:",
-    "wizard_bcp_created": "Piano creato e collegato al processo.",
-    "wizard_criticality_legend": "Criticità 1–5:",
-    "wizard_continue_risk": "Continua con rischio",
-    "wizard_save_risk_continue": "Salva rischio e continua",
-    "wizard_create_bcp": "Crea piano BCP",
-    "cause_label": "Causa",
-    "cause_placeholder": "Causa o fonte del rischio",
-    "consequence_label": "Conseguenza",
-    "consequence_placeholder": "Impatto atteso se il rischio si concretizza",
-    "nis2_section": "Classificazione NIS2",
-    "nis2_art21_label": "Articolo NIS2 Art.21",
-    "nis2_relevance_label": "Rilevanza NIS2",
-    "impacted_systems_label": "Sistemi/Servizi impattati",
-    "impacted_systems_placeholder": "es. ERP / Corporate IT / VPN",
-    "export_excel": "Esporta Excel",
-    "renew_acceptance": "Rinnova scadenza",
-    "renew_confirm": "Conferma rinnovo",
-    "reset_acceptance": "Rivaluta (annulla accettazione)",
-    "reset_acceptance_confirm": "Annullare l'accettazione formale e avviare la rivalutazione? L'azione è tracciata in audit trail.",
-    "plan_due_date_label": "Scadenza piano di trattamento",
-    "plan_due_date_help": "Data entro cui il trattamento scelto (mitigare/accettare/trasferire/evitare) deve essere applicato",
-    "plan_due_date_overdue": "Scaduto",
-    "plan_due_date_soon": "In scadenza",
-    "plan_col_header": "Scadenza Piano",
-    "mitigation_on_time": "Completato in tempo",
-    "mitigation_late": "Completato in ritardo",
-    "mitigation_progress": "{{completed}}/{{total}} azioni completate",
-    "mitigation_no_plans": "Nessuna azione di trattamento",
-    "reopen_label": "Riapri in bozza",
-    "reopen_confirm": "Riportare questo scenario in bozza? Lo stato 'completato' verrà annullato. L'azione è tracciata in audit trail.",
-    "complete_btn": "Completa",
-    "plan_complete_btn": "Segna completato",
-    "plan_completed_label": "Completato",
-    "plan_uncomplete_label": "Annulla completamento",
-    "plan_uncomplete_confirm": "Annullare il completamento di questa azione? Tornerà in stato 'in corso'. L'azione è tracciata in audit trail.",
-    "plan_delete_confirm": "Eliminare questa azione di mitigazione? L'operazione non è reversibile.",
-    "eff_status": {
-      "in_valutazione": "In valutazione",
-      "valutato": "Valutato",
-      "da_pianificare": "Da pianificare",
-      "in_trattamento": "In trattamento ({{done}}/{{total}})",
-      "in_accettazione": "In accettazione",
-      "accettato_azioni_in_corso": "Accettato — azioni in corso",
-      "completato": "Completato",
-      "archiviato": "Archiviato",
-      "rivalutare": "Rivalutare",
-      "hint_accettazione": "Espandi la riga per accettare formalmente"
-    },
-    "new_title": "Nuovo scenario di rischio",
-    "edit_title": "Modifica scenario rischio",
-    "name_label": "Nome scenario / rischio *",
-    "site_label": "Sito *",
-    "select_placeholder": "— seleziona —",
-    "threat_category_label": "Categoria minaccia",
-    "asset_type_label": "Tipo asset",
     "treatment_label": "Trattamento previsto",
-    "owner_label": "Owner rischio",
-    "no_owner": "— nessun owner —",
     "treatment_owner_label": "Responsabile del trattamento",
     "treatment_owner_short": "Tratt.",
-    "no_treatment_owner": "— nessun responsabile del trattamento —",
     "treatment_owner_help": "Chi realizza le misure di trattamento (es. IT/OT o un fornitore). Può coincidere con l'owner del rischio.",
     "owner_external_option": "Altro (non utente del portale)…",
     "owner_external_placeholder": "Nome, funzione o fornitore",
-    "plan_owner_label": "Responsabile dell'azione",
-    "no_plan_owner": "— nessun responsabile —",
-    "bia_process_label": "Processo BIA collegato (opzionale)",
-    "bia_process_edit_label": "Processo BIA collegato",
-    "no_bia_process": "— nessun processo BIA —",
-    "bia_criticality_bracket": "[criticità {{count}}]",
-    "bia_downtime_cost": "Costo orario fermo:",
-    "bia_criticality_val": "Criticità:",
-    "inherent_section": "Rischio inerente (prima dei controlli)",
-    "inherent_hint": "Valuta il rischio come se non esistessero controlli di sicurezza",
-    "inherent_probability_label": "Probabilità inerente",
-    "inherent_impact_label": "Impatto inerente",
-    "inherent_score_label": "Score inerente:",
-    "residual_section": "Rischio residuo (P × I dopo i controlli)",
-    "ale_label": "ALE calcolato dalla BIA",
-    "ale_auto_hint": "Calcolato automaticamente da probabilità × impatto × costo fermo BIA",
-    "ale_select_hint": "Seleziona probabilità e impatto per stimare l'ALE",
-    "ale_bia_hint": "Collega un processo BIA per calcolare l'ALE",
-    "create_btn": "Crea scenario",
-    "new_btn": "Nuovo scenario",
-    "filter_type": "Tipo",
-    "filter_status": "Stato",
-    "empty": "Nessuno scenario di rischio registrato",
-    "create_first": "Crea il primo scenario",
-    "col_scenario": "Scenario",
-    "col_threat": "Minaccia",
-    "col_inherent": "Rischio Inerente (P×I)",
-    "col_residual": "Rischio Residuo (P×I)",
-    "col_weighted": "Weighted (pesato)",
-    "weighted_on_bia": "Pesato sulla criticità BIA",
-    "col_ale": "ALE (da BIA)",
-    "ale_calculated": "Calcolato da BIA",
-    "ale_estimate": "Stima (dati BIA mancanti)",
-    "ale_no_bia": "BIA non collegata",
-    "nis2_sig": "Significativo",
-    "nis2_pot_sig": "Pot. significativo",
-    "nis2_non_sig": "Non significativo",
-    "edit_btn": "Modifica",
-    "delete_confirm": "Eliminare questo scenario di rischio?",
-    "delete_btn": "Elimina",
-    "no_bcp_option": "Nessun BCP",
-    "bcp_valid_until": "valido fino",
-    "add_plan": "Aggiungi piano",
-    "last_test": "Ultimo test:",
-    "next_test": "Prossimo test:",
-    "next_test_no_bcp": "— (collega un BCP)",
-    "appetite_max_score": "Score max accettabile:",
-    "appetite_max_red": "Max rischi rossi:",
-    "appetite_valid_until": "Valida fino:",
-    "appetite_approved_by": "Approvata da:",
-    "appetite_approved_at": "Data approvazione:",
-    "appetite_valid_from": "Valida dal:",
-    "appetite_notes": "Note:",
-    "appetite_create_btn": "Crea policy",
-    "appetite_missing": "Nessuna policy attiva — configurare prima di avviare le valutazioni",
-    "appetite_expired": "Scaduta — rinnovare",
-    "appetite_expiry_warning": "In scadenza (≤30 gg)",
-    "guide_btn": "Guida alla valutazione",
-    "bcp_link_label": "Collega a un BCP (opzionale)",
-    "no_mitigation_plans": "Nessun piano di mitigazione registrato",
-    "suggest_hint": "(Il suggeritore ricalcola dal rischio inerente usando controlli compliant e BCP validi: se risultano 0 o scaduti, la riduzione suggerita può differire dal valore attuale.)",
-    "threat_cat": {
-      "accesso_non_autorizzato": "Accesso non autorizzato",
-      "malware_ransomware": "Malware / Ransomware",
-      "data_breach": "Data breach / Fuga di dati",
-      "phishing_social": "Phishing / Social engineering",
-      "guasto_hw_sw": "Guasto hardware / software",
-      "disastro_naturale": "Disastro naturale / ambientale",
-      "errore_umano": "Errore umano",
-      "attacco_supply_chain": "Attacco supply chain",
-      "ddos": "DoS / DDoS",
-      "insider_threat": "Insider threat",
-      "furto_perdita": "Furto / perdita dispositivi",
-      "altro": "Altro"
-    },
-    "nis2_relevance": {
-      "non_significativo": "Non significativo",
-      "potenzialmente_significativo": "Potenzialmente significativo",
-      "significativo": "Significativo"
-    },
     "nis2_art21": {
       "art21_a": "Art.21(2)(a) – Analisi dei rischi e policy ISMS",
       "art21_b": "Art.21(2)(b) – Gestione incidenti",
@@ -3478,25 +3260,6 @@
       "art21_i": "Art.21(2)(i) – Controllo accessi, IAM e gestione asset",
       "art21_j": "Art.21(2)(j) – MFA e comunicazioni sicure"
     },
-    "prob": {
-      "1": "1 – Molto bassa",
-      "2": "2 – Bassa",
-      "3": "3 – Media",
-      "4": "4 – Alta",
-      "5": "5 – Molto alta"
-    },
-    "impact": {
-      "1": "1 – Trascurabile",
-      "2": "2 – Minore",
-      "3": "3 – Moderato",
-      "4": "4 – Grave",
-      "5": "5 – Critico"
-    },
-    "appetite_notes_placeholder": "Note sulla soglia: motivazione, delibera di approvazione, riesame previsto…",
-    "appetite": {
-      "all_frameworks": "Tutti i framework"
-    },
-    "col_score": "Score",
     "classes": {
       "very_low": "Very Low",
       "low": "Low",
@@ -3516,7 +3279,520 @@
       "risk_owner": "Risk Owner",
       "plant_manager": "Plant Manager",
       "site_risk_manager": "Risk Manager di sito",
-      "ciso": "CISO"
+      "ciso": "CISO",
+      "it_manager": "Responsabile IT",
+      "hr_manager": "Responsabile HR",
+      "purchasing_manager": "Responsabile Acquisti",
+      "production_manager": "Responsabile Produzione",
+      "engineering_manager": "Responsabile Engineering"
+    },
+    "errors": {
+      "generic": "Operazione non riuscita."
+    },
+    "page": {
+      "title": "Risk Assessment",
+      "register": "Registro",
+      "group_register": "Gruppo",
+      "export": "Excel",
+      "new_risk": "Nuovo rischio",
+      "new_needs_cycle": "Serve una valutazione in corso sul registro",
+      "tabs_label": "Sezioni del risk assessment",
+      "tabs": {
+        "register": "Registro",
+        "matrix": "Matrice",
+        "coverage": "Copertura",
+        "plan": "Piano di trattamento",
+        "acceptances": "Accettazioni",
+        "cycles": "Valutazioni",
+        "settings": "Impostazioni"
+      }
+    },
+    "help": {
+      "title": "Risk Assessment (M06)",
+      "description": "Il modulo applica la procedura di risk management: registro per sito e di gruppo, minacce da catalogo, classe dalla matrice, accettazione con autorità per classe e approvazione dell'organo.",
+      "steps": {
+        "1": "Avvia la valutazione del registro (primo risk assessment, revisione periodica o straordinaria).",
+        "2": "Dalla scheda Copertura valuta ogni minaccia applicabile o dichiarala non applicabile con il motivo.",
+        "3": "Nella scheda del rischio indica probabilità e impatto con le motivazioni, le misure esistenti e il trattamento.",
+        "4": "Completa la valutazione: High e Critical aprono il piano di trattamento.",
+        "5": "Invia in approvazione: l'organo approva e il registro viene congelato.",
+        "6": "Segui misure, verifiche e accettazioni: la classe scende solo con le misure verificate."
+      },
+      "connections": {
+        "governance": "Ruoli, organi di governo e obiettivi di sicurezza",
+        "controls": "Misure esistenti e del piano collegate ai controlli VDA ISA",
+        "assets": "Asset coinvolti e cambiamenti che suggeriscono una revisione",
+        "bia": "Processi critici, RTO e MTPD per l'impatto operativo",
+        "review": "Approvazione annuale del registro nel riesame di direzione"
+      },
+      "config_needed": {
+        "1": "Policy di governo del rischio (Impostazioni)",
+        "2": "Classi di informazioni del sito e catalogo minacce caricato"
+      }
+    },
+    "cycle": {
+      "in_progress": "{{kind}} in corso dal {{date}}",
+      "awaiting_approval": "{{kind}} in attesa di approvazione dell'organo",
+      "approved": "Valutazione approvata il {{date}} ({{body}})",
+      "none": "Nessuna valutazione con il metodo attuale: avvia il primo risk assessment.",
+      "none_with_legacy": "Il registro precedente è archiviato (metodo superato): avvia il primo risk assessment con il nuovo metodo.",
+      "start_first": "Avvia il primo risk assessment",
+      "start_review": "Avvia una revisione",
+      "start_title": "Avvia una valutazione",
+      "start": "Avvia",
+      "trigger_reason": "Motivo della revisione straordinaria (evento, incidente, cambiamento)",
+      "submit": "Invia in approvazione",
+      "submit_ready": "Copertura completa e rischi valutati: la valutazione può andare all'organo.",
+      "return": "Rinvia alla valutazione",
+      "return_reason": "Motivo del rinvio",
+      "approve": "Approva",
+      "approve_hint": "L'approvazione congela il registro e archivia la valutazione precedente. Indica l'organo che ha deliberato.",
+      "approve_scope_hint": "Nel modello centralizzato l'approvazione spetta a chi ha accesso a tutta l'organizzazione.",
+      "choose_body": "Scegli l'organo",
+      "local_adoption": "Delibera di recepimento della società (facoltativa)",
+      "triggers_hint": "Valuta se avviare una revisione straordinaria.",
+      "kinds": {
+        "primo": "Primo risk assessment",
+        "periodico": "Revisione periodica",
+        "straordinario": "Revisione straordinaria",
+        "legacy": "Valutazione precedente (metodo superato)"
+      },
+      "kind_hint": {
+        "primo": "Si parte da zero: ogni minaccia applicabile va valutata o dichiarata non applicabile.",
+        "periodico": "Ogni rischio va rivalutato o confermato; la copertura deve essere completa.",
+        "straordinario": "Dopo un evento (incidente, cambiamento, audit): si rivalutano solo i rischi toccati."
+      },
+      "triggers": {
+        "overdue_measures": "Misure del piano in ritardo: {{count}}",
+        "significant_incidents": "Incidenti significativi dopo l'approvazione: {{count}}",
+        "new_critical_assets": "Nuovi asset critici: {{count}}",
+        "changed_assets": "Asset con cambiamenti registrati: {{count}}",
+        "major_findings": "Non conformità maggiori da audit: {{count}}",
+        "control_gaps": "Controlli passati a gap: {{count}}"
+      }
+    },
+    "cycles": {
+      "col_kind": "Tipo",
+      "col_status": "Stato",
+      "col_started": "Avviata il",
+      "col_approved": "Approvazione",
+      "col_risks": "Rischi",
+      "empty": "Nessuna valutazione per questo registro.",
+      "hint": "Ogni approvazione conserva una fotografia del registro (rischi, classi, accettazioni, copertura e policy usata) per lo storico e l'audit.",
+      "show_legacy": "Mostra i rischi",
+      "hide_legacy": "Nascondi",
+      "status": {
+        "in_corso": "In corso",
+        "in_approvazione": "In approvazione",
+        "approvato": "Approvata (vigente)",
+        "archiviato": "Archiviata"
+      }
+    },
+    "legacy": {
+      "title": "Valutazione precedente",
+      "hint": "Rischio valutato con il metodo superato (punteggi): resta consultabile in sola lettura come evidenza.",
+      "name": "Scenario",
+      "score": "Score residuo",
+      "inherent_score": "Score inerente",
+      "probability_impact": "Probabilità × impatto",
+      "treatment": "Trattamento",
+      "cause": "Causa",
+      "consequence": "Conseguenza",
+      "accepted": "Accettato",
+      "acceptance_note": "Nota di accettazione",
+      "assessed_at": "Valutato il"
+    },
+    "matrix": {
+      "title": "Matrice probabilità × impatto",
+      "current": "Attuale",
+      "expected": "Atteso",
+      "probability": "Probabilità",
+      "impact": "Impatto",
+      "note": "La classe di ogni cella è quella della procedura; il numero è il conteggio dei rischi valutati.",
+      "pick_cell": "Scegli una cella per vedere i rischi",
+      "cell_title": "Rischi in P{{p}} × I{{i}}"
+    },
+    "new": {
+      "title": "Nuovo rischio",
+      "asset_type": "Tipologia di asset",
+      "threat": "Minaccia del catalogo",
+      "search_threat": "Cerca per codice o descrizione",
+      "name": "Nome dello scenario (facoltativo)",
+      "affected_plants": "Siti che ereditano il rischio",
+      "create": "Crea e valuta"
+    },
+    "drawer": {
+      "title": "Scheda del rischio",
+      "identification": "Identificazione",
+      "name": "Scenario",
+      "threat": "Minaccia",
+      "asset": "Asset",
+      "supplier": "Fornitore",
+      "asset_group": "Gruppo di asset (nessuno specifico)",
+      "asset_group_label": "Gruppo di asset",
+      "asset_group_placeholder": "Es. postazioni di lavoro, server room",
+      "process": "Processo critico (BIA)",
+      "information_classes": "Informazioni colpite",
+      "information_classes_hint": "Con una minaccia alla riservatezza, l'impatto non scende sotto la classe di protezione più alta.",
+      "no_information_classes": "Nessuna classe di informazioni: definiscile in Impostazioni.",
+      "affected_plants": "Siti che ereditano il rischio",
+      "vulnerability": "Vulnerabilità",
+      "consequence": "Conseguenza sugli obiettivi",
+      "consequence_hint": "Quale obiettivo aziendale viene compromesso (consegne OEM, riservatezza, conformità…)",
+      "evaluation": "Valutazione del rischio attuale",
+      "show_criteria": "Mostra i criteri",
+      "hide_criteria": "Nascondi i criteri",
+      "current_risk": "Rischio attuale",
+      "saved_class": "classe salvata",
+      "probability": "Probabilità",
+      "probability_method": "Metodo",
+      "method_frequency": "Frequenza storica",
+      "method_fer": "Fattore di esposizione (FER)",
+      "probability_rationale": "Motivazione della probabilità",
+      "impact_dimensions": "Impatto per dimensione",
+      "not_relevant": "non pertinente",
+      "impact_worst_case": "L'impatto finale è il caso peggiore fra le dimensioni valorizzate.",
+      "impact_rationale": "Motivazione dell'impatto",
+      "override": "Correzione della classe",
+      "override_hint": "Solo se la valutazione è al limite fra due celle, con motivazione.",
+      "override_down": "Un livello in meno",
+      "override_none": "Nessuna",
+      "override_up": "Un livello in più",
+      "override_rationale": "Motivazione della correzione",
+      "not_acceptable": "Comporta una violazione di legge, dei requisiti VDA ISA o di obblighi di riservatezza (mai accettabile)",
+      "treatment": "Trattamento",
+      "rule_mandatory": "Classe Critical: trattamento obbligatorio, misure entro {{months}} mesi.",
+      "rule_evaluate": "Classe High: trattamento da valutare con analisi costi/benefici, misure entro {{months}} mesi.",
+      "rule_acceptable": "Classe accettabile dal Risk Owner; eventuali misure entro {{months}} mesi.",
+      "treatment_option": "Opzione",
+      "plan_due_date": "Scadenza del piano",
+      "treatment_rationale": "Motivazione del trattamento",
+      "expected_probability": "Probabilità attesa",
+      "expected_impact": "Impatto atteso",
+      "expected_risk": "Rischio atteso",
+      "owner": "Risk Owner",
+      "owner_hint": "Responsabile di business che possiede l'informazione o il processo",
+      "treatment_owner": "Responsabile del trattamento",
+      "nis2": "NIS2",
+      "nis2_in_scope": "Riguarda sistemi o servizi nel perimetro NIS2",
+      "significant_incident": "Se si realizza sarebbe un incidente significativo (art. 23)",
+      "nis2_area": "Area art. 21(2)",
+      "impacted_systems": "Sistemi e servizi impattati",
+      "significant_incident_note": "Perché sarebbe significativo",
+      "existing_measures": "Misure esistenti",
+      "no_measures": "Nessuna misura esistente registrata.",
+      "effectiveness": "Efficacia",
+      "no_control": "Nessun controllo collegato",
+      "measure_description": "Descrizione della misura",
+      "treatment_plan": "Piano di trattamento",
+      "plan_hint": "La classe scende solo quando tutte le misure sono completate e la loro efficacia è verificata.",
+      "no_plans": "Nessuna misura pianificata.",
+      "apply_expected": "Applica il rischio atteso",
+      "due": "scadenza",
+      "verified": "Verificata",
+      "completed": "Completata",
+      "overdue": "In ritardo",
+      "open": "Aperta",
+      "mark_completed": "Segna completata",
+      "reopen_measure": "Riapri",
+      "verify": "Verifica efficacia",
+      "verification_note": "Come è stata verificata (test, evidenza, audit)",
+      "measure_action": "Misura da attuare",
+      "expected_effect": "Effetto atteso",
+      "measure_owner": "Responsabile",
+      "add_measure": "Aggiungi misura",
+      "acceptance": "Accettazione",
+      "acceptance_needs_completion": "Si accetta solo un rischio applicabile con valutazione completata.",
+      "not_acceptable_notice": "Rischio non accettabile: va trattato.",
+      "who_accepts": "Classe {{cls}}: accetta {{roles}}.",
+      "governing_body": "l'organo di amministrazione",
+      "opinion_binding": "Serve il parere favorevole del CISO.",
+      "opinion_notify": "Il CISO viene informato.",
+      "body_required": "Serve la delibera dell'organo.",
+      "max_validity": "Validità massima: {{months}} mesi.",
+      "expires": "scade il {{date}}",
+      "signatures": "Firme",
+      "required": "richieste",
+      "ciso_opinion": "Parere del CISO",
+      "body": "Organo",
+      "sign": "Firma",
+      "opinion_note": "Nota del parere",
+      "favorable": "Favorevole",
+      "unfavorable": "Contrario",
+      "resolution_ref": "Riferimento della delibera",
+      "record_decision": "Registra delibera",
+      "revoke_reason": "Motivo della revoca",
+      "revoke": "Revoca",
+      "acceptance_rationale": "Motivazione (per High: analisi costi/benefici)",
+      "acceptance_expiry": "Scadenza (vuota = massimo consentito)",
+      "request_acceptance": "Avvia l'accettazione",
+      "acceptance_history": "Accettazioni precedenti",
+      "local_impact": "Impatto locale (rischio di gruppo)",
+      "local_impact_value": "impatto locale {{value}}",
+      "local_impact_note": "Perché nel sito l'impatto è più alto",
+      "local_status": {
+        "aperta": "In attesa del gruppo",
+        "recepita": "Recepita dal gruppo"
+      },
+      "acknowledge": "Recepisci",
+      "report": "Segnala",
+      "history": "Storico",
+      "assessed": "Valutato da {{who}} il {{when}}",
+      "legacy_badge": "Metodo superato",
+      "inherited_badge": "Ereditato dal gruppo",
+      "read_only_rights": "Sola lettura: il rischio appartiene a un altro registro o non hai i permessi di modifica.",
+      "read_only_no_cycle": "La valutazione si modifica solo con una valutazione in corso; piani, verifiche e accettazioni restano gestibili.",
+      "not_applicable_title": "Minaccia non applicabile",
+      "delete_confirm": "Togliere questo rischio dal registro?",
+      "reopen": "Riapri",
+      "confirm": "Conferma valutazione",
+      "complete": "Completa la valutazione"
+    },
+    "register": {
+      "search": "Cerca",
+      "all_asset_types": "Tutte le tipologie",
+      "all_classes": "Tutte le classi",
+      "all_treatments": "Tutti i trattamenti",
+      "only_open": "Da completare o non accettati",
+      "show_na": "Mostra non applicabili",
+      "show_inherited": "Mostra ereditati dal gruppo",
+      "count": "Rischi: {{count}}",
+      "empty": "Nessun rischio nel registro.",
+      "col_threat": "Minaccia",
+      "col_scenario": "Scenario",
+      "col_owner": "Risk Owner",
+      "col_class": "Attuale → atteso",
+      "col_treatment": "Trattamento",
+      "col_status": "Stato",
+      "not_applicable": "Non applicabile",
+      "status_done": "Valutato",
+      "status_draft": "In bozza",
+      "plans_progress": "misure {{done}}/{{total}} (verificate {{verified}})",
+      "accepted": "accettato",
+      "acceptance_pending": "accettazione in corso",
+      "inherited_hint": "Rischio di gruppo ereditato dal sito"
+    },
+    "plan": {
+      "filters": {
+        "open": "Aperte",
+        "overdue": "In ritardo",
+        "to_verify": "Da verificare",
+        "all": "Tutte"
+      },
+      "count": "Misure: {{count}}",
+      "empty": "Nessuna misura.",
+      "col_measure": "Misura",
+      "col_risk": "Rischio",
+      "col_owner": "Responsabile",
+      "col_due": "Scadenza",
+      "col_status": "Stato"
+    },
+    "coverage": {
+      "progress": "Copertura: {{closed}} di {{total}} ({{pct}}%)",
+      "only_missing": "Solo da chiudere",
+      "hint": "Ogni minaccia del catalogo applicabile a una tipologia presente nel registro va valutata o dichiarata non applicabile con il motivo (procedura §6.5).",
+      "open": "Apri",
+      "evaluate": "Valuta",
+      "not_applicable": "Non applicabile",
+      "not_applicable_title": "{{code}} non applicabile",
+      "not_applicable_reason": "Perché la minaccia non si applica a questo registro",
+      "states": {
+        "missing": "Da valutare",
+        "draft": "In bozza",
+        "evaluated": "Valutata",
+        "not_applicable": "Non applicabile"
+      }
+    },
+    "acceptance": {
+      "filters": {
+        "awaiting_me": "Da firmare o parere",
+        "pending": "In approvazione",
+        "active": "Attive",
+        "closed": "Chiuse"
+      },
+      "empty": "Nessuna accettazione.",
+      "col_risk": "Rischio",
+      "col_class": "Classe",
+      "col_status": "Stato",
+      "col_expires": "Scadenza",
+      "awaiting_opinion": "attende il parere del CISO",
+      "your_turn": "tocca a te",
+      "status": {
+        "pending": "In approvazione",
+        "active": "Attiva",
+        "rejected": "Respinta",
+        "revoked": "Revocata",
+        "expired": "Scaduta"
+      },
+      "opinion": {
+        "not_required": "non richiesto",
+        "pending": "in attesa",
+        "favorable": "favorevole",
+        "unfavorable": "contrario"
+      }
+    },
+    "settings": {
+      "sections": {
+        "governance": "Governo del rischio",
+        "catalog": "Catalogo minacce",
+        "information": "Classi di informazioni"
+      },
+      "org_policy": "Policy di organizzazione",
+      "configured": "Approvata e in vigore.",
+      "defaults": "Non ancora salvata: valgono i valori predefiniti del preset.",
+      "read_only": "Sola lettura: le regole le decide chi ha accesso a tutta l'organizzazione.",
+      "preset": "Modello di governo",
+      "presets": {
+        "centralizzato": "Centralizzato",
+        "federato": "Federato",
+        "sito_singolo": "Sito singolo"
+      },
+      "preset_hint": {
+        "centralizzato": "La capogruppo decide: parere vincolante sui High, Critical all'organo di gruppo.",
+        "federato": "Siti autonomi: notifica al gruppo sui High, Critical all'organo della società.",
+        "sito_singolo": "Un solo sito: nessun registro di gruppo, tutto deciso nel sito."
+      },
+      "escalation_days": "Escalation misure in ritardo (giorni)",
+      "review_months": "Revisione periodica (mesi)",
+      "group_register": "Registro di gruppo attivo (rischi dei servizi condivisi, ereditati dai siti)",
+      "acceptance_matrix": "Chi accetta, per classe",
+      "col_class": "Classe",
+      "col_roles": "Firme richieste",
+      "col_scope": "Livello",
+      "col_body": "Delibera organo",
+      "col_opinion": "Parere CISO",
+      "col_months": "Validità (mesi)",
+      "scope_plant": "Sito",
+      "scope_org": "Organizzazione",
+      "opinion": {
+        "none": "Nessuno",
+        "notify": "Notifica",
+        "binding": "Vincolante"
+      },
+      "economic_thresholds": "Soglie economiche (€, limite inferiore del livello d'impatto)",
+      "threshold_level": "Livello {{level}} da",
+      "save": "Salva la policy",
+      "saved": "Policy salvata.",
+      "site_exception": "Eccezione per {{site}}",
+      "site_exception_active": "Il sito usa soglie economiche proprie, approvate dall'organizzazione.",
+      "site_exception_none": "Il sito usa le soglie di organizzazione.",
+      "save_site": "Salva le soglie del sito",
+      "search": "Cerca",
+      "catalog_count": "Minacce: {{count}}",
+      "col_code": "Codice",
+      "col_title": "Minaccia",
+      "col_types": "Tipologie",
+      "col_source": "Origine",
+      "source": {
+        "catalog": "Catalogo di gruppo",
+        "custom": "Personalizzata"
+      },
+      "deactivate": "Disattiva",
+      "reactivate": "Riattiva",
+      "new_threat": "Nuova minaccia personalizzata",
+      "code_hint": "Lettere maiuscole, cifre e trattino basso, unico",
+      "add_threat": "Aggiungi al catalogo",
+      "information_hint": "Le informazioni da proteggere con il livello richiesto per riservatezza, integrità e disponibilità (VDA ISA 1.3.1, 1.3.2). Quelle senza sito valgono per il gruppo.",
+      "no_classes": "Nessuna classe di informazioni.",
+      "class_name": "Classe di informazioni",
+      "class_description": "Descrizione",
+      "class_scope": "Perimetro",
+      "confidentiality": "Riservatezza",
+      "integrity": "Integrità",
+      "availability": "Disponibilità",
+      "new_class": "Nuova classe di informazioni",
+      "edit_class": "Modifica classe di informazioni",
+      "delete_class_confirm": "Eliminare questa classe di informazioni?"
+    },
+    "protection": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "very_high": "Very high"
+    },
+    "effectiveness": {
+      "alta": "Alta",
+      "media": "Media",
+      "bassa": "Bassa"
+    },
+    "effect": {
+      "probabilita": "riduce la probabilità",
+      "impatto": "riduce l'impatto",
+      "entrambi": "riduce probabilità e impatto"
+    },
+    "dimensions": {
+      "economic": "Economico",
+      "legal": "Legale",
+      "customer": "Cliente e contrattuale",
+      "reputational": "Reputazionale",
+      "people": "Sicurezza delle persone",
+      "operational": "Operativo"
+    },
+    "scales": {
+      "economic": {
+        "above": "Oltre {{from}}",
+        "between": "Da {{from}} a {{to}}",
+        "below": "Meno di {{to}}"
+      },
+      "probability": {
+        "5": {
+          "frequency": "Più di 1 volta l'anno",
+          "fer": "vulnerabilità non presidiate o controlli non efficaci"
+        },
+        "4": {
+          "frequency": "1 volta ogni 1–2 anni",
+          "fer": "controlli con lacune o non del tutto efficaci"
+        },
+        "3": {
+          "frequency": "1 volta ogni 2–4 anni",
+          "fer": "vulnerabilità sfruttabili solo da esperti o da eventi naturali importanti"
+        },
+        "2": {
+          "frequency": "1 volta ogni 4–10 anni",
+          "fer": "nessuna vulnerabilità significativa: serve un attacco mirato molto motivato o un evento eccezionale"
+        },
+        "1": {
+          "frequency": "Meno di 1 volta ogni 10 anni",
+          "fer": "vulnerabilità presidiate da controlli multipli e verificati, nessun agente credibile"
+        }
+      },
+      "impact": {
+        "legal": {
+          "5": "Sanzioni penali per amministratori; sanzioni NIS2 o GDPR della fascia massima; provvedimenti interdittivi",
+          "4": "Sanzioni penali per dipendenti; sanzioni amministrative rilevanti",
+          "3": "Sanzioni civili rilevanti; sanzioni amministrative minori o diffide",
+          "2": "Procedimento legale ordinario; contenziosi routinari",
+          "1": "Nessuna conseguenza legale"
+        },
+        "customer": {
+          "5": "Perdita o sospensione della label TISAX; perdita di un cliente OEM; fermo linea presso il cliente",
+          "4": "Penali contrattuali rilevanti; escalation formale; violazione di NDA su informazioni high o very high",
+          "3": "Reclamo formale del cliente; ritardi recuperati con costi straordinari",
+          "2": "Segnalazione informale del cliente, senza penali",
+          "1": "Nessun effetto sul cliente"
+        },
+        "reputational": {
+          "5": "Notizia su media nazionali o internazionali; fiducia compromessa in modo duraturo",
+          "4": "Danno visibile a clienti e settore",
+          "3": "Danno noto ad alcuni clienti o partner, senza effetti duraturi",
+          "2": "Danno lieve, limitato all'interno o a pochi interlocutori",
+          "1": "Nessun effetto"
+        },
+        "people": {
+          "5": "Decessi o infortuni con danni permanenti a più persone",
+          "4": "Decesso o infortunio con danni permanenti a una persona",
+          "3": "Lieve infortunio di una o più persone",
+          "2": "Nessun infortunio",
+          "1": "Nessun effetto"
+        },
+        "operational": {
+          "5": "Processo critico fermo oltre l'MTPD; consegne bloccate oltre 24 ore; funzioni interne ferme oltre 2 giorni",
+          "4": "Interruzione oltre l'RTO ma entro l'MTPD; consegne con forti ritardi; 31–50% delle funzioni ferme",
+          "3": "Disagi nelle consegne entro l'RTO; 11–30% delle funzioni ferme",
+          "2": "1–10% delle funzioni ferme; nessun effetto sulle consegne",
+          "1": "Nessun effetto apprezzabile"
+        }
+      }
     }
   },
   "pdca": {

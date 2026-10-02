@@ -1,198 +1,414 @@
 import { apiClient } from "../client";
 import { fetchAllPages } from "../pagination";
+import type { RiskClass } from "../../modules/risk/riskClasses";
 
-export interface RiskMitigationPlan {
+// ── Tipi ──────────────────────────────────────────────────────────────────────
+
+export type AssetType = "IT" | "OT" | "SEDE" | "PERSONALE" | "FORNITORI" | "PROTOTIPI";
+export const ASSET_TYPES: AssetType[] = ["IT", "OT", "SEDE", "PERSONALE", "FORNITORI", "PROTOTIPI"];
+export type Treatment = "" | "mitigare" | "accettare" | "trasferire" | "evitare";
+export type ImpactDimension = "economic" | "legal" | "customer" | "reputational" | "people" | "operational";
+export const IMPACT_DIMENSIONS: ImpactDimension[] = [
+  "economic", "legal", "customer", "reputational", "people", "operational",
+];
+
+export interface TreatmentRule { rule: "mandatory" | "evaluate" | "acceptable"; months: number }
+
+export interface ActiveAcceptance {
+  id: string;
+  status: "pending" | "active";
+  risk_class: RiskClass;
+  expires_on: string;
+  upper_opinion: string;
+}
+
+export interface Risk {
+  id: string;
+  plant: string | null;
+  plant_name: string | null;
+  cycle: string | null;
+  evaluated_in_cycle: string | null;
+  is_legacy: boolean;
+  is_inherited: boolean;
+  affected_plants: string[];
+  name: string;
+  status: "bozza" | "completato" | "archiviato";
+  asset_type: AssetType | "";
+  asset: string | null;
+  asset_name: string | null;
+  asset_group_label: string;
+  supplier: string | null;
+  supplier_name: string | null;
+  threat: string | null;
+  threat_code: string | null;
+  threat_title: string | null;
+  information_classes: string[];
+  critical_process: string | null;
+  critical_process_name: string | null;
+  vulnerability: string;
+  consequence: string;
+  applicable: boolean;
+  not_applicable_reason: string;
+  probability: number | null;
+  probability_method: "" | "frequenza" | "fer";
+  probability_rationale: string;
+  impact_economic: number | null;
+  impact_legal: number | null;
+  impact_customer: number | null;
+  impact_reputational: number | null;
+  impact_people: number | null;
+  impact_operational: number | null;
+  impact: number | null;
+  impact_rationale: string;
+  matrix_class: RiskClass | "";
+  class_override: number;
+  override_rationale: string;
+  current_class: RiskClass | "";
+  legal_or_contract_violation: boolean;
+  treatment: Treatment;
+  treatment_rationale: string;
+  treatment_rule: TreatmentRule | null;
+  expected_probability: number | null;
+  expected_impact: number | null;
+  expected_class: RiskClass | "";
+  can_apply_expected: boolean;
+  owner: number | null;
+  owner_name: string | null;
+  treatment_owner: number | null;
+  treatment_owner_external: string;
+  treatment_owner_name: string | null;
+  plan_due_date: string | null;
+  nis2_in_scope: boolean;
+  nis2_art21_category: string;
+  impacted_systems: string;
+  significant_incident_potential: boolean;
+  significant_incident_note: string;
+  assessed_by: number | null;
+  assessed_by_name: string | null;
+  assessed_at: string | null;
+  mitigation_plans_count: number;
+  mitigation_plans_completed: number;
+  mitigation_plans_verified: number;
+  active_acceptance: ActiveAcceptance | null;
+  legacy_snapshot: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Campi scrivibili della valutazione (le regole stanno nel backend). */
+export type RiskInput = Partial<Pick<Risk,
+  | "name" | "asset_type" | "asset" | "asset_group_label" | "supplier" | "threat" | "information_classes"
+  | "critical_process" | "vulnerability" | "consequence" | "probability" | "probability_method"
+  | "probability_rationale" | "impact_economic" | "impact_legal" | "impact_customer" | "impact_reputational"
+  | "impact_people" | "impact_operational" | "impact_rationale" | "class_override" | "override_rationale"
+  | "legal_or_contract_violation" | "treatment" | "treatment_rationale" | "expected_probability"
+  | "expected_impact" | "owner" | "treatment_owner" | "treatment_owner_external" | "plan_due_date"
+  | "nis2_in_scope" | "nis2_art21_category" | "impacted_systems" | "significant_incident_potential"
+  | "significant_incident_note" | "affected_plants"
+>> & { plant?: string | null };
+
+export interface ExistingMeasure {
+  id: string;
+  risk: string;
+  control_instance: string | null;
+  control_title: string | null;
+  description: string;
+  effectiveness: "alta" | "media" | "bassa";
+  created_at: string;
+}
+
+export interface MitigationPlan {
   id: string;
   assessment: string;
   action: string;
-  owner: string | null;
-  owner_external?: string;
-  owner_name?: string | null;
+  owner: number | null;
+  owner_external: string;
+  owner_name: string | null;
   due_date: string;
+  expected_effect: "" | "probabilita" | "impatto" | "entrambi";
+  bcp_plan: string | null;
+  bcp_plan_title: string | null;
+  bcp_plan_status: string | null;
+  control_instance: string | null;
+  control_title: string | null;
   completed_at: string | null;
-  bcp_plan?: string | null;
-  bcp_plan_title?: string | null;
-  bcp_plan_status?: string | null;
-  bcp_plan_last_test_date?: string | null;
-  bcp_plan_next_test_date?: string | null;
+  verified_at: string | null;
+  verified_by: number | null;
+  verified_by_name: string | null;
+  verification_note: string;
+  escalation_level: number;
+  created_at: string;
 }
 
-export const NIS2_ART21_CHOICES = [
-  { value: "art21_a", label: "risk.nis2_art21.art21_a" },
-  { value: "art21_b", label: "risk.nis2_art21.art21_b" },
-  { value: "art21_c", label: "risk.nis2_art21.art21_c" },
-  { value: "art21_d", label: "risk.nis2_art21.art21_d" },
-  { value: "art21_e", label: "risk.nis2_art21.art21_e" },
-  { value: "art21_f", label: "risk.nis2_art21.art21_f" },
-  { value: "art21_g", label: "risk.nis2_art21.art21_g" },
-  { value: "art21_h", label: "risk.nis2_art21.art21_h" },
-  { value: "art21_i", label: "risk.nis2_art21.art21_i" },
-  { value: "art21_j", label: "risk.nis2_art21.art21_j" },
-];
-
-export const NIS2_RELEVANCE_CHOICES = [
-  { value: "non_significativo",          label: "risk.nis2_relevance.non_significativo" },
-  { value: "potenzialmente_significativo", label: "risk.nis2_relevance.potenzialmente_significativo" },
-  { value: "significativo",              label: "risk.nis2_relevance.significativo" },
-];
-
-export interface RiskAssessment {
+export interface Acceptance {
   id: string;
+  risk: string;
+  risk_name: string;
+  plant: string | null;
+  risk_class: RiskClass;
+  status: "pending" | "active" | "rejected" | "revoked" | "expired";
+  required_roles: string[];
+  signatures_display: { role: string; user: string | null; at: string }[];
+  requires_body: boolean;
+  body: string | null;
+  body_name: string | null;
+  body_resolution_ref: string;
+  rationale: string;
+  expires_on: string;
+  upper_opinion: "not_required" | "pending" | "favorable" | "unfavorable";
+  opinion_by_name: string | null;
+  opinion_at: string | null;
+  opinion_note: string;
+  activated_at: string | null;
+  closed_at: string | null;
+  close_reason: string;
+  can_sign: boolean;
+  can_give_opinion: boolean;
+  created_at: string;
+}
+
+export interface AcceptanceRequirements {
+  class: RiskClass;
+  roles: string[];
+  scope: "plant" | "org";
+  requires_body: boolean;
+  notify: string[];
+  upper_opinion: "none" | "notify" | "binding";
+  max_months: number;
+  not_acceptable: boolean;
+}
+
+export interface LocalImpactReport {
+  id: string;
+  risk: string;
+  risk_name: string;
   plant: string;
   plant_name: string;
-  asset: string | null;
-  asset_name: string | null;
-  name: string;
-  threat_category: string;
-  assessment_type: "IT" | "OT";
-  probability: number | null;
-  impact: number | null;
-  inherent_probability: number | null;
-  inherent_impact: number | null;
-  inherent_score: number | null;
-  inherent_risk_level: "verde" | "giallo" | "rosso" | null;
-  treatment: string;
-  status: "bozza" | "completato" | "archiviato";
-  score: number | null;
-  risk_level: "verde" | "giallo" | "rosso" | null;
-  risk_reduction_pct: number | null;
-  ale_annuo: string | null;
-  ale_calcolato: string | null;
-  weighted_score: number | null;
-  owner: string | null;
-  owner_name: string | null;
-  treatment_owner: string | null;
-  treatment_owner_external: string;
-  treatment_owner_name: string | null;
-  critical_process: string | null;
-  critical_process_name: string | null;
-  risk_accepted: boolean;
-  risk_accepted_formally: boolean;
-  risk_accepted_by: string | null;
-  accepted_by_name: string | null;
-  risk_accepted_at: string | null;
-  risk_acceptance_note: string;
-  risk_acceptance_expiry: string | null;
-  assessed_at: string | null;
-  plan_due_date: string | null;
-  mitigation_plans_count: number;
-  mitigation_plans_completed: number;
-  last_plan_completed_at: string | null;
-  needs_revaluation: boolean;
-  needs_revaluation_since: string | null;
-  cause: string;
-  consequence: string;
-  nis2_art21_category: string;
-  nis2_relevance: string;
-  impacted_systems: string;
+  local_impact: number;
+  note: string;
+  status: "aperta" | "recepita";
+  acknowledged_at: string | null;
+  created_at: string;
 }
 
-export interface SuggestResidualResult {
-  suggested: number | null;
-  reduction_pct?: number;
-  compliant_controls?: number;
-  bcp_extra_pct?: number;
-  best_bcp_strength?: number;
-  reason: string;
-}
-
-export interface RiskContext {
-  risk: Record<string, unknown>;
-  bia: Record<string, unknown> | null;
-  bcp_plans: Array<Record<string, unknown>>;
-  bcp_summary: {
-    has_bcp_covering_process: boolean;
-    best_rto_vs_mtpd_status: string;
-  } | null;
-}
-
-export const THREAT_CATEGORIES = [
-  { value: "accesso_non_autorizzato", label: "risk.threat_cat.accesso_non_autorizzato" },
-  { value: "malware_ransomware",      label: "risk.threat_cat.malware_ransomware" },
-  { value: "data_breach",             label: "risk.threat_cat.data_breach" },
-  { value: "phishing_social",         label: "risk.threat_cat.phishing_social" },
-  { value: "guasto_hw_sw",            label: "risk.threat_cat.guasto_hw_sw" },
-  { value: "disastro_naturale",       label: "risk.threat_cat.disastro_naturale" },
-  { value: "errore_umano",            label: "risk.threat_cat.errore_umano" },
-  { value: "attacco_supply_chain",    label: "risk.threat_cat.attacco_supply_chain" },
-  { value: "ddos",                    label: "risk.threat_cat.ddos" },
-  { value: "insider_threat",          label: "risk.threat_cat.insider_threat" },
-  { value: "furto_perdita",           label: "risk.threat_cat.furto_perdita" },
-  { value: "altro",                   label: "risk.threat_cat.altro" },
-];
-
-export const PROB_LABELS: Record<number, string> = {
-  1: "risk.prob.1", 2: "risk.prob.2", 3: "risk.prob.3", 4: "risk.prob.4", 5: "risk.prob.5",
-};
-export const IMPACT_LABELS: Record<number, string> = {
-  1: "risk.impact.1", 2: "risk.impact.2", 3: "risk.impact.3", 4: "risk.impact.4", 5: "risk.impact.5",
-};
-
-export interface AppetiteFormData {
-  max_acceptable_score: number;
-  max_red_risks_count: number;
-  valid_from: string;
-  valid_until: string | null;
-  approved_by: number | null;
-  approved_at: string | null;
-  notes: string;
-  plant?: string | null;
-  framework_code?: string;
-}
-
-export interface AppetitePolicyFull extends AppetiteFormData {
+export interface ThreatEntry {
   id: string;
-  approved_by_name: string | null;
-  is_active: boolean;
-  max_unacceptable_score: number;
-  review_frequency_months: number;
+  code: string;
+  title: string;
+  asset_types: AssetType[];
+  cia: ("C" | "I" | "A")[];
+  translations: Record<string, { title?: string; description?: string }>;
+  source: "catalog" | "custom";
+  catalog_version: string;
+  active: boolean;
 }
+
+export type ProtectionLevel = "low" | "normal" | "high" | "very_high";
+
+export interface InformationClass {
+  id: string;
+  plant: string | null;
+  plant_name: string | null;
+  name: string;
+  description: string;
+  owner: number | null;
+  owner_name: string | null;
+  owner_role: string;
+  confidentiality: ProtectionLevel;
+  integrity: ProtectionLevel;
+  availability: ProtectionLevel;
+  critical_processes: string[];
+}
+
+export interface AcceptanceRule { roles: string[]; scope: "plant" | "org"; requires_body: boolean; notify?: string[] }
+
+export interface ResolvedPolicy {
+  preset: "centralizzato" | "federato" | "sito_singolo";
+  configured: boolean;
+  group_register_enabled: boolean;
+  acceptance_matrix: Record<RiskClass, AcceptanceRule>;
+  upper_opinion: Record<RiskClass, "none" | "notify" | "binding">;
+  acceptance_max_months: Record<RiskClass, number>;
+  economic_thresholds: Record<"2" | "3" | "4" | "5", number>;
+  overdue_escalation_days: number;
+  review_frequency_months: number;
+  org_policy_id: string | null;
+  plant_policy_id: string | null;
+  /** L'utente ha scope di organizzazione (governo del rischio, registro di gruppo). */
+  user_org_scope: boolean;
+}
+
+export type CycleKind = "primo" | "periodico" | "straordinario" | "legacy";
+export type CycleStatus = "in_corso" | "in_approvazione" | "approvato" | "archiviato";
+
+export interface Cycle {
+  id: string;
+  plant: string | null;
+  plant_name: string | null;
+  kind: CycleKind;
+  trigger_reason: string;
+  status: CycleStatus;
+  started_at: string;
+  closed_at: string | null;
+  approved_by_body: string | null;
+  approved_by_body_name: string | null;
+  approval_review: string | null;
+  approved_at: string | null;
+  local_adoption_ref: string;
+  risks_count: number;
+}
+
+export interface CoveragePair {
+  asset_type: AssetType;
+  threat_id: string;
+  threat_code: string;
+  state: "missing" | "draft" | "evaluated" | "not_applicable";
+  risk_ids: string[];
+  worst_class: RiskClass | "";
+}
+
+export interface Coverage {
+  asset_types: AssetType[];
+  pairs: CoveragePair[];
+  total: number;
+  closed: number;
+  missing: number;
+  pct: number;
+}
+
+export interface MatrixCell { probability: number; impact: number; count: number; class: RiskClass }
+
+export interface Trigger { kind: string; count: number }
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Parametro registro: id del sito o "null" per il gruppo. */
+export const registerParam = (plantId: string | null) => plantId ?? "null";
+
+const data = <T,>(p: Promise<{ data: T }>) => p.then(r => r.data);
+
+// ── API ───────────────────────────────────────────────────────────────────────
 
 export const riskApi = {
-  list: (params?: Record<string, string>) =>
-    fetchAllPages<RiskAssessment>("/risk/assessments/", params).then((results) => ({ results, count: results.length })),
-  create: (data: Partial<RiskAssessment>) =>
-    apiClient.post<RiskAssessment>("/risk/assessments/", data).then(r => r.data),
-  update: (id: string, data: Partial<RiskAssessment>) =>
-    apiClient.patch<RiskAssessment>(`/risk/assessments/${id}/`, data).then(r => r.data),
-  complete: (id: string) =>
-    apiClient.post(`/risk/assessments/${id}/complete/`).then(r => r.data),
-  reopen: (id: string) =>
-    apiClient.post<RiskAssessment>(`/risk/assessments/${id}/reopen/`).then(r => r.data),
-  accept: (id: string) =>
-    apiClient.post(`/risk/assessments/${id}/accept/`).then(r => r.data),
-  mitigationPlans: (assessmentId: string) =>
-    fetchAllPages<RiskMitigationPlan>("/risk/mitigation-plans/", { assessment: assessmentId, page_size: "100" }),
-  createPlan: (data: Partial<RiskMitigationPlan>) =>
-    apiClient.post<RiskMitigationPlan>("/risk/mitigation-plans/", data).then(r => r.data),
-  updatePlan: (id: string, data: Partial<RiskMitigationPlan>) =>
-    apiClient.patch<RiskMitigationPlan>(`/risk/mitigation-plans/${id}/`, data).then(r => r.data),
-  completePlan: (id: string) =>
-    apiClient.patch<RiskMitigationPlan>(`/risk/mitigation-plans/${id}/`, { completed_at: new Date().toISOString() }).then(r => r.data),
-  uncompletePlan: (id: string) =>
-    apiClient.post<RiskMitigationPlan>(`/risk/mitigation-plans/${id}/uncomplete/`).then(r => r.data),
-  deletePlan: (id: string) =>
-    apiClient.delete(`/risk/mitigation-plans/${id}/`).then(() => undefined),
-  suggestResidual: (id: string) =>
-    apiClient.get<SuggestResidualResult>(`/risk/assessments/${id}/suggest-residual/`).then(r => r.data),
-  acceptRisk: (id: string, note: string, expiryDate?: string) =>
-    apiClient.post(`/risk/assessments/${id}/accept-risk/`, { note, expiry_date: expiryDate }).then(r => r.data),
-  context: (id: string) =>
-    apiClient.get<RiskContext>(`/risk/assessments/${id}/context/`).then(r => r.data),
-  delete: (id: string) =>
-    apiClient.delete(`/risk/assessments/${id}/`).then(() => undefined),
-  renewAcceptance: (id: string, expiryDate?: string) =>
-    apiClient.post<RiskAssessment>(`/risk/assessments/${id}/renew-acceptance/`, { expiry_date: expiryDate }).then(r => r.data),
-  resetAcceptance: (id: string) =>
-    apiClient.post<RiskAssessment>(`/risk/assessments/${id}/reset-acceptance/`).then(r => r.data),
-  exportExcel: (params?: { plant?: string; include_draft?: boolean }) => {
-    const query = new URLSearchParams();
-    if (params?.plant) query.set("plant", params.plant);
-    if (params?.include_draft) query.set("include_draft", "1");
-    return apiClient.get(`/risk/assessments/export/?${query.toString()}`, { responseType: "blob" });
-  },
-  createAppetite: (data: AppetiteFormData) =>
-    apiClient.post<AppetitePolicyFull>("/risk/appetite-policies/", data).then(r => r.data),
-  updateAppetite: (id: string, data: Partial<AppetiteFormData>) =>
-    apiClient.patch<AppetitePolicyFull>(`/risk/appetite-policies/${id}/`, data).then(r => r.data),
+  // Registro
+  list: (plantId: string | null, params: Record<string, string> = {}) =>
+    fetchAllPages<Risk>("/risk/assessments/", { plant: registerParam(plantId), ...params }),
+  legacy: (plantId: string) => fetchAllPages<Risk>("/risk/assessments/", { plant: plantId, legacy: "1" }),
+  get: (id: string) => data(apiClient.get<Risk>(`/risk/assessments/${id}/`)),
+  create: (payload: RiskInput) => data(apiClient.post<Risk>("/risk/assessments/", payload)),
+  update: (id: string, payload: RiskInput) => data(apiClient.patch<Risk>(`/risk/assessments/${id}/`, payload)),
+  remove: (id: string) => apiClient.delete(`/risk/assessments/${id}/`),
+  complete: (id: string) => data(apiClient.post<Risk>(`/risk/assessments/${id}/complete/`)),
+  confirm: (id: string) => data(apiClient.post<Risk>(`/risk/assessments/${id}/confirm/`)),
+  reopen: (id: string) => data(apiClient.post<Risk>(`/risk/assessments/${id}/reopen/`)),
+  applyExpected: (id: string, note: string) =>
+    data(apiClient.post<Risk>(`/risk/assessments/${id}/apply-expected/`, { note })),
+  completeness: (id: string) => data(apiClient.get<{ errors: string[] }>(`/risk/assessments/${id}/completeness/`)),
+  acceptanceRequirements: (id: string) =>
+    data(apiClient.get<AcceptanceRequirements>(`/risk/assessments/${id}/acceptance-requirements/`)),
+  notApplicable: (plantId: string | null, assetType: AssetType, threat: string, reason: string) =>
+    data(apiClient.post<Risk>("/risk/assessments/not-applicable/", {
+      plant: plantId, asset_type: assetType, threat, reason,
+    })),
+  coverage: (plantId: string | null) =>
+    data(apiClient.get<Coverage>("/risk/assessments/coverage/", { params: { plant: registerParam(plantId) } })),
+  triggers: (plantId: string | null) =>
+    data(apiClient.get<Trigger[]>("/risk/assessments/triggers/", { params: { plant: registerParam(plantId) } })),
+  matrix: (plantId: string | null, view: "current" | "expected") =>
+    data(apiClient.get<MatrixCell[]>("/risk/assessments/matrix/", {
+      params: { plant: registerParam(plantId), view },
+    })),
+  exportExcel: (plantId: string | null) =>
+    apiClient.get("/risk/assessments/export/", { params: { plant: registerParam(plantId) }, responseType: "blob" }),
+
+  // Misure esistenti
+  measures: (riskId: string) => fetchAllPages<ExistingMeasure>("/risk/existing-measures/", { risk: riskId }),
+  createMeasure: (payload: Partial<ExistingMeasure>) =>
+    data(apiClient.post<ExistingMeasure>("/risk/existing-measures/", payload)),
+  updateMeasure: (id: string, payload: Partial<ExistingMeasure>) =>
+    data(apiClient.patch<ExistingMeasure>(`/risk/existing-measures/${id}/`, payload)),
+  deleteMeasure: (id: string) => apiClient.delete(`/risk/existing-measures/${id}/`),
+
+  // Piani di trattamento
+  plans: (params: Record<string, string>) => fetchAllPages<MitigationPlan>("/risk/mitigation-plans/", params),
+  createPlan: (payload: Partial<MitigationPlan>) =>
+    data(apiClient.post<MitigationPlan>("/risk/mitigation-plans/", payload)),
+  updatePlan: (id: string, payload: Partial<MitigationPlan>) =>
+    data(apiClient.patch<MitigationPlan>(`/risk/mitigation-plans/${id}/`, payload)),
+  deletePlan: (id: string) => apiClient.delete(`/risk/mitigation-plans/${id}/`),
+  verifyPlan: (id: string, note: string) =>
+    data(apiClient.post<MitigationPlan>(`/risk/mitigation-plans/${id}/verify/`, { note })),
+  uncompletePlan: (id: string) => data(apiClient.post<MitigationPlan>(`/risk/mitigation-plans/${id}/uncomplete/`)),
+
+  // Accettazioni
+  acceptances: (params: Record<string, string>) => fetchAllPages<Acceptance>("/risk/acceptances/", params),
+  requestAcceptance: (payload: {
+    risk: string; rationale: string; expires_on?: string; body?: string; body_resolution_ref?: string;
+  }) => data(apiClient.post<Acceptance>("/risk/acceptances/", payload)),
+  signAcceptance: (id: string) => data(apiClient.post<Acceptance>(`/risk/acceptances/${id}/sign/`)),
+  giveOpinion: (id: string, favorable: boolean, note: string) =>
+    data(apiClient.post<Acceptance>(`/risk/acceptances/${id}/opinion/`, { favorable, note })),
+  bodyDecision: (id: string, body: string, resolution_ref: string) =>
+    data(apiClient.post<Acceptance>(`/risk/acceptances/${id}/body-decision/`, { body, resolution_ref })),
+  revokeAcceptance: (id: string, reason: string) =>
+    data(apiClient.post<Acceptance>(`/risk/acceptances/${id}/revoke/`, { reason })),
+
+  // Rischi ereditati
+  localImpactReports: (params: Record<string, string>) =>
+    fetchAllPages<LocalImpactReport>("/risk/local-impact-reports/", params),
+  reportLocalImpact: (payload: { risk: string; plant: string; local_impact: number; note: string }) =>
+    data(apiClient.post<LocalImpactReport>("/risk/local-impact-reports/", payload)),
+  acknowledgeLocalImpact: (id: string) =>
+    data(apiClient.post<LocalImpactReport>(`/risk/local-impact-reports/${id}/acknowledge/`)),
+
+  // Catalogo minacce
+  threats: (params: Record<string, string> = {}) => fetchAllPages<ThreatEntry>("/risk/threats/", params),
+  createThreat: (payload: Partial<ThreatEntry>) => data(apiClient.post<ThreatEntry>("/risk/threats/", payload)),
+  updateThreat: (id: string, payload: Partial<ThreatEntry>) =>
+    data(apiClient.patch<ThreatEntry>(`/risk/threats/${id}/`, payload)),
+  deactivateThreat: (id: string) => apiClient.delete(`/risk/threats/${id}/`),
+
+  // Classi di informazioni
+  /** Classi del sito più quelle di gruppo (per il gruppo: solo quelle di gruppo). */
+  informationClasses: (plantId: string | null) =>
+    fetchAllPages<InformationClass>("/risk/information-classes/").then(all =>
+      all.filter(ic => ic.plant === null || ic.plant === plantId)),
+  createInformationClass: (payload: Partial<InformationClass>) =>
+    data(apiClient.post<InformationClass>("/risk/information-classes/", payload)),
+  updateInformationClass: (id: string, payload: Partial<InformationClass>) =>
+    data(apiClient.patch<InformationClass>(`/risk/information-classes/${id}/`, payload)),
+  deleteInformationClass: (id: string) => apiClient.delete(`/risk/information-classes/${id}/`),
+
+  // Governo del rischio
+  resolvedPolicy: (plantId: string | null) =>
+    data(apiClient.get<ResolvedPolicy>("/risk/governance-policies/resolved/", {
+      params: plantId ? { plant: plantId } : {},
+    })),
+  presets: () => data(apiClient.get<Record<string, ResolvedPolicy>>("/risk/governance-policies/presets/")),
+  savePolicy: (plantId: string | null, payload: Partial<ResolvedPolicy> & { notes?: string }) =>
+    data(apiClient.post("/risk/governance-policies/save/", { plant: plantId, ...payload })),
+
+  // Cicli
+  cycles: (plantId: string | null) => fetchAllPages<Cycle>("/risk/cycles/", { plant: registerParam(plantId) }),
+  startCycle: (plantId: string | null, kind: CycleKind, trigger_reason = "") =>
+    data(apiClient.post<Cycle>("/risk/cycles/start/", { plant: plantId, kind, trigger_reason })),
+  submissionCheck: (id: string) => data(apiClient.get<{ errors: string[] }>(`/risk/cycles/${id}/submission-check/`)),
+  submitCycle: (id: string) => data(apiClient.post<Cycle>(`/risk/cycles/${id}/submit/`)),
+  returnCycle: (id: string, reason: string) => data(apiClient.post<Cycle>(`/risk/cycles/${id}/return/`, { reason })),
+  approveCycle: (id: string, payload: { body: string; review?: string; local_adoption_ref?: string }) =>
+    data(apiClient.post<Cycle>(`/risk/cycles/${id}/approve/`, payload)),
 };
+
+/** Messaggio d'errore leggibile dalle risposte 400/403 del backend. */
+export function apiError(err: unknown, fallback: string): string {
+  const resp = (err as { response?: { data?: unknown } })?.response?.data;
+  if (resp && typeof resp === "object") {
+    const d = resp as Record<string, unknown>;
+    if (typeof d.error === "string") return d.error;
+    if (typeof d.detail === "string") return d.detail;
+    const first = Object.values(d)[0];
+    if (Array.isArray(first) && typeof first[0] === "string") return first[0];
+    if (typeof first === "string") return first;
+  }
+  return fallback;
+}
