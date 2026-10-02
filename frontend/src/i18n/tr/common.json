@@ -1272,7 +1272,13 @@
       "comitato_membro": "Komite üyesi",
       "bu_referente": "BU temsilcisi",
       "raci_responsible": "RACI Responsible",
-      "raci_accountable": "RACI Accountable"
+      "raci_accountable": "RACI Accountable",
+      "site_risk_manager": "Saha Risk Yöneticisi",
+      "it_manager": "BT Müdürü",
+      "hr_manager": "İK Müdürü",
+      "purchasing_manager": "Satın Alma Müdürü",
+      "production_manager": "Üretim / Bakım Müdürü",
+      "engineering_manager": "Mühendislik Müdürü"
     },
     "scopes": {
       "org": "Küresel — tüm organizasyon",

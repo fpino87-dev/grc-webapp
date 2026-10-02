@@ -1,8 +1,11 @@
 import logging
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
+from django.utils.translation import gettext as _
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
 
 from core.audit import log_action
@@ -10,9 +13,27 @@ from core.jwt import ExportRateThrottle
 from core.scoping import PlantScopedQuerysetMixin
 from core.viewsets import SoftDeleteAuditMixin
 
-from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
-from .permissions import RiskAppetitePermission, RiskPermission
-from .serializers import RiskAppetitePolicySerializer, RiskAssessmentSerializer, RiskDimensionSerializer, RiskMitigationPlanSerializer
+from .models import (
+    InformationClass,
+    RiskAppetitePolicy,
+    RiskAssessment,
+    RiskAssessmentCycle,
+    RiskDimension,
+    RiskGovernancePolicy,
+    RiskMitigationPlan,
+    ThreatCatalogEntry,
+)
+from .permissions import RiskAppetitePermission, RiskGovernancePermission, RiskPermission
+from .serializers import (
+    InformationClassSerializer,
+    RiskAppetitePolicySerializer,
+    RiskAssessmentCycleSerializer,
+    RiskAssessmentSerializer,
+    RiskDimensionSerializer,
+    RiskGovernancePolicySerializer,
+    RiskMitigationPlanSerializer,
+    ThreatCatalogEntrySerializer,
+)
 from .services import get_risk_bia_bcp_context
 from .services import delete_risk_assessment
 
@@ -497,3 +518,198 @@ class RiskAppetitePolicyViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, 
         if not policy:
             return Response({"detail": "Nessuna policy attiva"}, status=404)
         return Response(RiskAppetitePolicySerializer(policy).data)
+
+
+# ── Metodologia D-ITA-INF-23 ─────────────────────────────────────────────────
+
+def _call_service(fn, *args, **kwargs):
+    """Esegue un service traducendo la ValidationError Django in 400 DRF."""
+    try:
+        return fn(*args, **kwargs)
+    except DjangoValidationError as exc:
+        raise DRFValidationError({"error": exc.messages[0]}) from exc
+
+
+def _plant_from_param(request, value):
+    """Risolve un id di sito dal body/query (None = registro di gruppo)."""
+    from apps.plants.models import Plant
+
+    if value in (None, "", "null"):
+        return None
+    plant = Plant.objects.filter(pk=value).first()
+    if plant is None:
+        raise DRFValidationError({"plant": _("Sito inesistente.")})
+    return plant
+
+
+class ThreatCatalogViewSet(viewsets.ModelViewSet):
+    """Catalogo minacce: voci di gruppo (sola lettura) e voci personalizzate."""
+
+    queryset = ThreatCatalogEntry.objects.all()
+    serializer_class = ThreatCatalogEntrySerializer
+    permission_classes = [RiskGovernancePermission]
+
+    def get_queryset(self):
+        from django.db.models import Q, TextField
+        from django.db.models.functions import Cast
+
+        qs = super().get_queryset()
+        params = self.request.query_params
+        if params.get("asset_type"):
+            qs = qs.filter(asset_types__contains=[params["asset_type"]])
+        if params.get("source"):
+            qs = qs.filter(source=params["source"])
+        if params.get("active", "true") != "all":
+            qs = qs.filter(active=params.get("active", "true") == "true")
+        if params.get("q"):
+            q = params["q"]
+            qs = qs.annotate(_tr=Cast("translations", TextField())).filter(
+                Q(code__icontains=q) | Q(_tr__icontains=q)
+            )
+        return qs
+
+    def create(self, request, *args, **kwargs):
+        from .services import create_custom_threat
+
+        data = request.data
+        entry = _call_service(
+            create_custom_threat, request.user,
+            code=data.get("code"), asset_types=data.get("asset_types"),
+            cia=data.get("cia", []), translations=data.get("translations", {}),
+        )
+        return Response(self.get_serializer(entry).data, status=201)
+
+    def update(self, request, *args, **kwargs):
+        from .services import update_custom_threat
+
+        entry = self.get_object()
+        fields = {k: request.data[k] for k in ("asset_types", "cia", "translations", "active") if k in request.data}
+        entry = _call_service(update_custom_threat, request.user, entry, **fields)
+        return Response(self.get_serializer(entry).data)
+
+    def partial_update(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        from .services import deactivate_threat
+
+        _call_service(deactivate_threat, request.user, self.get_object())
+        return Response(status=204)
+
+
+class InformationClassViewSet(SoftDeleteAuditMixin, PlantScopedQuerysetMixin, viewsets.ModelViewSet):
+    """Classi di informazioni per sito; senza sito = classi di gruppo."""
+
+    queryset = InformationClass.objects.select_related("plant", "owner").prefetch_related("critical_processes")
+    serializer_class = InformationClassSerializer
+    permission_classes = [RiskPermission]
+    plant_field = "plant"
+    allow_null_plant = True
+    audit_action = "risk.information_class"
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        plant = self.request.query_params.get("plant")
+        if plant == "null":
+            qs = qs.filter(plant__isnull=True)
+        elif plant:
+            qs = qs.filter(plant_id=plant)
+        return qs
+
+    def perform_create(self, serializer):
+        from core.scoping import require_org_scope_for_org_wide
+
+        require_org_scope_for_org_wide(self.request.user, serializer.validated_data.get("plant"))
+        instance = serializer.save(created_by=self.request.user)
+        log_action(user=self.request.user, action_code="risk.information_class.create", level="L2",
+                   entity=instance, payload={"id": str(instance.id)})
+
+    def perform_update(self, serializer):
+        from core.scoping import require_org_scope_for_org_wide
+
+        require_org_scope_for_org_wide(self.request.user, serializer.instance.plant)
+        require_org_scope_for_org_wide(
+            self.request.user, serializer.validated_data.get("plant", serializer.instance.plant),
+        )
+        instance = serializer.save()
+        log_action(user=self.request.user, action_code="risk.information_class.update", level="L2",
+                   entity=instance, payload={"id": str(instance.id)})
+
+    def perform_destroy(self, instance):
+        from core.scoping import require_org_scope_for_org_wide
+
+        require_org_scope_for_org_wide(self.request.user, instance.plant)
+        super().perform_destroy(instance)
+
+
+class RiskGovernancePolicyViewSet(PlantScopedQuerysetMixin, viewsets.ReadOnlyModelViewSet):
+    """Policy di governo del rischio (organizzazione + eccezioni per sito)."""
+
+    queryset = RiskGovernancePolicy.objects.select_related("plant", "approved_by")
+    serializer_class = RiskGovernancePolicySerializer
+    permission_classes = [RiskGovernancePermission]
+    plant_field = "plant"
+    allow_null_plant = True
+
+    @action(detail=False, methods=["get"])
+    def resolved(self, request):
+        """Policy effettiva per `?plant=<id>` (assente = organizzazione/gruppo)."""
+        from core.scoping import require_plant_access
+
+        from .services import resolve_policy
+
+        plant = _plant_from_param(request, request.query_params.get("plant"))
+        if plant is not None:
+            require_plant_access(request.user, plant)
+        return Response(resolve_policy(plant))
+
+    @action(detail=False, methods=["get"])
+    def presets(self, request):
+        from .services import PRESETS, preset_defaults
+
+        return Response({name: preset_defaults(name) for name in PRESETS})
+
+    @action(detail=False, methods=["post"], url_path="save")
+    def save_policy(self, request):
+        """Crea/aggiorna la policy del perimetro indicato da `plant` (null = organizzazione)."""
+        from .services import save_governance_policy
+
+        data = dict(request.data)
+        plant = _plant_from_param(request, data.pop("plant", None))
+        policy = _call_service(save_governance_policy, request.user, plant, data)
+        return Response(self.get_serializer(policy).data)
+
+
+class RiskAssessmentCycleViewSet(PlantScopedQuerysetMixin, viewsets.ReadOnlyModelViewSet):
+    """Cicli di valutazione dei registri (sito o gruppo)."""
+
+    queryset = RiskAssessmentCycle.objects.select_related("plant", "approved_by_body")
+    serializer_class = RiskAssessmentCycleSerializer
+    permission_classes = [RiskPermission]
+    plant_field = "plant"
+    allow_null_plant = True
+
+    def get_queryset(self):
+        from django.db.models import Count, Q
+
+        qs = super().get_queryset().annotate(
+            risks_count=Count("risks", filter=Q(risks__deleted_at__isnull=True)),
+        ).order_by("-started_at")
+        plant = self.request.query_params.get("plant")
+        if plant == "null":
+            qs = qs.filter(plant__isnull=True)
+        elif plant:
+            qs = qs.filter(plant_id=plant)
+        return qs
+
+    @action(detail=False, methods=["post"])
+    def start(self, request):
+        """Avvia una valutazione. Body: {plant: id|null, kind, trigger_reason}."""
+        from .services import start_cycle
+
+        plant = _plant_from_param(request, request.data.get("plant"))
+        cycle = _call_service(
+            start_cycle, request.user, plant,
+            request.data.get("kind", ""), request.data.get("trigger_reason", ""),
+        )
+        return Response(self.get_serializer(cycle).data, status=201)

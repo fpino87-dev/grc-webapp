@@ -3179,3 +3179,99 @@ msgstr "Une preuve de l'organisation est déjà disponible pour tous les sites."
 
 msgid "Elenco dei siti non valido."
 msgstr "Liste de sites non valide."
+
+msgid "Risk Manager di sito"
+msgstr "Risk Manager de site"
+
+msgid "Responsabile IT"
+msgstr "Responsable IT"
+
+msgid "Responsabile HR"
+msgstr "Responsable RH"
+
+msgid "Responsabile Acquisti"
+msgstr "Responsable Achats"
+
+msgid "Responsabile Produzione / Manutenzione"
+msgstr "Responsable Production / Maintenance"
+
+msgid "Responsabile Engineering"
+msgstr "Responsable Ingénierie"
+
+#, python-format
+msgid "Classi di rischio non valide: %(classes)s"
+msgstr "Classes de risque non valides : %(classes)s"
+
+#, python-format
+msgid "Modalità di parere non valida: %(mode)s"
+msgstr "Mode d'avis non valide : %(mode)s"
+
+#, python-format
+msgid "Regola di accettazione non valida per la classe %(cls)s"
+msgstr "Règle d'acceptation non valide pour la classe %(cls)s"
+
+msgid "La validità dell'accettazione deve essere un numero di mesi positivo."
+msgstr "La validité de l'acceptation doit être un nombre de mois positif."
+
+msgid "Le soglie economiche richiedono i livelli 2, 3, 4 e 5."
+msgstr "Les seuils économiques exigent les niveaux 2, 3, 4 et 5."
+
+msgid "Le soglie economiche devono essere positive e crescenti dal livello 2 al 5."
+msgstr "Les seuils économiques doivent être positifs et croissants du niveau 2 au niveau 5."
+
+msgid "Solo chi ha accesso a tutta l'organizzazione può modificare il governo del rischio."
+msgstr "Seuls les utilisateurs ayant accès à toute l'organisation peuvent modifier la gouvernance des risques."
+
+msgid "Preset non valido."
+msgstr "Préréglage non valide."
+
+msgid "Il preset si sceglie solo a livello di organizzazione."
+msgstr "Le préréglage se choisit uniquement au niveau de l'organisation."
+
+msgid "Tipologie di asset non valide."
+msgstr "Types d'actifs non valides."
+
+msgid "Le proprietà colpite possono essere solo C, I, A."
+msgstr "Les propriétés touchées ne peuvent être que C, I, A."
+
+msgid "Solo chi ha accesso a tutta l'organizzazione può gestire il catalogo minacce."
+msgstr "Seuls les utilisateurs ayant accès à toute l'organisation peuvent gérer le catalogue des menaces."
+
+msgid "Il codice deve avere da 2 a 30 caratteri fra lettere maiuscole, cifre e trattino basso."
+msgstr "Le code doit comporter de 2 à 30 caractères parmi lettres majuscules, chiffres et tiret bas."
+
+msgid "Esiste già una minaccia con questo codice."
+msgstr "Une menace avec ce code existe déjà."
+
+msgid "Indica almeno il titolo della minaccia."
+msgstr "Indiquez au moins le titre de la menace."
+
+msgid "Le voci del catalogo di gruppo non si modificano da qui."
+msgstr "Les entrées du catalogue de groupe ne se modifient pas ici."
+
+msgid "Le voci del catalogo di gruppo non si disattivano da qui."
+msgstr "Les entrées du catalogue de groupe ne se désactivent pas ici."
+
+msgid "Tipo di valutazione non valido."
+msgstr "Type d'évaluation non valide."
+
+msgid "Il registro di gruppo non è attivo nella policy di governo del rischio."
+msgstr "Le registre de groupe n'est pas activé dans la politique de gouvernance des risques."
+
+msgid "C'è già una valutazione aperta per questo registro."
+msgstr "Une évaluation est déjà ouverte pour ce registre."
+
+msgid "Il primo risk assessment è già stato avviato per questo registro."
+msgstr "La première appréciation des risques a déjà été lancée pour ce registre."
+
+msgid "Serve una valutazione approvata prima di una revisione."
+msgstr "Une évaluation approuvée est nécessaire avant une révision."
+
+msgid "Indica il motivo della revisione straordinaria."
+msgstr "Indiquez le motif de la révision extraordinaire."
+
+msgid "I processi devono appartenere al sito della classe di informazioni."
+msgstr "Les processus doivent appartenir au site de la classe d'informations."
+
+msgid "Sito inesistente."
+msgstr "Site inexistant."

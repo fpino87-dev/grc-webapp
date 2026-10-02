@@ -722,3 +722,527 @@ def generate_risk_excel(plant_id=None, include_draft: bool = False) -> bytes:
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Metodologia D-ITA-INF-23 — regole uniche di calcolo, governo e cicli.
+# Ogni modulo che mostra o usa classi di rischio passa da queste funzioni.
+# ─────────────────────────────────────────────────────────────────────────────
+
+RISK_CLASSES = ("very_low", "low", "medium", "high", "critical")
+
+# Matrice probabilità × impatto della procedura (§8): la classe si legge solo
+# da qui, mai dal prodotto numerico. Costante: garantisce confrontabilità.
+_MATRIX = {
+    5: ("medium", "high", "high", "critical", "critical"),
+    4: ("low", "medium", "high", "critical", "critical"),
+    3: ("low", "medium", "medium", "high", "critical"),
+    2: ("very_low", "low", "medium", "high", "high"),
+    1: ("very_low", "low", "low", "medium", "high"),
+}
+
+IMPACT_DIMENSIONS = ("economic", "legal", "customer", "reputational", "people", "operational")
+
+# Soglia minima d'impatto per perdita di riservatezza, dalla classe di
+# protezione dell'informazione (§7.2, criterio del white paper VDA).
+CONFIDENTIALITY_FLOOR = {"very_high": 5, "high": 4, "normal": 3, "low": 2}
+
+# Regola di trattamento e scadenza per classe (§9.2).
+TREATMENT_RULES = {
+    "critical": {"rule": "mandatory", "months": 3},
+    "high": {"rule": "evaluate", "months": 12},
+    "medium": {"rule": "acceptable", "months": 24},
+    "low": {"rule": "acceptable", "months": 60},
+    "very_low": {"rule": "acceptable", "months": 60},
+}
+
+
+def risk_class(probability, impact) -> str | None:
+    """Classe di rischio dalla matrice; None se manca uno dei due valori."""
+    try:
+        p, i = int(probability), int(impact)
+    except (TypeError, ValueError):
+        return None
+    row = _MATRIX.get(p)
+    if row is None or not 1 <= i <= 5:
+        return None
+    return row[i - 1]
+
+
+def class_rank(cls: str | None) -> int:
+    """Posizione della classe (0 = very_low … 4 = critical); -1 se assente."""
+    return RISK_CLASSES.index(cls) if cls in RISK_CLASSES else -1
+
+
+def shift_class(cls: str, delta: int, floor: str | None = None) -> str:
+    """Override del Risk Owner (§8): sposta di `delta` livelli, mai sotto `floor`."""
+    rank = max(0, min(len(RISK_CLASSES) - 1, class_rank(cls) + delta))
+    if floor is not None:
+        rank = max(rank, class_rank(floor))
+    return RISK_CLASSES[rank]
+
+
+def confidentiality_floor(levels) -> int | None:
+    """Impatto minimo dato dalle classi di protezione delle informazioni colpite."""
+    values = [CONFIDENTIALITY_FLOOR[lv] for lv in levels if lv in CONFIDENTIALITY_FLOOR]
+    return max(values) if values else None
+
+
+def overall_impact(dimensions: dict, floor: int | None = None) -> int | None:
+    """Impatto finale = caso peggiore fra le dimensioni valorizzate e la soglia minima."""
+    values = [int(v) for k, v in (dimensions or {}).items() if k in IMPACT_DIMENSIONS and v]
+    if floor:
+        values.append(int(floor))
+    return max(values) if values else None
+
+
+def risk_level_bucket(cls: str | None) -> str | None:
+    """Semaforo verde/giallo/rosso per i moduli che non usano le 5 classi."""
+    if cls in ("very_low", "low"):
+        return "verde"
+    if cls == "medium":
+        return "giallo"
+    if cls in ("high", "critical"):
+        return "rosso"
+    return None
+
+
+def treatment_rule(cls: str | None) -> dict | None:
+    return TREATMENT_RULES.get(cls)
+
+
+# ── Policy di governo del rischio ────────────────────────────────────────────
+
+DEFAULT_ECONOMIC_THRESHOLDS = {
+    # Limite inferiore in euro di ciascun livello; sotto il livello 2 = livello 1.
+    "5": 500000,
+    "4": 250000,
+    "3": 50000,
+    "2": 10000,
+}
+
+_SITE_ACCEPT = {"roles": ["risk_owner"], "scope": "plant", "requires_body": False}
+
+PRESETS = {
+    "centralizzato": {
+        "group_register_enabled": True,
+        "acceptance_matrix": {
+            "very_low": _SITE_ACCEPT,
+            "low": _SITE_ACCEPT,
+            "medium": {**_SITE_ACCEPT, "notify": ["site_risk_manager"]},
+            "high": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+            "critical": {"roles": [], "scope": "org", "requires_body": True},
+        },
+        "upper_opinion": {"very_low": "none", "low": "none", "medium": "none",
+                          "high": "binding", "critical": "binding"},
+    },
+    "federato": {
+        "group_register_enabled": True,
+        "acceptance_matrix": {
+            "very_low": _SITE_ACCEPT,
+            "low": _SITE_ACCEPT,
+            "medium": {**_SITE_ACCEPT, "notify": ["site_risk_manager"]},
+            "high": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+            "critical": {"roles": [], "scope": "plant", "requires_body": True},
+        },
+        "upper_opinion": {"very_low": "none", "low": "none", "medium": "none",
+                          "high": "notify", "critical": "binding"},
+    },
+    "sito_singolo": {
+        "group_register_enabled": False,
+        "acceptance_matrix": {
+            "very_low": _SITE_ACCEPT,
+            "low": _SITE_ACCEPT,
+            "medium": _SITE_ACCEPT,
+            "high": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+            "critical": {"roles": [], "scope": "plant", "requires_body": True},
+        },
+        "upper_opinion": {c: "none" for c in RISK_CLASSES},
+    },
+}
+
+_COMMON_DEFAULTS = {
+    "acceptance_max_months": {"very_low": 12, "low": 12, "medium": 12, "high": 12, "critical": 6},
+    "economic_thresholds": DEFAULT_ECONOMIC_THRESHOLDS,
+    "overdue_escalation_days": 30,
+    "review_frequency_months": 12,
+}
+
+OPINION_MODES = ("none", "notify", "binding")
+_POLICY_DICT_FIELDS = ("acceptance_matrix", "upper_opinion", "acceptance_max_months", "economic_thresholds")
+_POLICY_SCALAR_FIELDS = ("group_register_enabled", "overdue_escalation_days", "review_frequency_months")
+
+
+def default_preset() -> str:
+    """Senza policy: un solo sito attivo → sito singolo, altrimenti centralizzato."""
+    from apps.plants.models import Plant
+
+    return "centralizzato" if Plant.objects.filter(status="attivo").count() > 1 else "sito_singolo"
+
+
+def preset_defaults(preset: str) -> dict:
+    import copy
+
+    base = copy.deepcopy(PRESETS[preset])
+    base.update(copy.deepcopy(_COMMON_DEFAULTS))
+    return base
+
+
+def resolve_policy(plant=None) -> dict:
+    """Policy effettiva per un registro: preset → organizzazione → sito.
+
+    Per i campi dizionario (per classe o per livello) l'override è chiave per
+    chiave; per gli scalari vale il valore più specifico non nullo.
+    """
+    from .models import RiskGovernancePolicy
+
+    org = RiskGovernancePolicy.objects.filter(plant__isnull=True).first()
+    site = (
+        RiskGovernancePolicy.objects.filter(plant=plant).first()
+        if plant is not None else None
+    )
+    preset = org.preset if org else default_preset()
+    effective = preset_defaults(preset)
+    for layer in (org, site):
+        if layer is None:
+            continue
+        for field in _POLICY_DICT_FIELDS:
+            override = getattr(layer, field) or {}
+            effective[field] = {**effective[field], **override}
+        for field in _POLICY_SCALAR_FIELDS:
+            value = getattr(layer, field)
+            if value is not None:
+                effective[field] = value
+    effective["preset"] = preset
+    effective["configured"] = org is not None
+    effective["org_policy_id"] = str(org.pk) if org else None
+    effective["plant_policy_id"] = str(site.pk) if site else None
+    return effective
+
+
+def economic_level(amount, thresholds: dict) -> int:
+    """Livello d'impatto economico (1–5) di un importo in euro."""
+    for level in ("5", "4", "3", "2"):
+        if amount >= thresholds[level]:
+            return int(level)
+    return 1
+
+
+def _validate_policy_data(data: dict) -> None:
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    for field in ("acceptance_matrix", "upper_opinion", "acceptance_max_months"):
+        unknown = set((data.get(field) or {})) - set(RISK_CLASSES)
+        if unknown:
+            raise ValidationError(_("Classi di rischio non valide: %(classes)s") % {"classes": ", ".join(sorted(unknown))})
+    for mode in (data.get("upper_opinion") or {}).values():
+        if mode not in OPINION_MODES:
+            raise ValidationError(_("Modalità di parere non valida: %(mode)s") % {"mode": mode})
+    for cls, rule in (data.get("acceptance_matrix") or {}).items():
+        if not isinstance(rule, dict) or rule.get("scope") not in ("plant", "org"):
+            raise ValidationError(_("Regola di accettazione non valida per la classe %(cls)s") % {"cls": cls})
+    for months in (data.get("acceptance_max_months") or {}).values():
+        if not isinstance(months, int) or months < 1:
+            raise ValidationError(_("La validità dell'accettazione deve essere un numero di mesi positivo."))
+    thresholds = data.get("economic_thresholds") or {}
+    if thresholds:
+        if set(thresholds) != {"2", "3", "4", "5"}:
+            raise ValidationError(_("Le soglie economiche richiedono i livelli 2, 3, 4 e 5."))
+        values = [thresholds[k] for k in ("2", "3", "4", "5")]
+        if any(not isinstance(v, (int, float)) or v <= 0 for v in values) or values != sorted(set(values)):
+            raise ValidationError(_("Le soglie economiche devono essere positive e crescenti dal livello 2 al 5."))
+
+
+def save_governance_policy(user, plant, data: dict):
+    """Crea o aggiorna la policy di un perimetro (organizzazione o sito).
+
+    Le regole di governo le decide chi ha scope di organizzazione, anche le
+    eccezioni per un singolo sito (procedura §1: la capogruppo approva).
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+    from rest_framework.exceptions import PermissionDenied
+
+    from core.audit import log_action
+    from core.scoping import user_has_org_scope
+
+    from .models import RiskGovernancePolicy
+
+    if not user_has_org_scope(user):
+        raise PermissionDenied(_("Solo chi ha accesso a tutta l'organizzazione può modificare il governo del rischio."))
+    if "preset" in data and data["preset"] not in PRESETS:
+        raise ValidationError(_("Preset non valido."))
+    if plant is not None and "preset" in data:
+        raise ValidationError(_("Il preset si sceglie solo a livello di organizzazione."))
+    _validate_policy_data(data)
+
+    allowed = set(_POLICY_DICT_FIELDS) | set(_POLICY_SCALAR_FIELDS) | {"preset", "notes"}
+    with transaction.atomic():
+        policy = RiskGovernancePolicy.objects.filter(plant=plant).first()
+        created = policy is None
+        if created:
+            policy = RiskGovernancePolicy(plant=plant, created_by=user)
+        for key, value in data.items():
+            if key in allowed:
+                setattr(policy, key, value)
+        policy.approved_by = user
+        policy.approved_at = timezone.now()
+        policy.save()
+        log_action(
+            user=user,
+            action_code="risk.policy.updated",
+            level="L1",
+            entity=policy,
+            payload={
+                "plant_id": str(plant.pk) if plant else None,
+                "created": created,
+                "fields": sorted(k for k in data if k in allowed),
+            },
+        )
+    return policy
+
+
+# ── Catalogo minacce ─────────────────────────────────────────────────────────
+
+_THREAT_CODE_RE = r"^[A-Z0-9_]{2,30}$"
+
+
+def _validate_threat_fields(asset_types, cia) -> None:
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from .models import ASSET_TYPES
+
+    if not asset_types or set(asset_types) - set(ASSET_TYPES):
+        raise ValidationError(_("Tipologie di asset non valide."))
+    if set(cia or []) - {"C", "I", "A"}:
+        raise ValidationError(_("Le proprietà colpite possono essere solo C, I, A."))
+
+
+def sync_threat_catalog(data: dict) -> dict:
+    """Allinea le voci `source=catalog` al file JSON del catalogo.
+
+    Upsert per codice; le voci sparite dal file vengono disattivate (i rischi
+    le referenziano). Le voci personalizzate non vengono toccate: se un codice
+    del file coincide con una voce custom, la voce custom resta e il codice del
+    file viene segnalato come conflitto.
+    """
+    from .models import ThreatCatalogEntry
+
+    version = str(data.get("version", ""))
+    counts = {"created": 0, "updated": 0, "deactivated": 0, "conflicts": []}
+    seen = set()
+    with transaction.atomic():
+        for item in data.get("threats", []):
+            code = item["code"]
+            seen.add(code)
+            _validate_threat_fields(item.get("asset_types"), item.get("cia"))
+            entry = ThreatCatalogEntry.objects.filter(code=code).first()
+            if entry and entry.source == "custom":
+                counts["conflicts"].append(code)
+                continue
+            values = {
+                "asset_types": item["asset_types"],
+                "cia": item.get("cia", []),
+                "translations": item.get("translations", {}),
+                "source": "catalog",
+                "catalog_version": version,
+                "active": True,
+            }
+            if entry is None:
+                ThreatCatalogEntry.objects.create(code=code, **values)
+                counts["created"] += 1
+            else:
+                for key, value in values.items():
+                    setattr(entry, key, value)
+                entry.save()
+                counts["updated"] += 1
+        counts["deactivated"] = (
+            ThreatCatalogEntry.objects.filter(source="catalog", active=True)
+            .exclude(code__in=seen)
+            .update(active=False)
+        )
+    return counts
+
+
+def _require_org_scope_for_catalog(user) -> None:
+    from django.utils.translation import gettext as _
+    from rest_framework.exceptions import PermissionDenied
+
+    from core.scoping import user_has_org_scope
+
+    if not user_has_org_scope(user):
+        raise PermissionDenied(_("Solo chi ha accesso a tutta l'organizzazione può gestire il catalogo minacce."))
+
+
+def create_custom_threat(user, *, code, asset_types, cia, translations):
+    import re
+
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    from .models import ThreatCatalogEntry
+
+    _require_org_scope_for_catalog(user)
+    code = (code or "").strip().upper()
+    if not re.match(_THREAT_CODE_RE, code):
+        raise ValidationError(_("Il codice deve avere da 2 a 30 caratteri fra lettere maiuscole, cifre e trattino basso."))
+    if ThreatCatalogEntry.objects.filter(code=code).exists():
+        raise ValidationError(_("Esiste già una minaccia con questo codice."))
+    _validate_threat_fields(asset_types, cia)
+    if not any((v or {}).get("title") for v in (translations or {}).values()):
+        raise ValidationError(_("Indica almeno il titolo della minaccia."))
+    with transaction.atomic():
+        entry = ThreatCatalogEntry.objects.create(
+            code=code, asset_types=asset_types, cia=cia or [], translations=translations,
+            source="custom", created_by=user,
+        )
+        log_action(user=user, action_code="risk.catalog.custom_created", level="L2",
+                   entity=entry, payload={"code": code})
+    return entry
+
+
+def update_custom_threat(user, entry, **fields):
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    _require_org_scope_for_catalog(user)
+    if entry.source != "custom":
+        raise ValidationError(_("Le voci del catalogo di gruppo non si modificano da qui."))
+    asset_types = fields.get("asset_types", entry.asset_types)
+    cia = fields.get("cia", entry.cia)
+    _validate_threat_fields(asset_types, cia)
+    with transaction.atomic():
+        for key in ("asset_types", "cia", "translations", "active"):
+            if key in fields:
+                setattr(entry, key, fields[key])
+        entry.save()
+        log_action(user=user, action_code="risk.catalog.custom_updated", level="L2",
+                   entity=entry, payload={"code": entry.code, "fields": sorted(fields)})
+    return entry
+
+
+def deactivate_threat(user, entry):
+    """Disattiva una voce personalizzata (i rischi già valutati la conservano)."""
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    _require_org_scope_for_catalog(user)
+    if entry.source != "custom":
+        raise ValidationError(_("Le voci del catalogo di gruppo non si disattivano da qui."))
+    with transaction.atomic():
+        entry.active = False
+        entry.save(update_fields=["active", "updated_at"])
+        log_action(user=user, action_code="risk.catalog.custom_deactivated", level="L2",
+                   entity=entry, payload={"code": entry.code})
+    return entry
+
+
+# ── Perimetro della valutazione ──────────────────────────────────────────────
+
+def plant_handles_prototypes(plant) -> bool:
+    """Un sito gestisce prototipi se ha attivo il framework TISAX prototipi."""
+    from apps.plants.models import PlantFramework
+
+    if plant is None:
+        return False
+    return PlantFramework.objects.filter(
+        plant=plant, framework__code="TISAX_PROTO", active=True,
+    ).exists()
+
+
+def asset_types_present(plant) -> list:
+    """Tipologie di asset da coprire nel registro (procedura §6.5).
+
+    Sito: IT, Sede e Personale sempre; OT se il sito ha OT; Fornitori se ha
+    fornitori attivi; Prototipi se gestisce prototipi. Gruppo: IT, Personale e
+    Fornitori (servizi condivisi, strutture e contratti della capogruppo).
+    """
+    from apps.assets.models import Asset
+    from apps.suppliers.models import Supplier
+
+    if plant is None:
+        return ["IT", "PERSONALE", "FORNITORI"]
+    types = ["IT"]
+    if plant.has_ot or Asset.objects.filter(plant=plant, asset_type="OT").exists():
+        types.append("OT")
+    types += ["SEDE", "PERSONALE"]
+    if Supplier.objects.filter(plants=plant, status="attivo").exists():
+        types.append("FORNITORI")
+    if plant_handles_prototypes(plant):
+        types.append("PROTOTIPI")
+    return types
+
+
+# ── Cicli di valutazione ─────────────────────────────────────────────────────
+
+def open_cycle(plant=None):
+    """Ciclo in corso o in approvazione del registro (sito o gruppo), se c'è."""
+    from .models import RiskAssessmentCycle
+
+    return RiskAssessmentCycle.objects.filter(
+        plant=plant, status__in=RiskAssessmentCycle.OPEN_STATUSES,
+    ).first()
+
+
+def approved_cycle(plant=None):
+    """Ultimo ciclo approvato del registro: è la valutazione vigente."""
+    from .models import RiskAssessmentCycle
+
+    return (
+        RiskAssessmentCycle.objects.filter(plant=plant, status="approvato")
+        .order_by("-approved_at", "-started_at").first()
+    )
+
+
+def start_cycle(user, plant, kind: str, trigger_reason: str = ""):
+    """Avvia una valutazione del registro di un sito (o del gruppo se plant è None).
+
+    - `primo`: solo se il registro non ha ancora valutazioni con il metodo
+      attuale (i cicli `legacy` non contano);
+    - `periodico` / `straordinario`: richiedono una valutazione approvata;
+      lo straordinario richiede il motivo (trigger, §11.2).
+    """
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+    from core.scoping import require_org_scope_for_org_wide, require_plant_access
+
+    from .models import RiskAssessmentCycle
+
+    if kind not in ("primo", "periodico", "straordinario"):
+        raise ValidationError(_("Tipo di valutazione non valido."))
+    if plant is None:
+        require_org_scope_for_org_wide(user, None)
+        if not resolve_policy(None)["group_register_enabled"]:
+            raise ValidationError(_("Il registro di gruppo non è attivo nella policy di governo del rischio."))
+    else:
+        require_plant_access(user, plant)
+    if open_cycle(plant):
+        raise ValidationError(_("C'è già una valutazione aperta per questo registro."))
+    current_method = RiskAssessmentCycle.objects.filter(plant=plant).exclude(kind="legacy")
+    if kind == "primo" and current_method.exists():
+        raise ValidationError(_("Il primo risk assessment è già stato avviato per questo registro."))
+    if kind != "primo" and not current_method.filter(status__in=("approvato", "archiviato")).exists():
+        raise ValidationError(_("Serve una valutazione approvata prima di una revisione."))
+    if kind == "straordinario" and not (trigger_reason or "").strip():
+        raise ValidationError(_("Indica il motivo della revisione straordinaria."))
+
+    with transaction.atomic():
+        cycle = RiskAssessmentCycle.objects.create(
+            plant=plant, kind=kind, trigger_reason=(trigger_reason or "").strip(),
+            status="in_corso", started_at=timezone.now(), created_by=user,
+        )
+        log_action(
+            user=user, action_code="risk.cycle.started", level="L1", entity=cycle,
+            payload={"plant_id": str(plant.pk) if plant else None, "kind": kind},
+        )
+    return cycle

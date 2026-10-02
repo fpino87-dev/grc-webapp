@@ -48,6 +48,12 @@ const ROLES_KEYS = [
   "bu_referente",
   "raci_responsible",
   "raci_accountable",
+  "site_risk_manager",
+  "it_manager",
+  "hr_manager",
+  "purchasing_manager",
+  "production_manager",
+  "engineering_manager",
 ] as const;
 
 const EVIDENCE_TYPE_KEYS = ["certification", "training", "experience", "assessment"] as const;

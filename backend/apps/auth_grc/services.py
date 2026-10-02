@@ -314,6 +314,8 @@ ROLE_MATRIX_AREAS = [
 # Varianti che non aggiungono un'area distinta (stessi ruoli di un'altra).
 ROLE_MATRIX_EXCLUDED = {
     "apps.management_review.permissions.ReviewWithBodyMembersPermission",
+    # Stessi ruoli di RiskAppetitePermission (area "risk_appetite").
+    "apps.risk.permissions.RiskGovernancePermission",
 }
 
 

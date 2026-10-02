@@ -7,6 +7,8 @@ const ROLE_OPTIONS = [
   "ciso", "compliance_officer", "risk_manager", "internal_auditor", "external_auditor",
   "plant_manager", "control_owner", "plant_security_officer", "nis2_contact", "dpo",
   "isms_manager", "comitato_membro", "bu_referente", "raci_responsible", "raci_accountable",
+  "site_risk_manager", "it_manager", "hr_manager",
+  "purchasing_manager", "production_manager", "engineering_manager",
 ];
 
 export function RoleRequirementsPanel() {

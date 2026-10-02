@@ -1272,7 +1272,13 @@
       "comitato_membro": "Membre du comité",
       "bu_referente": "Référent BU",
       "raci_responsible": "RACI Responsible",
-      "raci_accountable": "RACI Accountable"
+      "raci_accountable": "RACI Accountable",
+      "site_risk_manager": "Risk Manager de site",
+      "it_manager": "Responsable IT",
+      "hr_manager": "Responsable RH",
+      "purchasing_manager": "Responsable Achats",
+      "production_manager": "Responsable Production / Maintenance",
+      "engineering_manager": "Responsable Ingénierie"
     },
     "scopes": {
       "org": "Global — toute l'organisation",

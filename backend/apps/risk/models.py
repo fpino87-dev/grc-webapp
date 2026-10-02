@@ -211,6 +211,18 @@ class RiskAssessment(BaseModel):
         on_delete=models.SET_NULL,
         related_name="risk_assessments",
     )
+    # Ciclo di valutazione a cui appartiene il rischio (metodologia D-ITA-INF-23).
+    # I rischi precedenti alla revisione stanno nel ciclo `legacy` del loro sito.
+    cycle = models.ForeignKey(
+        "risk.RiskAssessmentCycle",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="risks",
+    )
+    # Valori dei campi del metodo superato, conservati per la consultazione in
+    # sola lettura quando i campi spariscono dal model.
+    legacy_snapshot = models.JSONField(default=dict, blank=True)
 
     # Descrizione strutturata ISO 27005
     cause = models.TextField(blank=True, default="")
@@ -392,3 +404,230 @@ class RiskAppetitePolicy(BaseModel):
             (self.valid_until is None or self.valid_until >= today)
         )
 
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Metodologia D-ITA-INF-23 (revisione post audit TISAX): catalogo minacce,
+# classi di informazioni, policy di governo del rischio e cicli di valutazione.
+# Le regole di calcolo stanno in services.py (risk_class, resolve_policy, …).
+# ─────────────────────────────────────────────────────────────────────────────
+
+ASSET_TYPE_CHOICES = [
+    ("IT", "IT"),
+    ("OT", "OT"),
+    ("SEDE", "Sede"),
+    ("PERSONALE", "Personale"),
+    ("FORNITORI", "Fornitori"),
+    ("PROTOTIPI", "Prototipi"),
+]
+ASSET_TYPES = [code for code, _ in ASSET_TYPE_CHOICES]
+
+PROTECTION_LEVEL_CHOICES = [
+    ("low", "Low"),
+    ("normal", "Normal"),
+    ("high", "High"),
+    ("very_high", "Very high"),
+]
+
+
+class ThreatCatalogEntry(BaseModel):
+    """Voce del catalogo minacce di gruppo (procedura §6.3).
+
+    `source=catalog` arriva da `backend/risk_catalogs/threats.json` tramite
+    `load_risk_catalog` e non si modifica da UI; `source=custom` sono le voci
+    aggiunte dall'organizzazione. Una voce non più usata si disattiva
+    (`active=False`), non si cancella: i rischi valutati la referenziano.
+    """
+
+    SOURCE_CHOICES = [("catalog", "Catalogo"), ("custom", "Personalizzata")]
+
+    code = models.CharField(max_length=30)
+    asset_types = models.JSONField(default=list, help_text="Tipologie di asset a cui si applica")
+    cia = models.JSONField(default=list, help_text="Proprietà colpite: C, I, A")
+    translations = models.JSONField(default=dict)
+    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default="custom")
+    catalog_version = models.CharField(max_length=20, blank=True, default="")
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["code"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["code"],
+                condition=models.Q(deleted_at__isnull=True),
+                name="uniq_active_threat_code",
+            ),
+        ]
+
+    def tr(self, field: str, lang: str = "it", default: str = "") -> str:
+        for cand in (lang, "it", "en"):
+            val = (self.translations.get(cand) or {}).get(field)
+            if val:
+                return val
+        return default
+
+    def get_title(self, lang: str = "it") -> str:
+        return self.tr("title", lang, default=self.code)
+
+    def __str__(self):
+        return f"{self.code} {self.get_title()}"
+
+
+class InformationClass(BaseModel):
+    """Classe di informazioni da proteggere (VDA ISA 1.3.1 / 1.3.2, procedura §6.1).
+
+    `plant` nullo = classe di gruppo (es. dati dell'ERP centrale).
+    """
+
+    plant = models.ForeignKey(
+        "plants.Plant",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="information_classes",
+    )
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default="")
+    owner = models.ForeignKey(
+        "auth.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="owned_information_classes",
+    )
+    owner_role = models.CharField(
+        max_length=50, blank=True, default="",
+        help_text="Ruolo normativo dell'owner (governance.NormativeRole)",
+    )
+    confidentiality = models.CharField(max_length=10, choices=PROTECTION_LEVEL_CHOICES, default="normal")
+    integrity = models.CharField(max_length=10, choices=PROTECTION_LEVEL_CHOICES, default="normal")
+    availability = models.CharField(max_length=10, choices=PROTECTION_LEVEL_CHOICES, default="normal")
+    critical_processes = models.ManyToManyField(
+        "bia.CriticalProcess", blank=True, related_name="information_classes",
+    )
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class RiskGovernancePolicy(BaseModel):
+    """Modello di governo del rischio (procedura §1, §4, §10).
+
+    Una policy di organizzazione (`plant` nullo) più eventuali eccezioni per
+    sito: per ogni impostazione vince la più specifica non vuota. Senza alcuna
+    policy valgono i default del preset (services.resolve_policy).
+    """
+
+    PRESET_CHOICES = [
+        ("centralizzato", "Centralizzato"),
+        ("federato", "Federato"),
+        ("sito_singolo", "Sito singolo"),
+    ]
+
+    plant = models.ForeignKey(
+        "plants.Plant",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="risk_governance_policies",
+    )
+    preset = models.CharField(max_length=20, choices=PRESET_CHOICES, default="centralizzato")
+    group_register_enabled = models.BooleanField(null=True, blank=True)
+    acceptance_matrix = models.JSONField(default=dict, blank=True)
+    upper_opinion = models.JSONField(default=dict, blank=True)
+    acceptance_max_months = models.JSONField(default=dict, blank=True)
+    economic_thresholds = models.JSONField(default=dict, blank=True)
+    overdue_escalation_days = models.PositiveIntegerField(null=True, blank=True)
+    review_frequency_months = models.PositiveIntegerField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        "auth.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_risk_governance_policies",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, default="")
+
+    class Meta:
+        ordering = ["plant_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["plant"],
+                condition=models.Q(deleted_at__isnull=True),
+                nulls_distinct=False,
+                name="uniq_active_risk_governance_policy_per_scope",
+            ),
+        ]
+
+
+class RiskAssessmentCycle(BaseModel):
+    """Una valutazione completa di un registro (sito o gruppo) — procedura §5, §11.
+
+    `plant` nullo = registro di gruppo. Al più un ciclo aperto (in corso o in
+    approvazione) per registro. `legacy` = il registro precedente alla
+    revisione della metodologia, archiviato in sola lettura.
+    """
+
+    KIND_CHOICES = [
+        ("primo", "Primo risk assessment"),
+        ("periodico", "Revisione periodica"),
+        ("straordinario", "Revisione straordinaria"),
+        ("legacy", "Valutazione precedente (metodo superato)"),
+    ]
+    STATUS_CHOICES = [
+        ("in_corso", "In corso"),
+        ("in_approvazione", "In approvazione"),
+        ("approvato", "Approvato"),
+        ("archiviato", "Archiviato"),
+    ]
+    OPEN_STATUSES = ("in_corso", "in_approvazione")
+
+    plant = models.ForeignKey(
+        "plants.Plant",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="risk_cycles",
+    )
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES)
+    trigger_reason = models.TextField(blank=True, default="")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="in_corso", db_index=True)
+    started_at = models.DateTimeField()
+    closed_at = models.DateTimeField(null=True, blank=True)
+    approved_by_body = models.ForeignKey(
+        "governance.SecurityCommittee",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_risk_cycles",
+    )
+    approval_review = models.ForeignKey(
+        "management_review.ManagementReview",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_risk_cycles",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    local_adoption_ref = models.CharField(
+        max_length=300, blank=True, default="",
+        help_text="Delibera di recepimento dell'organo della società (società estere)",
+    )
+
+    class Meta:
+        ordering = ["-started_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["plant"],
+                condition=models.Q(
+                    deleted_at__isnull=True,
+                    status__in=["in_corso", "in_approvazione"],
+                ),
+                nulls_distinct=False,
+                name="uniq_open_risk_cycle_per_register",
+            ),
+        ]

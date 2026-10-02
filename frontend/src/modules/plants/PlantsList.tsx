@@ -18,7 +18,7 @@ const EU_COUNTRIES_EU = [["AT","Austria"],["BE","Belgio"],
   ["RO","Romania"],["SE","Svezia"],["SI","Slovenia"],
   ["SK","Slovacchia"]];
 const EU_COUNTRIES_EXTRA = [["GB","Regno Unito"],
-  ["NO","Norvegia"],["CH","Svizzera"],["TR","Turchia"],
+  ["NO","Norvegia"],["CH","Svizzera"],["TR","Turchia"],["TN","Tunisia"],
   ["US","Stati Uniti"],["JP","Giappone"],["CN","Cina"],
   ["OTHER","Altro"]];
 

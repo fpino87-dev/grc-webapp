@@ -21,6 +21,14 @@ class NormativeRole(models.TextChoices):
     BU_REFERENTE = "bu_referente", _("Referente BU")
     RACI_RESPONSIBLE = "raci_responsible", _("RACI Responsible")
     RACI_ACCOUNTABLE = "raci_accountable", _("RACI Accountable")
+    # Responsabili di funzione: Risk Owner tipici per tipologia di asset
+    # (procedura di risk management §4.2) e Risk Manager di sito.
+    SITE_RISK_MANAGER = "site_risk_manager", _("Risk Manager di sito")
+    IT_MANAGER = "it_manager", _("Responsabile IT")
+    HR_MANAGER = "hr_manager", _("Responsabile HR")
+    PURCHASING_MANAGER = "purchasing_manager", _("Responsabile Acquisti")
+    PRODUCTION_MANAGER = "production_manager", _("Responsabile Produzione / Manutenzione")
+    ENGINEERING_MANAGER = "engineering_manager", _("Responsabile Engineering")
 
 
 class RoleAssignment(BaseModel):

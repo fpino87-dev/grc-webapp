@@ -37,11 +37,19 @@ EU_COUNTRIES = [
     ("NO", "Norvegia"),
     ("CH", "Svizzera"),
     ("TR", "Turchia"),
+    ("TN", "Tunisia"),
     ("US", "Stati Uniti"),
     ("JP", "Giappone"),
     ("CN", "Cina"),
     ("OTHER", "Altro"),
 ]
+
+# Stati membri UE (NIS2 si applica solo qui): tutto il resto di EU_COUNTRIES è
+# fuori UE — per una società lì vale la sola regola di gruppo.
+EU_MEMBER_CODES = frozenset({
+    "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GR", "HR",
+    "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK",
+})
 
 CSIRT_BY_COUNTRY = {
     "IT": {
@@ -211,6 +219,10 @@ class Plant(BaseModel):
     def clean(self):
         if self.parent_plant and self.parent_plant.parent_plant:
             raise ValidationError(_("Max 1 livello di nesting per i sub-plant."))
+
+    @property
+    def is_eu(self) -> bool:
+        return self.country in EU_MEMBER_CODES
 
     @property
     def is_nis2_subject(self):

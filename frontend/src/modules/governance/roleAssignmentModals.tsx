@@ -25,6 +25,12 @@ export const ROLE_KEYS: Record<string, string> = {
   bu_referente:           "bu_referente",
   raci_responsible:       "raci_responsible",
   raci_accountable:       "raci_accountable",
+  site_risk_manager:      "site_risk_manager",
+  it_manager:             "it_manager",
+  hr_manager:             "hr_manager",
+  purchasing_manager:     "purchasing_manager",
+  production_manager:     "production_manager",
+  engineering_manager:    "engineering_manager",
 };
 
 const TODAY = todayISO();

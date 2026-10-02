@@ -3113,3 +3113,99 @@ msgstr "Kuruluş genelindeki bir kanıt zaten tüm tesisler için kullanılabili
 
 msgid "Elenco dei siti non valido."
 msgstr "Geçersiz tesis listesi."
+
+msgid "Risk Manager di sito"
+msgstr "Saha Risk Yöneticisi"
+
+msgid "Responsabile IT"
+msgstr "BT Müdürü"
+
+msgid "Responsabile HR"
+msgstr "İK Müdürü"
+
+msgid "Responsabile Acquisti"
+msgstr "Satın Alma Müdürü"
+
+msgid "Responsabile Produzione / Manutenzione"
+msgstr "Üretim / Bakım Müdürü"
+
+msgid "Responsabile Engineering"
+msgstr "Mühendislik Müdürü"
+
+#, python-format
+msgid "Classi di rischio non valide: %(classes)s"
+msgstr "Geçersiz risk sınıfları: %(classes)s"
+
+#, python-format
+msgid "Modalità di parere non valida: %(mode)s"
+msgstr "Geçersiz görüş modu: %(mode)s"
+
+#, python-format
+msgid "Regola di accettazione non valida per la classe %(cls)s"
+msgstr "%(cls)s sınıfı için geçersiz kabul kuralı"
+
+msgid "La validità dell'accettazione deve essere un numero di mesi positivo."
+msgstr "Kabul geçerliliği pozitif bir ay sayısı olmalıdır."
+
+msgid "Le soglie economiche richiedono i livelli 2, 3, 4 e 5."
+msgstr "Ekonomik eşikler 2, 3, 4 ve 5. seviyeleri gerektirir."
+
+msgid "Le soglie economiche devono essere positive e crescenti dal livello 2 al 5."
+msgstr "Ekonomik eşikler pozitif olmalı ve 2. seviyeden 5. seviyeye artmalıdır."
+
+msgid "Solo chi ha accesso a tutta l'organizzazione può modificare il governo del rischio."
+msgstr "Risk yönetişimini yalnızca tüm kuruluşa erişimi olanlar değiştirebilir."
+
+msgid "Preset non valido."
+msgstr "Geçersiz ön ayar."
+
+msgid "Il preset si sceglie solo a livello di organizzazione."
+msgstr "Ön ayar yalnızca kuruluş düzeyinde seçilebilir."
+
+msgid "Tipologie di asset non valide."
+msgstr "Geçersiz varlık türleri."
+
+msgid "Le proprietà colpite possono essere solo C, I, A."
+msgstr "Etkilenen özellikler yalnızca C, I, A olabilir."
+
+msgid "Solo chi ha accesso a tutta l'organizzazione può gestire il catalogo minacce."
+msgstr "Tehdit kataloğunu yalnızca tüm kuruluşa erişimi olanlar yönetebilir."
+
+msgid "Il codice deve avere da 2 a 30 caratteri fra lettere maiuscole, cifre e trattino basso."
+msgstr "Kod, büyük harf, rakam ve alt çizgiden oluşan 2 ila 30 karakter olmalıdır."
+
+msgid "Esiste già una minaccia con questo codice."
+msgstr "Bu koda sahip bir tehdit zaten var."
+
+msgid "Indica almeno il titolo della minaccia."
+msgstr "En azından tehdidin başlığını girin."
+
+msgid "Le voci del catalogo di gruppo non si modificano da qui."
+msgstr "Grup kataloğu kayıtları buradan düzenlenemez."
+
+msgid "Le voci del catalogo di gruppo non si disattivano da qui."
+msgstr "Grup kataloğu kayıtları buradan devre dışı bırakılamaz."
+
+msgid "Tipo di valutazione non valido."
+msgstr "Geçersiz değerlendirme türü."
+
+msgid "Il registro di gruppo non è attivo nella policy di governo del rischio."
+msgstr "Grup kaydı risk yönetişimi politikasında etkin değil."
+
+msgid "C'è già una valutazione aperta per questo registro."
+msgstr "Bu kayıt için zaten açık bir değerlendirme var."
+
+msgid "Il primo risk assessment è già stato avviato per questo registro."
+msgstr "Bu kayıt için ilk risk değerlendirmesi zaten başlatıldı."
+
+msgid "Serve una valutazione approvata prima di una revisione."
+msgstr "Bir gözden geçirmeden önce onaylanmış bir değerlendirme gerekir."
+
+msgid "Indica il motivo della revisione straordinaria."
+msgstr "Olağanüstü gözden geçirmenin nedenini girin."
+
+msgid "I processi devono appartenere al sito della classe di informazioni."
+msgstr "Süreçler bilgi sınıfının sahasına ait olmalıdır."
+
+msgid "Sito inesistente."
+msgstr "Saha bulunamadı."

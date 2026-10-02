@@ -3134,3 +3134,99 @@ msgstr "Dowód organizacji jest już dostępny dla wszystkich zakładów."
 
 msgid "Elenco dei siti non valido."
 msgstr "Nieprawidłowa lista zakładów."
+
+msgid "Risk Manager di sito"
+msgstr "Kierownik ds. ryzyka zakładu"
+
+msgid "Responsabile IT"
+msgstr "Kierownik IT"
+
+msgid "Responsabile HR"
+msgstr "Kierownik HR"
+
+msgid "Responsabile Acquisti"
+msgstr "Kierownik Zakupów"
+
+msgid "Responsabile Produzione / Manutenzione"
+msgstr "Kierownik Produkcji / Utrzymania Ruchu"
+
+msgid "Responsabile Engineering"
+msgstr "Kierownik Działu Inżynierii"
+
+#, python-format
+msgid "Classi di rischio non valide: %(classes)s"
+msgstr "Nieprawidłowe klasy ryzyka: %(classes)s"
+
+#, python-format
+msgid "Modalità di parere non valida: %(mode)s"
+msgstr "Nieprawidłowy tryb opinii: %(mode)s"
+
+#, python-format
+msgid "Regola di accettazione non valida per la classe %(cls)s"
+msgstr "Nieprawidłowa reguła akceptacji dla klasy %(cls)s"
+
+msgid "La validità dell'accettazione deve essere un numero di mesi positivo."
+msgstr "Ważność akceptacji musi być dodatnią liczbą miesięcy."
+
+msgid "Le soglie economiche richiedono i livelli 2, 3, 4 e 5."
+msgstr "Progi ekonomiczne wymagają poziomów 2, 3, 4 i 5."
+
+msgid "Le soglie economiche devono essere positive e crescenti dal livello 2 al 5."
+msgstr "Progi ekonomiczne muszą być dodatnie i rosnące od poziomu 2 do 5."
+
+msgid "Solo chi ha accesso a tutta l'organizzazione può modificare il governo del rischio."
+msgstr "Tylko osoby z dostępem do całej organizacji mogą zmieniać zasady zarządzania ryzykiem."
+
+msgid "Preset non valido."
+msgstr "Nieprawidłowy szablon."
+
+msgid "Il preset si sceglie solo a livello di organizzazione."
+msgstr "Szablon wybiera się wyłącznie na poziomie organizacji."
+
+msgid "Tipologie di asset non valide."
+msgstr "Nieprawidłowe typy zasobów."
+
+msgid "Le proprietà colpite possono essere solo C, I, A."
+msgstr "Naruszone właściwości mogą być wyłącznie C, I, A."
+
+msgid "Solo chi ha accesso a tutta l'organizzazione può gestire il catalogo minacce."
+msgstr "Tylko osoby z dostępem do całej organizacji mogą zarządzać katalogiem zagrożeń."
+
+msgid "Il codice deve avere da 2 a 30 caratteri fra lettere maiuscole, cifre e trattino basso."
+msgstr "Kod musi mieć od 2 do 30 znaków: wielkie litery, cyfry i podkreślenia."
+
+msgid "Esiste già una minaccia con questo codice."
+msgstr "Zagrożenie o tym kodzie już istnieje."
+
+msgid "Indica almeno il titolo della minaccia."
+msgstr "Podaj co najmniej tytuł zagrożenia."
+
+msgid "Le voci del catalogo di gruppo non si modificano da qui."
+msgstr "Pozycji katalogu grupy nie można tu edytować."
+
+msgid "Le voci del catalogo di gruppo non si disattivano da qui."
+msgstr "Pozycji katalogu grupy nie można tu dezaktywować."
+
+msgid "Tipo di valutazione non valido."
+msgstr "Nieprawidłowy typ oceny."
+
+msgid "Il registro di gruppo non è attivo nella policy di governo del rischio."
+msgstr "Rejestr grupy nie jest włączony w polityce zarządzania ryzykiem."
+
+msgid "C'è già una valutazione aperta per questo registro."
+msgstr "Dla tego rejestru jest już otwarta ocena."
+
+msgid "Il primo risk assessment è già stato avviato per questo registro."
+msgstr "Pierwsza ocena ryzyka została już rozpoczęta dla tego rejestru."
+
+msgid "Serve una valutazione approvata prima di una revisione."
+msgstr "Przed przeglądem wymagana jest zatwierdzona ocena."
+
+msgid "Indica il motivo della revisione straordinaria."
+msgstr "Podaj powód przeglądu nadzwyczajnego."
+
+msgid "I processi devono appartenere al sito della classe di informazioni."
+msgstr "Procesy muszą należeć do zakładu klasy informacji."
+
+msgid "Sito inesistente."
+msgstr "Zakład nie istnieje."

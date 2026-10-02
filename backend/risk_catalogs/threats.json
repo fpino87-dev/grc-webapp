@@ -1,0 +1,2060 @@
+{
+  "version": "1.0",
+  "description": "Catalogo minacce di gruppo (procedura D-ITA-INF-23 §6.3). Base: catalogo aziendale + BSI Elementary threats. Approccio all-hazards (NIS2 art. 21).",
+  "asset_types": [
+    "IT",
+    "OT",
+    "SEDE",
+    "PERSONALE",
+    "FORNITORI",
+    "PROTOTIPI"
+  ],
+  "threats": [
+    {
+      "code": "FO_ACQ",
+      "asset_types": [
+        "FORNITORI"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Problemi nella catena di approvvigionamento / supply chain"
+        },
+        "en": {
+          "title": "Supply chain disruption"
+        },
+        "fr": {
+          "title": "Perturbation de la chaîne d'approvisionnement"
+        },
+        "pl": {
+          "title": "Zakłócenia w łańcuchu dostaw"
+        },
+        "tr": {
+          "title": "Tedarik zinciri aksaklıkları"
+        }
+      }
+    },
+    {
+      "code": "FO_IPR",
+      "asset_types": [
+        "FORNITORI"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Indisponibilità prolungata di risorse del fornitore"
+        },
+        "en": {
+          "title": "Prolonged unavailability of supplier resources"
+        },
+        "fr": {
+          "title": "Indisponibilité prolongée des ressources du fournisseur"
+        },
+        "pl": {
+          "title": "Długotrwała niedostępność zasobów dostawcy"
+        },
+        "tr": {
+          "title": "Tedarikçi kaynaklarının uzun süreli kullanılamaması"
+        }
+      }
+    },
+    {
+      "code": "FO_ITE",
+      "asset_types": [
+        "FORNITORI"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Indisponibilità temporanea (breve e medio periodo) di risorse del fornitore"
+        },
+        "en": {
+          "title": "Temporary (short/medium-term) unavailability of supplier resources"
+        },
+        "fr": {
+          "title": "Indisponibilité temporaire (court et moyen terme) des ressources du fournisseur"
+        },
+        "pl": {
+          "title": "Tymczasowa (krótko- i średnioterminowa) niedostępność zasobów dostawcy"
+        },
+        "tr": {
+          "title": "Tedarikçi kaynaklarının geçici (kısa ve orta vadeli) kullanılamaması"
+        }
+      }
+    },
+    {
+      "code": "FO_SEG",
+      "asset_types": [
+        "FORNITORI"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Violazione dei requisiti di sicurezza da parte del fornitore"
+        },
+        "en": {
+          "title": "Breach of security requirements by the supplier"
+        },
+        "fr": {
+          "title": "Violation des exigences de sécurité par le fournisseur"
+        },
+        "pl": {
+          "title": "Naruszenie wymagań bezpieczeństwa przez dostawcę"
+        },
+        "tr": {
+          "title": "Tedarikçinin güvenlik gerekliliklerini ihlal etmesi"
+        }
+      }
+    },
+    {
+      "code": "FO_SLA",
+      "asset_types": [
+        "FORNITORI"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Mancato rispetto dei livelli di servizio contrattualizzati (SLA)"
+        },
+        "en": {
+          "title": "Failure to meet contracted service levels (SLA)"
+        },
+        "fr": {
+          "title": "Non-respect des niveaux de service contractuels (SLA)"
+        },
+        "pl": {
+          "title": "Niedotrzymanie umownych poziomów usług (SLA)"
+        },
+        "tr": {
+          "title": "Sözleşmeli hizmet seviyelerine (SLA) uyulmaması"
+        }
+      }
+    },
+    {
+      "code": "FO_CON",
+      "asset_types": [
+        "FORNITORI"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Dipendenza da un fornitore unico o critico"
+        },
+        "en": {
+          "title": "Dependency on a single or critical supplier"
+        },
+        "fr": {
+          "title": "Dépendance à un fournisseur unique ou critique"
+        },
+        "pl": {
+          "title": "Uzależnienie od jednego lub krytycznego dostawcy"
+        },
+        "tr": {
+          "title": "Tek veya kritik bir tedarikçiye bağımlılık"
+        }
+      }
+    },
+    {
+      "code": "FO_CNT",
+      "asset_types": [
+        "FORNITORI"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Contratto scaduto o privo di clausole di sicurezza"
+        },
+        "en": {
+          "title": "Expired contract or contract without security clauses"
+        },
+        "fr": {
+          "title": "Contrat expiré ou sans clauses de sécurité"
+        },
+        "pl": {
+          "title": "Umowa wygasła lub bez klauzul bezpieczeństwa"
+        },
+        "tr": {
+          "title": "Süresi dolmuş veya güvenlik maddeleri içermeyen sözleşme"
+        }
+      }
+    },
+    {
+      "code": "FO_RMT",
+      "asset_types": [
+        "FORNITORI",
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Accesso remoto non controllato dei fornitori ai sistemi"
+        },
+        "en": {
+          "title": "Uncontrolled supplier remote access to systems"
+        },
+        "fr": {
+          "title": "Accès distant non contrôlé des fournisseurs aux systèmes"
+        },
+        "pl": {
+          "title": "Niekontrolowany zdalny dostęp dostawców do systemów"
+        },
+        "tr": {
+          "title": "Tedarikçilerin sistemlere kontrolsüz uzaktan erişimi"
+        }
+      }
+    },
+    {
+      "code": "PE_CON",
+      "asset_types": [
+        "PERSONALE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Contaminazione da agenti chimici, tossici, radioattivi"
+        },
+        "en": {
+          "title": "Contamination by chemical, toxic or radioactive agents"
+        },
+        "fr": {
+          "title": "Contamination par agents chimiques, toxiques ou radioactifs"
+        },
+        "pl": {
+          "title": "Skażenie substancjami chemicznymi, toksycznymi lub radioaktywnymi"
+        },
+        "tr": {
+          "title": "Kimyasal, toksik veya radyoaktif maddelerle kontaminasyon"
+        }
+      }
+    },
+    {
+      "code": "PE_IPR",
+      "asset_types": [
+        "PERSONALE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Indisponibilità prolungata di risorse umane interne"
+        },
+        "en": {
+          "title": "Prolonged unavailability of internal staff"
+        },
+        "fr": {
+          "title": "Indisponibilité prolongée du personnel interne"
+        },
+        "pl": {
+          "title": "Długotrwała niedostępność personelu wewnętrznego"
+        },
+        "tr": {
+          "title": "İç personelin uzun süreli yokluğu"
+        }
+      }
+    },
+    {
+      "code": "PE_IST",
+      "asset_types": [
+        "PERSONALE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Incidenti stradali (auto, bus)"
+        },
+        "en": {
+          "title": "Road accidents (car, bus)"
+        },
+        "fr": {
+          "title": "Accidents de la route (voiture, bus)"
+        },
+        "pl": {
+          "title": "Wypadki drogowe (samochód, autobus)"
+        },
+        "tr": {
+          "title": "Trafik kazaları (otomobil, otobüs)"
+        }
+      }
+    },
+    {
+      "code": "PE_ITE",
+      "asset_types": [
+        "PERSONALE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Indisponibilità temporanea (breve e medio periodo) di risorse umane interne"
+        },
+        "en": {
+          "title": "Temporary (short/medium-term) unavailability of internal staff"
+        },
+        "fr": {
+          "title": "Indisponibilité temporaire (court et moyen terme) du personnel interne"
+        },
+        "pl": {
+          "title": "Tymczasowa (krótko- i średnioterminowa) niedostępność personelu wewnętrznego"
+        },
+        "tr": {
+          "title": "İç personelin geçici (kısa ve orta vadeli) yokluğu"
+        }
+      }
+    },
+    {
+      "code": "PE_MFI",
+      "asset_types": [
+        "PERSONALE"
+      ],
+      "cia": [
+        "C",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Minacce fisiche di terzi verso i dipendenti (sequestri, estorsioni, violenza)"
+        },
+        "en": {
+          "title": "Physical threats by third parties against employees (kidnapping, extortion, violence)"
+        },
+        "fr": {
+          "title": "Menaces physiques de tiers envers les employés (enlèvement, extorsion, violence)"
+        },
+        "pl": {
+          "title": "Fizyczne zagrożenia ze strony osób trzecich wobec pracowników (porwania, wymuszenia, przemoc)"
+        },
+        "tr": {
+          "title": "Üçüncü tarafların çalışanlara yönelik fiziksel tehditleri (kaçırma, şantaj, şiddet)"
+        }
+      }
+    },
+    {
+      "code": "PE_SOD",
+      "asset_types": [
+        "PERSONALE"
+      ],
+      "cia": [
+        "C",
+        "I"
+      ],
+      "translations": {
+        "it": {
+          "title": "Mancata segregazione di ruoli e responsabilità tra le strutture organizzative"
+        },
+        "en": {
+          "title": "Lack of segregation of roles and responsibilities between organisational units"
+        },
+        "fr": {
+          "title": "Absence de séparation des rôles et responsabilités entre les structures"
+        },
+        "pl": {
+          "title": "Brak rozdzielenia ról i obowiązków między jednostkami organizacyjnymi"
+        },
+        "tr": {
+          "title": "Organizasyon birimleri arasında rol ve sorumluluk ayrımının olmaması"
+        }
+      }
+    },
+    {
+      "code": "PE_INS",
+      "asset_types": [
+        "PERSONALE"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Azioni dolose di dipendenti o collaboratori (insider)"
+        },
+        "en": {
+          "title": "Malicious actions by employees or contractors (insider)"
+        },
+        "fr": {
+          "title": "Actions malveillantes d'employés ou de collaborateurs (initié)"
+        },
+        "pl": {
+          "title": "Złośliwe działania pracowników lub współpracowników (insider)"
+        },
+        "tr": {
+          "title": "Çalışan veya yüklenicilerin kötü niyetli eylemleri (içeriden tehdit)"
+        }
+      }
+    },
+    {
+      "code": "IN_AMI",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "I"
+      ],
+      "translations": {
+        "it": {
+          "title": "Alterazione / modifica delle informazioni memorizzate"
+        },
+        "en": {
+          "title": "Alteration / modification of stored information"
+        },
+        "fr": {
+          "title": "Altération / modification des informations stockées"
+        },
+        "pl": {
+          "title": "Zmiana / modyfikacja przechowywanych informacji"
+        },
+        "tr": {
+          "title": "Depolanan bilgilerin değiştirilmesi"
+        }
+      }
+    },
+    {
+      "code": "IN_AMT",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I"
+      ],
+      "translations": {
+        "it": {
+          "title": "Alterazione / modifica del traffico in rete"
+        },
+        "en": {
+          "title": "Alteration / modification of network traffic"
+        },
+        "fr": {
+          "title": "Altération / modification du trafic réseau"
+        },
+        "pl": {
+          "title": "Zmiana / modyfikacja ruchu sieciowego"
+        },
+        "tr": {
+          "title": "Ağ trafiğinin değiştirilmesi"
+        }
+      }
+    },
+    {
+      "code": "IN_DAI",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Distruzione o alterazione volontaria / involontaria delle informazioni"
+        },
+        "en": {
+          "title": "Intentional / accidental destruction or alteration of information"
+        },
+        "fr": {
+          "title": "Destruction ou altération volontaire / involontaire des informations"
+        },
+        "pl": {
+          "title": "Celowe / przypadkowe zniszczenie lub zmiana informacji"
+        },
+        "tr": {
+          "title": "Bilgilerin kasıtlı / kazara yok edilmesi veya değiştirilmesi"
+        }
+      }
+    },
+    {
+      "code": "IN_DIB",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Divulgazione volontaria / involontaria delle informazioni di business"
+        },
+        "en": {
+          "title": "Intentional / accidental disclosure of business information"
+        },
+        "fr": {
+          "title": "Divulgation volontaire / involontaire d'informations métier"
+        },
+        "pl": {
+          "title": "Celowe / przypadkowe ujawnienie informacji biznesowych"
+        },
+        "tr": {
+          "title": "İş bilgilerinin kasıtlı / kazara ifşası"
+        }
+      }
+    },
+    {
+      "code": "IN_DII",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Divulgazione volontaria / involontaria delle informazioni sull'infrastruttura e sugli accessi di rete"
+        },
+        "en": {
+          "title": "Intentional / accidental disclosure of infrastructure and network access information"
+        },
+        "fr": {
+          "title": "Divulgation volontaire / involontaire d'informations sur l'infrastructure et les accès réseau"
+        },
+        "pl": {
+          "title": "Celowe / przypadkowe ujawnienie informacji o infrastrukturze i dostępie do sieci"
+        },
+        "tr": {
+          "title": "Altyapı ve ağ erişim bilgilerinin kasıtlı / kazara ifşası"
+        }
+      }
+    },
+    {
+      "code": "IN_EST",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Errore dello staff IT"
+        },
+        "en": {
+          "title": "IT staff error"
+        },
+        "fr": {
+          "title": "Erreur du personnel IT"
+        },
+        "pl": {
+          "title": "Błąd personelu IT"
+        },
+        "tr": {
+          "title": "BT personeli hatası"
+        }
+      }
+    },
+    {
+      "code": "IN_EUT",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Errore lato utente"
+        },
+        "en": {
+          "title": "User error"
+        },
+        "fr": {
+          "title": "Erreur utilisateur"
+        },
+        "pl": {
+          "title": "Błąd użytkownika"
+        },
+        "tr": {
+          "title": "Kullanıcı hatası"
+        }
+      }
+    },
+    {
+      "code": "IN_FIN",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Furto totale o parziale (intercettazione) delle informazioni"
+        },
+        "en": {
+          "title": "Total or partial theft (interception) of information"
+        },
+        "fr": {
+          "title": "Vol total ou partiel (interception) d'informations"
+        },
+        "pl": {
+          "title": "Całkowita lub częściowa kradzież (przechwycenie) informacji"
+        },
+        "tr": {
+          "title": "Bilgilerin tamamen veya kısmen çalınması (dinleme)"
+        }
+      }
+    },
+    {
+      "code": "IN_IHA",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Mancanza di meccanismi di alta affidabilità (HA) dei sistemi"
+        },
+        "en": {
+          "title": "Lack of high-availability (HA) mechanisms for systems"
+        },
+        "fr": {
+          "title": "Absence de mécanismes de haute disponibilité (HA) des systèmes"
+        },
+        "pl": {
+          "title": "Brak mechanizmów wysokiej dostępności (HA) systemów"
+        },
+        "tr": {
+          "title": "Sistemlerde yüksek erişilebilirlik (HA) mekanizmalarının olmaması"
+        }
+      }
+    },
+    {
+      "code": "IN_MOD",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I"
+      ],
+      "translations": {
+        "it": {
+          "title": "Modifica dei privilegi di sistema senza autorizzazione"
+        },
+        "en": {
+          "title": "Unauthorised change of system privileges"
+        },
+        "fr": {
+          "title": "Modification non autorisée des privilèges système"
+        },
+        "pl": {
+          "title": "Nieautoryzowana zmiana uprawnień systemowych"
+        },
+        "tr": {
+          "title": "Sistem yetkilerinin yetkisiz değiştirilmesi"
+        }
+      }
+    },
+    {
+      "code": "IN_OTT",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Ottenimento di accesso non autorizzato a sistemi o reti"
+        },
+        "en": {
+          "title": "Unauthorised access to systems or networks"
+        },
+        "fr": {
+          "title": "Accès non autorisé aux systèmes ou réseaux"
+        },
+        "pl": {
+          "title": "Nieautoryzowany dostęp do systemów lub sieci"
+        },
+        "tr": {
+          "title": "Sistemlere veya ağlara yetkisiz erişim"
+        }
+      }
+    },
+    {
+      "code": "IN_PMI",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Perdita di dati nel riciclo o nella dismissione di supporti digitali"
+        },
+        "en": {
+          "title": "Data loss during recycling or disposal of digital media"
+        },
+        "fr": {
+          "title": "Perte de données lors du recyclage ou de la mise au rebut de supports numériques"
+        },
+        "pl": {
+          "title": "Utrata danych podczas recyklingu lub utylizacji nośników cyfrowych"
+        },
+        "tr": {
+          "title": "Dijital ortamların geri dönüşümü veya imhası sırasında veri kaybı"
+        }
+      }
+    },
+    {
+      "code": "IN_RIP",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "I"
+      ],
+      "translations": {
+        "it": {
+          "title": "Ripudio (negazione delle azioni svolte)"
+        },
+        "en": {
+          "title": "Repudiation (denial of actions performed)"
+        },
+        "fr": {
+          "title": "Répudiation (négation des actions effectuées)"
+        },
+        "pl": {
+          "title": "Wyparcie się (zaprzeczenie wykonanych działań)"
+        },
+        "tr": {
+          "title": "İnkâr (yapılan işlemlerin reddedilmesi)"
+        }
+      }
+    },
+    {
+      "code": "IN_SOD",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I"
+      ],
+      "translations": {
+        "it": {
+          "title": "Mancata segregazione di ruoli e responsabilità nella gestione dei sistemi"
+        },
+        "en": {
+          "title": "Lack of segregation of roles and responsibilities in system management"
+        },
+        "fr": {
+          "title": "Absence de séparation des rôles et responsabilités dans la gestion des systèmes"
+        },
+        "pl": {
+          "title": "Brak rozdzielenia ról i obowiązków w zarządzaniu systemami"
+        },
+        "tr": {
+          "title": "Sistem yönetiminde rol ve sorumluluk ayrımının olmaması"
+        }
+      }
+    },
+    {
+      "code": "IN_TST",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Test del software in ambienti non dedicati"
+        },
+        "en": {
+          "title": "Software testing in non-dedicated environments"
+        },
+        "fr": {
+          "title": "Tests logiciels dans des environnements non dédiés"
+        },
+        "pl": {
+          "title": "Testowanie oprogramowania w nieprzeznaczonych do tego środowiskach"
+        },
+        "tr": {
+          "title": "Yazılımın ayrılmamış ortamlarda test edilmesi"
+        }
+      }
+    },
+    {
+      "code": "IN_MAL",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Malware e ransomware"
+        },
+        "en": {
+          "title": "Malware and ransomware"
+        },
+        "fr": {
+          "title": "Logiciels malveillants et rançongiciels"
+        },
+        "pl": {
+          "title": "Złośliwe oprogramowanie i ransomware"
+        },
+        "tr": {
+          "title": "Kötü amaçlı yazılım ve fidye yazılımı"
+        }
+      }
+    },
+    {
+      "code": "IN_PHI",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I"
+      ],
+      "translations": {
+        "it": {
+          "title": "Phishing e social engineering"
+        },
+        "en": {
+          "title": "Phishing and social engineering"
+        },
+        "fr": {
+          "title": "Hameçonnage et ingénierie sociale"
+        },
+        "pl": {
+          "title": "Phishing i socjotechnika"
+        },
+        "tr": {
+          "title": "Oltalama ve sosyal mühendislik"
+        }
+      }
+    },
+    {
+      "code": "IN_DOS",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Attacchi di negazione del servizio (DoS / DDoS)"
+        },
+        "en": {
+          "title": "Denial-of-service attacks (DoS / DDoS)"
+        },
+        "fr": {
+          "title": "Attaques par déni de service (DoS / DDoS)"
+        },
+        "pl": {
+          "title": "Ataki typu odmowa usługi (DoS / DDoS)"
+        },
+        "tr": {
+          "title": "Hizmet engelleme saldırıları (DoS / DDoS)"
+        }
+      }
+    },
+    {
+      "code": "IN_VUL",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Sfruttamento di vulnerabilità software non corrette"
+        },
+        "en": {
+          "title": "Exploitation of unpatched software vulnerabilities"
+        },
+        "fr": {
+          "title": "Exploitation de vulnérabilités logicielles non corrigées"
+        },
+        "pl": {
+          "title": "Wykorzystanie niezałatanych podatności oprogramowania"
+        },
+        "tr": {
+          "title": "Yamanmamış yazılım açıklarının istismarı"
+        }
+      }
+    },
+    {
+      "code": "IN_CLO",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Indisponibilità di servizi cloud o SaaS"
+        },
+        "en": {
+          "title": "Unavailability of cloud or SaaS services"
+        },
+        "fr": {
+          "title": "Indisponibilité des services cloud ou SaaS"
+        },
+        "pl": {
+          "title": "Niedostępność usług chmurowych lub SaaS"
+        },
+        "tr": {
+          "title": "Bulut veya SaaS hizmetlerinin kullanılamaması"
+        }
+      }
+    },
+    {
+      "code": "IN_DEV",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "C",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Furto o smarrimento di dispositivi (laptop, smartphone, supporti)"
+        },
+        "en": {
+          "title": "Theft or loss of devices (laptops, smartphones, media)"
+        },
+        "fr": {
+          "title": "Vol ou perte d'appareils (ordinateurs portables, smartphones, supports)"
+        },
+        "pl": {
+          "title": "Kradzież lub zgubienie urządzeń (laptopy, smartfony, nośniki)"
+        },
+        "tr": {
+          "title": "Cihazların çalınması veya kaybolması (dizüstü, akıllı telefon, ortam)"
+        }
+      }
+    },
+    {
+      "code": "IN_GHW",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Guasto hardware o software dei sistemi"
+        },
+        "en": {
+          "title": "Hardware or software failure of systems"
+        },
+        "fr": {
+          "title": "Panne matérielle ou logicielle des systèmes"
+        },
+        "pl": {
+          "title": "Awaria sprzętu lub oprogramowania systemów"
+        },
+        "tr": {
+          "title": "Sistemlerde donanım veya yazılım arızası"
+        }
+      }
+    },
+    {
+      "code": "IN_BKP",
+      "asset_types": [
+        "IT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Backup assenti, incompleti o non ripristinabili"
+        },
+        "en": {
+          "title": "Missing, incomplete or non-restorable backups"
+        },
+        "fr": {
+          "title": "Sauvegardes absentes, incomplètes ou non restaurables"
+        },
+        "pl": {
+          "title": "Brak, niekompletne lub nieodtwarzalne kopie zapasowe"
+        },
+        "tr": {
+          "title": "Eksik, tamamlanmamış veya geri yüklenemeyen yedekler"
+        }
+      }
+    },
+    {
+      "code": "OT_OTT",
+      "asset_types": [
+        "OT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Accesso non autorizzato ai sistemi di controllo industriale"
+        },
+        "en": {
+          "title": "Unauthorised access to industrial control systems"
+        },
+        "fr": {
+          "title": "Accès non autorisé aux systèmes de contrôle industriel"
+        },
+        "pl": {
+          "title": "Nieautoryzowany dostęp do przemysłowych systemów sterowania"
+        },
+        "tr": {
+          "title": "Endüstriyel kontrol sistemlerine yetkisiz erişim"
+        }
+      }
+    },
+    {
+      "code": "OT_MAL",
+      "asset_types": [
+        "OT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Malware sui sistemi OT"
+        },
+        "en": {
+          "title": "Malware on OT systems"
+        },
+        "fr": {
+          "title": "Logiciels malveillants sur les systèmes OT"
+        },
+        "pl": {
+          "title": "Złośliwe oprogramowanie w systemach OT"
+        },
+        "tr": {
+          "title": "OT sistemlerinde kötü amaçlı yazılım"
+        }
+      }
+    },
+    {
+      "code": "OT_OBS",
+      "asset_types": [
+        "OT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Sistemi OT obsoleti o non aggiornabili"
+        },
+        "en": {
+          "title": "Obsolete or non-patchable OT systems"
+        },
+        "fr": {
+          "title": "Systèmes OT obsolètes ou non actualisables"
+        },
+        "pl": {
+          "title": "Przestarzałe lub nieaktualizowalne systemy OT"
+        },
+        "tr": {
+          "title": "Eski veya güncellenemeyen OT sistemleri"
+        }
+      }
+    },
+    {
+      "code": "OT_GUA",
+      "asset_types": [
+        "OT"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Guasto di PLC, SCADA o HMI"
+        },
+        "en": {
+          "title": "Failure of PLC, SCADA or HMI"
+        },
+        "fr": {
+          "title": "Panne d'automate, SCADA ou IHM"
+        },
+        "pl": {
+          "title": "Awaria PLC, SCADA lub HMI"
+        },
+        "tr": {
+          "title": "PLC, SCADA veya HMI arızası"
+        }
+      }
+    },
+    {
+      "code": "OT_ERR",
+      "asset_types": [
+        "OT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Errore di configurazione o di operatore sui sistemi OT"
+        },
+        "en": {
+          "title": "Configuration or operator error on OT systems"
+        },
+        "fr": {
+          "title": "Erreur de configuration ou d'opérateur sur les systèmes OT"
+        },
+        "pl": {
+          "title": "Błąd konfiguracji lub operatora w systemach OT"
+        },
+        "tr": {
+          "title": "OT sistemlerinde yapılandırma veya operatör hatası"
+        }
+      }
+    },
+    {
+      "code": "OT_RMT",
+      "asset_types": [
+        "OT",
+        "FORNITORI"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Accesso remoto di manutenzione non controllato (fornitori OT)"
+        },
+        "en": {
+          "title": "Uncontrolled remote maintenance access (OT vendors)"
+        },
+        "fr": {
+          "title": "Accès distant de maintenance non contrôlé (fournisseurs OT)"
+        },
+        "pl": {
+          "title": "Niekontrolowany zdalny dostęp serwisowy (dostawcy OT)"
+        },
+        "tr": {
+          "title": "Kontrolsüz uzaktan bakım erişimi (OT tedarikçileri)"
+        }
+      }
+    },
+    {
+      "code": "OT_SEG",
+      "asset_types": [
+        "OT"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Mancata segregazione tra rete IT e rete OT"
+        },
+        "en": {
+          "title": "Lack of segregation between IT and OT networks"
+        },
+        "fr": {
+          "title": "Absence de séparation entre réseaux IT et OT"
+        },
+        "pl": {
+          "title": "Brak separacji między siecią IT i OT"
+        },
+        "tr": {
+          "title": "BT ve OT ağları arasında ayrım olmaması"
+        }
+      }
+    },
+    {
+      "code": "LO_ACO",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Atti terroristici / crimine organizzato (esplosivi, armi, attacchi CBR)"
+        },
+        "en": {
+          "title": "Terrorism / organised crime (explosives, weapons, CBR attacks)"
+        },
+        "fr": {
+          "title": "Terrorisme / crime organisé (explosifs, armes, attaques NRBC)"
+        },
+        "pl": {
+          "title": "Terroryzm / przestępczość zorganizowana (materiały wybuchowe, broń, ataki CBRN)"
+        },
+        "tr": {
+          "title": "Terör / organize suç (patlayıcı, silah, KBRN saldırıları)"
+        }
+      }
+    },
+    {
+      "code": "LO_ALE",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Alluvione"
+        },
+        "en": {
+          "title": "Flood"
+        },
+        "fr": {
+          "title": "Inondation"
+        },
+        "pl": {
+          "title": "Powódź"
+        },
+        "tr": {
+          "title": "Sel"
+        }
+      }
+    },
+    {
+      "code": "LO_ALO",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Allagamento"
+        },
+        "en": {
+          "title": "Water ingress / local flooding"
+        },
+        "fr": {
+          "title": "Dégât des eaux"
+        },
+        "pl": {
+          "title": "Zalanie"
+        },
+        "tr": {
+          "title": "Su baskını"
+        }
+      }
+    },
+    {
+      "code": "LO_AST",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Asteroidi / eventi cosmici estremi"
+        },
+        "en": {
+          "title": "Asteroids / extreme cosmic events"
+        },
+        "fr": {
+          "title": "Astéroïdes / événements cosmiques extrêmes"
+        },
+        "pl": {
+          "title": "Asteroidy / ekstremalne zjawiska kosmiczne"
+        },
+        "tr": {
+          "title": "Asteroitler / aşırı kozmik olaylar"
+        }
+      }
+    },
+    {
+      "code": "LO_AVA",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Atti vandalici (distruzioni, piromania)"
+        },
+        "en": {
+          "title": "Vandalism (destruction, arson)"
+        },
+        "fr": {
+          "title": "Actes de vandalisme (destruction, incendie volontaire)"
+        },
+        "pl": {
+          "title": "Akty wandalizmu (zniszczenia, podpalenia)"
+        },
+        "tr": {
+          "title": "Vandalizm (tahribat, kundaklama)"
+        }
+      }
+    },
+    {
+      "code": "LO_ESP",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Esplosione accidentale"
+        },
+        "en": {
+          "title": "Accidental explosion"
+        },
+        "fr": {
+          "title": "Explosion accidentelle"
+        },
+        "pl": {
+          "title": "Przypadkowy wybuch"
+        },
+        "tr": {
+          "title": "Kaza sonucu patlama"
+        }
+      }
+    },
+    {
+      "code": "LO_FRA",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Frane e colate di fango"
+        },
+        "en": {
+          "title": "Landslides and mudflows"
+        },
+        "fr": {
+          "title": "Glissements de terrain et coulées de boue"
+        },
+        "pl": {
+          "title": "Osuwiska i lawiny błotne"
+        },
+        "tr": {
+          "title": "Heyelan ve çamur akıntısı"
+        }
+      }
+    },
+    {
+      "code": "LO_FUL",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Fulmini"
+        },
+        "en": {
+          "title": "Lightning"
+        },
+        "fr": {
+          "title": "Foudre"
+        },
+        "pl": {
+          "title": "Wyładowania atmosferyczne"
+        },
+        "tr": {
+          "title": "Yıldırım"
+        }
+      }
+    },
+    {
+      "code": "LO_FUO",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Incendio"
+        },
+        "en": {
+          "title": "Fire"
+        },
+        "fr": {
+          "title": "Incendie"
+        },
+        "pl": {
+          "title": "Pożar"
+        },
+        "tr": {
+          "title": "Yangın"
+        }
+      }
+    },
+    {
+      "code": "LO_GRA",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Grandinata"
+        },
+        "en": {
+          "title": "Hailstorm"
+        },
+        "fr": {
+          "title": "Grêle"
+        },
+        "pl": {
+          "title": "Grad"
+        },
+        "tr": {
+          "title": "Dolu"
+        }
+      }
+    },
+    {
+      "code": "LO_IAE",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Incidenti aerei in volo o a terra (vicinanza aeroporto)"
+        },
+        "en": {
+          "title": "Aircraft accidents in flight or on the ground (airport nearby)"
+        },
+        "fr": {
+          "title": "Accidents aériens en vol ou au sol (proximité d'aéroport)"
+        },
+        "pl": {
+          "title": "Katastrofy lotnicze w powietrzu lub na ziemi (bliskość lotniska)"
+        },
+        "tr": {
+          "title": "Havada veya yerde uçak kazaları (havalimanı yakınlığı)"
+        }
+      }
+    },
+    {
+      "code": "LO_IAM",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Incidenti ambientali (alberi caduti, vegetazione)"
+        },
+        "en": {
+          "title": "Environmental incidents (fallen trees, vegetation)"
+        },
+        "fr": {
+          "title": "Incidents environnementaux (arbres tombés, végétation)"
+        },
+        "pl": {
+          "title": "Incydenty środowiskowe (powalone drzewa, roślinność)"
+        },
+        "tr": {
+          "title": "Çevresel olaylar (devrilen ağaçlar, bitki örtüsü)"
+        }
+      }
+    },
+    {
+      "code": "LO_IFE",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Incidenti ferroviari in superficie o sotterranei"
+        },
+        "en": {
+          "title": "Rail accidents above or below ground"
+        },
+        "fr": {
+          "title": "Accidents ferroviaires en surface ou souterrains"
+        },
+        "pl": {
+          "title": "Wypadki kolejowe naziemne lub podziemne"
+        },
+        "tr": {
+          "title": "Yerüstü veya yeraltı demiryolu kazaları"
+        }
+      }
+    },
+    {
+      "code": "LO_IMA",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Incidenti marittimi in porto o vicino alla costa"
+        },
+        "en": {
+          "title": "Maritime accidents in port or near the coast"
+        },
+        "fr": {
+          "title": "Accidents maritimes au port ou près des côtes"
+        },
+        "pl": {
+          "title": "Wypadki morskie w porcie lub w pobliżu wybrzeża"
+        },
+        "tr": {
+          "title": "Limanda veya kıyıya yakın deniz kazaları"
+        }
+      }
+    },
+    {
+      "code": "LO_MFI",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Minacce fisiche di terzi verso i beni (sabotaggi, intrusioni)"
+        },
+        "en": {
+          "title": "Physical threats by third parties against property (sabotage, intrusion)"
+        },
+        "fr": {
+          "title": "Menaces physiques de tiers envers les biens (sabotage, intrusion)"
+        },
+        "pl": {
+          "title": "Fizyczne zagrożenia ze strony osób trzecich wobec mienia (sabotaż, włamanie)"
+        },
+        "tr": {
+          "title": "Üçüncü tarafların varlıklara yönelik fiziksel tehditleri (sabotaj, izinsiz giriş)"
+        }
+      }
+    },
+    {
+      "code": "LO_MIM",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Minacce da imprese, abitazioni o obiettivi sensibili vicini"
+        },
+        "en": {
+          "title": "Threats from nearby businesses, homes or sensitive targets"
+        },
+        "fr": {
+          "title": "Menaces provenant d'entreprises, d'habitations ou de cibles sensibles voisines"
+        },
+        "pl": {
+          "title": "Zagrożenia ze strony sąsiednich firm, domów lub obiektów wrażliwych"
+        },
+        "tr": {
+          "title": "Yakındaki işletmeler, konutlar veya hassas hedeflerden kaynaklanan tehditler"
+        }
+      }
+    },
+    {
+      "code": "LO_MPO",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Minacce di tipo politico (disordini, proteste, blocchi)"
+        },
+        "en": {
+          "title": "Political threats (civil unrest, protests, blockades)"
+        },
+        "fr": {
+          "title": "Menaces politiques (troubles civils, manifestations, blocages)"
+        },
+        "pl": {
+          "title": "Zagrożenia polityczne (niepokoje społeczne, protesty, blokady)"
+        },
+        "tr": {
+          "title": "Siyasi tehditler (toplumsal olaylar, protestolar, ablukalar)"
+        }
+      }
+    },
+    {
+      "code": "LO_OTT",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "C",
+        "I",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Accesso fisico non autorizzato a locali, sistemi o reti"
+        },
+        "en": {
+          "title": "Unauthorised physical access to premises, systems or networks"
+        },
+        "fr": {
+          "title": "Accès physique non autorisé aux locaux, systèmes ou réseaux"
+        },
+        "pl": {
+          "title": "Nieautoryzowany fizyczny dostęp do pomieszczeń, systemów lub sieci"
+        },
+        "tr": {
+          "title": "Tesislere, sistemlere veya ağlara yetkisiz fiziksel erişim"
+        }
+      }
+    },
+    {
+      "code": "LO_PAC",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Malfunzionamento o perdita degli apparati di calcolo e di rete"
+        },
+        "en": {
+          "title": "Malfunction or loss of computing and network equipment"
+        },
+        "fr": {
+          "title": "Dysfonctionnement ou perte des équipements informatiques et réseau"
+        },
+        "pl": {
+          "title": "Awaria lub utrata sprzętu komputerowego i sieciowego"
+        },
+        "tr": {
+          "title": "Bilgi işlem ve ağ ekipmanlarının arızası veya kaybı"
+        }
+      }
+    },
+    {
+      "code": "LO_TEM",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Tempeste di neve, forti gelate, valanghe"
+        },
+        "en": {
+          "title": "Snowstorms, severe frost, avalanches"
+        },
+        "fr": {
+          "title": "Tempêtes de neige, fortes gelées, avalanches"
+        },
+        "pl": {
+          "title": "Burze śnieżne, silne mrozy, lawiny"
+        },
+        "tr": {
+          "title": "Kar fırtınası, şiddetli don, çığ"
+        }
+      }
+    },
+    {
+      "code": "LO_TER",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Terremoto"
+        },
+        "en": {
+          "title": "Earthquake"
+        },
+        "fr": {
+          "title": "Tremblement de terre"
+        },
+        "pl": {
+          "title": "Trzęsienie ziemi"
+        },
+        "tr": {
+          "title": "Deprem"
+        }
+      }
+    },
+    {
+      "code": "LO_VEN",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Vento forte, tromba d'aria, tornado"
+        },
+        "en": {
+          "title": "Strong wind, whirlwind, tornado"
+        },
+        "fr": {
+          "title": "Vent violent, trombe, tornade"
+        },
+        "pl": {
+          "title": "Silny wiatr, trąba powietrzna, tornado"
+        },
+        "tr": {
+          "title": "Kuvvetli rüzgâr, hortum, kasırga"
+        }
+      }
+    },
+    {
+      "code": "LO_ENE",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Interruzione dell'alimentazione elettrica"
+        },
+        "en": {
+          "title": "Power supply interruption"
+        },
+        "fr": {
+          "title": "Coupure de l'alimentation électrique"
+        },
+        "pl": {
+          "title": "Przerwa w zasilaniu elektrycznym"
+        },
+        "tr": {
+          "title": "Elektrik kesintisi"
+        }
+      }
+    },
+    {
+      "code": "LO_CLI",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Guasto di climatizzazione o raffreddamento dei locali tecnici"
+        },
+        "en": {
+          "title": "Failure of air conditioning or cooling in technical rooms"
+        },
+        "fr": {
+          "title": "Panne de climatisation ou de refroidissement des locaux techniques"
+        },
+        "pl": {
+          "title": "Awaria klimatyzacji lub chłodzenia pomieszczeń technicznych"
+        },
+        "tr": {
+          "title": "Teknik odalarda klima veya soğutma arızası"
+        }
+      }
+    },
+    {
+      "code": "LO_TLC",
+      "asset_types": [
+        "SEDE"
+      ],
+      "cia": [
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Interruzione delle linee di telecomunicazione"
+        },
+        "en": {
+          "title": "Telecommunication line outage"
+        },
+        "fr": {
+          "title": "Interruption des lignes de télécommunication"
+        },
+        "pl": {
+          "title": "Przerwa w działaniu łączy telekomunikacyjnych"
+        },
+        "tr": {
+          "title": "Telekomünikasyon hatlarının kesintisi"
+        }
+      }
+    },
+    {
+      "code": "PR_FUR",
+      "asset_types": [
+        "PROTOTIPI"
+      ],
+      "cia": [
+        "C",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Furto di prototipi o componenti"
+        },
+        "en": {
+          "title": "Theft of prototypes or components"
+        },
+        "fr": {
+          "title": "Vol de prototypes ou de composants"
+        },
+        "pl": {
+          "title": "Kradzież prototypów lub komponentów"
+        },
+        "tr": {
+          "title": "Prototiplerin veya bileşenlerin çalınması"
+        }
+      }
+    },
+    {
+      "code": "PR_FOT",
+      "asset_types": [
+        "PROTOTIPI"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Fotografie o riprese non autorizzate di prototipi"
+        },
+        "en": {
+          "title": "Unauthorised photos or filming of prototypes"
+        },
+        "fr": {
+          "title": "Photos ou prises de vue non autorisées de prototypes"
+        },
+        "pl": {
+          "title": "Nieautoryzowane zdjęcia lub nagrania prototypów"
+        },
+        "tr": {
+          "title": "Prototiplerin izinsiz fotoğraflanması veya filme alınması"
+        }
+      }
+    },
+    {
+      "code": "PR_ACC",
+      "asset_types": [
+        "PROTOTIPI"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Accesso non autorizzato alle aree con prototipi"
+        },
+        "en": {
+          "title": "Unauthorised access to prototype areas"
+        },
+        "fr": {
+          "title": "Accès non autorisé aux zones de prototypes"
+        },
+        "pl": {
+          "title": "Nieautoryzowany dostęp do stref z prototypami"
+        },
+        "tr": {
+          "title": "Prototip alanlarına yetkisiz erişim"
+        }
+      }
+    },
+    {
+      "code": "PR_TRA",
+      "asset_types": [
+        "PROTOTIPI"
+      ],
+      "cia": [
+        "C",
+        "A"
+      ],
+      "translations": {
+        "it": {
+          "title": "Perdita o esposizione di prototipi durante trasporto e spedizione"
+        },
+        "en": {
+          "title": "Loss or exposure of prototypes during transport and shipping"
+        },
+        "fr": {
+          "title": "Perte ou exposition de prototypes pendant le transport et l'expédition"
+        },
+        "pl": {
+          "title": "Utrata lub ujawnienie prototypów podczas transportu i wysyłki"
+        },
+        "tr": {
+          "title": "Taşıma ve sevkiyat sırasında prototiplerin kaybı veya ifşası"
+        }
+      }
+    },
+    {
+      "code": "PR_TST",
+      "asset_types": [
+        "PROTOTIPI"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Esposizione di prototipi durante prove e test all'esterno"
+        },
+        "en": {
+          "title": "Exposure of prototypes during outdoor trials and tests"
+        },
+        "fr": {
+          "title": "Exposition de prototypes lors d'essais et de tests en extérieur"
+        },
+        "pl": {
+          "title": "Ujawnienie prototypów podczas prób i testów na zewnątrz"
+        },
+        "tr": {
+          "title": "Dış ortam deneme ve testlerinde prototiplerin ifşası"
+        }
+      }
+    },
+    {
+      "code": "PR_DIV",
+      "asset_types": [
+        "PROTOTIPI"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Divulgazione di informazioni sui prototipi (social media, eventi)"
+        },
+        "en": {
+          "title": "Disclosure of prototype information (social media, events)"
+        },
+        "fr": {
+          "title": "Divulgation d'informations sur les prototypes (réseaux sociaux, événements)"
+        },
+        "pl": {
+          "title": "Ujawnienie informacji o prototypach (media społecznościowe, wydarzenia)"
+        },
+        "tr": {
+          "title": "Prototip bilgilerinin ifşası (sosyal medya, etkinlikler)"
+        }
+      }
+    },
+    {
+      "code": "PR_SMA",
+      "asset_types": [
+        "PROTOTIPI"
+      ],
+      "cia": [
+        "C"
+      ],
+      "translations": {
+        "it": {
+          "title": "Smaltimento non sicuro di prototipi e scarti"
+        },
+        "en": {
+          "title": "Insecure disposal of prototypes and scrap"
+        },
+        "fr": {
+          "title": "Élimination non sécurisée des prototypes et des rebuts"
+        },
+        "pl": {
+          "title": "Niebezpieczna utylizacja prototypów i odpadów"
+        },
+        "tr": {
+          "title": "Prototiplerin ve hurdaların güvensiz imhası"
+        }
+      }
+    }
+  ]
+}

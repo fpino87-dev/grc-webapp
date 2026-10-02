@@ -1272,7 +1272,13 @@
       "comitato_membro": "Członek komitetu",
       "bu_referente": "Referent BU",
       "raci_responsible": "RACI Responsible",
-      "raci_accountable": "RACI Accountable"
+      "raci_accountable": "RACI Accountable",
+      "site_risk_manager": "Kierownik ds. ryzyka zakładu",
+      "it_manager": "Kierownik IT",
+      "hr_manager": "Kierownik HR",
+      "purchasing_manager": "Kierownik Zakupów",
+      "production_manager": "Kierownik Produkcji / Utrzymania Ruchu",
+      "engineering_manager": "Kierownik Działu Inżynierii"
     },
     "scopes": {
       "org": "Globalny — cała organizacja",

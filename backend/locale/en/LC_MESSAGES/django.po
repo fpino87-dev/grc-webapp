@@ -3112,3 +3112,99 @@ msgstr "An organisation-wide evidence item is already available to all sites."
 
 msgid "Elenco dei siti non valido."
 msgstr "Invalid list of sites."
+
+msgid "Risk Manager di sito"
+msgstr "Site Risk Manager"
+
+msgid "Responsabile IT"
+msgstr "IT Manager"
+
+msgid "Responsabile HR"
+msgstr "HR Manager"
+
+msgid "Responsabile Acquisti"
+msgstr "Purchasing Manager"
+
+msgid "Responsabile Produzione / Manutenzione"
+msgstr "Production / Maintenance Manager"
+
+msgid "Responsabile Engineering"
+msgstr "Engineering Manager"
+
+#, python-format
+msgid "Classi di rischio non valide: %(classes)s"
+msgstr "Invalid risk classes: %(classes)s"
+
+#, python-format
+msgid "Modalità di parere non valida: %(mode)s"
+msgstr "Invalid opinion mode: %(mode)s"
+
+#, python-format
+msgid "Regola di accettazione non valida per la classe %(cls)s"
+msgstr "Invalid acceptance rule for class %(cls)s"
+
+msgid "La validità dell'accettazione deve essere un numero di mesi positivo."
+msgstr "The acceptance validity must be a positive number of months."
+
+msgid "Le soglie economiche richiedono i livelli 2, 3, 4 e 5."
+msgstr "Economic thresholds require levels 2, 3, 4 and 5."
+
+msgid "Le soglie economiche devono essere positive e crescenti dal livello 2 al 5."
+msgstr "Economic thresholds must be positive and increasing from level 2 to 5."
+
+msgid "Solo chi ha accesso a tutta l'organizzazione può modificare il governo del rischio."
+msgstr "Only users with access to the whole organisation can change risk governance."
+
+msgid "Preset non valido."
+msgstr "Invalid preset."
+
+msgid "Il preset si sceglie solo a livello di organizzazione."
+msgstr "The preset can only be chosen at organisation level."
+
+msgid "Tipologie di asset non valide."
+msgstr "Invalid asset types."
+
+msgid "Le proprietà colpite possono essere solo C, I, A."
+msgstr "Affected properties can only be C, I, A."
+
+msgid "Solo chi ha accesso a tutta l'organizzazione può gestire il catalogo minacce."
+msgstr "Only users with access to the whole organisation can manage the threat catalogue."
+
+msgid "Il codice deve avere da 2 a 30 caratteri fra lettere maiuscole, cifre e trattino basso."
+msgstr "The code must be 2 to 30 characters long, using capital letters, digits and underscores."
+
+msgid "Esiste già una minaccia con questo codice."
+msgstr "A threat with this code already exists."
+
+msgid "Indica almeno il titolo della minaccia."
+msgstr "Enter at least the threat title."
+
+msgid "Le voci del catalogo di gruppo non si modificano da qui."
+msgstr "Group catalogue entries cannot be edited here."
+
+msgid "Le voci del catalogo di gruppo non si disattivano da qui."
+msgstr "Group catalogue entries cannot be deactivated here."
+
+msgid "Tipo di valutazione non valido."
+msgstr "Invalid assessment type."
+
+msgid "Il registro di gruppo non è attivo nella policy di governo del rischio."
+msgstr "The group register is not enabled in the risk governance policy."
+
+msgid "C'è già una valutazione aperta per questo registro."
+msgstr "There is already an open assessment for this register."
+
+msgid "Il primo risk assessment è già stato avviato per questo registro."
+msgstr "The first risk assessment has already been started for this register."
+
+msgid "Serve una valutazione approvata prima di una revisione."
+msgstr "An approved assessment is required before a review."
+
+msgid "Indica il motivo della revisione straordinaria."
+msgstr "Enter the reason for the extraordinary review."
+
+msgid "I processi devono appartenere al sito della classe di informazioni."
+msgstr "Processes must belong to the site of the information class."
+
+msgid "Sito inesistente."
+msgstr "Site not found."

@@ -22,3 +22,8 @@ class RiskAppetitePermission(RoleScopedPermission):
     """Policy di risk appetite: decisione di governance → scrittura ristretta."""
     read_roles = _OPERATIONAL | _AUDIT | {GrcRole.CONTROL_OWNER}
     write_roles = {GrcRole.SUPER_ADMIN, GrcRole.COMPLIANCE_OFFICER, GrcRole.RISK_MANAGER}
+
+
+class RiskGovernancePermission(RiskAppetitePermission):
+    """Policy di governo del rischio e catalogo minacce: decisioni di
+    governance. Il service richiede in più lo scope di organizzazione."""

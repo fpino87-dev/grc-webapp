@@ -1,6 +1,15 @@
 from rest_framework import serializers
 
-from .models import RiskAppetitePolicy, RiskAssessment, RiskDimension, RiskMitigationPlan
+from .models import (
+    InformationClass,
+    RiskAppetitePolicy,
+    RiskAssessment,
+    RiskAssessmentCycle,
+    RiskDimension,
+    RiskGovernancePolicy,
+    RiskMitigationPlan,
+    ThreatCatalogEntry,
+)
 from apps.bcp.models import BcpPlan
 
 
@@ -215,3 +224,94 @@ class RiskAppetitePolicySerializer(serializers.ModelSerializer):
             return None
         u = obj.approved_by
         return f"{u.first_name} {u.last_name}".strip() or u.email
+
+
+# ── Metodologia D-ITA-INF-23 ─────────────────────────────────────────────────
+
+
+def _request_lang(serializer) -> str:
+    request = serializer.context.get("request")
+    return (getattr(request, "LANGUAGE_CODE", None) if request else None) or "it"
+
+
+def _user_name(user):
+    if not user:
+        return None
+    return f"{user.first_name} {user.last_name}".strip() or user.username
+
+
+class ThreatCatalogEntrySerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ThreatCatalogEntry
+        fields = [
+            "id", "code", "title", "asset_types", "cia", "translations",
+            "source", "catalog_version", "active",
+        ]
+        read_only_fields = ["source", "catalog_version"]
+
+    def get_title(self, obj):
+        return obj.get_title(_request_lang(self))
+
+
+class InformationClassSerializer(serializers.ModelSerializer):
+    plant_name = serializers.CharField(source="plant.name", read_only=True)
+    owner_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = InformationClass
+        fields = [
+            "id", "plant", "plant_name", "name", "description",
+            "owner", "owner_name", "owner_role",
+            "confidentiality", "integrity", "availability",
+            "critical_processes",
+        ]
+
+    def get_owner_name(self, obj):
+        return _user_name(obj.owner)
+
+    def validate(self, attrs):
+        from django.utils.translation import gettext as _
+
+        plant = attrs.get("plant", getattr(self.instance, "plant", None))
+        processes = attrs.get("critical_processes")
+        if processes and plant is not None:
+            if any(p.plant_id != plant.pk for p in processes):
+                raise serializers.ValidationError(
+                    {"critical_processes": _("I processi devono appartenere al sito della classe di informazioni.")}
+                )
+        return attrs
+
+
+class RiskGovernancePolicySerializer(serializers.ModelSerializer):
+    plant_name = serializers.CharField(source="plant.name", read_only=True)
+    approved_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RiskGovernancePolicy
+        fields = [
+            "id", "plant", "plant_name", "preset", "group_register_enabled",
+            "acceptance_matrix", "upper_opinion", "acceptance_max_months",
+            "economic_thresholds", "overdue_escalation_days", "review_frequency_months",
+            "approved_by", "approved_by_name", "approved_at", "notes",
+        ]
+        read_only_fields = fields
+
+    def get_approved_by_name(self, obj):
+        return _user_name(obj.approved_by)
+
+
+class RiskAssessmentCycleSerializer(serializers.ModelSerializer):
+    plant_name = serializers.CharField(source="plant.name", read_only=True)
+    approved_by_body_name = serializers.CharField(source="approved_by_body.name", read_only=True)
+    risks_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = RiskAssessmentCycle
+        fields = [
+            "id", "plant", "plant_name", "kind", "trigger_reason", "status",
+            "started_at", "closed_at", "approved_by_body", "approved_by_body_name",
+            "approval_review", "approved_at", "local_adoption_ref", "risks_count",
+        ]
+        read_only_fields = fields
