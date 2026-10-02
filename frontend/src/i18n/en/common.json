@@ -3830,6 +3830,7 @@
       "measures": "Suggest measures with AI",
       "measures_title": "Suggested measures",
       "measures_hint": "Add to the plan only the measures you agree with; owner and deadline remain editable in the plan.",
+      "measures_needs_treatment": "To get AI-suggested measures, first save probability, impact and treatment: the deadline depends on the class.",
       "added": "Added",
       "add_to_plan": "Add to plan",
       "review_button": "Coherence review",

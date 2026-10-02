@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { AiMeasuresButton } from "./RiskAi";
 import { apiError, riskApi, type Acceptance, type MitigationPlan, type Risk } from "../../api/endpoints/risk";
 import { controlsApi } from "../../api/endpoints/controls";
 import { usersApi } from "../../api/endpoints/users";
@@ -132,6 +133,11 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
       ) : undefined}
     >
       <p className="text-[11px] text-gray-500 mb-2">{t("risk.drawer.plan_hint")}</p>
+      {canMonitor && risk.treatment !== "accettare" && (
+        risk.current_class && risk.treatment
+          ? <div className="mb-2"><AiMeasuresButton risk={risk} /></div>
+          : <p className="text-[11px] text-amber-700 mb-2">{t("risk.ai.measures_needs_treatment")}</p>
+      )}
       {plans.length === 0 && <p className="text-xs text-gray-400 mb-2">{t("risk.drawer.no_plans")}</p>}
       <ul className="space-y-1 mb-2">
         {plans.map(p => {

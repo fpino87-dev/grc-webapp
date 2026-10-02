@@ -3830,6 +3830,7 @@
       "measures": "Proponi misure con IA",
       "measures_title": "Misure proposte",
       "measures_hint": "Aggiungi al piano solo le misure che condividi; responsabile e scadenza restano modificabili nel piano.",
+      "measures_needs_treatment": "Per le misure proposte dall'IA salva prima probabilità, impatto e trattamento: la scadenza dipende dalla classe.",
       "added": "Aggiunta",
       "add_to_plan": "Aggiungi al piano",
       "review_button": "Revisione di coerenza",

@@ -3830,6 +3830,7 @@
       "measures": "Proposer des mesures avec l'IA",
       "measures_title": "Mesures proposées",
       "measures_hint": "N'ajoutez au plan que les mesures que vous partagez ; responsable et échéance restent modifiables dans le plan.",
+      "measures_needs_treatment": "Pour obtenir des mesures proposées par l'IA, enregistrez d'abord probabilité, impact et traitement : l'échéance dépend de la classe.",
       "added": "Ajoutée",
       "add_to_plan": "Ajouter au plan",
       "review_button": "Revue de cohérence",

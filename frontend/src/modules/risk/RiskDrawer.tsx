@@ -5,7 +5,7 @@ import { apiError, riskApi, type CycleKind } from "../../api/endpoints/risk";
 import { EvaluationForm, initialEvaluation, type EvaluationState } from "./EvaluationForm";
 import { AcceptanceSection, LocalImpactSection, MeasuresSection, PlanSection } from "./RiskSections";
 import { ClassTransition, ErrorBox, Section } from "./RiskUi";
-import { AiDraftButton, AiMeasuresButton } from "./RiskAi";
+import { AiDraftButton } from "./RiskAi";
 import type { RegisterId } from "./RiskPage";
 import { Link } from "react-router-dom";
 import { TrackBadge } from "../objectives/objectiveBadges";
@@ -126,9 +126,6 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
               <EvaluationForm risk={risk} value={form} onChange={setForm} editable={editable} policy={policy} />
               <MeasuresSection risk={risk} editable={editable} />
               <PlanSection risk={risk} canMonitor={canMonitor} />
-              {canMonitor && risk.status === "completato" && risk.treatment && risk.treatment !== "accettare" && (
-                <AiMeasuresButton risk={risk} />
-              )}
               <AcceptanceSection risk={risk} canMonitor={canMonitor} />
               {risk.plant === null && <LocalImpactSection risk={risk} registerId={registerId} orgScope={orgScope} />}
               <Section title={t("risk.drawer.security_objectives")}>

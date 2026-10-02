@@ -321,7 +321,7 @@ export function AiMeasuresButton({ risk }: { risk: Risk }) {
   };
 
   return (
-    <div className="mt-2">
+    <div>
       <button onClick={() => ask.mutate()} disabled={ask.isPending}
         className="text-xs px-2.5 py-1 rounded border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 disabled:opacity-50">
         ✨ {t(ask.isPending ? "risk.ai.working" : "risk.ai.measures")}

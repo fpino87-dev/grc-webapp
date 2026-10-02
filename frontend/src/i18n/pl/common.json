@@ -3830,6 +3830,7 @@
       "measures": "Zaproponuj działania z AI",
       "measures_title": "Proponowane działania",
       "measures_hint": "Dodaj do planu tylko działania, z którymi się zgadzasz; odpowiedzialny i termin pozostają edytowalne w planie.",
+      "measures_needs_treatment": "Aby otrzymać działania zaproponowane przez AI, najpierw zapisz prawdopodobieństwo, wpływ i postępowanie: termin zależy od klasy.",
       "added": "Dodano",
       "add_to_plan": "Dodaj do planu",
       "review_button": "Przegląd spójności",

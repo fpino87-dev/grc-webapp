@@ -258,3 +258,16 @@ def test_ai_identify_apply_links_information(org_user, plant, threats, cycle):
     risk = RiskAssessment.objects.get(pk=res.json()["created"][0])
     assert list(risk.information_classes.all()) == [cad]
     assert risk.impact == 5  # soglia di riservatezza: informazioni Segrete su minaccia C
+
+
+@pytest.mark.django_db
+def test_ai_measures_on_draft_risk(org_user, plant, threats, cycle):
+    risk = services.create_risk(org_user, plant, {
+        "asset_type": "IT", "threat": threats["malware"], "probability": 4, "impact_operational": 4,
+        "treatment": "mitigare",
+    })
+    assert risk.status == "bozza" and risk.current_class
+    answer = json.dumps({"measures": [{"action": "MFA per gli accessi remoti", "expected_effect": "probabilita"}]})
+    with patch("apps.ai_engine.tasks_ai.route", _fake_route(answer)):
+        res = _client(org_user).post(f"/api/v1/risk/assessments/{risk.pk}/ai-measures/")
+    assert res.status_code == 200 and res.json()["measures"][0]["action"] == "MFA per gli accessi remoti"

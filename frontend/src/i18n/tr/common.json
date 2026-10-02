@@ -3830,6 +3830,7 @@
       "measures": "AI ile önlem öner",
       "measures_title": "Önerilen önlemler",
       "measures_hint": "Plana yalnızca katıldığınız önlemleri ekleyin; sorumlu ve son tarih planda düzenlenebilir.",
+      "measures_needs_treatment": "AI tarafından önerilen önlemler için önce olasılık, etki ve işlemi kaydedin: son tarih sınıfa bağlıdır.",
       "added": "Eklendi",
       "add_to_plan": "Plana ekle",
       "review_button": "Tutarlılık incelemesi",
