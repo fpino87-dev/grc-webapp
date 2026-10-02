@@ -241,7 +241,11 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({ rationale: "", expires_on: "", body: "", ref: "" });
+  // Rischio da accettare: la motivazione del trattamento è già la motivazione
+  // dell'accettazione, si riprende e si può correggere.
+  const [form, setForm] = useState({
+    rationale: risk.treatment === "accettare" ? risk.treatment_rationale : "", expires_on: "", body: "", ref: "",
+  });
   const [opinionNote, setOpinionNote] = useState("");
   const [revokeReason, setRevokeReason] = useState("");
   const { data: req } = useQuery({
@@ -286,6 +290,7 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
                 cls: t(`risk.classes.${req.class}`),
                 roles: req.roles.map(r => t(`risk.acceptance_roles.${r}`, r)).join(" + ") || t("risk.drawer.governing_body"),
               })}</p>
+              {req.added_for_self_management && <p className="text-amber-800">{t("risk.drawer.self_management_note")}</p>}
               {req.upper_opinion !== "none" && <p>{t(`risk.drawer.opinion_${req.upper_opinion}`)}</p>}
               {req.requires_body && <p>{t("risk.drawer.body_required")}</p>}
               <p>{t("risk.drawer.max_validity", { months: req.max_months })}</p>
@@ -356,7 +361,10 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
       ) : canMonitor && req && !req.not_acceptable ? (
         <div className="border rounded p-2 bg-gray-50">
           <Field label={t("risk.drawer.acceptance_rationale")}>
-            <textarea value={form.rationale} onChange={e => setForm({ ...form, rationale: e.target.value })} rows={2} className={inputCls} />
+            <p className="text-[11px] text-gray-500 mb-1">
+              {t(risk.treatment === "accettare" ? "risk.drawer.acceptance_rationale_from_treatment" : "risk.drawer.acceptance_rationale_while_treating")}
+            </p>
+            <textarea value={form.rationale} onChange={e => setForm({ ...form, rationale: e.target.value })} rows={3} className={inputCls} />
           </Field>
           <div className="grid grid-cols-2 gap-2">
             <Field label={t("risk.drawer.acceptance_expiry")}>

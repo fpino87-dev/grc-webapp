@@ -1201,14 +1201,24 @@ def acceptance_requirements(risk) -> dict:
     rule = policy["acceptance_matrix"].get(cls) or {}
     roles = list(rule.get("roles", []))
     # Chi ha valutato e tratta da solo il proprio rischio non lo accetta da
-    # solo: serve il livello superiore (§10).
+    # solo: serve il livello superiore (§10). Vale solo se a firmare sarebbe
+    # proprio lui (come Risk Owner o perché ricopre tutti i ruoli richiesti):
+    # se accetta un altro ruolo, per esempio il solo CISO, il controllo
+    # indipendente c'è già.
     self_managed = (
         risk.owner_id is not None and risk.owner_id == risk.assessed_by_id
-        and risk.treatment_owner_id in (None, risk.owner_id)
+        and risk.treatment_owner_id in (None, risk.owner_id) and not risk.treatment_owner_external.strip()
     )
-    if self_managed and "plant_manager" not in roles and not rule.get("requires_body"):
+    signs_alone = bool(roles) and (
+        "risk_owner" in roles or all(user_holds_role(risk.owner, r, risk.plant) for r in roles)
+    ) if self_managed else False
+    added_for_self_management = (
+        signs_alone and "plant_manager" not in roles and not rule.get("requires_body")
+    )
+    if added_for_self_management:
         roles.append("plant_manager")
     return {
+        "added_for_self_management": added_for_self_management,
         "class": cls,
         "roles": roles,
         "scope": rule.get("scope", "plant"),

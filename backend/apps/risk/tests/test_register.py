@@ -643,6 +643,26 @@ def test_self_managed_risk_needs_plant_manager(org_user, plant, threats, cycle):
                            treatment="accettare", expected_probability=None, expected_impact=None)
     acc = services.request_acceptance(org_user, risk, rationale="ok")
     assert acc.status == "pending" and "plant_manager" in acc.required_roles
+    assert services.acceptance_requirements(risk)["added_for_self_management"] is True
+
+
+@pytest.mark.django_db
+def test_self_managed_rule_only_when_owner_would_sign(org_user, plant, threats, cycle):
+    """Se la policy fa accettare un altro ruolo (es. solo il CISO), chi ha
+    valutato e tratta il rischio non lo accetta da solo: niente Plant Manager."""
+    services.save_governance_policy(org_user, None, {"acceptance_matrix": {
+        "high": {"roles": ["ciso"], "scope": "plant", "requires_body": False},
+        "medium": {"roles": ["ciso"], "scope": "plant", "requires_body": False},
+    }})
+    risk = _completed_risk(org_user, plant, threats["malware"], probability=2, impact_operational=3,
+                           treatment="accettare", expected_probability=None, expected_impact=None)
+    req = services.acceptance_requirements(risk)
+    assert req["roles"] == ["ciso"] and req["added_for_self_management"] is False
+    # responsabile del trattamento esterno: non è autogestito
+    risk.treatment_owner_external = "MSP"
+    services.save_governance_policy(org_user, None, {"acceptance_matrix": {
+        risk.current_class: {"roles": ["risk_owner"], "scope": "plant", "requires_body": False}}})
+    assert services.acceptance_requirements(risk)["roles"] == ["risk_owner"]
 
 
 @pytest.mark.django_db

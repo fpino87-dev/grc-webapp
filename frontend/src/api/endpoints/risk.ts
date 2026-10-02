@@ -182,6 +182,8 @@ export interface AcceptanceRequirements {
   upper_opinion: "none" | "notify" | "binding";
   max_months: number;
   not_acceptable: boolean;
+  /** Plant Manager aggiunto perché chi ha valutato e tratta il rischio lo accetterebbe da solo (§10). */
+  added_for_self_management: boolean;
 }
 
 export interface LocalImpactReport {

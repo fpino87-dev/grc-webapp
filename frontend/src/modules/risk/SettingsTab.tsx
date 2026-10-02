@@ -206,7 +206,8 @@ function GovernanceSettings({ registerId, policy, plants }: {
           {t("risk.settings.group_register")}
         </label>
 
-        <h4 className="text-xs font-semibold text-gray-600 mb-2">{t("risk.settings.acceptance_matrix")}</h4>
+        <h4 className="text-xs font-semibold text-gray-600 mb-1">{t("risk.settings.acceptance_matrix")}</h4>
+        <p className="text-[11px] text-gray-500 mb-2">{t("risk.settings.self_management_hint")}</p>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="bg-gray-50 text-gray-600">

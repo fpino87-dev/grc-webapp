@@ -473,7 +473,7 @@ Plan önlemlerinin bir sorumlusu, son tarihi ve beklenen etkisi vardır. Tamamla
 
 ### Kabul
 
-Kimin kabul edebileceği sınıfa ve **risk yönetişimi politikasına** (Ayarlar) bağlıdır: gerekli rollerin imzaları, CISO görüşü (bağlayıcı veya bilgilendirici) ve Critical için organ kararı. Azami geçerlilik süresi sınıfa bağlıdır. Yasa ihlali, VDA ISA gereklilikleri veya gizlilik yükümlülükleri içeren riskler asla kabul edilemez; Risk Sahibi riski tek başına değerlendirip işlediyse Tesis Yöneticisinin imzası da gerekir. Sınıf değişirse kabul düşer. Süresi dolmak üzere olan kabuller 30 gün önceden görev oluşturur.
+Kimin kabul edebileceği sınıfa ve **risk yönetişimi politikasına** (Ayarlar) bağlıdır: gerekli rollerin imzaları, CISO görüşü (bağlayıcı veya bilgilendirici) ve Critical için organ kararı. Azami geçerlilik süresi sınıfa bağlıdır. Yasa ihlali, VDA ISA gereklilikleri veya gizlilik yükümlülükleri içeren riskler asla kabul edilemez; Risk Sahibi riski tek başına değerlendirip işlediyse Tesis Yöneticisinin imzası da gerekir. Sınıf değişirse kabul düşer. Süresi dolmak üzere olan kabuller 30 gün önceden görev oluşturur. Plant Manager'ın ek imzası yalnızca imzalayacak kişi Risk Sahibi'nin kendisiyse gerekir: politika kabulü başka bir role veriyorsa (örneğin yalnızca CISO) kimse eklenmez ve kart Plant Manager'ın neden eklendiğini her zaman belirtir. İşlem «kabul et» ise kabul gerekçesi işlem gerekçesinden alınır ve düzeltilebilir; risk işlem altındaysa kabul, önlemler tamamlanıp doğrulanana kadar mevcut maruziyeti kapsar.
 
 ### Devralınan grup riskleri
 

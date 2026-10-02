@@ -473,7 +473,7 @@ Plan measures have an owner, deadline and expected effect. When a measure is com
 
 ### Acceptance
 
-Who can accept depends on the class and on the **risk governance policy** (Settings): signatures of the required roles, the CISO's opinion (binding or informative) and, for Critical, the governing body resolution. Maximum validity depends on the class. Risks involving breaches of law, VDA ISA requirements or confidentiality obligations can never be accepted; if the Risk Owner assessed and treated the risk alone, the Plant Manager's signature is also required. If the class changes, the acceptance lapses. Expiring acceptances create a task 30 days in advance.
+Who can accept depends on the class and on the **risk governance policy** (Settings): signatures of the required roles, the CISO's opinion (binding or informative) and, for Critical, the governing body resolution. Maximum validity depends on the class. Risks involving breaches of law, VDA ISA requirements or confidentiality obligations can never be accepted; if the Risk Owner assessed and treated the risk alone, the Plant Manager's signature is also required. If the class changes, the acceptance lapses. Expiring acceptances create a task 30 days in advance. The additional Plant Manager signature applies only if the Risk Owner would be the one signing: if the policy has another role accept (for example only the CISO), nobody is added, and the card always states why the Plant Manager was added. If the treatment is "accept", the acceptance rationale is taken from the treatment rationale and can be corrected; if the risk is being treated, the acceptance covers the current exposure until the measures are completed and verified.
 
 ### Inherited group risks
 

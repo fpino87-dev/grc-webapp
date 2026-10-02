@@ -473,7 +473,7 @@ Działania planu mają odpowiedzialnego, termin i oczekiwany efekt. Zakończone 
 
 ### Akceptacja
 
-Kto może zaakceptować, zależy od klasy i od **polityki zarządzania ryzykiem** (Ustawienia): podpisy wymaganych ról, opinia CISO (wiążąca lub informacyjna) oraz, dla Critical, uchwała organu. Maksymalna ważność zależy od klasy. Ryzyk wiążących się z naruszeniem prawa, wymagań VDA ISA lub zobowiązań do zachowania poufności nigdy nie można zaakceptować; jeśli Właściciel ryzyka sam ocenił i potraktował ryzyko, wymagany jest także podpis Plant Managera. Zmiana klasy unieważnia akceptację. Wygasające akceptacje tworzą zadanie 30 dni wcześniej.
+Kto może zaakceptować, zależy od klasy i od **polityki zarządzania ryzykiem** (Ustawienia): podpisy wymaganych ról, opinia CISO (wiążąca lub informacyjna) oraz, dla Critical, uchwała organu. Maksymalna ważność zależy od klasy. Ryzyk wiążących się z naruszeniem prawa, wymagań VDA ISA lub zobowiązań do zachowania poufności nigdy nie można zaakceptować; jeśli Właściciel ryzyka sam ocenił i potraktował ryzyko, wymagany jest także podpis Plant Managera. Zmiana klasy unieważnia akceptację. Wygasające akceptacje tworzą zadanie 30 dni wcześniej. Dodatkowy podpis Plant Managera jest wymagany tylko wtedy, gdy podpisywać miałby sam Risk Owner: jeśli polityka przewiduje akceptację przez inną rolę (na przykład tylko CISO), nikt nie jest dodawany, a karta zawsze podaje, dlaczego dodano Plant Managera. Jeśli postępowanie to „akceptacja”, uzasadnienie akceptacji jest przejmowane z uzasadnienia postępowania i można je poprawić; jeśli ryzyko jest w trakcie postępowania, akceptacja obejmuje obecną ekspozycję do czasu zakończenia i weryfikacji działań.
 
 ### Dziedziczone ryzyka grupy
 
