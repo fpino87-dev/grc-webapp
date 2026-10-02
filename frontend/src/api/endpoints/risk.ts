@@ -395,6 +395,7 @@ export const riskApi = {
   submissionCheck: (id: string) => data(apiClient.get<{ errors: string[] }>(`/risk/cycles/${id}/submission-check/`)),
   submitCycle: (id: string) => data(apiClient.post<Cycle>(`/risk/cycles/${id}/submit/`)),
   returnCycle: (id: string, reason: string) => data(apiClient.post<Cycle>(`/risk/cycles/${id}/return/`, { reason })),
+  exportCycle: (id: string) => apiClient.get(`/risk/cycles/${id}/export/`, { responseType: "blob" }),
   approveCycle: (id: string, payload: { body: string; review?: string; local_adoption_ref?: string }) =>
     data(apiClient.post<Cycle>(`/risk/cycles/${id}/approve/`, payload)),
 };

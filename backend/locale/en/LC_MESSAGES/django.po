@@ -3450,3 +3450,6 @@ msgstr "Invalid date."
 
 msgid "Indica il rischio di gruppo e il sito."
 msgstr "Enter the group risk and the site."
+
+msgid "La valutazione non ha una fotografia: si esporta solo una valutazione approvata."
+msgstr "The assessment has no snapshot: only an approved assessment can be exported."

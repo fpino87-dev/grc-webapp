@@ -1922,3 +1922,115 @@ def generate_risk_excel(plant=None) -> bytes:
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()
+
+
+def generate_cycle_excel(cycle) -> bytes:
+    """Fotografia congelata di una valutazione approvata (procedura §11.5):
+    registro, copertura e criteri in vigore al momento dell'approvazione."""
+    import io
+
+    from django.utils.translation import gettext as _
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill
+
+    if not cycle.snapshot:
+        raise _err(_("La valutazione non ha una fotografia: si esporta solo una valutazione approvata."))
+    snap = cycle.snapshot
+    fill = PatternFill("solid", fgColor="1E3A5F")
+    font = Font(color="FFFFFF", bold=True, size=10)
+
+    def header(ws, cols):
+        for i, col in enumerate(cols, 1):
+            cell = ws.cell(row=1, column=i, value=col)
+            cell.fill, cell.font = fill, font
+            ws.column_dimensions[cell.column_letter].width = 18
+        ws.freeze_panes = "A2"
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Valutazione"
+    rows = [
+        ("Registro", cycle.plant.name if cycle.plant else "Gruppo"),
+        ("Tipo", cycle.get_kind_display()),
+        ("Avviata il", cycle.started_at.date() if cycle.started_at else None),
+        ("Approvata il", cycle.approved_at.date() if cycle.approved_at else None),
+        ("Organo", cycle.approved_by_body.name if cycle.approved_by_body else ""),
+        ("Recepimento della società", cycle.local_adoption_ref),
+        ("Motivo (revisione straordinaria)", cycle.trigger_reason),
+        ("Copertura", f"{snap.get('coverage', {}).get('closed', 0)}/{snap.get('coverage', {}).get('total', 0)}"),
+        ("Modello di governo", snap.get("policy", {}).get("preset", "")),
+    ]
+    for r, (k, v) in enumerate(rows, 1):
+        ws.cell(row=r, column=1, value=k).font = Font(bold=True)
+        ws.cell(row=r, column=2, value=v)
+    ws.column_dimensions["A"].width = 32
+    ws.column_dimensions["B"].width = 40
+
+    ws = wb.create_sheet("Registro")
+    cols = ["Tipologia", "Minaccia", "Scenario", "Applicabile", "Motivo non applicabile", "Asset / gruppo",
+            "Fornitore", "Processo", "Probabilità", "Impatto", *[f"Imp. {d}" for d in IMPACT_DIMENSIONS],
+            "Classe attuale", "Classe attesa", "Trattamento", "Misure (completate/verificate)",
+            "Accettazione", "Siti che lo ereditano"]
+    header(ws, cols)
+    for r, item in enumerate(snap.get("risks", []), 2):
+        plans = item.get("plans", [])
+        acc = item.get("acceptance")
+        values = [
+            item.get("asset_type"), item.get("threat"), item.get("name"),
+            "Sì" if item.get("applicable") else "No", item.get("not_applicable_reason"), item.get("asset"),
+            item.get("supplier"), item.get("process"), item.get("probability"), item.get("impact"),
+            *[(item.get("impacts") or {}).get(d) for d in IMPACT_DIMENSIONS],
+            CLASS_LABELS.get(item.get("current_class"), ""), CLASS_LABELS.get(item.get("expected_class"), ""),
+            item.get("treatment"),
+            f"{len(plans)} ({sum(1 for p in plans if p.get('completed'))}/{sum(1 for p in plans if p.get('verified'))})",
+            f"{CLASS_LABELS.get(acc['class'], '')} fino al {acc['expires_on']}" if acc else "",
+            len(item.get("affected_plants") or []) or "",
+        ]
+        for c, v in enumerate(values, 1):
+            ws.cell(row=r, column=c, value=v)
+
+    ws = wb.create_sheet("Criteri")
+    policy = snap.get("policy", {})
+    header(ws, ["Classe", "Ruoli che firmano", "Livello", "Delibera organo", "Parere CISO", "Validità (mesi)"])
+    for r, cls in enumerate(reversed(RISK_CLASSES), 2):
+        rule = (policy.get("acceptance_matrix") or {}).get(cls, {})
+        for c, v in enumerate([
+            CLASS_LABELS[cls], ", ".join(rule.get("roles", [])), rule.get("scope", ""),
+            "Sì" if rule.get("requires_body") else "No", (policy.get("upper_opinion") or {}).get(cls, ""),
+            (policy.get("acceptance_max_months") or {}).get(cls, ""),
+        ], 1):
+            ws.cell(row=r, column=c, value=v)
+    thresholds = policy.get("economic_thresholds") or {}
+    ws.cell(row=9, column=1, value="Soglie economiche (€, limite inferiore)").font = Font(bold=True)
+    for offset, level in enumerate(("2", "3", "4", "5")):
+        ws.cell(row=10 + offset, column=1, value=f"Livello {level}")
+        ws.cell(row=10 + offset, column=2, value=thresholds.get(level))
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def legacy_register_rows(plant) -> list:
+    """Registro del metodo superato (valori congelati), per pacchetti audit ed export."""
+    rows = []
+    risks = RiskAssessment.objects.filter(cycle__kind="legacy", plant=plant).order_by("created_at")
+    for r in risks:
+        s = r.legacy_snapshot or {}
+        rows.append({
+            "name": r.name,
+            "assessment_type": s.get("assessment_type", ""),
+            "threat_category": s.get("threat_category", ""),
+            "probability": s.get("probability"),
+            "impact": s.get("impact"),
+            "score": s.get("score"),
+            "inherent_score": s.get("inherent_score"),
+            "treatment": s.get("treatment", ""),
+            "cause": s.get("cause", ""),
+            "consequence": s.get("consequence", ""),
+            "risk_accepted_formally": s.get("risk_accepted_formally"),
+            "risk_acceptance_note": s.get("risk_acceptance_note", ""),
+            "risk_acceptance_expiry": s.get("risk_acceptance_expiry", ""),
+            "assessed_at": s.get("assessed_at", ""),
+        })
+    return rows

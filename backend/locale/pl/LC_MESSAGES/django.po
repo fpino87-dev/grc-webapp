@@ -3472,3 +3472,6 @@ msgstr "Nieprawidłowa data."
 
 msgid "Indica il rischio di gruppo e il sito."
 msgstr "Podaj ryzyko grupy i zakład."
+
+msgid "La valutazione non ha una fotografia: si esporta solo una valutazione approvata."
+msgstr "Ocena nie ma migawki: eksportować można tylko zatwierdzoną ocenę."

@@ -3369,7 +3369,8 @@
         "changed_assets": "Zasoby z zarejestrowanymi zmianami: {{count}}",
         "major_findings": "Poważne niezgodności z audytów: {{count}}",
         "control_gaps": "Zabezpieczenia z luką: {{count}}"
-      }
+      },
+      "choose_review": "Przegląd zarządzania z protokołem (opcjonalnie)"
     },
     "cycles": {
       "col_kind": "Rodzaj",
@@ -3386,7 +3387,8 @@
         "in_approvazione": "Do zatwierdzenia",
         "approvato": "Zatwierdzona (obowiązująca)",
         "archiviato": "Zarchiwizowana"
-      }
+      },
+      "export": "Excel oceny"
     },
     "legacy": {
       "title": "Poprzednia ocena",

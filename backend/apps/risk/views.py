@@ -676,6 +676,23 @@ class RiskAssessmentCycleViewSet(PlantScopedQuerysetMixin, viewsets.ReadOnlyMode
             local_adoption_ref=request.data.get("local_adoption_ref", ""),
         )
 
+    @action(detail=True, methods=["get"], url_path="export", throttle_classes=[ExportRateThrottle])
+    def export(self, request, pk=None):
+        """Excel della fotografia congelata di una valutazione approvata."""
+        from django.http import HttpResponse
+
+        cycle = self.get_object()
+        content = _call_service(services.generate_cycle_excel, cycle)
+        log_action(user=request.user, action_code="risk.cycle.export", level="L2", entity=cycle,
+                   payload={"plant_id": str(cycle.plant_id) if cycle.plant_id else None})
+        label = cycle.plant.code if cycle.plant else "gruppo"
+        date = cycle.approved_at.date().isoformat() if cycle.approved_at else "bozza"
+        response = HttpResponse(
+            content, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="valutazione_rischi_{label}_{date}.xlsx"'
+        return response
+
     @action(detail=True, methods=["get"], url_path="submission-check")
     def submission_check(self, request, pk=None):
         return Response({"errors": services.cycle_submission_errors(self.get_object())})

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiError, riskApi, type Cycle, type CycleKind } from "../../api/endpoints/risk";
 import { governanceApi } from "../../api/endpoints/governance";
+import { managementReviewApi } from "../../api/endpoints/managementReview";
 import { ErrorBox, inputCls } from "./RiskUi";
 import type { RegisterId } from "./RiskPage";
 
@@ -218,10 +219,16 @@ function ApproveDialog({ cycle, orgScope, onClose, onDone }: {
   const { t } = useTranslation();
   const [body, setBody] = useState("");
   const [adoption, setAdoption] = useState("");
+  const [review, setReview] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { data: bodies = [] } = useQuery({ queryKey: ["committees"], queryFn: () => governanceApi.committees(), retry: false });
+  const { data: reviews } = useQuery({
+    queryKey: ["management-reviews-for-risk", cycle.plant],
+    queryFn: () => managementReviewApi.list(cycle.plant ? { plant: cycle.plant } : {}),
+    retry: false,
+  });
   const approve = useMutation({
-    mutationFn: () => riskApi.approveCycle(cycle.id, { body, local_adoption_ref: adoption }),
+    mutationFn: () => riskApi.approveCycle(cycle.id, { body, local_adoption_ref: adoption, review: review || undefined }),
     onSuccess: onDone,
     onError: e => setError(apiError(e, t("risk.errors.generic"))),
   });
@@ -232,6 +239,10 @@ function ApproveDialog({ cycle, orgScope, onClose, onDone }: {
         <select value={body} onChange={e => setBody(e.target.value)} className={inputCls}>
           <option value="">{t("risk.cycle.choose_body")}</option>
           {bodies.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+        </select>
+        <select value={review} onChange={e => setReview(e.target.value)} className={inputCls}>
+          <option value="">{t("risk.cycle.choose_review")}</option>
+          {(reviews?.results ?? []).map(r => <option key={r.id} value={r.id}>{r.review_date} — {r.title}</option>)}
         </select>
         {cycle.plant && (
           <input value={adoption} onChange={e => setAdoption(e.target.value)} className={inputCls}

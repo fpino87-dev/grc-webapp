@@ -632,3 +632,33 @@ def test_policy_exposes_org_scope_and_untreated_filter(org_user, site_user, plan
                     treatment="accettare", expected_probability=None, expected_impact=None)
     listed = _client(org_user).get(f"/api/v1/risk/assessments/?plant={plant.pk}&untreated_high=1").json()["results"]
     assert [x["id"] for x in listed] == [str(high.pk)]
+
+
+@pytest.mark.django_db
+def test_cycle_export_and_audit_pack_history(org_user, plant, threats, cycle, tmp_path):
+    from openpyxl import load_workbook
+
+    from apps.audit_prep.audit_pack import _collect_risk
+    from apps.governance.models import SecurityCommittee
+
+    legacy_cycle = RiskAssessmentCycle.objects.create(plant=plant, kind="legacy", status="archiviato",
+                                                      started_at=timezone.now())
+    RiskAssessment.objects.create(plant=plant, cycle=legacy_cycle, name="Vecchio",
+                                  legacy_snapshot={"score": 12, "inherent_score": 20, "treatment": "mitigare"})
+    c = _client(org_user)
+    assert c.get(f"/api/v1/risk/cycles/{cycle.pk}/export/").status_code == 400  # niente fotografia
+    _completed_risk(org_user, plant, threats["malware"])
+    _close_coverage(org_user, plant)
+    services.submit_cycle(org_user, cycle)
+    services.approve_cycle(org_user, cycle, body=SecurityCommittee.objects.create(name="CdA"))
+    res = c.get(f"/api/v1/risk/cycles/{cycle.pk}/export/")
+    assert res.status_code == 200
+    wb = load_workbook(io.BytesIO(b"".join(res.streaming_content) if hasattr(res, "streaming_content") else res.content))
+    assert wb.sheetnames == ["Valutazione", "Registro", "Criteri"]
+    assert wb["Registro"].max_row == 4  # intestazione + 3 coppie della copertura
+
+    out = _collect_risk(tmp_path, plant)
+    assert out["approved_cycle"] is True and out["legacy"] == 1
+    files = {p.name for p in (tmp_path / "03_risk").iterdir()}
+    assert "valutazione_precedente_metodo_superato.csv" in files
+    assert any(f.startswith("valutazione_approvata_") for f in files)

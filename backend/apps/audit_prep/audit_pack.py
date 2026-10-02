@@ -343,7 +343,22 @@ def _collect_risk(out_dir: Path, plant) -> dict:
         else:
             fp.write("# Nessun risk assessment completato per il plant.\n")
 
-    return {"total": len(rows)}
+    # Valutazione approvata vigente (fotografia congelata) e registro del
+    # metodo superato, per mostrare il passaggio al nuovo metodo.
+    from apps.risk.services import approved_cycle, generate_cycle_excel, legacy_register_rows
+
+    approved = approved_cycle(plant)
+    if approved is not None and approved.snapshot:
+        name = f"valutazione_approvata_{approved.approved_at.date().isoformat()}.xlsx"
+        (risk_dir / name).write_bytes(generate_cycle_excel(approved))
+    legacy = legacy_register_rows(plant)
+    if legacy:
+        with (risk_dir / "valutazione_precedente_metodo_superato.csv").open("w", newline="", encoding="utf-8") as fp:
+            writer = safe_dict_writer(fp, fieldnames=list(legacy[0].keys()))
+            writer.writeheader()
+            writer.writerows(legacy)
+
+    return {"total": len(rows), "approved_cycle": bool(approved), "legacy": len(legacy)}
 
 
 def _collect_bia_bcp(out_dir: Path, plant) -> dict:

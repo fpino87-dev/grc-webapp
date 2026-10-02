@@ -3517,3 +3517,6 @@ msgstr "Date non valide."
 
 msgid "Indica il rischio di gruppo e il sito."
 msgstr "Indiquez le risque de groupe et le site."
+
+msgid "La valutazione non ha una fotografia: si esporta solo una valutazione approvata."
+msgstr "L'appréciation n'a pas de photographie : seule une appréciation approuvée peut être exportée."

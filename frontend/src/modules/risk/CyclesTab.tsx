@@ -15,6 +15,15 @@ export function CyclesTab({ registerId, cycles }: { registerId: RegisterId; cycl
     retry: false,
   });
   const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString(i18n.language) : "—");
+  const download = async (c: Cycle) => {
+    const resp = await riskApi.exportCycle(c.id);
+    const url = window.URL.createObjectURL(new Blob([resp.data]));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `valutazione_rischi_${c.plant_name ?? "gruppo"}_${(c.approved_at ?? "").slice(0, 10)}.xlsx`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-4">
@@ -45,7 +54,12 @@ export function CyclesTab({ registerId, cycles }: { registerId: RegisterId; cycl
                     {c.local_adoption_ref && <span className="block text-[11px] text-gray-400">{c.local_adoption_ref}</span>}
                   </td>
                   <td className="px-3 py-2 text-xs text-gray-600">{c.risks_count}</td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="px-3 py-2 text-right whitespace-nowrap">
+                    {c.approved_at && c.kind !== "legacy" && (
+                      <button onClick={() => download(c)} className="text-xs text-green-700 hover:underline mr-3">
+                        ⬇ {t("risk.cycles.export")}
+                      </button>
+                    )}
                     {c.kind === "legacy" && registerId && (
                       <button onClick={() => setShowLegacy(s => !s)} className="text-xs text-primary-600 hover:underline">
                         {t(showLegacy ? "risk.cycles.hide_legacy" : "risk.cycles.show_legacy")}

@@ -323,12 +323,36 @@ def _add_management_review_reports(zf, zip_name: str, plant_id) -> None:
             )
 
 
+def _add_risk_history(zf, zip_name: str, plant) -> None:
+    """Valutazione approvata vigente e registro del metodo superato."""
+    import io
+
+    from apps.risk.services import approved_cycle, generate_cycle_excel, legacy_register_rows
+    from core.csv_safe import safe_dict_writer
+
+    approved = approved_cycle(plant)
+    if approved is not None and approved.snapshot:
+        zf.writestr(
+            f"{zip_name}/RISK_REGISTER/valutazione_approvata_{approved.approved_at.date().isoformat()}.xlsx",
+            generate_cycle_excel(approved),
+        )
+    legacy = legacy_register_rows(plant) if plant is not None else []
+    if legacy:
+        buf = io.StringIO()
+        writer = safe_dict_writer(buf, fieldnames=list(legacy[0].keys()))
+        writer.writeheader()
+        writer.writerows(legacy)
+        zf.writestr(f"{zip_name}/RISK_REGISTER/valutazione_precedente_metodo_superato.csv",
+                    buf.getvalue().encode("utf-8-sig"))
+
+
 def _add_risk_register(zf, zip_name: str, plant_id) -> None:
     from apps.plants.models import Plant
     from apps.risk.services import generate_risk_excel
     try:
         plant = Plant.objects.filter(pk=plant_id).first() if plant_id else None
         excel_bytes = generate_risk_excel(plant)
+        _add_risk_history(zf, zip_name, plant)
         zf.writestr(f"{zip_name}/RISK_REGISTER/risk_register.xlsx", excel_bytes)
     except Exception as exc:
         import logging

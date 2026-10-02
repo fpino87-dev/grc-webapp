@@ -3369,7 +3369,8 @@
         "changed_assets": "Asset con cambiamenti registrati: {{count}}",
         "major_findings": "Non conformità maggiori da audit: {{count}}",
         "control_gaps": "Controlli passati a gap: {{count}}"
-      }
+      },
+      "choose_review": "Riesame di direzione con il verbale (facoltativo)"
     },
     "cycles": {
       "col_kind": "Tipo",
@@ -3386,7 +3387,8 @@
         "in_approvazione": "In approvazione",
         "approvato": "Approvata (vigente)",
         "archiviato": "Archiviata"
-      }
+      },
+      "export": "Excel della valutazione"
     },
     "legacy": {
       "title": "Valutazione precedente",

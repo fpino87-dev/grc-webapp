@@ -3369,7 +3369,8 @@
         "changed_assets": "Değişiklik kaydedilen varlıklar: {{count}}",
         "major_findings": "Denetimlerden büyük uygunsuzluklar: {{count}}",
         "control_gaps": "Açığa düşen kontroller: {{count}}"
-      }
+      },
+      "choose_review": "Tutanaklı yönetim gözden geçirmesi (isteğe bağlı)"
     },
     "cycles": {
       "col_kind": "Tür",
@@ -3386,7 +3387,8 @@
         "in_approvazione": "Onay bekliyor",
         "approvato": "Onaylı (yürürlükte)",
         "archiviato": "Arşivlendi"
-      }
+      },
+      "export": "Değerlendirme Excel"
     },
     "legacy": {
       "title": "Önceki değerlendirme",

@@ -65,11 +65,12 @@ vi.mock("../../../api/endpoints/risk", () => {
       informationClasses: ok([]), measures: ok([]),
       plans: ok([{ id: "m1", assessment: "r1", action: "EDR", owner: null, owner_external: "MSP", owner_name: "MSP", due_date: "2020-01-01", expected_effect: "probabilita", bcp_plan: null, bcp_plan_title: null, bcp_plan_status: null, control_instance: null, control_title: null, completed_at: null, verified_at: null, verified_by: null, verified_by_name: null, verification_note: "", escalation_level: 1, created_at: "" }]),
       acceptances: ok([]), acceptanceRequirements: ok({ class: "critical", roles: [], scope: "org", requires_body: true, notify: [], upper_opinion: "binding", max_months: 6, not_acceptable: false }),
-      localImpactReports: ok([]), exportExcel: ok({ data: "" }),
+      localImpactReports: ok([]), exportExcel: ok({ data: "" }), exportCycle: ok({ data: "" }),
     },
   };
 });
 vi.mock("../../../api/endpoints/plants", () => ({ plantsApi: { list: () => Promise.resolve([{ id: "p1", code: "P1", name: "Sito 1" }]) } }));
+vi.mock("../../../api/endpoints/managementReview", () => ({ managementReviewApi: { list: () => Promise.resolve({ results: [] }) } }));
 vi.mock("../../../api/endpoints/governance", () => ({ governanceApi: { committees: () => Promise.resolve([]) } }));
 vi.mock("../../../api/endpoints/users", () => ({ usersApi: { list: () => Promise.resolve([{ id: 1, username: "m", email: "m@x", first_name: "Mario", last_name: "" }]) } }));
 vi.mock("../../../api/endpoints/assets", () => ({ assetsApi: { listIT: () => Promise.resolve({ results: [] }), listSW: () => Promise.resolve({ results: [] }), listOT: () => Promise.resolve({ results: [] }), listFacility: () => Promise.resolve({ results: [] }) } }));

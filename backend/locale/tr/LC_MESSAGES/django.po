@@ -3451,3 +3451,6 @@ msgstr "Geçersiz tarih."
 
 msgid "Indica il rischio di gruppo e il sito."
 msgstr "Grup riskini ve sahayı girin."
+
+msgid "La valutazione non ha una fotografia: si esporta solo una valutazione approvata."
+msgstr "Değerlendirmenin anlık görüntüsü yok: yalnızca onaylanmış bir değerlendirme dışa aktarılabilir."

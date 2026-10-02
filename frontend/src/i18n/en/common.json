@@ -3369,7 +3369,8 @@
         "changed_assets": "Assets with recorded changes: {{count}}",
         "major_findings": "Major nonconformities from audits: {{count}}",
         "control_gaps": "Controls moved to gap: {{count}}"
-      }
+      },
+      "choose_review": "Management review with the minutes (optional)"
     },
     "cycles": {
       "col_kind": "Type",
@@ -3386,7 +3387,8 @@
         "in_approvazione": "Awaiting approval",
         "approvato": "Approved (in force)",
         "archiviato": "Archived"
-      }
+      },
+      "export": "Assessment Excel"
     },
     "legacy": {
       "title": "Previous assessment",

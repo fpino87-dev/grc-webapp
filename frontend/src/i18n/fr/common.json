@@ -3369,7 +3369,8 @@
         "changed_assets": "Actifs avec changements enregistrés : {{count}}",
         "major_findings": "Non-conformités majeures d'audit : {{count}}",
         "control_gaps": "Contrôles passés en écart : {{count}}"
-      }
+      },
+      "choose_review": "Revue de direction avec le procès-verbal (facultatif)"
     },
     "cycles": {
       "col_kind": "Type",
@@ -3386,7 +3387,8 @@
         "in_approvazione": "En attente d'approbation",
         "approvato": "Approuvée (en vigueur)",
         "archiviato": "Archivée"
-      }
+      },
+      "export": "Excel de l'appréciation"
     },
     "legacy": {
       "title": "Appréciation précédente",
