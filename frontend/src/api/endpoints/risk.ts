@@ -297,7 +297,11 @@ export type AiDraftProposal = Partial<Pick<Risk,
   | "vulnerability" | "consequence" | "probability" | "probability_method" | "probability_rationale"
   | "impact_economic" | "impact_legal" | "impact_customer" | "impact_reputational" | "impact_people"
   | "impact_operational" | "impact_rationale" | "treatment" | "treatment_rationale"
-  | "expected_probability" | "expected_impact">>;
+  | "expected_probability" | "expected_impact" | "business_objectives" | "information_classes" | "critical_process">>;
+/** id → nome dei riferimenti che una proposta IA può indicare. */
+export interface AiLinkNames {
+  processes: Record<string, string>; objectives: Record<string, string>; information: Record<string, string>;
+}
 export interface AiMeasure {
   action: string; expected_effect: "" | "probabilita" | "impatto" | "entrambi"; due_date: string;
   control_instance: string | null; control_label: string | null; rationale: string;
@@ -306,10 +310,11 @@ export interface AiMeasure {
 export interface AiIdentifyItem {
   threat_id: string; threat_code: string; applicable: boolean; reason: string;
   proposal?: AiDraftProposal; critical_process?: string | null; business_objectives?: string[];
+  information_classes?: string[];
 }
 export interface AiIdentifyResult extends AiMeta {
   items: AiIdentifyItem[]; remaining: number;
-  names?: { processes: Record<string, string>; objectives: Record<string, string> };
+  names?: AiLinkNames;
 }
 export interface ConsistencyFinding {
   code: string; severity: "error" | "warning"; risk_id: string; risk_name: string; params: Record<string, string | number>;
@@ -416,7 +421,9 @@ export const riskApi = {
   updateBusinessObjective: (id: string, payload: Partial<BusinessObjective>) =>
     data(apiClient.patch<BusinessObjective>(`/risk/business-objectives/${id}/`, payload)),
   deleteBusinessObjective: (id: string) => apiClient.delete(`/risk/business-objectives/${id}/`),
-  aiDraft: (id: string) => data(apiClient.post<AiMeta & { proposal: AiDraftProposal }>(`/risk/assessments/${id}/ai-draft/`)),
+  aiDraft: (id: string) => data(apiClient.post<AiMeta & { proposal: AiDraftProposal; names?: AiLinkNames }>(
+    `/risk/assessments/${id}/ai-draft/`, {}, { timeout: 180000 },
+  )),
   aiMeasures: (id: string) => data(apiClient.post<AiMeta & { measures: AiMeasure[] }>(`/risk/assessments/${id}/ai-measures/`)),
   aiIdentify: (plantId: string | null, assetType: AssetType) =>
     data(apiClient.post<AiIdentifyResult>("/risk/assessments/ai-identify/", { asset_type: assetType }, {

@@ -2381,7 +2381,8 @@ def risk_ai_context(risk, lang: str = "it") -> dict:
         "paese": risk.plant.country if risk.plant else None,
         "nis2": bool(risk.nis2_in_scope),
         "tipologia_asset": risk.asset_type,
-        "minaccia": {"codice": threat.code, "titolo": threat.get_title(lang), "cia": threat.cia} if threat else None,
+        "minaccia": ({"codice": threat.code, "titolo": threat.get_title(lang),
+                      "descrizione": threat.tr("description", lang), "cia": threat.cia} if threat else None),
         "asset": ({"nome": risk.asset.name, "criticita": getattr(risk.asset, "criticality", None)}
                   if risk.asset_id else (risk.asset_group_label or None)),
         "fornitore": risk.supplier.name if risk.supplier_id else None,
@@ -2416,6 +2417,12 @@ def _level(value):
     return v if 1 <= v <= 5 else None
 
 
+def _ai_method(value) -> str:
+    """Metodo della probabilità: "frequenza" o "fer" (anche in maiuscolo o con spazi)."""
+    v = str(value or "").strip().lower()
+    return v if v in ("frequenza", "fer") else ""
+
+
 def validate_ai_draft(data: dict) -> dict:
     """Proposta di valutazione ripulita: solo campi noti, livelli 1–5, valori
     ammessi. La classe NON arriva dall'IA: la calcola la matrice."""
@@ -2424,7 +2431,7 @@ def validate_ai_draft(data: dict) -> dict:
         "vulnerability": _clip(data.get("vulnerability")),
         "consequence": _clip(data.get("consequence")),
         "probability": _level(data.get("probability")),
-        "probability_method": data.get("probability_method") if data.get("probability_method") in ("frequenza", "fer") else "",
+        "probability_method": _ai_method(data.get("probability_method")),
         "probability_rationale": _clip(data.get("probability_rationale")),
         "impact_rationale": _clip(data.get("impact_rationale")),
         "treatment": data.get("treatment") if data.get("treatment") in AI_TREATMENTS else "",
@@ -2487,7 +2494,7 @@ def validate_ai_measures(items, risk, candidates: list) -> list:
 
 # Coppie proposte per chiamata: con la bozza completa per ognuna, oltre questo
 # numero la risposta del modello rischia di essere troncata.
-AI_IDENTIFY_BATCH = 10
+AI_IDENTIFY_BATCH = 6
 # Tipologie della copertura → tipi di asset dell'inventario M04.
 _COVERAGE_ASSET_KINDS = {"IT": ("IT", "SW"), "OT": ("OT", "FAC"), "SEDE": ("FAC",)}
 
@@ -2501,12 +2508,13 @@ def ai_identification_threats(plant, asset_type: str) -> list:
     return list(ThreatCatalogEntry.objects.filter(pk__in=missing).order_by("code"))
 
 
-def ai_identification_links(plant) -> dict:
-    """Processi BIA e obiettivi aziendali che una proposta può richiamare per numero."""
+def ai_link_candidates(plant) -> dict:
+    """Processi BIA, obiettivi aziendali e classi di informazioni che una
+    proposta IA può richiamare per numero: solo quelli del registro o di gruppo."""
     from apps.bia.models import CriticalProcess
-    from django.db.models import Q
+    from django.db.models import Case, IntegerField, Q, Value, When
 
-    from .models import BusinessObjective
+    from .models import BusinessObjective, InformationClass
 
     processes = list(CriticalProcess.objects.filter(plant=plant).order_by("-criticality", "name")[:15]) \
         if plant is not None else []
@@ -2514,7 +2522,68 @@ def ai_identification_links(plant) -> dict:
         BusinessObjective.objects.filter(Q(plant__isnull=True) | Q(plant=plant), active=True)
         .order_by("order", "name")
     )
-    return {"processes": processes, "objectives": objectives}
+    rank = Case(*(When(confidentiality=lvl, then=Value(i)) for i, lvl in
+                  enumerate(("very_high", "high", "normal", "low"))), output_field=IntegerField())
+    information = list(
+        InformationClass.objects.filter(Q(plant__isnull=True) | Q(plant=plant))
+        .annotate(_rank=rank).order_by("_rank", "name")[:30]
+    )
+    return {"processes": processes, "objectives": objectives, "information": information}
+
+
+def ai_link_payload(links: dict) -> dict:
+    """Le stesse liste, numerate, per il prompt."""
+    return {
+        "processi_bia": [
+            {"n": i, "nome": p.name, "criticita": p.criticality, "rto_ore": p.rto_target_hours,
+             "mtpd_ore": p.mtpd_hours}
+            for i, p in enumerate(links["processes"], start=1)
+        ],
+        "obiettivi_aziendali": [
+            {"n": i, "nome": o.name, "descrizione": _clip(o.description, 300), "dimensioni_impatto": o.impact_dimensions}
+            for i, o in enumerate(links["objectives"], start=1)
+        ],
+        "classi_informazioni": [
+            {"n": i, "nome": ic.name, "riservatezza": ic.confidentiality, "integrita": ic.integrity,
+             "disponibilita": ic.availability}
+            for i, ic in enumerate(links["information"], start=1)
+        ],
+    }
+
+
+def ai_link_names(links: dict) -> dict:
+    """id → nome, per mostrare nell'interfaccia i riferimenti proposti."""
+    return {
+        "processes": {str(p.pk): p.name for p in links["processes"]},
+        "objectives": {str(o.pk): o.name for o in links["objectives"]},
+        "information": {str(ic.pk): ic.name for ic in links["information"]},
+    }
+
+
+def _ai_indexes(value) -> list:
+    """Numeri di elenco proposti dal modello: interi o stringhe numeriche, senza ripetizioni."""
+    out = []
+    for v in value if isinstance(value, list) else [value]:
+        try:
+            n = int(str(v).strip())
+        except (TypeError, ValueError):
+            continue
+        if n not in out:
+            out.append(n)
+    return out
+
+
+def validate_ai_links(data: dict, links: dict) -> dict:
+    """Riferimenti proposti ripuliti: solo numeri fra quelli forniti nel prompt."""
+    def pick(key, items, limit):
+        return [str(items[n - 1].pk) for n in _ai_indexes(data.get(key)) if 1 <= n <= len(items)][:limit]
+
+    process = pick("process", links["processes"], 1)
+    return {
+        "critical_process": process[0] if process else None,
+        "business_objectives": pick("objectives", links["objectives"], 3),
+        "information_classes": pick("information", links["information"], 8),
+    }
 
 
 def risk_identification_context(plant, asset_type: str, links: dict, lang: str = "it") -> dict:
@@ -2528,8 +2597,6 @@ def risk_identification_context(plant, asset_type: str, links: dict, lang: str =
     from apps.incidents.models import Incident
     from apps.suppliers.models import Supplier
 
-    from .models import InformationClass
-
     ctx = {
         "registro": plant.name if plant else "gruppo (servizi condivisi)",
         "paese": plant.country if plant else None,
@@ -2537,21 +2604,7 @@ def risk_identification_context(plant, asset_type: str, links: dict, lang: str =
         "ha_ot": bool(plant and plant.has_ot),
         "tipologia_asset": asset_type,
         "tipologie_presenti": asset_types_present(plant),
-        "processi_bia": [
-            {"n": i, "nome": p.name, "criticita": p.criticality, "rto_ore": p.rto_target_hours,
-             "mtpd_ore": p.mtpd_hours}
-            for i, p in enumerate(links["processes"], start=1)
-        ],
-        "obiettivi_aziendali": [
-            {"n": i, "nome": o.name, "dimensioni": o.impact_dimensions}
-            for i, o in enumerate(links["objectives"], start=1)
-        ],
-        "informazioni_riservate": [
-            {"nome": ic.name, "riservatezza": ic.confidentiality}
-            for ic in InformationClass.objects.filter(
-                Q(plant__isnull=True) | Q(plant=plant), confidentiality__in=("high", "very_high"),
-            )[:15]
-        ],
+        **ai_link_payload(links),
     }
     kinds = _COVERAGE_ASSET_KINDS.get(asset_type)
     if kinds and plant is not None:
@@ -2599,15 +2652,7 @@ def validate_ai_identification(items, threats: list, links: dict) -> list:
                "reason": _clip(item.get("reason"), 600)}
         if applicable:
             row["proposal"] = validate_ai_draft(item)
-            idx = item.get("process")
-            processes = links["processes"]
-            row["critical_process"] = (str(processes[idx - 1].pk)
-                                       if isinstance(idx, int) and 1 <= idx <= len(processes) else None)
-            objectives = links["objectives"]
-            row["business_objectives"] = [
-                str(objectives[n - 1].pk) for n in dict.fromkeys(item.get("objectives") or [])
-                if isinstance(n, int) and 1 <= n <= len(objectives)
-            ][:3]
+            row.update(validate_ai_links(item, links))
         elif not row["reason"]:
             continue  # "non applicabile" senza motivo non si può dichiarare (§6.5)
         out.append(row)
@@ -2631,7 +2676,7 @@ def apply_ai_identification(user, plant, asset_type: str, items: list) -> dict:
 
     from core.audit import log_action
 
-    from .models import BusinessObjective
+    from .models import BusinessObjective, InformationClass
 
     require_register_write(user, plant)
     cycle = _require_evaluation_cycle(plant)
@@ -2659,6 +2704,9 @@ def apply_ai_identification(user, plant, asset_type: str, items: list) -> dict:
             objective_ids = [str(i) for i in item.get("business_objectives") or []][:3]
             if objective_ids:
                 data["business_objectives"] = list(BusinessObjective.objects.filter(pk__in=objective_ids, active=True))
+            info_ids = [str(i) for i in item.get("information_classes") or []][:8]
+            if info_ids:
+                data["information_classes"] = list(InformationClass.objects.filter(pk__in=info_ids))
             created.append(create_risk(user, plant, data))
         log_action(
             user=user, action_code="risk.ai.identification_applied", level="L2", entity=cycle,

@@ -149,7 +149,7 @@ def test_ai_identify_proposes_only_missing_threats(org_user, plant, threats, cyc
     answer = json.dumps({"items": [
         {"threat": "IN_PHI", "applicable": True, "vulnerability": "Posta senza filtro", "probability": 4,
          "probability_rationale": "Campagne frequenti", "impacts": {"customer": 4, "foo": 3},
-         "objectives": [1, 1, 99], "process": 42, "current_class": "low"},
+         "objectives": ["1", 1, 99], "process": 42, "current_class": "low"},
         {"threat": "IN_MAL", "applicable": True, "vulnerability": "già valutata"},  # non richiesta
         {"threat": "XX_FAKE", "applicable": False, "reason": "inventata"},
     ]})
@@ -163,7 +163,7 @@ def test_ai_identify_proposes_only_missing_threats(org_user, plant, threats, cyc
         "threat_id": str(extra.pk), "threat_code": "IN_PHI", "applicable": True, "reason": "",
         "proposal": {"vulnerability": "Posta senza filtro", "probability": 4,
                      "probability_rationale": "Campagne frequenti", "impact_customer": 4},
-        "critical_process": None, "business_objectives": [str(objective.pk)],
+        "critical_process": None, "business_objectives": [str(objective.pk)], "information_classes": [],
     }]
     assert RiskAssessment.objects.filter(plant=plant).count() == 1  # niente creato
 
@@ -216,3 +216,45 @@ def test_ai_identify_requires_register_write(site_user, org_user, other_plant, t
                                   format="json")
     assert res.status_code in (403, 404)
     assert not RiskAssessment.objects.filter(plant=other_plant).exists()
+
+
+@pytest.mark.django_db
+def test_ai_draft_proposes_objectives_information_and_process(org_user, plant, threats, cycle):
+    from apps.bia.models import CriticalProcess
+    from apps.risk.tests.test_register import _objective
+
+    objective = _objective()
+    cad = InformationClass.objects.create(name="CAD cliente", confidentiality="very_high")
+    other = InformationClass.objects.create(plant=None, name="Listini", confidentiality="normal")
+    process = CriticalProcess.objects.create(plant=plant, name="Produzione linea", criticality=5)
+    risk = services.create_risk(org_user, plant, {"asset_type": "IT", "threat": threats["malware"]})
+    links = services.ai_link_candidates(plant)
+    assert links["information"][:2] == [cad, other]  # le più riservate prima
+    n_obj = links["objectives"].index(objective) + 1
+    answer = json.dumps({
+        "probability_method": " FER ", "probability": 3, "impacts": {"operational": 4, "customer": "4"},
+        "objectives": [n_obj, 999], "information": ["1"], "process": 1,
+    })
+    with patch("apps.ai_engine.tasks_ai.route", _fake_route(answer)):
+        res = _client(org_user).post(f"/api/v1/risk/assessments/{risk.pk}/ai-draft/")
+    body = res.json()
+    assert body["proposal"] == {
+        "probability_method": "fer", "probability": 3, "impact_operational": 4, "impact_customer": 4,
+        "business_objectives": [str(objective.pk)], "information_classes": [str(cad.pk)],
+        "critical_process": str(process.pk),
+    }
+    assert body["names"]["information"][str(cad.pk)] == "CAD cliente"
+    risk.refresh_from_db()
+    assert not risk.business_objectives.exists()  # niente applicato
+
+
+@pytest.mark.django_db
+def test_ai_identify_apply_links_information(org_user, plant, threats, cycle):
+    cad = InformationClass.objects.create(name="CAD cliente", confidentiality="very_high")
+    items = [{"threat_id": str(threats["malware"].pk), "applicable": True,
+              "proposal": {"probability": 3, "impact_operational": 2}, "information_classes": [str(cad.pk)]}]
+    res = _client(org_user).post(f"/api/v1/risk/assessments/ai-identify-apply/?plant={plant.pk}",
+                                 {"asset_type": "IT", "items": items}, format="json")
+    risk = RiskAssessment.objects.get(pk=res.json()["created"][0])
+    assert list(risk.information_classes.all()) == [cad]
+    assert risk.impact == 5  # soglia di riservatezza: informazioni Segrete su minaccia C

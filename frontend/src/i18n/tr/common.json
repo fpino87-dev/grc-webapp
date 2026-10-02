@@ -3860,7 +3860,7 @@
       "identify_button": "AI ile öner (değerlendirilecek: {{count}})",
       "identify_button_hint": "AI bu türün henüz değerlendirilmemiş tehditlerini inceler ve her biri için taslak bir risk ya da uygulanamazlık önerir",
       "identify_title": "Risk önerileri · {{type}}",
-      "identify_hint": "AI yalnızca kaydın toplu verilerini alır (varlıklar, BIA süreçleri, hedefler, gizli bilgiler, kategoriye göre olaylar), asla kişileri almaz ve bir seferde en fazla 10 tehdidi inceler. Kaydedilecek önerileri seçin: riskler mevcut döngüde taslak olarak oluşturulur; Risk Sahibi ile tamamlanmalı ve doğrulanmalıdır.",
+      "identify_hint": "AI yalnızca kaydın toplu verilerini alır (varlıklar, BIA süreçleri, hedefler, gizli bilgiler, kategoriye göre olaylar), asla kişileri almaz ve bir seferde en fazla 6 tehdidi inceler. Kaydedilecek önerileri seçin: riskler mevcut döngüde taslak olarak oluşturulur; Risk Sahibi ile tamamlanmalı ve doğrulanmalıdır.",
       "identify_run": "Önerileri başlat",
       "identify_next": "Sonrakileri öner",
       "identify_applicable": "Uygulanabilir",

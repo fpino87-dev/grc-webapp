@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { AiSuggestion } from "../../components/ui/AiSuggestion";
 import {
-  IMPACT_DIMENSIONS, apiError, riskApi, type AiDraftProposal, type AiIdentifyItem, type AiIdentifyResult,
+  IMPACT_DIMENSIONS, apiError, riskApi, type AiDraftProposal, type AiIdentifyItem, type AiIdentifyResult, type AiLinkNames,
   type AiMeasure, type AssetType, type RegisterReview, type Risk,
 } from "../../api/endpoints/risk";
 import type { EvaluationState } from "./EvaluationForm";
@@ -47,28 +47,42 @@ const DRAFT_ORDER: DraftKey[] = [
   "vulnerability", "consequence", "probability_method", "probability", "probability_rationale",
   ...IMPACT_DIMENSIONS.map(d => `impact_${d}` as DraftKey), "impact_rationale",
   "treatment", "treatment_rationale", "expected_probability", "expected_impact",
+  "business_objectives", "information_classes", "critical_process",
 ];
+
+/** Nomi dei riferimenti proposti (obiettivi, informazioni, processo BIA). */
+const linkNames = (names: AiLinkNames | undefined, k: DraftKey, v: unknown): string | null => {
+  const map = k === "business_objectives" ? names?.objectives : k === "information_classes" ? names?.information
+    : k === "critical_process" ? names?.processes : undefined;
+  if (!map) return null;
+  const ids = Array.isArray(v) ? v : v ? [v] : [];
+  return ids.map(id => map[String(id)] ?? "?").join(", ") || "—";
+};
 
 export function AiDraftButton({ risk, form, onApply }: {
   risk: Risk; form: EvaluationState; onApply: (next: EvaluationState) => void;
 }) {
   const { t } = useTranslation();
   const [proposal, setProposal] = useState<AiDraftProposal | null>(null);
+  const [names, setNames] = useState<AiLinkNames | undefined>(undefined);
   const [interaction, setInteraction] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<DraftKey>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const ask = useMutation({
     mutationFn: () => riskApi.aiDraft(risk.id),
     onSuccess: res => {
-      setProposal(res.proposal); setInteraction(res.interaction_id); setError(null);
+      setProposal(res.proposal); setNames(res.names); setInteraction(res.interaction_id); setError(null);
       setSelected(new Set(DRAFT_ORDER.filter(k => res.proposal[k] !== undefined)));
     },
     onError: e => setError(apiError(e, t("risk.ai.error"))),
   });
 
   const label = (k: DraftKey) => k.startsWith("impact_") && k !== "impact_rationale"
-    ? `${t("risk.drawer.impact_dimensions")} · ${t(`risk.dimensions.${k.slice(7)}`)}` : t(`risk.drawer.${k}`);
+    ? `${t("risk.drawer.impact_dimensions")} · ${t(`risk.dimensions.${k.slice(7)}`)}`
+    : t(`risk.drawer.${k === "critical_process" ? "process" : k}`);
   const show = (k: DraftKey, v: unknown) => {
+    const linked = linkNames(names, k, v);
+    if (linked !== null) return linked;
     if (v === null || v === undefined || v === "") return "—";
     if (k === "probability_method") return t(v === "fer" ? "risk.drawer.method_fer" : "risk.drawer.method_frequency");
     if (k === "treatment") return t(`risk.treatment_${v}`);
@@ -192,6 +206,7 @@ export function AiIdentifyDialog({ registerId, assetType, titles, onClose }: {
             const p = i.proposal ?? {};
             const objectives = (i.business_objectives ?? []).map(id => result.names?.objectives[id]).filter(Boolean);
             const process = i.critical_process ? result.names?.processes[i.critical_process] : null;
+            const information = (i.information_classes ?? []).map(id => result.names?.information[id]).filter(Boolean);
             return (
               <li key={i.threat_id} className={`border rounded p-2 text-sm ${selected.has(i.threat_id) ? "" : "opacity-60"}`}>
                 <div className="flex items-start gap-2">
@@ -214,12 +229,18 @@ export function AiIdentifyDialog({ registerId, assetType, titles, onClose }: {
                         {p.consequence && <p><span className="text-gray-400">{t("risk.drawer.consequence")}:</span> {p.consequence}</p>}
                         <p>
                           {p.probability && `${t("risk.drawer.probability")} ${p.probability}`}
-                          {impacts(p) && ` · ${impacts(p)}`}
                           {p.treatment && ` · ${t(`risk.treatment_${p.treatment}`)}`}
                         </p>
-                        {(process || objectives.length > 0) && (
-                          <p className="text-gray-500">{[process, ...objectives].filter(Boolean).join(" · ")}</p>
+                        <p className={impacts(p) ? "" : "text-red-600"}>
+                          <span className="text-gray-400">{t("risk.drawer.impact_dimensions")}:</span> {impacts(p) || "—"}
+                        </p>
+                        {objectives.length > 0 && (
+                          <p><span className="text-gray-400">{t("risk.drawer.business_objectives")}:</span> {objectives.join(", ")}</p>
                         )}
+                        {information.length > 0 && (
+                          <p><span className="text-gray-400">{t("risk.drawer.information_classes")}:</span> {information.join(", ")}</p>
+                        )}
+                        {process && <p><span className="text-gray-400">{t("risk.drawer.process")}:</span> {process}</p>}
                         {(p.probability_rationale || p.impact_rationale) && (
                           <details>
                             <summary className="cursor-pointer text-gray-400">{t("risk.ai.identify_rationales")}</summary>

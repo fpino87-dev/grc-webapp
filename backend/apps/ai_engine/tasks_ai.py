@@ -492,12 +492,33 @@ _RISK_SYSTEM = (
     "Sei un risk manager esperto di sicurezza delle informazioni nel settore automotive (TISAX/VDA ISA, NIS2). "
     "Applichi la procedura aziendale di risk management: il rischio è la minaccia a un obiettivo aziendale; "
     "probabilità e impatto si scelgono SOLO con i criteri forniti; l'impatto è il caso peggiore fra le dimensioni. "
-    "Non inventi fatti non presenti nei dati: se un dato manca, lo dici nella motivazione. Rispondi SOLO in JSON valido."
+    "Non inventi fatti non presenti nei dati: se un dato manca fai una stima prudente e lo dici nella motivazione. "
+    "Rispondi SOLO in JSON valido."
 )
 
 
 def _lang_name(lang: str) -> str:
     return _LANG_NAMES.get((lang or "it")[:2], "italiano")
+
+
+# Regole comuni a bozza e identificazione. Senza la regola sugli impatti il
+# modello, su un rischio con pochi dati, lasciava tutte le dimensioni a null.
+_RISK_DRAFT_RULES = """- "probability_method": un solo valore, "frequenza" oppure "fer".
+- Obiettivi aziendali: da 1 a 3 numeri dell'elenco, quelli che la minaccia mette davvero a rischio.
+- Impatti: dai SEMPRE un livello 1–5 a ogni dimensione misurata dagli obiettivi scelti e a quelle colpite dalle
+  proprietà C/I/A della minaccia; null solo per le dimensioni estranee allo scenario. Se mancano dati specifici,
+  stima il caso peggiore plausibile per un sito manifatturiero automotive e scrivi nella motivazione che è una stima
+  da verificare (es. quale dato manca). Usa le soglie economiche del registro.
+- Classi di informazioni: i numeri delle classi colpite (per minacce a riservatezza o integrità quasi sempre almeno
+  una; [] solo se nessuna è coinvolta). Processo BIA: il numero del più colpito, o null.
+- Motiva probabilità e impatto citando il criterio del livello scelto, dimensione per dimensione, e i dati.
+- Trattamento fra: mitigare, evitare, trasferire, accettare. Se non accetti indica il rischio atteso dopo le misure."""
+
+_RISK_DRAFT_FIELDS = """"vulnerability": "...", "consequence": "conseguenza sugli obiettivi aziendali",
+ "probability_method": "fer", "probability": 3, "probability_rationale": "...",
+ "impacts": {"economic": 3, "legal": null, "customer": 4, "reputational": 2, "people": null, "operational": 4},
+ "impact_rationale": "...", "treatment": "mitigare", "treatment_rationale": "...",
+ "expected_probability": 2, "expected_impact": 3, "objectives": [1], "information": [2], "process": 1"""
 
 
 def _risk_plants(risk) -> list:
@@ -506,35 +527,39 @@ def _risk_plants(risk) -> list:
 
 def draft_risk_assessment(risk, user, lang: str = "it") -> dict:
     """Bozza di valutazione di un rischio: vulnerabilità, conseguenza,
-    probabilità, impatto per dimensione, trattamento e rischio atteso."""
-    from apps.risk.services import PROCEDURE_CRITERIA, economic_criteria, risk_ai_context, validate_ai_draft
+    probabilità, impatto per dimensione, trattamento, rischio atteso e
+    riferimenti (obiettivi aziendali, classi di informazioni, processo BIA)."""
+    from apps.risk.services import (
+        PROCEDURE_CRITERIA, ai_link_candidates, ai_link_names, ai_link_payload, economic_criteria,
+        risk_ai_context, validate_ai_draft, validate_ai_links,
+    )
 
     criteria = {**PROCEDURE_CRITERIA, "economic": economic_criteria(risk.plant)}
+    links = ai_link_candidates(risk.plant)
     prompt = f"""Prepara una bozza di valutazione del rischio seguente.
 
 DATI DEL RISCHIO (JSON):
 {json.dumps(risk_ai_context(risk, lang), ensure_ascii=False, indent=1)}
 
+ELENCHI DEL REGISTRO (scegli per numero "n"):
+{json.dumps(ai_link_payload(links), ensure_ascii=False, indent=1)}
+
 CRITERI DELLA PROCEDURA (livelli 1–5 per probabilità e per ogni dimensione d'impatto):
 {json.dumps(criteria, ensure_ascii=False, indent=1)}
 
 Regole:
-- Valuta solo le dimensioni pertinenti (le altre: null). Usa le soglie economiche del registro.
-- Motiva probabilità e impatto citando il criterio del livello scelto e i dati (RTO/MTPD, misure esistenti, informazioni).
-- Trattamento fra: mitigare, evitare, trasferire, accettare. Se proponi mitigare/evitare/trasferire indica il rischio atteso dopo le misure.
+{_RISK_DRAFT_RULES}
 - Scrivi i testi in {_lang_name(lang)}, frasi brevi.
 
-Rispondi con questo JSON:
-{{"vulnerability": "...", "consequence": "conseguenza sugli obiettivi aziendali",
- "probability_method": "frequenza|fer", "probability": 1-5, "probability_rationale": "...",
- "impacts": {{"economic": null, "legal": null, "customer": null, "reputational": null, "people": null, "operational": null}},
- "impact_rationale": "...", "treatment": "...", "treatment_rationale": "...",
- "expected_probability": 1-5, "expected_impact": 1-5}}"""
+Rispondi con questo JSON (i valori sono solo un esempio di formato):
+{{{_RISK_DRAFT_FIELDS}}}"""
     result = route(
         task_type="risk_draft", prompt=prompt, system=_RISK_SYSTEM, user=user, entity_id=risk.pk,
-        module_source="M06", sanitize=True, plant_ids=_risk_plants(risk), max_tokens=3000,
+        module_source="M06", sanitize=True, plant_ids=_risk_plants(risk), max_tokens=4000,
     )
-    return {**result, "proposal": validate_ai_draft(_parse_json_object(result["text"]))}
+    data = _parse_json_object(result["text"])
+    proposal = {**validate_ai_draft(data), **{k: v for k, v in validate_ai_links(data, links).items() if v}}
+    return {**result, "proposal": proposal, "names": ai_link_names(links)}
 
 
 def identify_risks(plant, asset_type: str, threats: list, links: dict, user, entity_id,
@@ -551,7 +576,7 @@ def identify_risks(plant, asset_type: str, threats: list, links: dict, user, ent
     prompt = f"""Per il registro dei rischi seguente, decidi per OGNI minaccia elencata se si applica alla
 tipologia di asset "{asset_type}" e, se si applica, prepara la bozza della valutazione.
 
-CONTESTO DEL REGISTRO (JSON):
+CONTESTO DEL REGISTRO (JSON; processi, obiettivi e classi di informazioni si scelgono per numero "n"):
 {json.dumps(risk_identification_context(plant, asset_type, links, lang), ensure_ascii=False, indent=1)}
 
 MINACCE NON ANCORA VALUTATE:
@@ -563,19 +588,13 @@ CRITERI DELLA PROCEDURA (livelli 1–5 per probabilità e per ogni dimensione d'
 Regole:
 - "applicable": false SOLO se la minaccia non può realisticamente colpire questa tipologia nel registro
   (es. nessun asset o attività esposta); in "reason" il motivo verificabile dai dati. Nel dubbio è applicabile.
-- Se applicabile: vulnerabilità e conseguenza concrete per il registro, probabilità e impatti con i criteri
-  (dimensioni non pertinenti: null), motivazioni che citano il criterio e i dati; se un dato manca dillo.
-- "process": numero del processo BIA più colpito (o null); "objectives": numeri (max 3) degli obiettivi aziendali minacciati.
-- Trattamento fra: mitigare, evitare, trasferire, accettare; se non accetti indica il rischio atteso.
+- Se applicabile: vulnerabilità e conseguenza concrete per il registro e la valutazione completa.
+{_RISK_DRAFT_RULES}
 - Scrivi i testi in {_lang_name(lang)}, frasi brevi.
 
-Rispondi con questo JSON, una voce per minaccia:
+Rispondi con questo JSON, una voce per minaccia (i valori sono solo un esempio di formato):
 {{"items": [{{"threat": "codice", "applicable": true, "reason": "",
-  "vulnerability": "...", "consequence": "...", "probability_method": "frequenza|fer", "probability": 1-5,
-  "probability_rationale": "...",
-  "impacts": {{"economic": null, "legal": null, "customer": null, "reputational": null, "people": null, "operational": null}},
-  "impact_rationale": "...", "treatment": "...", "treatment_rationale": "...",
-  "expected_probability": 1-5, "expected_impact": 1-5, "process": null, "objectives": [1]}}]}}"""
+ {_RISK_DRAFT_FIELDS}}}]}}"""
     result = route(
         task_type="risk_identify", prompt=prompt, system=_RISK_SYSTEM, user=user, entity_id=entity_id,
         module_source="M06", sanitize=True, plant_ids=[plant.pk] if plant else [], max_tokens=8000,

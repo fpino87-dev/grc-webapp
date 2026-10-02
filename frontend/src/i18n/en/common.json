@@ -3860,7 +3860,7 @@
       "identify_button": "Suggest with AI ({{count}} to assess)",
       "identify_button_hint": "The AI reviews the threats of this type still to be assessed and proposes either a draft risk or non-applicability for each",
       "identify_title": "Risk proposals · {{type}}",
-      "identify_hint": "The AI only receives aggregated register data (assets, BIA processes, objectives, confidential information, incidents by category), never people, and reviews up to 10 threats at a time. Choose the proposals to record: risks are created as drafts in the current cycle, to be completed with Risk Owner and review.",
+      "identify_hint": "The AI only receives aggregated register data (assets, BIA processes, objectives, confidential information, incidents by category), never people, and reviews up to 6 threats at a time. Choose the proposals to record: risks are created as drafts in the current cycle, to be completed with Risk Owner and review.",
       "identify_run": "Start proposals",
       "identify_next": "Suggest the next ones",
       "identify_applicable": "Applicable",

@@ -191,7 +191,7 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         result, error = self._ai_call(draft_risk_assessment, risk, request.user, request.LANGUAGE_CODE)
         if error:
             return error
-        return Response({**self._ai_meta(result), "proposal": result["proposal"]})
+        return Response({**self._ai_meta(result), "proposal": result["proposal"], "names": result["names"]})
 
     @action(detail=True, methods=["post"], url_path="ai-measures")
     def ai_measures(self, request, pk=None):
@@ -222,17 +222,13 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         threats = pending[:services.AI_IDENTIFY_BATCH]
         if not threats:
             return Response({"items": [], "remaining": 0, "interaction_id": None})
-        links = services.ai_identification_links(plant)
+        links = services.ai_link_candidates(plant)
         result, error = self._ai_call(
             identify_risks, plant, asset_type, threats, links, request.user, cycle.pk, request.LANGUAGE_CODE,
         )
         if error:
             return error
-        names = {
-            "processes": {str(p.pk): p.name for p in links["processes"]},
-            "objectives": {str(o.pk): o.name for o in links["objectives"]},
-        }
-        return Response({**self._ai_meta(result), "items": result["items"], "names": names,
+        return Response({**self._ai_meta(result), "items": result["items"], "names": services.ai_link_names(links),
                          "remaining": len(pending) - len(threats)})
 
     @action(detail=False, methods=["post"], url_path="ai-identify-apply")

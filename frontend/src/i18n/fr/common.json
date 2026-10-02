@@ -3860,7 +3860,7 @@
       "identify_button": "Proposer avec l'IA ({{count}} à évaluer)",
       "identify_button_hint": "L'IA examine les menaces de cette typologie encore à évaluer et propose pour chacune un risque en brouillon ou la non-applicabilité",
       "identify_title": "Propositions de risques · {{type}}",
-      "identify_hint": "L'IA ne reçoit que des données agrégées du registre (actifs, processus BIA, objectifs, informations confidentielles, incidents par catégorie), jamais de personnes, et examine jusqu'à 10 menaces à la fois. Choisissez les propositions à enregistrer : les risques sont créés en brouillon dans le cycle en cours, à compléter avec le Risk Owner et à vérifier.",
+      "identify_hint": "L'IA ne reçoit que des données agrégées du registre (actifs, processus BIA, objectifs, informations confidentielles, incidents par catégorie), jamais de personnes, et examine jusqu'à 6 menaces à la fois. Choisissez les propositions à enregistrer : les risques sont créés en brouillon dans le cycle en cours, à compléter avec le Risk Owner et à vérifier.",
       "identify_run": "Lancer les propositions",
       "identify_next": "Proposer les suivantes",
       "identify_applicable": "Applicable",
