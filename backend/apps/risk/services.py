@@ -1732,7 +1732,7 @@ def build_register_snapshot(plant, cycle) -> dict:
         "kind": cycle.kind,
         "risks": items,
         "coverage": {k: v for k, v in register_coverage(plant).items() if k != "pairs"},
-        "objectives": [{k: v for k, v in o.items() if k != "risk_ids"} for o in register_objectives(plant)],
+        "objectives": [{k: v for k, v in o.items() if k not in ("risk_ids", "inherited_risk_ids")} for o in register_objectives(plant)],
         "information_coverage": [{k: v for k, v in i.items() if k != "risk_ids"} for i in information_coverage(plant)],
         "policy": resolve_policy(plant),
     }
@@ -1906,28 +1906,54 @@ def register_attention(plant=None, today=None) -> dict:
     }
     result = {key: {"count": len(ids), "risk_ids": ids} for key, ids in groups.items()}
     result["overdue_measures"]["measures"] = overdue.count()
+    # A parte, non sommati: i rischi di gruppo che riguardano il sito.
+    result["inherited"] = inherited_summary(plant) if plant is not None else None
     return result
+
+
+def inherited_group_risks(plant):
+    """Rischi di gruppo valutati che riguardano il sito (`affected_plants`).
+    Regola unica: si mostrano nel sito A PARTE e non si sommano ai suoi numeri,
+    perché li valuta e li tratta il gruppo (ogni rischio conta una volta sola)."""
+    if plant is None:
+        return RiskAssessment.objects.none()
+    return (
+        RiskAssessment.objects.exclude(cycle__kind="legacy")
+        .filter(plant__isnull=True, affected_plants=plant, applicable=True, status="completato")
+        .distinct()
+    )
+
+
+def inherited_summary(plant) -> dict:
+    """Rischi di gruppo che riguardano il sito: totale e High/Critical non accettati."""
+    qs = inherited_group_risks(plant)
+    untreated = untreated_high_risks(qs)
+    return {"count": qs.count(), "untreated_high": untreated.count(),
+            "risk_ids": [str(pk) for pk in qs.values_list("pk", flat=True)]}
 
 
 def register_objectives(plant=None) -> list:
     """Rischi per obiettivo aziendale (procedura §2): la vista che mostra che la
-    valutazione parte dagli obiettivi. Registro proprio + rischi di gruppo
-    ereditati (un sito risponde anche di quelli); in coda i rischi senza obiettivo."""
+    valutazione parte dagli obiettivi. I numeri sono del registro proprio; per un
+    sito i rischi di gruppo ereditati sono indicati a parte (`inherited_*`), non
+    sommati. In coda i rischi senza obiettivo."""
     from django.db.models import Q
 
     from .models import BusinessObjective
 
     risks = list(
-        register_queryset(plant, include_inherited=plant is not None)
-        .filter(applicable=True, status="completato")
+        register_queryset(plant).filter(applicable=True, status="completato")
         .prefetch_related("business_objectives")
     )
-    accepted = active_acceptance_risk_ids(RiskAssessment.objects.filter(pk__in=[r.pk for r in risks]))
+    inherited = list(inherited_group_risks(plant).prefetch_related("business_objectives"))
+    accepted = active_acceptance_risk_ids(RiskAssessment.objects.filter(pk__in=[r.pk for r in risks + inherited]))
     scope = Q(plant__isnull=True) | (Q(plant=plant) if plant is not None else Q(pk__in=[]))
     rows = []
 
-    def _row(objective, linked):
-        untreated = [r for r in linked if r.current_class in HIGH_CLASSES and r.pk not in accepted]
+    def _untreated(linked):
+        return [r for r in linked if r.current_class in HIGH_CLASSES and r.pk not in accepted]
+
+    def _row(objective, linked, linked_inherited):
         return {
             "objective": None if objective is None else {
                 "id": str(objective.pk), "code": objective.code, "name": objective.name,
@@ -1936,13 +1962,20 @@ def register_objectives(plant=None) -> list:
             "count": len(linked),
             "worst_class": worst_class(r.current_class for r in linked),
             "by_class": {c: sum(1 for r in linked if r.current_class == c) for c in RISK_CLASSES},
-            "untreated_high": len(untreated),
+            "untreated_high": len(_untreated(linked)),
             "risk_ids": [str(r.pk) for r in linked],
+            "inherited_count": len(linked_inherited),
+            "inherited_untreated_high": len(_untreated(linked_inherited)),
+            "inherited_risk_ids": [str(r.pk) for r in linked_inherited],
         }
 
+    def _of(objective, pool):
+        return [r for r in pool if objective in r.business_objectives.all()]
+
     for objective in BusinessObjective.objects.filter(scope, active=True):
-        rows.append(_row(objective, [r for r in risks if objective in r.business_objectives.all()]))
-    rows.append(_row(None, [r for r in risks if not r.business_objectives.all()]))
+        rows.append(_row(objective, _of(objective, risks), _of(objective, inherited)))
+    rows.append(_row(None, [r for r in risks if not r.business_objectives.all()],
+                     [r for r in inherited if not r.business_objectives.all()]))
     return rows
 
 
@@ -2102,6 +2135,7 @@ def generate_risk_excel(plant=None) -> bytes:
     ws = sheet(wb, "Obiettivi aziendali", [
         "Obiettivo", "Rischi valutati", "Classe peggiore", "High/Critical non accettati",
         "Critical", "High", "Medium", "Low", "Very Low",
+        "Rischi di gruppo ereditati (non sommati)", "di cui High/Critical non accettati",
     ])
     for row, item in enumerate(register_objectives(plant), 2):
         bc = item["by_class"]
@@ -2109,6 +2143,7 @@ def generate_risk_excel(plant=None) -> bytes:
             item["objective"]["name"] if item["objective"] else "(nessun obiettivo indicato)",
             item["count"], CLASS_LABELS.get(item["worst_class"], ""), item["untreated_high"],
             bc["critical"], bc["high"], bc["medium"], bc["low"], bc["very_low"],
+            item["inherited_count"], item["inherited_untreated_high"],
         ], 1):
             ws.cell(row=row, column=col, value=value)
     ws = sheet(wb, "Copertura informazioni", ["Classe di informazioni", "Riservatezza", "Stato", "Classe peggiore"])
@@ -2517,4 +2552,7 @@ def register_ai_digest(plant=None) -> dict:
             assessment__in=risks, completed_at__isnull=True, due_date__lt=today).count(),
         "copertura": {k: v for k, v in register_coverage(plant).items() if k != "pairs"},
         "informazioni_scoperte": sum(1 for i in information_coverage(plant) if i["state"] == "missing"),
+        "rischi_di_gruppo_che_riguardano_il_sito": (
+            {k: v for k, v in inherited_summary(plant).items() if k != "risk_ids"} if plant is not None else None
+        ),
     }

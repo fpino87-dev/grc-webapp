@@ -3562,3 +3562,15 @@ msgstr "Interaction introuvable."
 
 msgid "Azione non valida."
 msgstr "Action non valide."
+
+msgid "di cui dal gruppo (non sommati)"
+msgstr "dont du groupe (non additionnés)"
+
+msgid "Gruppo (servizi condivisi)"
+msgstr "Groupe (services partagés)"
+
+msgid "Rischi di gruppo che riguardano il sito (valutati dal gruppo, non sommati)"
+msgstr "Risques de groupe concernant le site (évalués par le groupe, non additionnés)"
+
+msgid "Accettato"
+msgstr "Accepté"

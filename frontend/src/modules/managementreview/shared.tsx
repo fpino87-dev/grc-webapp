@@ -80,11 +80,19 @@ export type SnapObjective = {
   /** Rischi trattati con gli obiettivi aziendali da cui nascono (snapshot da ottobre 2026). */
   rischi?: { name: string; current_class: string; obiettivi_aziendali: string[] }[];
 };
-export type SnapObjectiveRisks = { name: string | null; count: number; worst_class: string; untreated_high: number };
+export type SnapObjectiveRisks = { name: string | null; count: number; worst_class: string; untreated_high: number; ereditati?: number };
 export type SnapSite = {
-  plant_id: string; code: string; name: string; pct_compliant: number | null;
-  rischi_critici: number; incidenti_aperti: number; task_scaduti: number;
+  plant_id: string | null; code: string; name: string | null; pct_compliant: number | null;
+  rischi_critici: number; incidenti_aperti: number | null; task_scaduti: number | null;
   rischi_oltre_soglia?: number; // soglia di accettabilità (regola 2) o High/Critical non accettati (regola 3)
+  /** Da ottobre 2026: High/Critical non accettati di gruppo che riguardano il sito (non sommati). */
+  rischi_ereditati_gruppo?: number | null;
+  /** Riga del registro di gruppo: la colonna dei rischi somma il totale. */
+  is_group?: boolean;
+};
+export type SnapInherited = {
+  count: number; untreated_high: number;
+  elenco: { name: string; current_class: string; treatment: string | null; accettato: boolean }[];
 };
 
 // ── Sub-components ──────────────────────────────────────────────────────────

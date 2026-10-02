@@ -702,7 +702,8 @@ def test_register_attention(org_user, plant, threats, cycle):
 def test_register_attention_endpoint(org_user, plant):
     resp = _client(org_user).get(f"/api/v1/risk/assessments/attention/?plant={plant.pk}")
     assert resp.status_code == 200
-    assert set(resp.data) == {"critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"}
+    assert set(resp.data) == {"critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures",
+                              "inherited"}
 
 
 @pytest.mark.django_db
@@ -853,3 +854,22 @@ def test_site_coverage_ignores_group_risks_not_inherited(org_user, plant, other_
                                           "affected_plants": [other_plant]})
     pair = next(p for p in services.register_coverage(plant)["pairs"] if p["threat_code"] == "IN_MAL")
     assert pair["state"] == "missing"
+
+
+
+@pytest.mark.django_db
+def test_inherited_group_risks_shown_apart_not_summed(org_user, plant, other_plant, threats):
+    """Regola unica: i rischi di gruppo che riguardano il sito si mostrano a parte
+    e non entrano nei numeri del sito; nell'organizzazione contano una volta."""
+    services.start_cycle(org_user, None, "primo")
+    group = services.complete_risk(org_user, services.create_risk(org_user, None, {
+        **_eval(org_user), "threat": threats["malware"], "affected_plants": [plant, other_plant]}))
+    services.start_cycle(org_user, plant, "primo")
+    _completed_risk(org_user, plant, threats["fire"], asset_type="SEDE")
+    assert services.inherited_summary(plant) == {"count": 1, "untreated_high": 1, "risk_ids": [str(group.pk)]}
+    row = next(r for r in services.register_objectives(plant) if r["objective"])
+    assert row["count"] == 1 and row["inherited_count"] == 1 and row["inherited_risk_ids"] == [str(group.pk)]
+    attention = services.register_attention(plant)
+    assert str(group.pk) not in attention["critical_untreated"]["risk_ids"]
+    assert attention["inherited"]["untreated_high"] == 1
+    assert services.register_attention(None)["inherited"] is None

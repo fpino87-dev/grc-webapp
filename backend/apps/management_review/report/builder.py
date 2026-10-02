@@ -386,6 +386,17 @@ def _risk_class_blocks(r) -> list:
             ("critical", "Critical", "red"), ("high", "High", "red"), ("medium", "Medium", "orange"),
             ("low", "Low", "green"), ("very_low", "Very Low", "green"))]),
     ]
+    inherited = r.get("ereditati_gruppo")
+    if inherited and inherited.get("count"):
+        blocks.append(_table(
+            _("Rischi di gruppo che riguardano il sito (valutati dal gruppo, non sommati)"),
+            [_("Rischio"), _("Classe"), _("Trattamento"), _("Accettato")],
+            [[x.get("name"), RISK_CLASS.get(x.get("current_class"), "—"),
+              TREATMENT.get(x.get("treatment"), _dash(x.get("treatment"))),
+              _("Sì") if x.get("accettato") else _("No")]
+             for x in inherited.get("elenco", [])],
+            inherited.get("count"),
+        ))
     if r.get("valutazioni"):
         blocks.append(_table(
             _("Valutazioni dei rischi"), [_("Registro"), _("Tipo"), _("Stato"), _("Approvata il")],
@@ -404,11 +415,13 @@ def _risk_class_blocks(r) -> list:
                 for x in r.get("top_critici", [])],
                r.get("oltre_soglia")),
         _table(_("Rischi per obiettivo aziendale"),
-               [_("Obiettivo aziendale"), _("Rischi valutati"), _("Classe peggiore"), _("Non accettati High/Critical")],
+               [_("Obiettivo aziendale"), _("Rischi valutati"), _("Classe peggiore"), _("Non accettati High/Critical")]
+               + ([_("di cui dal gruppo (non sommati)")] if r.get("ereditati_gruppo") is not None else []),
                [[x.get("name") or _("Nessun obiettivo indicato"), x.get("count", 0),
                  RISK_CLASS.get(x.get("worst_class"), "—"),
                  {"text": str(x.get("untreated_high", 0)), "tone": "red" if x.get("untreated_high") else None,
                   "bold": bool(x.get("untreated_high"))}]
+                + ([str(x.get("ereditati", 0))] if r.get("ereditati_gruppo") is not None else [])
                 for x in r.get("per_obiettivo", []) if x.get("name") or x.get("count")]),
         _table(_("Rischi accettati"),
                [_("Rischio"), _("Classe"), _("Firme"), _("Organo"), _("Scadenza accettazione")],
@@ -820,14 +833,26 @@ def build_report(review) -> dict:
         # accettabilità del sito invece della fascia fissa.
         by_appetite = "rischi_oltre_soglia" in sites[0]
         risk_key = "rischi_oltre_soglia" if by_appetite else "rischi_critici"
+        # Da ottobre 2026: riga del registro di gruppo (la colonna somma il
+        # totale) e colonna dei rischi di gruppo che riguardano il sito, non sommata.
+        with_inherited = "rischi_ereditati_gruppo" in sites[0]
+        headers = [_("Sito"), _("% compliant"),
+                   _("Rischi oltre soglia") if by_appetite else _("Rischi critici")]
+        if with_inherited:
+            headers.append(_("di cui dal gruppo (non sommati)"))
+        headers += [_("Incidenti aperti"), _("Task scaduti")]
+
+        def _site_row(s):
+            label = _("Gruppo (servizi condivisi)") if s.get("is_group") else f"{s.get('code')} — {s.get('name')}"
+            row = [label, f"{s['pct_compliant']}%" if s.get("pct_compliant") is not None else "—",
+                   str(s.get(risk_key, 0))]
+            if with_inherited:
+                row.append(_dash(s.get("rischi_ereditati_gruppo")))
+            row += [_dash(s.get("incidenti_aperti")), _dash(s.get("task_scaduti"))]
+            return row
+
         sections.append({"heading": _("Quadro per sito"), "blocks": [_table(
-            None, [_("Sito"), _("% compliant"),
-                   _("Rischi oltre soglia") if by_appetite else _("Rischi critici"),
-                   _("Incidenti aperti"), _("Task scaduti")],
-            [[f"{s.get('code')} — {s.get('name')}",
-              f"{s['pct_compliant']}%" if s.get("pct_compliant") is not None else "—",
-              str(s.get(risk_key, 0)), str(s.get("incidenti_aperti", 0)), str(s.get("task_scaduti", 0))]
-             for s in sites])]})
+            None, headers, [_site_row(s) for s in sites])]})
 
     actions = list(review.actions.all())
     agenda = list(review.agenda_items.all())

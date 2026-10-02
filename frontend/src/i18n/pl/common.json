@@ -3546,7 +3546,8 @@
       "acceptances_expiring": "Wygasające akceptacje",
       "acceptances_expiring_hint": "Aktywne akceptacje wygasające w ciągu 30 dni: odnowić lub potraktować ryzyko",
       "overdue_measures": "Ryzyka z opóźnionymi działaniami",
-      "overdue_measures_hint": "Ryzyka z co najmniej jednym działaniem planu po terminie i niezakończonym"
+      "overdue_measures_hint": "Ryzyka z co najmniej jednym działaniem planu po terminie i niezakończonym",
+      "inherited": "Ryzyka grupy dotyczące zakładu: {{count}} (niezaakceptowane High/Critical: {{high}}) — oceniane przez grupę, niesumowane"
     },
     "plan": {
       "filters": {
@@ -3800,7 +3801,9 @@
       "col_worst": "Najwyższa klasa",
       "col_untreated": "High/Critical niezaakceptowane",
       "col_distribution": "Według klasy",
-      "none": "Ryzyka bez wskazanego celu"
+      "none": "Ryzyka bez wskazanego celu",
+      "col_inherited": "Z grupy",
+      "col_inherited_hint": "Ryzyka grupy dziedziczone przez zakład dla tego celu: oceniane i traktowane przez grupę, niedodawane do liczb zakładu"
     },
     "information_coverage": {
       "title": "Pokrycie informacji",
@@ -4941,7 +4944,9 @@
       "asset_type_chart_title": "Ryzyka według typu zasobu",
       "nis2_in_scope": "W zakresie NIS2",
       "nis2_significant": "Możliwy poważny incydent",
-      "heatmap_note": "Klasę odczytuje się z macierzy procedury, a nie z iloczynu P × I."
+      "heatmap_note": "Klasę odczytuje się z macierzy procedury, a nie z iloczynu P × I.",
+      "kpi_inherited": "Ryzyka grupy w zakładzie",
+      "kpi_inherited_sub": "Oceniane przez grupę, niesumowane · niezaakceptowane High/Critical: {{high}}"
     },
     "access_matrix": {
       "subtitle": "Kto ma dostęp i kto za co odpowiada — weryfikuj dostępy w dowolnym momencie.",
@@ -6224,7 +6229,11 @@
       "col_business_objective": "Cel biznesowy",
       "col_assessed_risks": "Ocenione ryzyka",
       "col_worst_class": "Najwyższa klasa",
-      "col_untreated_high": "High/Critical niezaakceptowane"
+      "col_untreated_high": "High/Critical niezaakceptowane",
+      "col_from_group": "w tym z grupy (niesumowane)",
+      "group_row": "Grupa (usługi wspólne)",
+      "inherited_title": "Ryzyka grupy dotyczące zakładu (oceniane przez grupę, niesumowane)",
+      "col_accepted": "Zaakceptowane"
     },
     "participants": {
       "heading": "Zaproszeni i obecność",

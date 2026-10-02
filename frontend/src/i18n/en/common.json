@@ -3546,7 +3546,8 @@
       "acceptances_expiring": "Expiring acceptances",
       "acceptances_expiring_hint": "Active acceptances expiring within 30 days: renew or treat the risk",
       "overdue_measures": "Risks with overdue measures",
-      "overdue_measures_hint": "Risks with at least one plan measure past its deadline and not completed"
+      "overdue_measures_hint": "Risks with at least one plan measure past its deadline and not completed",
+      "inherited": "Group risks concerning the site: {{count}} (High/Critical not accepted: {{high}}) — assessed by the group, not summed"
     },
     "plan": {
       "filters": {
@@ -3800,7 +3801,9 @@
       "col_worst": "Worst class",
       "col_untreated": "High/Critical not accepted",
       "col_distribution": "By class",
-      "none": "Risks with no objective indicated"
+      "none": "Risks with no objective indicated",
+      "col_inherited": "From the group",
+      "col_inherited_hint": "Group risks inherited by the site for this objective: assessed and treated by the group, not added to the site figures"
     },
     "information_coverage": {
       "title": "Information coverage",
@@ -4941,7 +4944,9 @@
       "asset_type_chart_title": "Risks by asset type",
       "nis2_in_scope": "In NIS2 scope",
       "nis2_significant": "Possible significant incident",
-      "heatmap_note": "The class is read from the procedure matrix, not from the P × I product."
+      "heatmap_note": "The class is read from the procedure matrix, not from the P × I product.",
+      "kpi_inherited": "Group risks on the site",
+      "kpi_inherited_sub": "Assessed by the group, not summed · High/Critical not accepted: {{high}}"
     },
     "access_matrix": {
       "subtitle": "Who has access and who is responsible for what — review accesses at any time.",
@@ -6224,7 +6229,11 @@
       "col_business_objective": "Business objective",
       "col_assessed_risks": "Assessed risks",
       "col_worst_class": "Worst class",
-      "col_untreated_high": "High/Critical not accepted"
+      "col_untreated_high": "High/Critical not accepted",
+      "col_from_group": "of which from the group (not summed)",
+      "group_row": "Group (shared services)",
+      "inherited_title": "Group risks concerning the site (assessed by the group, not summed)",
+      "col_accepted": "Accepted"
     },
     "participants": {
       "heading": "Invitees and attendance",

@@ -152,6 +152,9 @@ export interface RiskBiaBcpData {
     risks_yellow: number;
     risks_accepted: number;
     risks_untreated_high: number; // High/Critical senza accettazione attiva
+    /** Sito: rischi di gruppo che lo riguardano, a parte e non sommati (null per l'organizzazione). */
+    risks_inherited?: number | null;
+    risks_inherited_untreated_high?: number | null;
     bia_critical_no_bcp: number;
     bia_critical_test_expired: number;
     bcp_test_overdue: number;

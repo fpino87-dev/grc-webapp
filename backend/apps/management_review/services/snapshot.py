@@ -422,6 +422,16 @@ def _sites_block(today) -> list[dict]:
         row["plant_id"]: row["n"]
         for row in untreated_high_risks(risks_qs).values("plant_id").annotate(n=Count("id"))
     }
+    # Registro di gruppo: una riga propria (la colonna somma il totale) e, per
+    # ogni sito, quanti dei suoi High/Critical non accettati vengono dal gruppo
+    # (informativo, non sommato).
+    group_qs = evaluated_risks().filter(plant__isnull=True)
+    group_untreated = untreated_high_risks(group_qs)
+    inherited_by_plant = {
+        row["affected_plants"]: row["n"]
+        for row in group_untreated.values("affected_plants").annotate(n=Count("id", distinct=True))
+        if row["affected_plants"]
+    }
     high = _by_plant(risks_qs.filter(current_class="critical"), n=Count("id"))
     incidents = _by_plant(Incident.objects.filter(status__in=["aperto", "in_analisi"]), n=Count("id"))
     tasks = _by_plant(
@@ -437,8 +447,18 @@ def _sites_block(today) -> list[dict]:
             "pct_compliant": summary["pct_compliant"] if summary["total"] else None,
             "rischi_oltre_soglia": over_by_plant.get(plant.pk, 0),
             "rischi_critici": high.get(plant.pk, {}).get("n", 0),
+            "rischi_ereditati_gruppo": inherited_by_plant.get(plant.pk, 0),
             "incidenti_aperti": incidents.get(plant.pk, {}).get("n", 0),
             "task_scaduti": tasks.get(plant.pk, {}).get("n", 0),
+        })
+    if group_qs.exists():
+        rows.append({
+            "plant_id": None, "code": "GRUPPO", "name": None, "is_group": True,
+            "pct_compliant": None,
+            "rischi_oltre_soglia": group_untreated.count(),
+            "rischi_critici": group_qs.filter(current_class="critical").count(),
+            "rischi_ereditati_gruppo": None,
+            "incidenti_aperti": None, "task_scaduti": None,
         })
     return rows
 
@@ -716,6 +736,11 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     objective_risks = list(risks_qs.prefetch_related("business_objectives"))
     accepted_ids = active_acceptance_risk_ids(risks_qs)
     objective_scope = Q(plant__isnull=True) | (Q(plant_id=plant_id) if plant_id else Q(plant__isnull=False))
+    # Rischi di gruppo che riguardano il sito: a parte, mai sommati ai numeri del sito.
+    from apps.risk.services import inherited_group_risks
+
+    inherited = list(inherited_group_risks(plant_id).prefetch_related("business_objectives").select_related("threat"))
+    inherited_accepted = active_acceptance_risk_ids(inherited_group_risks(plant_id))
     per_objective = []
     for bo in BusinessObjective.objects.filter(objective_scope, active=True):
         linked = [r for r in objective_risks if bo in r.business_objectives.all()]
@@ -723,12 +748,25 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
             "name": bo.name, "count": len(linked),
             "worst_class": worst_class(r.current_class for r in linked),
             "untreated_high": sum(1 for r in linked if r.current_class in HIGH_CLASSES and r.pk not in accepted_ids),
+            "ereditati": sum(1 for r in inherited if bo in r.business_objectives.all()),
         })
     per_objective.append({
         "name": None, "count": sum(1 for r in objective_risks if not r.business_objectives.all()),
         "worst_class": "", "untreated_high": 0,
     })
     risk_summary["per_obiettivo"] = per_objective
+    if plant_id:
+        untreated_inherited = [r for r in inherited
+                               if r.current_class in HIGH_CLASSES and r.pk not in inherited_accepted]
+        risk_summary["ereditati_gruppo"] = {
+            "count": len(inherited),
+            "untreated_high": len(untreated_inherited),
+            "elenco": [
+                {"name": risk_label(r), "current_class": r.current_class, "treatment": r.treatment or None,
+                 "accettato": r.pk in inherited_accepted}
+                for r in sorted(inherited, key=lambda x: class_rank(x.current_class), reverse=True)[:SNAPSHOT_LIST_LIMIT]
+            ],
+        }
     risk_summary["elenco_accettati"] = [
         {
             "id": str(a.risk_id),

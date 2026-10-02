@@ -5,7 +5,7 @@ import {
   DetailTable, KpiBox, KpiGrid, SnapSection, fmtDate, isOverdue, type SnapRiskCycle,
   type Snap, type SnapAudit, type SnapDoc, type SnapFinding, type SnapFramework, type SnapIncident,
   type SnapKpi, type SnapObjective, type SnapObjectiveRisks, type SnapPdca, type SnapPdcaOverdue, type SnapPendingDoc, type SnapPrevAction, type SnapRisk,
-  type SnapSite, type SnapTask,
+  type SnapInherited, type SnapSite, type SnapTask,
 } from "./shared";
 
 // Ogni blocco mostra i dati congelati di un'area; se lo snapshot non contiene
@@ -426,15 +426,32 @@ function ClassRisksBlock({ snap }: { snap: Snap }) {
           headers={[
             t("management_review.snap.col_business_objective"), t("management_review.snap.col_assessed_risks"),
             t("management_review.snap.col_worst_class"), t("management_review.snap.col_untreated_high"),
+            ...(r.ereditati_gruppo ? [t("management_review.snap.col_from_group")] : []),
           ]}
           rows={((r.per_obiettivo ?? []) as SnapObjectiveRisks[]).filter(x => x.name || x.count).map(x => [
             x.name ?? <span className="text-amber-700">{t("risk.objectives.none")}</span>,
             x.count,
             x.worst_class ? cls(x.worst_class) : "—",
             <span className={x.untreated_high ? "text-red-600 font-semibold" : ""}>{x.untreated_high}</span>,
+            ...(r.ereditati_gruppo ? [<span className="text-gray-500">{x.ereditati ?? 0}</span>] : []),
           ])}
         />
       )}
+      {(r.ereditati_gruppo as SnapInherited | undefined)?.count ? (
+        <DetailTable
+          title={t("management_review.snap.inherited_title")}
+          headers={[
+            t("management_review.snap.col_risk"), t("management_review.snap.col_class"),
+            t("management_review.snap.col_treatment"), t("management_review.snap.col_accepted"),
+          ]}
+          rows={(r.ereditati_gruppo as SnapInherited).elenco.map(x => [
+            x.name, cls(x.current_class),
+            x.treatment ? t(`risk.treatment_${x.treatment}`, x.treatment) : "—",
+            x.accettato ? t("management_review.snap.yes") : <span className="text-red-600">{t("management_review.snap.no")}</span>,
+          ])}
+          total={(r.ereditati_gruppo as SnapInherited).count}
+        />
+      ) : null}
       <DetailTable
         title={t("management_review.snap.accepted_risks")}
         headers={[
@@ -593,22 +610,29 @@ export function SitesBlock({ snap }: { snap: Snap }) {
   if (sites.length === 0) return null;
   const byAppetite = sites[0].rischi_oltre_soglia !== undefined;
   const byClass = (snap.compliance_rule ?? 0) >= 3;
+  // Snapshot da ottobre 2026: riga del gruppo (la colonna somma il totale) e
+  // colonna informativa dei rischi di gruppo che riguardano ogni sito.
+  const withInherited = sites.some(s => s.rischi_ereditati_gruppo !== undefined);
   return (
     <DetailTable
       headers={[
         t("management_review.snap.col_site"), t("management_review.snap.col_compliance"),
         t(byClass ? "management_review.snap.high_untreated"
           : byAppetite ? "management_review.snap.over_appetite" : "management_review.snap.critical"),
+        ...(withInherited ? [t("management_review.snap.col_from_group")] : []),
         t("management_review.snap.open_incidents"), t("management_review.snap.tasks_overdue"),
       ]}
       rows={sites.map(s => {
         const risks = byAppetite ? (s.rischi_oltre_soglia ?? 0) : s.rischi_critici;
         return [
-        <span><span className="font-medium">{s.code}</span> <span className="text-gray-500">{s.name}</span></span>,
+        s.is_group
+          ? <span className="font-medium">{t("management_review.snap.group_row")}</span>
+          : <span><span className="font-medium">{s.code}</span> <span className="text-gray-500">{s.name}</span></span>,
         s.pct_compliant != null ? `${s.pct_compliant}%` : "—",
         <span className={risks ? "text-red-600 font-medium" : ""}>{risks}</span>,
-        s.incidenti_aperti,
-        <span className={s.task_scaduti ? "text-red-600" : ""}>{s.task_scaduti}</span>,
+        ...(withInherited ? [<span className="text-gray-500">{s.rischi_ereditati_gruppo ?? "—"}</span>] : []),
+        s.incidenti_aperti ?? "—",
+        <span className={s.task_scaduti ? "text-red-600" : ""}>{s.task_scaduti ?? "—"}</span>,
         ];
       })}
     />

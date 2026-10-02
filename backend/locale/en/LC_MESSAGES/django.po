@@ -3495,3 +3495,15 @@ msgstr "Interaction not found."
 
 msgid "Azione non valida."
 msgstr "Invalid action."
+
+msgid "di cui dal gruppo (non sommati)"
+msgstr "of which from the group (not summed)"
+
+msgid "Gruppo (servizi condivisi)"
+msgstr "Group (shared services)"
+
+msgid "Rischi di gruppo che riguardano il sito (valutati dal gruppo, non sommati)"
+msgstr "Group risks concerning the site (assessed by the group, not summed)"
+
+msgid "Accettato"
+msgstr "Accepted"

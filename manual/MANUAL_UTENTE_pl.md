@@ -477,7 +477,7 @@ Kto może zaakceptować, zależy od klasy i od **polityki zarządzania ryzykiem*
 
 ### Dziedziczone ryzyka grupy
 
-W rejestrze zakładu ryzyka grupy, które go dotyczą, są oznaczone ⇩ i dostępne tylko do odczytu. Jeśli wpływ na zakład jest większy, zgłoś to z karty (**Wpływ lokalny**): grupa przyjmuje zgłoszenie i aktualizuje ocenę. W zakładce Pokrycie zakładu te zagrożenia są oznaczone jako **Pokryte przez grupę**: nie należy ich powielać ani oznaczać jako nie dotyczy. Jeśli warunki lub środki w zakładzie są inne, dodaj własne ryzyko przyciskiem **Ryzyko zakładu**.
+W rejestrze zakładu ryzyka grupy, które go dotyczą, są oznaczone ⇩ i dostępne tylko do odczytu. Jeśli wpływ na zakład jest większy, zgłoś to z karty (**Wpływ lokalny**): grupa przyjmuje zgłoszenie i aktualizuje ocenę. W zakładce Pokrycie zakładu te zagrożenia są oznaczone jako **Pokryte przez grupę**: nie należy ich powielać ani oznaczać jako nie dotyczy. Jeśli warunki lub środki w zakładzie są inne, dodaj własne ryzyko przyciskiem **Ryzyko zakładu**. W liczbach zakładu (liczniki, zakładka Według celu, Reporting, przegląd zarządzania) ryzyka grupy nie są sumowane: pojawiają się osobno jako „Ryzyka grupy dotyczące zakładu”. W przeglądzie organizacji zestawienie zakładów ma wiersz **Grupa (usługi wspólne)**, dzięki czemu kolumna sumuje się do całości, a dla każdego zakładu informacyjną kolumnę „w tym z grupy”.
 
 ### Wsparcie AI
 

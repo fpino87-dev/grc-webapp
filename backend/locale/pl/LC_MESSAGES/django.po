@@ -3517,3 +3517,15 @@ msgstr "Nie znaleziono interakcji."
 
 msgid "Azione non valida."
 msgstr "Nieprawidłowa akcja."
+
+msgid "di cui dal gruppo (non sommati)"
+msgstr "w tym z grupy (niesumowane)"
+
+msgid "Gruppo (servizi condivisi)"
+msgstr "Grupa (usługi wspólne)"
+
+msgid "Rischi di gruppo che riguardano il sito (valutati dal gruppo, non sommati)"
+msgstr "Ryzyka grupy dotyczące zakładu (oceniane przez grupę, niesumowane)"
+
+msgid "Accettato"
+msgstr "Zaakceptowane"

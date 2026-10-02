@@ -251,6 +251,11 @@ function RisksView({ data }: { data: RiskBiaBcpData }) {
           variant={kpis.risks_untreated_high > 0 ? "danger" : "ok"}
           sub={t("reporting.risk_bia_bcp.kpi_untreated_high_sub")}
         />
+        {kpis.risks_inherited != null && (
+          <KpiTile label={t("reporting.risk_bia_bcp.kpi_inherited")} value={kpis.risks_inherited}
+                   variant={(kpis.risks_inherited_untreated_high ?? 0) > 0 ? "warning" : "ok"}
+                   sub={t("reporting.risk_bia_bcp.kpi_inherited_sub", { high: kpis.risks_inherited_untreated_high ?? 0 })} />
+        )}
         <KpiTile label={t("reporting.risk_bia_bcp.kpi_total")} value={kpis.risks_total} />
         <KpiTile label={t("reporting.risk_bia_bcp.kpi_red")} value={kpis.risks_red} variant={kpis.risks_red > 0 ? "warning" : "ok"}
                  sub={t("reporting.risk_bia_bcp.kpi_red_sub", { critical: kpis.risks_by_class.critical, high: kpis.risks_by_class.high })} />

@@ -3496,3 +3496,15 @@ msgstr "Etkileşim bulunamadı."
 
 msgid "Azione non valida."
 msgstr "Geçersiz işlem."
+
+msgid "di cui dal gruppo (non sommati)"
+msgstr "bunlardan gruptan gelen (toplanmaz)"
+
+msgid "Gruppo (servizi condivisi)"
+msgstr "Grup (paylaşılan hizmetler)"
+
+msgid "Rischi di gruppo che riguardano il sito (valutati dal gruppo, non sommati)"
+msgstr "Tesisi ilgilendiren grup riskleri (grup tarafından değerlendirilir, toplanmaz)"
+
+msgid "Accettato"
+msgstr "Kabul edildi"

@@ -31,13 +31,15 @@ const ATTENTION_STYLE: Record<AttentionKey, string> = {
 };
 
 /** Contatori di cosa richiede di agire: clic = filtra il registro su quei rischi. */
-function AttentionBar({ data, active, onSelect }: {
+function AttentionBar({ data, active, onSelect, inheritedActive, onInherited }: {
   data?: Attention; active: AttentionKey | null; onSelect: (key: AttentionKey | null) => void;
+  inheritedActive: boolean; onInherited: () => void;
 }) {
   const { t } = useTranslation();
   if (!data) return null;
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3" role="group" aria-label={t("risk.attention.label")}>
+    <div className="mb-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2" role="group" aria-label={t("risk.attention.label")}>
       {ATTENTION_KEYS.map(key => {
         const { count } = data[key];
         const selected = active === key;
@@ -50,6 +52,13 @@ function AttentionBar({ data, active, onSelect }: {
           </button>
         );
       })}
+    </div>
+    {data.inherited && data.inherited.count > 0 && (
+      <button type="button" onClick={onInherited} aria-pressed={inheritedActive}
+        className={`mt-1.5 text-xs text-blue-700 hover:underline ${inheritedActive ? "font-semibold" : ""}`}>
+        ⇩ {t("risk.attention.inherited", { count: data.inherited.count, high: data.inherited.untreated_high })}
+      </button>
+    )}
     </div>
   );
 }
@@ -64,6 +73,7 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
   const [inherited, setInherited] = useState(true);
   const [q, setQ] = useState("");
   const [attentionKey, setAttentionKey] = useState<AttentionKey | null>(null);
+  const [inheritedOnly, setInheritedOnly] = useState(false);
 
   const { data: risks = [], isLoading } = useQuery({
     queryKey: ["risk-register", registerId, inherited],
@@ -78,7 +88,8 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    const focus = attentionKey && attention ? new Set(attention[attentionKey].risk_ids) : null;
+    const focus = inheritedOnly && attention?.inherited ? new Set(attention.inherited.risk_ids)
+      : attentionKey && attention ? new Set(attention[attentionKey].risk_ids) : null;
     return risks
       .filter(r => !focus || focus.has(r.id))
       .filter(r => showNa || r.applicable)
@@ -89,11 +100,14 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
       .filter(r => !needle || [r.display_name, r.threat_code, r.threat_title, r.asset_name, r.owner_name]
         .some(v => (v ?? "").toLowerCase().includes(needle)))
       .sort((a, b) => classRank(b.current_class) - classRank(a.current_class) || a.display_name.localeCompare(b.display_name));
-  }, [risks, assetType, cls, treatment, onlyOpen, showNa, q, attentionKey, attention]);
+  }, [risks, assetType, cls, treatment, onlyOpen, showNa, q, attentionKey, attention, inheritedOnly]);
 
   return (
     <div>
-      <AttentionBar data={attention} active={attentionKey} onSelect={setAttentionKey} />
+      <AttentionBar data={attention} active={attentionKey}
+        onSelect={key => { setAttentionKey(key); setInheritedOnly(false); }}
+        inheritedActive={inheritedOnly}
+        onInherited={() => { setInheritedOnly(v => !v); setAttentionKey(null); setInherited(true); }} />
       <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
         <input value={q} onChange={e => setQ(e.target.value)} placeholder={t("risk.register.search")}
           className="border rounded px-2 py-1.5 w-56" />

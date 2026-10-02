@@ -3546,7 +3546,8 @@
       "acceptances_expiring": "Accettazioni in scadenza",
       "acceptances_expiring_hint": "Accettazioni attive che scadono entro 30 giorni: rinnovare o trattare il rischio",
       "overdue_measures": "Rischi con misure in ritardo",
-      "overdue_measures_hint": "Rischi con almeno una misura del piano oltre la scadenza e non completata"
+      "overdue_measures_hint": "Rischi con almeno una misura del piano oltre la scadenza e non completata",
+      "inherited": "Rischi di gruppo che riguardano il sito: {{count}} (High/Critical non accettati: {{high}}) — valutati dal gruppo, non sommati"
     },
     "plan": {
       "filters": {
@@ -3800,7 +3801,9 @@
       "col_worst": "Classe peggiore",
       "col_untreated": "High/Critical non accettati",
       "col_distribution": "Per classe",
-      "none": "Rischi senza obiettivo indicato"
+      "none": "Rischi senza obiettivo indicato",
+      "col_inherited": "Dal gruppo",
+      "col_inherited_hint": "Rischi di gruppo ereditati dal sito per questo obiettivo: valutati e trattati dal gruppo, non sommati ai numeri del sito"
     },
     "information_coverage": {
       "title": "Copertura delle informazioni",
@@ -4941,7 +4944,9 @@
       "asset_type_chart_title": "Rischi per tipologia di asset",
       "nis2_in_scope": "Nel perimetro NIS2",
       "nis2_significant": "Possibile incidente significativo",
-      "heatmap_note": "La classe si legge dalla matrice della procedura, non dal prodotto P × I."
+      "heatmap_note": "La classe si legge dalla matrice della procedura, non dal prodotto P × I.",
+      "kpi_inherited": "Rischi di gruppo sul sito",
+      "kpi_inherited_sub": "Valutati dal gruppo, non sommati · High/Critical non accettati: {{high}}"
     },
     "access_matrix": {
       "subtitle": "Chi ha accesso e chi è responsabile di cosa — valida gli accessi in qualunque momento.",
@@ -6224,7 +6229,11 @@
       "col_business_objective": "Obiettivo aziendale",
       "col_assessed_risks": "Rischi valutati",
       "col_worst_class": "Classe peggiore",
-      "col_untreated_high": "High/Critical non accettati"
+      "col_untreated_high": "High/Critical non accettati",
+      "col_from_group": "di cui dal gruppo (non sommati)",
+      "group_row": "Gruppo (servizi condivisi)",
+      "inherited_title": "Rischi di gruppo che riguardano il sito (valutati dal gruppo, non sommati)",
+      "col_accepted": "Accettato"
     },
     "participants": {
       "heading": "Convocati e presenze",

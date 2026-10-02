@@ -240,6 +240,10 @@ export interface ObjectiveRow {
   by_class: Record<RiskClass, number>;
   untreated_high: number;
   risk_ids: string[];
+  /** Rischi di gruppo ereditati dal sito per questo obiettivo: a parte, non sommati. */
+  inherited_count: number;
+  inherited_untreated_high: number;
+  inherited_risk_ids: string[];
 }
 
 export interface InformationCoverageRow {
@@ -307,7 +311,10 @@ export interface RegisterReview { checks: ConsistencyFinding[]; ai: (AiMeta & { 
 export type AttentionKey = "critical_untreated" | "high_untreated" | "acceptances_expiring" | "overdue_measures";
 export const ATTENTION_KEYS: AttentionKey[] = ["critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"];
 /** Cosa richiede di agire nel registro (backend: risk.services.register_attention). */
-export type Attention = Record<AttentionKey, { count: number; risk_ids: string[]; measures?: number }>;
+export type Attention = Record<AttentionKey, { count: number; risk_ids: string[]; measures?: number }> & {
+  /** Rischi di gruppo che riguardano il sito: a parte, non sommati (null per il registro di gruppo). */
+  inherited: { count: number; untreated_high: number; risk_ids: string[] } | null;
+};
 
 export type CycleKind = "primo" | "periodico" | "straordinario" | "legacy";
 export type CycleStatus = "in_corso" | "in_approvazione" | "approvato" | "archiviato";

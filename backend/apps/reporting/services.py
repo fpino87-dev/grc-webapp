@@ -172,7 +172,7 @@ def risk_bia_bcp(plant_id) -> dict:
     from apps.risk.models import NIS2_ART21_CHOICES
     from apps.risk.services import (
         CLASS_LABELS, active_acceptance_risk_ids, class_counts, class_rank, evaluated_risks,
-        risk_class, risk_label, risk_level_bucket, untreated_high_risks,
+        inherited_summary, risk_class, risk_label, risk_level_bucket, untreated_high_risks,
     )
 
     today = timezone.localdate()
@@ -356,6 +356,7 @@ def risk_bia_bcp(plant_id) -> dict:
             ),
         })
 
+    inherited = inherited_summary(plant_id) if plant_id else None
     return {
         "kpis": {
             "risks_total": counts["total"],
@@ -364,6 +365,10 @@ def risk_bia_bcp(plant_id) -> dict:
             "risks_yellow": counts["giallo"],
             "risks_accepted": len(accepted_ids),
             "risks_untreated_high": risks_untreated_high,
+            # Sito: rischi di gruppo che lo riguardano, a parte e non sommati
+            # (stessa regola di registro e riesame). Organizzazione: None.
+            "risks_inherited": inherited["count"] if inherited else None,
+            "risks_inherited_untreated_high": inherited["untreated_high"] if inherited else None,
             "bia_critical_no_bcp": bia_critical_no_bcp,
             "bia_critical_test_expired": bia_critical_test_expired,
             "bcp_test_overdue": bcp_test_overdue,
