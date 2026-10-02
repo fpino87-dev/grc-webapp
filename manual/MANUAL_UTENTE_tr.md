@@ -477,7 +477,7 @@ Kimin kabul edebileceği sınıfa ve **risk yönetişimi politikasına** (Ayarla
 
 ### Devralınan grup riskleri
 
-Bir tesis kaydında, o tesisi ilgilendiren grup riskleri ⇩ ile ve salt okunur olarak görünür. Tesis üzerindeki etki daha yüksekse karttan bildirin (**Yerel etki**): grup bildirimi kabul eder ve değerlendirmeyi günceller.
+Bir tesis kaydında, o tesisi ilgilendiren grup riskleri ⇩ ile ve salt okunur olarak görünür. Tesis üzerindeki etki daha yüksekse karttan bildirin (**Yerel etki**): grup bildirimi kabul eder ve değerlendirmeyi günceller. Tesisin Kapsam sekmesinde bu tehditler **Grup tarafından kapsanıyor** olarak görünür: yinelenmemeli veya uygulanamaz olarak işaretlenmemelidir. Tesiste koşullar veya önlemler farklıysa **Tesis riski** ile tesise ait bir risk ekleyin.
 
 ### Matris ve Ayarlar
 

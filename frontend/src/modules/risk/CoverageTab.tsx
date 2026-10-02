@@ -13,6 +13,7 @@ const STATE_TONE: Record<CoveragePair["state"], string> = {
   not_applicable: "border-gray-200 bg-gray-50 text-gray-400",
   draft: "border-yellow-300 bg-yellow-50",
   missing: "border-red-300 bg-red-50",
+  inherited: "border-blue-200 bg-blue-50",
 };
 
 /** Copertura tipologie × minacce del catalogo (procedura §6.5). */
@@ -73,11 +74,21 @@ export function CoverageTab({ registerId, evaluating, onOpen, onEvaluate }: {
                       <span className="font-mono text-gray-500 mr-1">{p.threat_code}</span>{titles.get(p.threat_id)}
                     </span>
                     {p.state === "evaluated" ? <ClassBadge cls={p.worst_class} size="xs" />
+                      : p.state === "inherited" ? (
+                        <span className="flex items-center gap-1 whitespace-nowrap text-blue-700">
+                          ⇩ {t("risk.coverage.states.inherited")}
+                          {p.worst_class && <ClassBadge cls={p.worst_class} size="xs" />}
+                        </span>
+                      )
                       : <span className="whitespace-nowrap">{t(`risk.coverage.states.${p.state}`)}</span>}
                   </div>
                   <div className="flex gap-3 mt-1">
                     {p.risk_ids.length > 0 && (
                       <button onClick={() => onOpen(p.risk_ids[0])} className="text-primary-600 hover:underline">{t("risk.coverage.open")}</button>
+                    )}
+                    {p.state === "inherited" && evaluating && (
+                      <button onClick={() => onEvaluate(type, p.threat_id)} className="text-gray-600 hover:underline"
+                        title={t("risk.coverage.add_site_risk_hint")}>{t("risk.coverage.add_site_risk")}</button>
                     )}
                     {p.state === "missing" && evaluating && (
                       <>

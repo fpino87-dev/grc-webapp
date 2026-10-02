@@ -3562,7 +3562,7 @@
     "coverage": {
       "progress": "Copertura: {{closed}} di {{total}} ({{pct}}%)",
       "only_missing": "Solo da chiudere",
-      "hint": "Ogni minaccia del catalogo applicabile a una tipologia presente nel registro va valutata o dichiarata non applicabile con il motivo (procedura §6.5).",
+      "hint": "Ogni minaccia del catalogo applicabile a una tipologia presente nel registro va valutata o dichiarata non applicabile con il motivo (procedura §6.5). La copertura conta anche i rischi di gruppo ereditati dal sito (⇩): quelle minacce le valuta e le tratta il gruppo, il sito non le duplica.",
       "open": "Apri",
       "evaluate": "Valuta",
       "not_applicable": "Non applicabile",
@@ -3572,8 +3572,11 @@
         "missing": "Da valutare",
         "draft": "In bozza",
         "evaluated": "Valutata",
-        "not_applicable": "Non applicabile"
-      }
+        "not_applicable": "Non applicabile",
+        "inherited": "Coperta dal gruppo"
+      },
+      "add_site_risk": "Rischio del sito",
+      "add_site_risk_hint": "Valuta anche un rischio proprio del sito, se qui le condizioni o le misure sono diverse da quelle del rischio di gruppo"
     },
     "acceptance": {
       "filters": {

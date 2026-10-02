@@ -477,7 +477,7 @@ Qui peut accepter dépend de la classe et de la **politique de gouvernance des r
 
 ### Risques de groupe hérités
 
-Dans le registre d'un site, les risques de groupe qui le concernent apparaissent avec ⇩, en lecture seule. Si l'impact sur le site est plus élevé, signalez-le depuis la fiche (**Impact local**) : le groupe prend en compte le signalement et met à jour l'évaluation.
+Dans le registre d'un site, les risques de groupe qui le concernent apparaissent avec ⇩, en lecture seule. Si l'impact sur le site est plus élevé, signalez-le depuis la fiche (**Impact local**) : le groupe prend en compte le signalement et met à jour l'évaluation. Dans l'onglet Couverture du site, ces menaces apparaissent **Couvertes par le groupe** : il ne faut ni les dupliquer ni les déclarer non applicables. Si les conditions ou les mesures diffèrent sur le site, ajoutez un risque propre avec **Risque du site**.
 
 ### Matrice et Paramètres
 

@@ -3562,7 +3562,7 @@
     "coverage": {
       "progress": "Pokrycie: {{closed}} z {{total}} ({{pct}}%)",
       "only_missing": "Tylko do zamknięcia",
-      "hint": "Każde zagrożenie z katalogu dla typu zasobu w rejestrze należy ocenić lub oznaczyć jako niemające zastosowania z uzasadnieniem (procedura §6.5).",
+      "hint": "Każde zagrożenie z katalogu dla typu zasobu w rejestrze należy ocenić lub oznaczyć jako niemające zastosowania z uzasadnieniem (procedura §6.5). Pokrycie uwzględnia też ryzyka grupy dziedziczone przez zakład (⇩): te zagrożenia ocenia i traktuje grupa, zakład ich nie powiela.",
       "open": "Otwórz",
       "evaluate": "Oceń",
       "not_applicable": "Nie dotyczy",
@@ -3572,8 +3572,11 @@
         "missing": "Do oceny",
         "draft": "Wersja robocza",
         "evaluated": "Ocenione",
-        "not_applicable": "Nie dotyczy"
-      }
+        "not_applicable": "Nie dotyczy",
+        "inherited": "Pokryte przez grupę"
+      },
+      "add_site_risk": "Ryzyko zakładu",
+      "add_site_risk_hint": "Oceń także własne ryzyko zakładu, jeśli warunki lub środki różnią się tu od ryzyka grupy"
     },
     "acceptance": {
       "filters": {

@@ -316,7 +316,8 @@ export interface CoveragePair {
   asset_type: AssetType;
   threat_id: string;
   threat_code: string;
-  state: "missing" | "draft" | "evaluated" | "not_applicable";
+  /** `inherited` = coperta da un rischio di gruppo ereditato dal sito. */
+  state: "missing" | "draft" | "evaluated" | "not_applicable" | "inherited";
   risk_ids: string[];
   worst_class: RiskClass | "";
 }

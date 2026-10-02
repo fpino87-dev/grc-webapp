@@ -477,7 +477,7 @@ Who can accept depends on the class and on the **risk governance policy** (Setti
 
 ### Inherited group risks
 
-In a site register, the group risks that concern it appear with ⇩, read-only. If the impact on site is higher, report it from the card (**Local impact**): the group acknowledges the report and updates the assessment.
+In a site register, the group risks that concern it appear with ⇩, read-only. If the impact on site is higher, report it from the card (**Local impact**): the group acknowledges the report and updates the assessment. In the site Coverage tab these threats show as **Covered by the group**: do not duplicate them or mark them not applicable. If conditions or measures differ on site, add a site risk with **Site risk**.
 
 ### Matrix and Settings
 

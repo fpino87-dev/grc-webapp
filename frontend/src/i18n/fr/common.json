@@ -3562,7 +3562,7 @@
     "coverage": {
       "progress": "Couverture : {{closed}} sur {{total}} ({{pct}} %)",
       "only_missing": "Seulement à clôturer",
-      "hint": "Chaque menace du catalogue applicable à un type d'actif présent doit être évaluée ou déclarée non applicable avec le motif (procédure §6.5).",
+      "hint": "Chaque menace du catalogue applicable à un type d'actif présent doit être évaluée ou déclarée non applicable avec le motif (procédure §6.5). La couverture compte aussi les risques de groupe hérités par le site (⇩) : le groupe évalue et traite ces menaces, le site ne les duplique pas.",
       "open": "Ouvrir",
       "evaluate": "Évaluer",
       "not_applicable": "Non applicable",
@@ -3572,8 +3572,11 @@
         "missing": "À évaluer",
         "draft": "Brouillon",
         "evaluated": "Évaluée",
-        "not_applicable": "Non applicable"
-      }
+        "not_applicable": "Non applicable",
+        "inherited": "Couverte par le groupe"
+      },
+      "add_site_risk": "Risque du site",
+      "add_site_risk_hint": "Évaluer aussi un risque propre au site, si les conditions ou les mesures y diffèrent de celles du risque de groupe"
     },
     "acceptance": {
       "filters": {

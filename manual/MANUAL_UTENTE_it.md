@@ -477,7 +477,7 @@ Chi può accettare dipende dalla classe e dalla **policy di governo del rischio*
 
 ### Rischi di gruppo ereditati
 
-Nel registro di un sito i rischi di gruppo che lo riguardano compaiono con ⇩, in sola lettura. Se nel sito l'impatto è più alto, segnalalo dalla scheda (**Impatto locale**): il gruppo recepisce la segnalazione e aggiorna la valutazione.
+Nel registro di un sito i rischi di gruppo che lo riguardano compaiono con ⇩, in sola lettura. Se nel sito l'impatto è più alto, segnalalo dalla scheda (**Impatto locale**): il gruppo recepisce la segnalazione e aggiorna la valutazione. Nella scheda Copertura del sito queste minacce risultano **Coperte dal gruppo**: non vanno duplicate né dichiarate non applicabili. Se nel sito condizioni o misure sono diverse, si può aggiungere un rischio proprio del sito con **Rischio del sito**.
 
 ### Matrice e Impostazioni
 

@@ -3562,7 +3562,7 @@
     "coverage": {
       "progress": "Coverage: {{closed}} of {{total}} ({{pct}}%)",
       "only_missing": "Only to close",
-      "hint": "Each catalogue threat applicable to an asset type present in the register must be assessed or declared not applicable with the reason (procedure §6.5).",
+      "hint": "Each catalogue threat applicable to an asset type present in the register must be assessed or declared not applicable with the reason (procedure §6.5). Coverage also counts the group risks inherited by the site (⇩): the group assesses and treats those threats, the site does not duplicate them.",
       "open": "Open",
       "evaluate": "Assess",
       "not_applicable": "Not applicable",
@@ -3572,8 +3572,11 @@
         "missing": "To assess",
         "draft": "Draft",
         "evaluated": "Assessed",
-        "not_applicable": "Not applicable"
-      }
+        "not_applicable": "Not applicable",
+        "inherited": "Covered by the group"
+      },
+      "add_site_risk": "Site risk",
+      "add_site_risk_hint": "Also assess a site risk, if conditions or measures here differ from those of the group risk"
     },
     "acceptance": {
       "filters": {

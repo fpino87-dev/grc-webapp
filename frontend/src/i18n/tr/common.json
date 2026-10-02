@@ -3562,7 +3562,7 @@
     "coverage": {
       "progress": "Kapsam: {{total}} içinden {{closed}} (%{{pct}})",
       "only_missing": "Yalnızca kapatılacaklar",
-      "hint": "Kayıttaki bir varlık türüne uygulanabilen her katalog tehdidi değerlendirilmeli veya nedeniyle uygulanamaz bildirilmelidir (prosedür §6.5).",
+      "hint": "Kayıttaki bir varlık türüne uygulanabilen her katalog tehdidi değerlendirilmeli veya nedeniyle uygulanamaz bildirilmelidir (prosedür §6.5). Kapsam, tesisin devraldığı grup risklerini de sayar (⇩): bu tehditleri grup değerlendirir ve işler, tesis bunları yinelemez.",
       "open": "Aç",
       "evaluate": "Değerlendir",
       "not_applicable": "Uygulanamaz",
@@ -3572,8 +3572,11 @@
         "missing": "Değerlendirilecek",
         "draft": "Taslak",
         "evaluated": "Değerlendirildi",
-        "not_applicable": "Uygulanamaz"
-      }
+        "not_applicable": "Uygulanamaz",
+        "inherited": "Grup tarafından kapsanıyor"
+      },
+      "add_site_risk": "Tesis riski",
+      "add_site_risk_hint": "Buradaki koşullar veya önlemler grup riskinden farklıysa tesise ait bir risk de değerlendirin"
     },
     "acceptance": {
       "filters": {

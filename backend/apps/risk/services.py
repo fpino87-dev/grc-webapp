@@ -1560,6 +1560,12 @@ def acknowledge_local_impact(user, report):
 
 # ── Copertura, invio e approvazione dei cicli ────────────────────────────────
 
+COVERAGE_STATE_LABELS = {
+    "evaluated": "Valutata", "draft": "In valutazione", "missing": "Da valutare",
+    "not_applicable": "Non applicabile", "inherited": "Coperta dal gruppo",
+}
+
+
 def register_coverage(plant=None) -> dict:
     """Copertura del registro (§6.5): ogni minaccia applicabile a ogni
     tipologia presente va valutata o dichiarata non applicabile."""
@@ -1567,19 +1573,33 @@ def register_coverage(plant=None) -> dict:
 
     types = asset_types_present(plant)
     threats = list(ThreatCatalogEntry.objects.filter(active=True))
-    risks = list(register_queryset(plant).filter(threat__isnull=False).values(
-        "id", "asset_type", "threat_id", "applicable", "status", "current_class",
-    ))
+    fields = ("id", "asset_type", "threat_id", "applicable", "status", "current_class")
+    risks = list(register_queryset(plant).filter(threat__isnull=False).values(*fields))
     by_pair: dict = {}
     for r in risks:
         by_pair.setdefault((r["asset_type"], r["threat_id"]), []).append(r)
+    # Rischi di gruppo ereditati dal sito (§4.3): la coppia è coperta dal gruppo,
+    # che la valuta e la tratta; il sito non la duplica né la dichiara non applicabile.
+    inherited: dict = {}
+    if plant is not None:
+        group_risks = (
+            RiskAssessment.objects.exclude(cycle__kind="legacy")
+            .filter(plant__isnull=True, affected_plants=plant, applicable=True, threat__isnull=False)
+            .distinct().values(*fields)
+        )
+        for r in group_risks:
+            inherited.setdefault((r["asset_type"], r["threat_id"]), []).append(r)
     pairs = []
     for asset_type in types:
         for threat in threats:
             if asset_type not in threat.asset_types:
                 continue
             found = by_pair.get((asset_type, threat.pk), [])
-            if not found:
+            from_group = inherited.get((asset_type, threat.pk), []) if not found else []
+            if from_group:
+                state = "inherited"
+                found = from_group
+            elif not found:
                 state = "missing"
             elif any(r["status"] != "completato" for r in found):
                 state = "draft"
@@ -1594,7 +1614,7 @@ def register_coverage(plant=None) -> dict:
                                    key=class_rank, default=""),
             })
     total = len(pairs)
-    closed = sum(1 for p in pairs if p["state"] in ("evaluated", "not_applicable"))
+    closed = sum(1 for p in pairs if p["state"] in ("evaluated", "not_applicable", "inherited"))
     return {
         "asset_types": types,
         "pairs": pairs,
@@ -2094,13 +2114,15 @@ def generate_risk_excel(plant=None) -> bytes:
     ws = sheet(wb, "Copertura informazioni", ["Classe di informazioni", "Riservatezza", "Stato", "Classe peggiore"])
     for row, item in enumerate(information_coverage(plant), 2):
         for col, value in enumerate([
-            item["name"], item["confidentiality"], item["state"], CLASS_LABELS.get(item["worst_class"], ""),
+            item["name"], item["confidentiality"], COVERAGE_STATE_LABELS.get(item["state"], item["state"]),
+            CLASS_LABELS.get(item["worst_class"], ""),
         ], 1):
             ws.cell(row=row, column=col, value=value)
     ws = sheet(wb, "Copertura", ["Tipologia", "Codice minaccia", "Stato", "Classe peggiore"])
     for row, pair in enumerate(register_coverage(plant)["pairs"], 2):
         for col, value in enumerate([
-            pair["asset_type"], pair["threat_code"], pair["state"], CLASS_LABELS.get(pair["worst_class"], ""),
+            pair["asset_type"], pair["threat_code"], COVERAGE_STATE_LABELS.get(pair["state"], pair["state"]),
+            CLASS_LABELS.get(pair["worst_class"], ""),
         ], 1):
             ws.cell(row=row, column=col, value=value)
 

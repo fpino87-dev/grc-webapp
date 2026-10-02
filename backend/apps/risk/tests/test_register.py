@@ -827,3 +827,29 @@ def test_security_objective_links_risks(org_user, plant, other_plant, threats, c
                  {**base, "code": "OBJ-R2", "risks": [str(foreign.pk)]}, format="json")
     assert res.status_code == 400
     assert SecurityObjective.objects.filter(code="OBJ-R2").count() == 0
+
+
+@pytest.mark.django_db
+def test_site_coverage_counts_inherited_group_risks(org_user, plant, other_plant, threats):
+    """Un rischio di gruppo ereditato copre la coppia nel sito: niente duplicati."""
+    services.start_cycle(org_user, None, "primo")
+    group = services.create_risk(org_user, None, {**_eval(org_user), "threat": threats["malware"],
+                                                  "affected_plants": [plant]})
+    pair = next(p for p in services.register_coverage(plant)["pairs"]
+                if p["threat_code"] == "IN_MAL" and p["asset_type"] == "IT")
+    assert pair["state"] == "inherited" and pair["risk_ids"] == [str(group.pk)]
+    # un rischio proprio del sito sulla stessa minaccia prevale
+    services.start_cycle(org_user, plant, "primo")
+    own = services.create_risk(org_user, plant, {**_eval(org_user), "threat": threats["malware"]})
+    pair = next(p for p in services.register_coverage(plant)["pairs"]
+                if p["threat_code"] == "IN_MAL" and p["asset_type"] == "IT")
+    assert pair["state"] == "draft" and pair["risk_ids"] == [str(own.pk)]
+
+
+@pytest.mark.django_db
+def test_site_coverage_ignores_group_risks_not_inherited(org_user, plant, other_plant, threats):
+    services.start_cycle(org_user, None, "primo")
+    services.create_risk(org_user, None, {**_eval(org_user), "threat": threats["malware"],
+                                          "affected_plants": [other_plant]})
+    pair = next(p for p in services.register_coverage(plant)["pairs"] if p["threat_code"] == "IN_MAL")
+    assert pair["state"] == "missing"
