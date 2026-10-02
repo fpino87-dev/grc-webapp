@@ -3574,3 +3574,6 @@ msgstr "Risques de groupe concernant le site (évalués par le groupe, non addit
 
 msgid "Accettato"
 msgstr "Accepté"
+
+msgid "Seleziona almeno una proposta."
+msgstr "Sélectionnez au moins une proposition."

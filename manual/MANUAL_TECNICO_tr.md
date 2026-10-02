@@ -528,7 +528,7 @@ Yanıt: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Tehdit kataloğu: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (API ile özel kayıtlar)
 - İş hedefleri `BusinessObjective` (prosedür §2, öneri olarak `risk_catalogs/business_objectives.json`) riske bağlı (`business_objectives`, tamamlamak için zorunlu); `governance.SecurityObjective.risks` güvenlik hedeflerini işlenen risklere bağlar
 - Diğer modüller için ortak fonksiyonlar: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
-- AI desteği: `risk.services` (bağlam, kriterler, öneri doğrulama, `register_consistency_checks`, `register_ai_digest`) + `ai_engine.tasks_ai` (`risk_draft`, `risk_measures`, `risk_review`, `risk_summary` görevleri); `assessments/{id}/ai-draft|ai-measures`, `assessments/review|ai-summary|ai-feedback` uç noktaları; sunucu tarafında hiçbir öneri uygulanmaz
+- AI desteği: `risk.services` (bağlam, kriterler, öneri doğrulama, `register_consistency_checks`, `register_ai_digest`) + `ai_engine.tasks_ai` (`risk_draft`, `risk_identify`, `risk_measures`, `risk_review`, `risk_summary` görevleri); `assessments/{id}/ai-draft|ai-measures`, `assessments/review|ai-summary|ai-feedback|ai-identify|ai-identify-apply` uç noktaları; sunucu tarafında hiçbir öneri uygulanmaz
 
 ### M00 — Yönetişim
 

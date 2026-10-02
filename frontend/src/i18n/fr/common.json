@@ -267,6 +267,7 @@
         "cockpit_assistant": "Demander à govrico (M21 Centre opérationnel)",
         "vda_interview": "Entretien guidé VDA ISA (M03 Contrôles)",
         "risk_draft": "Appréciation des risques : brouillon de l'évaluation",
+        "risk_identify": "Appréciation des risques : identification à partir des lacunes de couverture",
         "risk_measures": "Appréciation des risques : mesures du plan",
         "risk_review": "Appréciation des risques : revue des justifications",
         "risk_summary": "Appréciation des risques : synthèse pour l'organe"
@@ -3855,7 +3856,20 @@
       "summary_title": "Synthèse du registre pour l'organe",
       "summary_hint": "Brouillon de rapport pour l'organe et la revue de direction, rédigé uniquement à partir des chiffres du registre. Relisez-le avant usage.",
       "summary_run": "Générer le brouillon",
-      "copy": "Copier le texte"
+      "copy": "Copier le texte",
+      "identify_button": "Proposer avec l'IA ({{count}} à évaluer)",
+      "identify_button_hint": "L'IA examine les menaces de cette typologie encore à évaluer et propose pour chacune un risque en brouillon ou la non-applicabilité",
+      "identify_title": "Propositions de risques · {{type}}",
+      "identify_hint": "L'IA ne reçoit que des données agrégées du registre (actifs, processus BIA, objectifs, informations confidentielles, incidents par catégorie), jamais de personnes, et examine jusqu'à 10 menaces à la fois. Choisissez les propositions à enregistrer : les risques sont créés en brouillon dans le cycle en cours, à compléter avec le Risk Owner et à vérifier.",
+      "identify_run": "Lancer les propositions",
+      "identify_next": "Proposer les suivantes",
+      "identify_applicable": "Applicable",
+      "identify_rationales": "Justifications",
+      "identify_note": "La classe n'est pas proposée par l'IA : elle est calculée par la matrice.",
+      "identify_remaining": "Autres menaces à évaluer : {{count}}, avec les propositions suivantes.",
+      "identify_apply": "Enregistrer la sélection ({{count}})",
+      "identify_done": "Enregistrés : risques en brouillon {{created}}, non applicables {{na}}.",
+      "identify_skipped": "Déjà couvertes entre-temps et ignorées : {{count}}."
     }
   },
   "pdca": {

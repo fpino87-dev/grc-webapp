@@ -17,6 +17,7 @@ const TASKS = [
   "cockpit_explain",
   "cockpit_assistant",
   "risk_draft",
+  "risk_identify",
   "risk_measures",
   "risk_review",
   "risk_summary",

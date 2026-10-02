@@ -529,7 +529,7 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Catalogo minacce: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (voci personalizzate da API)
 - Obiettivi aziendali `BusinessObjective` (procedura §2, `risk_catalogs/business_objectives.json` come proposta) collegati al rischio (`business_objectives`, obbligatorio per completare); `governance.SecurityObjective.risks` collega gli obiettivi di sicurezza ai rischi trattati
 - Funzioni uniche per gli altri moduli: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
-- Supporto IA: `risk.services` (contesto, criteri, validazione delle proposte, `register_consistency_checks`, `register_ai_digest`) + `ai_engine.tasks_ai` (task `risk_draft`, `risk_measures`, `risk_review`, `risk_summary`); endpoint `assessments/{id}/ai-draft|ai-measures`, `assessments/review|ai-summary|ai-feedback`; nessuna proposta applicata lato server
+- Supporto IA: `risk.services` (contesto, criteri, validazione delle proposte, `register_consistency_checks`, `register_ai_digest`) + `ai_engine.tasks_ai` (task `risk_draft`, `risk_identify`, `risk_measures`, `risk_review`, `risk_summary`); endpoint `assessments/{id}/ai-draft|ai-measures`, `assessments/review|ai-summary|ai-feedback|ai-identify|ai-identify-apply`; nessuna proposta applicata lato server
 
 ### M00 — Governance
 

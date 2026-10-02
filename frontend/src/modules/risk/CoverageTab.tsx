@@ -5,6 +5,7 @@ import { apiError, riskApi, type AssetType, type CoveragePair } from "../../api/
 import { RiskIntegratedRegisters } from "./RiskIntegratedRegisters";
 import { ClassBadge, ErrorBox } from "./RiskUi";
 import { ReasonDialog } from "./CycleBar";
+import { AiIdentifyDialog } from "./RiskAi";
 import type { RegisterId } from "./RiskPage";
 import { classBadge } from "./riskClasses";
 
@@ -28,6 +29,7 @@ export function CoverageTab({ registerId, evaluating, onOpen, onEvaluate }: {
   const [naPair, setNaPair] = useState<CoveragePair | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [onlyMissing, setOnlyMissing] = useState(false);
+  const [aiType, setAiType] = useState<AssetType | null>(null);
   const { data: coverage } = useQuery({
     queryKey: ["risk-coverage", registerId], queryFn: () => riskApi.coverage(registerId), retry: false,
   });
@@ -63,9 +65,18 @@ export function CoverageTab({ registerId, evaluating, onOpen, onEvaluate }: {
       {coverage.asset_types.map(type => {
         const pairs = coverage.pairs.filter(p => p.asset_type === type && (!onlyMissing || p.state === "missing" || p.state === "draft"));
         if (!pairs.length) return null;
+        const missing = coverage.pairs.filter(p => p.asset_type === type && p.state === "missing").length;
         return (
           <div key={type} className="bg-white rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">{t(`risk.asset_types.${type}`)}</h3>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <h3 className="text-sm font-semibold text-gray-700">{t(`risk.asset_types.${type}`)}</h3>
+              {evaluating && missing > 0 && (
+                <button onClick={() => setAiType(type)} title={t("risk.ai.identify_button_hint")}
+                  className="text-xs px-2.5 py-1 rounded border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100">
+                  ✨ {t("risk.ai.identify_button", { count: missing })}
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
               {pairs.map(p => (
                 <div key={p.threat_id} className={`border rounded px-2 py-1.5 text-xs ${STATE_TONE[p.state]}`}>
@@ -108,6 +119,9 @@ export function CoverageTab({ registerId, evaluating, onOpen, onEvaluate }: {
 
       {registerId && <RiskIntegratedRegisters plantId={registerId} />}
 
+      {aiType && (
+        <AiIdentifyDialog registerId={registerId} assetType={aiType} titles={titles} onClose={() => setAiType(null)} />
+      )}
       {naPair && (
         <ReasonDialog
           title={t("risk.coverage.not_applicable_title", { code: naPair.threat_code })}

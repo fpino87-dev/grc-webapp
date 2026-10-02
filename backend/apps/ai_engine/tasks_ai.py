@@ -537,6 +537,54 @@ Rispondi con questo JSON:
     return {**result, "proposal": validate_ai_draft(_parse_json_object(result["text"]))}
 
 
+def identify_risks(plant, asset_type: str, threats: list, links: dict, user, entity_id,
+                   lang: str = "it") -> dict:
+    """Identificazione dai buchi di copertura: per ogni minaccia scoperta della
+    tipologia, applicabile (con bozza della valutazione) o non applicabile."""
+    from apps.risk.services import (
+        PROCEDURE_CRITERIA, economic_criteria, risk_identification_context, validate_ai_identification,
+    )
+
+    criteria = {**PROCEDURE_CRITERIA, "economic": economic_criteria(plant)}
+    catalog = [{"threat": t.code, "titolo": t.get_title(lang), "descrizione": t.tr("description", lang),
+                "cia": t.cia} for t in threats]
+    prompt = f"""Per il registro dei rischi seguente, decidi per OGNI minaccia elencata se si applica alla
+tipologia di asset "{asset_type}" e, se si applica, prepara la bozza della valutazione.
+
+CONTESTO DEL REGISTRO (JSON):
+{json.dumps(risk_identification_context(plant, asset_type, links, lang), ensure_ascii=False, indent=1)}
+
+MINACCE NON ANCORA VALUTATE:
+{json.dumps(catalog, ensure_ascii=False, indent=1)}
+
+CRITERI DELLA PROCEDURA (livelli 1–5 per probabilità e per ogni dimensione d'impatto):
+{json.dumps(criteria, ensure_ascii=False, indent=1)}
+
+Regole:
+- "applicable": false SOLO se la minaccia non può realisticamente colpire questa tipologia nel registro
+  (es. nessun asset o attività esposta); in "reason" il motivo verificabile dai dati. Nel dubbio è applicabile.
+- Se applicabile: vulnerabilità e conseguenza concrete per il registro, probabilità e impatti con i criteri
+  (dimensioni non pertinenti: null), motivazioni che citano il criterio e i dati; se un dato manca dillo.
+- "process": numero del processo BIA più colpito (o null); "objectives": numeri (max 3) degli obiettivi aziendali minacciati.
+- Trattamento fra: mitigare, evitare, trasferire, accettare; se non accetti indica il rischio atteso.
+- Scrivi i testi in {_lang_name(lang)}, frasi brevi.
+
+Rispondi con questo JSON, una voce per minaccia:
+{{"items": [{{"threat": "codice", "applicable": true, "reason": "",
+  "vulnerability": "...", "consequence": "...", "probability_method": "frequenza|fer", "probability": 1-5,
+  "probability_rationale": "...",
+  "impacts": {{"economic": null, "legal": null, "customer": null, "reputational": null, "people": null, "operational": null}},
+  "impact_rationale": "...", "treatment": "...", "treatment_rationale": "...",
+  "expected_probability": 1-5, "expected_impact": 1-5, "process": null, "objectives": [1]}}]}}"""
+    result = route(
+        task_type="risk_identify", prompt=prompt, system=_RISK_SYSTEM, user=user, entity_id=entity_id,
+        module_source="M06", sanitize=True, plant_ids=[plant.pk] if plant else [], max_tokens=8000,
+        timeout=180,
+    )
+    items = _parse_json_object(result["text"]).get("items", [])
+    return {**result, "items": validate_ai_identification(items, threats, links)}
+
+
 def suggest_risk_measures(risk, user, lang: str = "it") -> dict:
     """Misure del piano di trattamento collegate ai controlli VDA ISA del sito."""
     from apps.risk.services import (

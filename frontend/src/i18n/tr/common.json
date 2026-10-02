@@ -267,6 +267,7 @@
         "cockpit_assistant": "govrico'ya sor (M21 Operasyon Merkezi)",
         "vda_interview": "VDA ISA rehberli görüşme (M03 Kontroller)",
         "risk_draft": "Risk değerlendirmesi: değerlendirme taslağı",
+        "risk_identify": "Risk değerlendirmesi: kapsam boşluklarından tanımlama",
         "risk_measures": "Risk değerlendirmesi: plan önlemleri",
         "risk_review": "Risk değerlendirmesi: gerekçe incelemesi",
         "risk_summary": "Risk değerlendirmesi: organ için özet"
@@ -3855,7 +3856,20 @@
       "summary_title": "Organ için kayıt özeti",
       "summary_hint": "Organ ve yönetim gözden geçirmesi için yalnızca kayıt verilerinden yazılmış rapor taslağı. Kullanmadan önce gözden geçirin.",
       "summary_run": "Taslak oluştur",
-      "copy": "Metni kopyala"
+      "copy": "Metni kopyala",
+      "identify_button": "AI ile öner (değerlendirilecek: {{count}})",
+      "identify_button_hint": "AI bu türün henüz değerlendirilmemiş tehditlerini inceler ve her biri için taslak bir risk ya da uygulanamazlık önerir",
+      "identify_title": "Risk önerileri · {{type}}",
+      "identify_hint": "AI yalnızca kaydın toplu verilerini alır (varlıklar, BIA süreçleri, hedefler, gizli bilgiler, kategoriye göre olaylar), asla kişileri almaz ve bir seferde en fazla 10 tehdidi inceler. Kaydedilecek önerileri seçin: riskler mevcut döngüde taslak olarak oluşturulur; Risk Sahibi ile tamamlanmalı ve doğrulanmalıdır.",
+      "identify_run": "Önerileri başlat",
+      "identify_next": "Sonrakileri öner",
+      "identify_applicable": "Uygulanabilir",
+      "identify_rationales": "Gerekçeler",
+      "identify_note": "Sınıfı AI önermez: matristen hesaplanır.",
+      "identify_remaining": "Değerlendirilecek diğer tehditler: {{count}}, sonraki önerilerle.",
+      "identify_apply": "Seçilenleri kaydet ({{count}})",
+      "identify_done": "Kaydedildi: taslak riskler {{created}}, uygulanamaz {{na}}.",
+      "identify_skipped": "Bu arada zaten kapsanmış ve atlanmış: {{count}}."
     }
   },
   "pdca": {

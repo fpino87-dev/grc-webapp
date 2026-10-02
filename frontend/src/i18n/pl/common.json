@@ -267,6 +267,7 @@
         "cockpit_assistant": "Zapytaj govrico (M21 Centrum operacyjne)",
         "vda_interview": "Wywiad VDA ISA (M03 Kontrole)",
         "risk_draft": "Ocena ryzyka: szkic oceny",
+        "risk_identify": "Ocena ryzyka: identyfikacja na podstawie luk w pokryciu",
         "risk_measures": "Ocena ryzyka: działania planu",
         "risk_review": "Ocena ryzyka: przegląd uzasadnień",
         "risk_summary": "Ocena ryzyka: podsumowanie dla organu"
@@ -3855,7 +3856,20 @@
       "summary_title": "Podsumowanie rejestru dla organu",
       "summary_hint": "Szkic raportu dla organu i przeglądu zarządzania, napisany wyłącznie na podstawie danych rejestru. Przejrzyj go przed użyciem.",
       "summary_run": "Wygeneruj szkic",
-      "copy": "Kopiuj tekst"
+      "copy": "Kopiuj tekst",
+      "identify_button": "Zaproponuj z AI (do oceny: {{count}})",
+      "identify_button_hint": "AI analizuje zagrożenia tego typu, które nie zostały jeszcze ocenione, i dla każdego proponuje ryzyko w wersji roboczej albo brak zastosowania",
+      "identify_title": "Propozycje ryzyk · {{type}}",
+      "identify_hint": "AI otrzymuje wyłącznie zagregowane dane rejestru (aktywa, procesy BIA, cele, informacje poufne, incydenty według kategorii), nigdy dane osób, i analizuje do 10 zagrożeń naraz. Wybierz propozycje do zapisania: ryzyka powstają jako wersje robocze w bieżącym cyklu i wymagają uzupełnienia o Risk Ownera oraz weryfikacji.",
+      "identify_run": "Uruchom propozycje",
+      "identify_next": "Zaproponuj kolejne",
+      "identify_applicable": "Ma zastosowanie",
+      "identify_rationales": "Uzasadnienia",
+      "identify_note": "Klasy nie proponuje AI: jest wyliczana z macierzy.",
+      "identify_remaining": "Pozostałe zagrożenia do oceny: {{count}}, w kolejnych propozycjach.",
+      "identify_apply": "Zapisz zaznaczone ({{count}})",
+      "identify_done": "Zapisano: ryzyka robocze {{created}}, bez zastosowania {{na}}.",
+      "identify_skipped": "W międzyczasie już pokryte i pominięte: {{count}}."
     }
   },
   "pdca": {

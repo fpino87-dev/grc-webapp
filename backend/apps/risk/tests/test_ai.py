@@ -136,3 +136,83 @@ def test_ai_feedback_only_by_requester(org_user, plant, threats, cycle):
     assert log.confirmed_at and log.output_human_final == "probabilità, impatto"
     assert RiskAssessment.objects.filter(pk=risk.pk).exists()
     assert ThreatCatalogEntry.objects.exists()
+
+
+@pytest.mark.django_db
+def test_ai_identify_proposes_only_missing_threats(org_user, plant, threats, cycle):
+    from apps.risk.tests.test_register import _objective
+
+    extra = ThreatCatalogEntry.objects.create(code="IN_PHI", asset_types=["IT"], cia=["C"], source="catalog",
+                                              translations={"it": {"title": "Phishing"}})
+    services.create_risk(org_user, plant, {"asset_type": "IT", "threat": threats["malware"]})  # già coperta
+    objective = _objective()
+    answer = json.dumps({"items": [
+        {"threat": "IN_PHI", "applicable": True, "vulnerability": "Posta senza filtro", "probability": 4,
+         "probability_rationale": "Campagne frequenti", "impacts": {"customer": 4, "foo": 3},
+         "objectives": [1, 1, 99], "process": 42, "current_class": "low"},
+        {"threat": "IN_MAL", "applicable": True, "vulnerability": "già valutata"},  # non richiesta
+        {"threat": "XX_FAKE", "applicable": False, "reason": "inventata"},
+    ]})
+    with patch("apps.ai_engine.tasks_ai.route", _fake_route(answer)):
+        res = _client(org_user).post(f"/api/v1/risk/assessments/ai-identify/?plant={plant.pk}",
+                                     {"asset_type": "IT"}, format="json")
+    assert res.status_code == 200, res.content
+    body = res.json()
+    assert body["remaining"] == 0
+    assert body["items"] == [{
+        "threat_id": str(extra.pk), "threat_code": "IN_PHI", "applicable": True, "reason": "",
+        "proposal": {"vulnerability": "Posta senza filtro", "probability": 4,
+                     "probability_rationale": "Campagne frequenti", "impact_customer": 4},
+        "critical_process": None, "business_objectives": [str(objective.pk)],
+    }]
+    assert RiskAssessment.objects.filter(plant=plant).count() == 1  # niente creato
+
+
+@pytest.mark.django_db
+def test_ai_identify_not_applicable_requires_reason(threats):
+    items = [{"threat": "IN_MAL", "applicable": False, "reason": ""},
+             {"threat": "LO_FUO", "applicable": False, "reason": "Nessuna sede fisica propria"}]
+    out = services.validate_ai_identification(items, list(threats.values()), {"processes": [], "objectives": []})
+    assert [(r["threat_code"], r["applicable"]) for r in out] == [("LO_FUO", False)]
+
+
+@pytest.mark.django_db
+def test_ai_identify_apply_creates_drafts_and_not_applicable(org_user, plant, threats, cycle):
+    from apps.risk.tests.test_register import _objective
+
+    objective = _objective()
+    url = f"/api/v1/risk/assessments/ai-identify-apply/?plant={plant.pk}"
+    items = [{"threat_id": str(threats["malware"].pk), "applicable": True,
+              "proposal": {"vulnerability": "Patch in ritardo", "probability": 9, "impact_operational": 4,
+                           "current_class": "very_low", "owner": str(org_user.pk)},
+              "business_objectives": [str(objective.pk)]},
+             {"threat_id": str(threats["fire"].pk), "applicable": False, "reason": "tipologia diversa"}]
+    res = _client(org_user).post(url, {"asset_type": "IT", "items": items}, format="json")
+    assert res.status_code == 201, res.content
+    assert res.json() == {"created": res.json()["created"], "not_applicable": 0, "skipped": 1}
+    risk = RiskAssessment.objects.get(pk=res.json()["created"][0])
+    assert risk.status == "bozza" and risk.vulnerability == "Patch in ritardo"
+    assert risk.probability is None and risk.impact_operational == 4 and risk.owner_id is None
+    assert list(risk.business_objectives.all()) == [objective]
+    # seconda volta: la coppia è coperta, niente duplicati
+    res = _client(org_user).post(url, {"asset_type": "IT", "items": items[:1]}, format="json")
+    assert res.json()["created"] == [] and res.json()["skipped"] == 1
+    # non applicabile: motivo obbligatorio, come a mano
+    na = {"threat_id": str(threats["fire"].pk), "applicable": False, "reason": "Sito senza sede propria"}
+    res = _client(org_user).post(url, {"asset_type": "SEDE", "items": [na]}, format="json")
+    assert res.json()["not_applicable"] == 1
+    assert RiskAssessment.objects.get(plant=plant, threat=threats["fire"]).applicable is False
+
+
+@pytest.mark.django_db
+def test_ai_identify_requires_register_write(site_user, org_user, other_plant, threats):
+    services.start_cycle(org_user, other_plant, "primo")
+    with patch("apps.ai_engine.tasks_ai.route", _fake_route("{}")):
+        res = _client(site_user).post(f"/api/v1/risk/assessments/ai-identify/?plant={other_plant.pk}",
+                                      {"asset_type": "IT"}, format="json")
+    assert res.status_code in (403, 404)
+    res = _client(site_user).post(f"/api/v1/risk/assessments/ai-identify-apply/?plant={other_plant.pk}",
+                                  {"asset_type": "IT", "items": [{"threat_id": str(threats["malware"].pk)}]},
+                                  format="json")
+    assert res.status_code in (403, 404)
+    assert not RiskAssessment.objects.filter(plant=other_plant).exists()

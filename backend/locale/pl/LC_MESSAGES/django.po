@@ -3529,3 +3529,6 @@ msgstr "Ryzyka grupy dotyczące zakładu (oceniane przez grupę, niesumowane)"
 
 msgid "Accettato"
 msgstr "Zaakceptowane"
+
+msgid "Seleziona almeno una proposta."
+msgstr "Wybierz co najmniej jedną propozycję."

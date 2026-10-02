@@ -205,6 +205,46 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             return error
         return Response({**self._ai_meta(result), "measures": result["measures"]})
 
+    @action(detail=False, methods=["post"], url_path="ai-identify")
+    def ai_identify(self, request):
+        """Proposte per le minacce scoperte di una tipologia (copertura §6.5):
+        applicabile con bozza della valutazione o non applicabile. Non crea nulla."""
+        from apps.ai_engine.tasks_ai import identify_risks
+        from apps.risk.models import ASSET_TYPES
+
+        plant = self._register_plant(request)
+        _call_service(services.require_register_write, request.user, plant)
+        cycle = _call_service(services._require_evaluation_cycle, plant)
+        asset_type = request.data.get("asset_type", "")
+        if asset_type not in ASSET_TYPES:
+            raise DRFValidationError({"asset_type": _("Tipologie di asset non valide.")})
+        pending = services.ai_identification_threats(plant, asset_type)
+        threats = pending[:services.AI_IDENTIFY_BATCH]
+        if not threats:
+            return Response({"items": [], "remaining": 0, "interaction_id": None})
+        links = services.ai_identification_links(plant)
+        result, error = self._ai_call(
+            identify_risks, plant, asset_type, threats, links, request.user, cycle.pk, request.LANGUAGE_CODE,
+        )
+        if error:
+            return error
+        names = {
+            "processes": {str(p.pk): p.name for p in links["processes"]},
+            "objectives": {str(o.pk): o.name for o in links["objectives"]},
+        }
+        return Response({**self._ai_meta(result), "items": result["items"], "names": names,
+                         "remaining": len(pending) - len(threats)})
+
+    @action(detail=False, methods=["post"], url_path="ai-identify-apply")
+    def ai_identify_apply(self, request):
+        """Registra le proposte di identificazione scelte (anche modificate) dall'utente."""
+        plant = self._register_plant(request)
+        out = _call_service(
+            services.apply_ai_identification, request.user, plant,
+            request.data.get("asset_type", ""), request.data.get("items"),
+        )
+        return Response(out, status=201)
+
     @action(detail=False, methods=["post"])
     def review(self, request):
         """Revisione di coerenza del registro: regole fisse e, con `ai=1`, analisi

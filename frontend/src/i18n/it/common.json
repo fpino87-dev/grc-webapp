@@ -110,6 +110,7 @@
         "cockpit_assistant": "Chiedi a govrico (M21 Centro Operativo)",
         "vda_interview": "Intervista guidata VDA ISA (M03 Controlli)",
         "risk_draft": "Risk assessment: bozza della valutazione",
+        "risk_identify": "Risk assessment: identificazione dai buchi di copertura",
         "risk_measures": "Risk assessment: misure del piano",
         "risk_review": "Risk assessment: revisione delle motivazioni",
         "risk_summary": "Risk assessment: sintesi per l'organo"
@@ -3855,7 +3856,20 @@
       "summary_title": "Sintesi del registro per l'organo",
       "summary_hint": "Bozza di relazione per l'organo e il riesame di direzione, scritta solo dai numeri del registro. Rivedila prima di usarla.",
       "summary_run": "Genera la bozza",
-      "copy": "Copia il testo"
+      "copy": "Copia il testo",
+      "identify_button": "Proponi con IA ({{count}} da valutare)",
+      "identify_button_hint": "L'IA esamina le minacce ancora da valutare di questa tipologia e propone per ognuna un rischio in bozza o la non applicabilità",
+      "identify_title": "Proposte di rischio · {{type}}",
+      "identify_hint": "L'IA riceve solo dati aggregati del registro (asset, processi BIA, obiettivi, informazioni riservate, incidenti per categoria), mai persone, ed esamina fino a 10 minacce per volta. Scegli le proposte da registrare: i rischi nascono in bozza nel ciclo in corso, da completare con Risk Owner e verifica.",
+      "identify_run": "Avvia le proposte",
+      "identify_next": "Proponi le successive",
+      "identify_applicable": "Applicabile",
+      "identify_rationales": "Motivazioni",
+      "identify_note": "La classe non la propone l'IA: si calcola dalla matrice.",
+      "identify_remaining": "Altre minacce da valutare: {{count}}, con le proposte successive.",
+      "identify_apply": "Registra i selezionati ({{count}})",
+      "identify_done": "Registrati: rischi in bozza {{created}}, non applicabili {{na}}.",
+      "identify_skipped": "Già coperte nel frattempo e saltate: {{count}}."
     }
   },
   "pdca": {

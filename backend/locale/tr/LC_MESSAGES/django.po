@@ -3508,3 +3508,6 @@ msgstr "Tesisi ilgilendiren grup riskleri (grup tarafından değerlendirilir, to
 
 msgid "Accettato"
 msgstr "Kabul edildi"
+
+msgid "Seleziona almeno una proposta."
+msgstr "En az bir öneri seçin."

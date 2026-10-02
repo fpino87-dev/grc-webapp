@@ -302,6 +302,15 @@ export interface AiMeasure {
   action: string; expected_effect: "" | "probabilita" | "impatto" | "entrambi"; due_date: string;
   control_instance: string | null; control_label: string | null; rationale: string;
 }
+/** Proposta di identificazione per una minaccia scoperta (copertura §6.5). */
+export interface AiIdentifyItem {
+  threat_id: string; threat_code: string; applicable: boolean; reason: string;
+  proposal?: AiDraftProposal; critical_process?: string | null; business_objectives?: string[];
+}
+export interface AiIdentifyResult extends AiMeta {
+  items: AiIdentifyItem[]; remaining: number;
+  names?: { processes: Record<string, string>; objectives: Record<string, string> };
+}
 export interface ConsistencyFinding {
   code: string; severity: "error" | "warning"; risk_id: string; risk_name: string; params: Record<string, string | number>;
 }
@@ -409,6 +418,15 @@ export const riskApi = {
   deleteBusinessObjective: (id: string) => apiClient.delete(`/risk/business-objectives/${id}/`),
   aiDraft: (id: string) => data(apiClient.post<AiMeta & { proposal: AiDraftProposal }>(`/risk/assessments/${id}/ai-draft/`)),
   aiMeasures: (id: string) => data(apiClient.post<AiMeta & { measures: AiMeasure[] }>(`/risk/assessments/${id}/ai-measures/`)),
+  aiIdentify: (plantId: string | null, assetType: AssetType) =>
+    data(apiClient.post<AiIdentifyResult>("/risk/assessments/ai-identify/", { asset_type: assetType }, {
+      params: { plant: registerParam(plantId) }, timeout: 240000,
+    })),
+  aiIdentifyApply: (plantId: string | null, assetType: AssetType, items: AiIdentifyItem[]) =>
+    data(apiClient.post<{ created: string[]; not_applicable: number; skipped: number }>(
+      "/risk/assessments/ai-identify-apply/", { asset_type: assetType, items },
+      { params: { plant: registerParam(plantId) } },
+    )),
   review: (plantId: string | null, ai: boolean) =>
     data(apiClient.post<RegisterReview>("/risk/assessments/review/", { ai }, { params: { plant: registerParam(plantId) } })),
   aiSummary: (plantId: string | null) =>

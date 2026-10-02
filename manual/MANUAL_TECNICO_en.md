@@ -529,7 +529,7 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Threat catalogue: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (custom entries via API)
 - Business objectives `BusinessObjective` (procedure §2, `risk_catalogs/business_objectives.json` as a proposal) linked to the risk (`business_objectives`, required to complete); `governance.SecurityObjective.risks` links security objectives to the treated risks
 - Single functions for other modules: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
-- AI support: `risk.services` (context, criteria, proposal validation, `register_consistency_checks`, `register_ai_digest`) + `ai_engine.tasks_ai` (tasks `risk_draft`, `risk_measures`, `risk_review`, `risk_summary`); endpoints `assessments/{id}/ai-draft|ai-measures`, `assessments/review|ai-summary|ai-feedback`; no proposal applied server-side
+- AI support: `risk.services` (context, criteria, proposal validation, `register_consistency_checks`, `register_ai_digest`) + `ai_engine.tasks_ai` (tasks `risk_draft`, `risk_identify`, `risk_measures`, `risk_review`, `risk_summary`); endpoints `assessments/{id}/ai-draft|ai-measures`, `assessments/review|ai-summary|ai-feedback|ai-identify|ai-identify-apply`; no proposal applied server-side
 
 ### M00 — Governance
 

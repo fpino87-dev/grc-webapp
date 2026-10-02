@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { AiSuggestion } from "../../components/ui/AiSuggestion";
 import {
-  IMPACT_DIMENSIONS, apiError, riskApi, type AiDraftProposal, type AiMeasure, type RegisterReview, type Risk,
+  IMPACT_DIMENSIONS, apiError, riskApi, type AiDraftProposal, type AiIdentifyItem, type AiIdentifyResult,
+  type AiMeasure, type AssetType, type RegisterReview, type Risk,
 } from "../../api/endpoints/risk";
 import type { EvaluationState } from "./EvaluationForm";
 import { ErrorBox } from "./RiskUi";
@@ -121,7 +122,151 @@ export function AiDraftButton({ risk, form, onApply }: {
   );
 }
 
-// ── 2. Misure del piano di trattamento ─────────────────────────────────────
+// ── 2. Identificazione dai buchi di copertura ──────────────────────────────
+
+export function AiIdentifyDialog({ registerId, assetType, titles, onClose }: {
+  registerId: RegisterId; assetType: AssetType; titles: Map<string, string>; onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const [result, setResult] = useState<AiIdentifyResult | null>(null);
+  const [items, setItems] = useState<AiIdentifyItem[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [done, setDone] = useState<{ created: number; not_applicable: number; skipped: number; left: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const ask = useMutation({
+    mutationFn: () => riskApi.aiIdentify(registerId, assetType),
+    onSuccess: res => {
+      setResult(res); setItems(res.items); setDone(null); setError(null);
+      setSelected(new Set(res.items.map(i => i.threat_id)));
+    },
+    onError: e => setError(apiError(e, t("risk.ai.error"))),
+  });
+  const chosen = items.filter(i => selected.has(i.threat_id));
+  const missingReason = chosen.some(i => !i.applicable && !i.reason.trim());
+  const apply = useMutation({
+    mutationFn: () => riskApi.aiIdentifyApply(registerId, assetType, chosen),
+    onSuccess: res => {
+      feedback(result?.interaction_id ?? null, "confirm",
+        chosen.map(i => `${i.threat_code}: ${i.applicable ? "applicable" : `n/a — ${i.reason}`}`).join("\n"));
+      // Restano scoperte: le minacce oltre il lotto e le proposte non scelte.
+      const left = (result?.remaining ?? 0) + items.length - chosen.length;
+      setDone({ created: res.created.length, not_applicable: res.not_applicable, skipped: res.skipped, left });
+      setResult(null); setItems([]);
+      qc.invalidateQueries({ queryKey: ["risk-coverage", registerId] });
+      qc.invalidateQueries({ queryKey: ["risk-register"] });
+    },
+    onError: e => setError(apiError(e, t("risk.errors.generic"))),
+  });
+  const close = () => {
+    if (result) feedback(result.interaction_id, "ignore");
+    onClose();
+  };
+  const update = (id: string, patch: Partial<AiIdentifyItem>) =>
+    setItems(list => list.map(i => (i.threat_id === id ? { ...i, ...patch } : i)));
+  const toggle = (id: string, on: boolean) =>
+    setSelected(s => { const n = new Set(s); if (on) n.add(id); else n.delete(id); return n; });
+  const impacts = (p: AiDraftProposal = {}) => IMPACT_DIMENSIONS
+    .filter(d => p[`impact_${d}` as keyof AiDraftProposal])
+    .map(d => `${t(`risk.dimensions.${d}`)} ${p[`impact_${d}` as keyof AiDraftProposal]}`).join(", ");
+
+  return (
+    <AiModal title={t("risk.ai.identify_title", { type: t(`risk.asset_types.${assetType}`) })} onClose={close}>
+      <p className="text-xs text-gray-500 mb-2">{t("risk.ai.identify_hint")}</p>
+      {done && (
+        <p className="text-sm text-green-700 mb-2">
+          {t("risk.ai.identify_done", { created: done.created, na: done.not_applicable })}
+          {done.skipped > 0 && ` ${t("risk.ai.identify_skipped", { count: done.skipped })}`}
+        </p>
+      )}
+      {!result && (!done || done.left > 0) && (
+        <button onClick={() => ask.mutate()} disabled={ask.isPending}
+          className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm disabled:opacity-50">
+          {t(ask.isPending ? "risk.ai.working" : done ? "risk.ai.identify_next" : "risk.ai.identify_run")}
+        </button>
+      )}
+      {result && items.length === 0 && <p className="text-sm text-gray-500">{t("risk.ai.nothing")}</p>}
+      {result && items.length > 0 && (
+        <ul className="space-y-2">
+          {items.map(i => {
+            const p = i.proposal ?? {};
+            const objectives = (i.business_objectives ?? []).map(id => result.names?.objectives[id]).filter(Boolean);
+            const process = i.critical_process ? result.names?.processes[i.critical_process] : null;
+            return (
+              <li key={i.threat_id} className={`border rounded p-2 text-sm ${selected.has(i.threat_id) ? "" : "opacity-60"}`}>
+                <div className="flex items-start gap-2">
+                  <input type="checkbox" className="mt-1" checked={selected.has(i.threat_id)}
+                    aria-label={i.threat_code} onChange={e => toggle(i.threat_id, e.target.checked)} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-medium">
+                        <span className="font-mono text-gray-500 mr-1">{i.threat_code}</span>{titles.get(i.threat_id)}
+                      </p>
+                      <select value={i.applicable ? "yes" : "no"} className="text-xs border rounded px-1 py-0.5"
+                        onChange={e => update(i.threat_id, { applicable: e.target.value === "yes" })}>
+                        <option value="yes">{t("risk.ai.identify_applicable")}</option>
+                        <option value="no">{t("risk.coverage.not_applicable")}</option>
+                      </select>
+                    </div>
+                    {i.applicable ? (
+                      <div className="text-xs text-gray-600 mt-0.5 space-y-0.5">
+                        {p.vulnerability && <p><span className="text-gray-400">{t("risk.drawer.vulnerability")}:</span> {p.vulnerability}</p>}
+                        {p.consequence && <p><span className="text-gray-400">{t("risk.drawer.consequence")}:</span> {p.consequence}</p>}
+                        <p>
+                          {p.probability && `${t("risk.drawer.probability")} ${p.probability}`}
+                          {impacts(p) && ` · ${impacts(p)}`}
+                          {p.treatment && ` · ${t(`risk.treatment_${p.treatment}`)}`}
+                        </p>
+                        {(process || objectives.length > 0) && (
+                          <p className="text-gray-500">{[process, ...objectives].filter(Boolean).join(" · ")}</p>
+                        )}
+                        {(p.probability_rationale || p.impact_rationale) && (
+                          <details>
+                            <summary className="cursor-pointer text-gray-400">{t("risk.ai.identify_rationales")}</summary>
+                            {p.probability_rationale && <p>{p.probability_rationale}</p>}
+                            {p.impact_rationale && <p>{p.impact_rationale}</p>}
+                            {p.treatment_rationale && <p>{p.treatment_rationale}</p>}
+                          </details>
+                        )}
+                      </div>
+                    ) : (
+                      <textarea value={i.reason} rows={2} placeholder={t("risk.coverage.not_applicable_reason")}
+                        onChange={e => update(i.threat_id, { reason: e.target.value })}
+                        className={`mt-1 w-full border rounded p-1.5 text-xs ${selected.has(i.threat_id) && !i.reason.trim() ? "border-red-400" : ""}`} />
+                    )}
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <ErrorBox message={error} />
+      {result && (
+        <>
+          <p className="text-[11px] text-gray-500 mt-2">
+            {t("ai.generated_label")} {t("risk.ai.identify_note")}
+            {result.remaining > 0 && ` ${t("risk.ai.identify_remaining", { count: result.remaining })}`}
+          </p>
+          <div className="flex gap-2 justify-end mt-3">
+            <button onClick={close} className="px-3 py-1.5 border rounded text-sm">{t("ai.ignore")}</button>
+            <button onClick={() => apply.mutate()} disabled={!chosen.length || missingReason || apply.isPending}
+              className="px-3 py-1.5 bg-green-600 text-white rounded text-sm disabled:opacity-50">
+              {t("risk.ai.identify_apply", { count: chosen.length })}
+            </button>
+          </div>
+        </>
+      )}
+      {!result && done && (
+        <div className="flex justify-end mt-3">
+          <button onClick={onClose} className="px-3 py-1.5 border rounded text-sm">{t("common.close")}</button>
+        </div>
+      )}
+    </AiModal>
+  );
+}
+
+// ── 3. Misure del piano di trattamento ─────────────────────────────────────
 
 export function AiMeasuresButton({ risk }: { risk: Risk }) {
   const { t, i18n } = useTranslation();
@@ -193,7 +338,7 @@ export function AiMeasuresButton({ risk }: { risk: Risk }) {
   );
 }
 
-// ── 3. Revisione di coerenza ───────────────────────────────────────────────
+// ── 4. Revisione di coerenza ───────────────────────────────────────────────
 
 export function ReviewDialog({ registerId, onOpen, onClose }: {
   registerId: RegisterId; onOpen: (id: string) => void; onClose: () => void;
@@ -268,7 +413,7 @@ export function ReviewDialog({ registerId, onOpen, onClose }: {
   );
 }
 
-// ── 4. Sintesi per l'organo ────────────────────────────────────────────────
+// ── 5. Sintesi per l'organo ────────────────────────────────────────────────
 
 export function SummaryDialog({ registerId, onClose }: { registerId: RegisterId; onClose: () => void }) {
   const { t } = useTranslation();

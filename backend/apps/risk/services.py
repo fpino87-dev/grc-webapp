@@ -2483,6 +2483,191 @@ def validate_ai_measures(items, risk, candidates: list) -> list:
     return out
 
 
+# ── Identificazione dei rischi dai buchi di copertura (§6.5) ────────────────
+
+# Coppie proposte per chiamata: con la bozza completa per ognuna, oltre questo
+# numero la risposta del modello rischia di essere troncata.
+AI_IDENTIFY_BATCH = 10
+# Tipologie della copertura → tipi di asset dell'inventario M04.
+_COVERAGE_ASSET_KINDS = {"IT": ("IT", "SW"), "OT": ("OT", "FAC"), "SEDE": ("FAC",)}
+
+
+def ai_identification_threats(plant, asset_type: str) -> list:
+    """Minacce del catalogo ancora scoperte per la tipologia nel registro."""
+    from .models import ThreatCatalogEntry
+
+    missing = [p["threat_id"] for p in register_coverage(plant)["pairs"]
+               if p["asset_type"] == asset_type and p["state"] == "missing"]
+    return list(ThreatCatalogEntry.objects.filter(pk__in=missing).order_by("code"))
+
+
+def ai_identification_links(plant) -> dict:
+    """Processi BIA e obiettivi aziendali che una proposta può richiamare per numero."""
+    from apps.bia.models import CriticalProcess
+    from django.db.models import Q
+
+    from .models import BusinessObjective
+
+    processes = list(CriticalProcess.objects.filter(plant=plant).order_by("-criticality", "name")[:15]) \
+        if plant is not None else []
+    objectives = list(
+        BusinessObjective.objects.filter(Q(plant__isnull=True) | Q(plant=plant), active=True)
+        .order_by("order", "name")
+    )
+    return {"processes": processes, "objectives": objectives}
+
+
+def risk_identification_context(plant, asset_type: str, links: dict, lang: str = "it") -> dict:
+    """Quello che il programma sa del registro per decidere quali minacce si
+    applicano. Solo dati aggregati o di inventario: nessuna persona."""
+    import datetime
+
+    from django.db.models import Count, Q
+
+    from apps.assets.models import Asset
+    from apps.incidents.models import Incident
+    from apps.suppliers.models import Supplier
+
+    from .models import InformationClass
+
+    ctx = {
+        "registro": plant.name if plant else "gruppo (servizi condivisi)",
+        "paese": plant.country if plant else None,
+        "nis2": bool(plant and plant.is_nis2_subject),
+        "ha_ot": bool(plant and plant.has_ot),
+        "tipologia_asset": asset_type,
+        "tipologie_presenti": asset_types_present(plant),
+        "processi_bia": [
+            {"n": i, "nome": p.name, "criticita": p.criticality, "rto_ore": p.rto_target_hours,
+             "mtpd_ore": p.mtpd_hours}
+            for i, p in enumerate(links["processes"], start=1)
+        ],
+        "obiettivi_aziendali": [
+            {"n": i, "nome": o.name, "dimensioni": o.impact_dimensions}
+            for i, o in enumerate(links["objectives"], start=1)
+        ],
+        "informazioni_riservate": [
+            {"nome": ic.name, "riservatezza": ic.confidentiality}
+            for ic in InformationClass.objects.filter(
+                Q(plant__isnull=True) | Q(plant=plant), confidentiality__in=("high", "very_high"),
+            )[:15]
+        ],
+    }
+    kinds = _COVERAGE_ASSET_KINDS.get(asset_type)
+    if kinds and plant is not None:
+        assets = Asset.objects.filter(plant=plant, asset_type__in=kinds)
+        ctx["asset"] = {
+            "totale": assets.count(),
+            "piu_critici": [{"nome": a.name, "criticita": a.criticality}
+                            for a in assets.order_by("-criticality", "name")[:15]],
+        }
+    if asset_type == "FORNITORI":
+        suppliers = Supplier.objects.filter(status="attivo")
+        if plant is not None:
+            suppliers = suppliers.filter(Q(plants=plant) | Q(plants__isnull=True)).distinct()
+        ctx["fornitori"] = {
+            "attivi": suppliers.count(),
+            "per_livello_rischio": dict(
+                suppliers.order_by().values_list("risk_level").annotate(n=Count("pk", distinct=True))
+            ),
+        }
+    if plant is not None:
+        since = timezone.now() - datetime.timedelta(days=730)
+        ctx["incidenti_24_mesi"] = [
+            {"categoria": row["incident_category"] or "non classificato", "gravita": row["severity"], "numero": row["n"]}
+            for row in Incident.objects.filter(plant=plant, detected_at__gte=since).order_by()
+            .values("incident_category", "severity").annotate(n=Count("pk"))
+        ]
+    return ctx
+
+
+def validate_ai_identification(items, threats: list, links: dict) -> list:
+    """Proposte ripulite, una per minaccia scoperta: applicabile con la bozza
+    della valutazione, oppure non applicabile con il motivo. Solo minacce della
+    richiesta; processi e obiettivi solo fra quelli forniti."""
+    by_code = {t.code: t for t in threats}
+    out, seen = [], set()
+    for item in items if isinstance(items, list) else []:
+        if not isinstance(item, dict):
+            continue
+        threat = by_code.get(str(item.get("threat") or "").strip())
+        if threat is None or threat.pk in seen:
+            continue
+        seen.add(threat.pk)
+        applicable = item.get("applicable") is not False
+        row = {"threat_id": str(threat.pk), "threat_code": threat.code, "applicable": applicable,
+               "reason": _clip(item.get("reason"), 600)}
+        if applicable:
+            row["proposal"] = validate_ai_draft(item)
+            idx = item.get("process")
+            processes = links["processes"]
+            row["critical_process"] = (str(processes[idx - 1].pk)
+                                       if isinstance(idx, int) and 1 <= idx <= len(processes) else None)
+            objectives = links["objectives"]
+            row["business_objectives"] = [
+                str(objectives[n - 1].pk) for n in dict.fromkeys(item.get("objectives") or [])
+                if isinstance(n, int) and 1 <= n <= len(objectives)
+            ][:3]
+        elif not row["reason"]:
+            continue  # "non applicabile" senza motivo non si può dichiarare (§6.5)
+        out.append(row)
+    return out
+
+
+_AI_IDENTIFY_FIELDS = (
+    "vulnerability", "consequence", "probability", "probability_method", "probability_rationale",
+    *(f"impact_{d}" for d in IMPACT_DIMENSIONS), "impact_rationale",
+    "treatment", "treatment_rationale", "expected_probability", "expected_impact",
+)
+
+
+def apply_ai_identification(user, plant, asset_type: str, items: list) -> dict:
+    """Registra le proposte di identificazione scelte dall'utente: rischi in
+    bozza nel ciclo in corso o coppie non applicabili. Le coppie nel frattempo
+    coperte si saltano; il resto passa dalle stesse regole dell'inserimento a
+    mano (create_risk / mark_not_applicable)."""
+    from apps.bia.models import CriticalProcess
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    from .models import BusinessObjective
+
+    require_register_write(user, plant)
+    cycle = _require_evaluation_cycle(plant)
+    if not isinstance(items, list) or not items:
+        raise _err(_("Seleziona almeno una proposta."))
+    open_threats = {str(t.pk): t for t in ai_identification_threats(plant, asset_type)}
+    created, not_applicable, skipped = [], 0, 0
+    with transaction.atomic():
+        for item in items:
+            threat = open_threats.pop(str((item or {}).get("threat_id")), None) if isinstance(item, dict) else None
+            if threat is None:
+                skipped += 1
+                continue
+            if item.get("applicable") is False:
+                mark_not_applicable(user, plant, asset_type, threat, str(item.get("reason") or ""))
+                not_applicable += 1
+                continue
+            proposal = item.get("proposal") if isinstance(item.get("proposal"), dict) else {}
+            data = {k: proposal[k] for k in _AI_IDENTIFY_FIELDS if k in proposal}
+            data = validate_ai_draft({**data, "impacts": {d: data.pop(f"impact_{d}", None) for d in IMPACT_DIMENSIONS}})
+            data.update({"asset_type": asset_type, "threat": threat})
+            if item.get("critical_process") and plant is not None:
+                data["critical_process"] = CriticalProcess.objects.filter(
+                    pk=item["critical_process"], plant=plant).first()
+            objective_ids = [str(i) for i in item.get("business_objectives") or []][:3]
+            if objective_ids:
+                data["business_objectives"] = list(BusinessObjective.objects.filter(pk__in=objective_ids, active=True))
+            created.append(create_risk(user, plant, data))
+        log_action(
+            user=user, action_code="risk.ai.identification_applied", level="L2", entity=cycle,
+            payload={"asset_type": asset_type, "created": len(created), "not_applicable": not_applicable,
+                     "skipped": skipped},
+        )
+    return {"created": [str(r.pk) for r in created], "not_applicable": not_applicable, "skipped": skipped}
+
+
 def register_consistency_checks(plant=None) -> list:
     """Controlli di coerenza deterministici del registro proprio (gratuiti e
     ripetibili), prima dell'invio in approvazione. Ritorna codici + parametri:

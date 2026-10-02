@@ -3507,3 +3507,6 @@ msgstr "Group risks concerning the site (assessed by the group, not summed)"
 
 msgid "Accettato"
 msgstr "Accepted"
+
+msgid "Seleziona almeno una proposta."
+msgstr "Select at least one proposal."
