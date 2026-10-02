@@ -219,8 +219,10 @@ def kpi_threshold_advisor(context=None):
     from apps.management_review.services import get_operational_kpi_summary
 
     plant_ids = (
+        # order_by() vuoto: con l'ordinamento di default (-week_start) la DISTINCT
+        # restituiva un sito per ogni settimana e duplicava gli insight.
         OperationalKpiSnapshot.objects.filter(plant_id__isnull=False, deleted_at__isnull=True)
-        .values_list("plant_id", flat=True).distinct()
+        .order_by().values_list("plant_id", flat=True).distinct()
     )
     out = []
     for pid in plant_ids:

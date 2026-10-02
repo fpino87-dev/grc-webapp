@@ -556,3 +556,27 @@ class TestAI:
     def test_assistant_endpoint_requires_question(self, client):
         resp = client.post("/api/v1/cockpit/assistant/", {}, format="json")
         assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_kpi_threshold_advisor_one_insight_per_plant(monkeypatch):
+    """Più settimane di snapshot dello stesso sito: un solo insight (la DISTINCT
+    con l'ordinamento di default restituiva il sito una volta per settimana)."""
+    from datetime import date
+
+    from apps.cockpit.advisors_builtin import kpi_threshold_advisor
+    from apps.plants.models import Plant
+    from apps.tasks.models import KPIDefinition, OperationalKpiSnapshot
+
+    plant = Plant.objects.create(code="CKK1", name="KpiPlant", country="IT", nis2_scope="essenziale", status="attivo")
+    kpi = KPIDefinition.objects.create(kpi_code="kpi_x", name="KPI", unit="%", source="manual", plant=plant,
+                                       threshold_warning=90.0, threshold_critical=75.0, threshold_direction="above")
+    for week in (date(2026, 1, 5), date(2026, 1, 12), date(2026, 1, 19)):
+        OperationalKpiSnapshot.objects.create(kpi_definition=kpi, plant=plant, week_start=week,
+                                              value=50.0, status="critical", source="manual")
+    monkeypatch.setattr(
+        "apps.management_review.services.get_operational_kpi_summary",
+        lambda pid: {"attention": 1, "status_counts": {"critical": 1}, "total": 1},
+    )
+    out = kpi_threshold_advisor()
+    assert len([i for i in out if i.plant_id == str(plant.pk)]) == 1

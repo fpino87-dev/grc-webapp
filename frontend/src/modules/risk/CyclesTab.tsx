@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { riskApi, type Cycle } from "../../api/endpoints/risk";
+import { riskApi, type Cycle, type Risk } from "../../api/endpoints/risk";
 import type { RegisterId } from "./RiskPage";
 
 /** Valutazioni del registro: cicli, approvazioni e valutazione precedente archiviata. */
-export function CyclesTab({ registerId, cycles }: { registerId: RegisterId; cycles: Cycle[] }) {
+export function CyclesTab({ registerId, cycles, onOpen }: {
+  registerId: RegisterId; cycles: Cycle[]; onOpen: (riskId: string) => void;
+}) {
   const { t, i18n } = useTranslation();
   const [showLegacy, setShowLegacy] = useState(false);
   const { data: legacy = [] } = useQuery({
@@ -42,7 +44,8 @@ export function CyclesTab({ registerId, cycles }: { registerId: RegisterId; cycl
             </thead>
             <tbody className="divide-y divide-gray-100">
               {cycles.map(c => (
-                <tr key={c.id}>
+                <Fragment key={c.id}>
+                <tr>
                   <td className="px-3 py-2">
                     {t(`risk.cycle.kinds.${c.kind}`)}
                     {c.trigger_reason && <span className="block text-[11px] text-gray-400 truncate max-w-xs" title={c.trigger_reason}>{c.trigger_reason}</span>}
@@ -67,6 +70,14 @@ export function CyclesTab({ registerId, cycles }: { registerId: RegisterId; cycl
                     )}
                   </td>
                 </tr>
+                {c.kind === "legacy" && showLegacy && (
+                  <tr>
+                    <td colSpan={6} className="p-0">
+                      <LegacyTable risks={legacy} onOpen={onOpen} />
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -74,36 +85,43 @@ export function CyclesTab({ registerId, cycles }: { registerId: RegisterId; cycl
       </div>
       <p className="text-xs text-gray-500">{t("risk.cycles.hint")}</p>
 
-      {showLegacy && (
-        <div className="bg-white rounded-lg border border-amber-200 overflow-hidden">
-          <p className="px-4 py-2 text-xs bg-amber-50 text-amber-800">{t("risk.legacy.hint")}</p>
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b text-xs text-gray-600">
-              <tr>
-                <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.name")}</th>
-                <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.inherent_score")}</th>
-                <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.score")}</th>
-                <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.treatment")}</th>
-                <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.accepted")}</th>
+    </div>
+  );
+}
+
+/** Registro con il metodo superato: sola lettura, clic = scheda con i valori congelati. */
+function LegacyTable({ risks, onOpen }: { risks: Risk[]; onOpen: (riskId: string) => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="bg-amber-50/40 border-t border-amber-200">
+      <p className="px-4 py-2 text-xs text-amber-800">{t("risk.legacy.hint")}</p>
+      <table className="w-full text-sm">
+        <thead className="border-y border-amber-200 text-xs text-gray-600">
+          <tr>
+            <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.name")}</th>
+            <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.probability_impact")}</th>
+            <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.inherent_score")}</th>
+            <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.score")}</th>
+            <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.treatment")}</th>
+            <th className="text-left px-3 py-2 font-medium">{t("risk.legacy.accepted")}</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-amber-100 bg-white">
+          {risks.map(r => {
+            const s = r.legacy_snapshot as Record<string, string | number | boolean | null>;
+            return (
+              <tr key={r.id} onClick={() => onOpen(r.id)} className="cursor-pointer hover:bg-amber-50">
+                <td className="px-3 py-2">{r.name}</td>
+                <td className="px-3 py-2 text-xs">{`${s.probability ?? "—"} × ${s.impact ?? "—"}`}</td>
+                <td className="px-3 py-2 text-xs">{s.inherent_score ?? "—"}</td>
+                <td className="px-3 py-2 text-xs">{s.score ?? "—"}</td>
+                <td className="px-3 py-2 text-xs">{s.treatment ? t(`risk.treatment_${s.treatment}`) : "—"}</td>
+                <td className="px-3 py-2 text-xs">{s.risk_accepted_formally ? t("common.yes") : t("common.no")}</td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {legacy.map(r => {
-                const s = r.legacy_snapshot as Record<string, string | number | boolean | null>;
-                return (
-                  <tr key={r.id}>
-                    <td className="px-3 py-2">{r.name}</td>
-                    <td className="px-3 py-2 text-xs">{s.inherent_score ?? "—"}</td>
-                    <td className="px-3 py-2 text-xs">{s.score ?? "—"}</td>
-                    <td className="px-3 py-2 text-xs">{s.treatment ? t(`risk.treatment_${s.treatment}`) : "—"}</td>
-                    <td className="px-3 py-2 text-xs">{s.risk_accepted_formally ? t("common.yes") : t("common.no")}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

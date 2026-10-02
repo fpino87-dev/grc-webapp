@@ -30,12 +30,16 @@ def forwards(apps, schema_editor):
     RiskDimension = apps.get_model("risk", "RiskDimension")
 
     now = timezone.now()
-    plant_ids = (
+    # order_by() vuoto: l'ordinamento di default del model entrerebbe nella
+    # DISTINCT e restituirebbe un "sito" per ogni rischio (un ciclo per rischio).
+    plant_ids = set(
         RiskAssessment.objects.filter(cycle__isnull=True)
-        .values_list("plant_id", flat=True).distinct()
+        .order_by().values_list("plant_id", flat=True).distinct()
     )
     for plant_id in plant_ids:
         risks = RiskAssessment.objects.filter(plant_id=plant_id, cycle__isnull=True)
+        if not risks.exists():
+            continue
         first = risks.order_by("created_at").values_list("created_at", flat=True).first()
         cycle = RiskAssessmentCycle.objects.create(
             plant_id=plant_id,

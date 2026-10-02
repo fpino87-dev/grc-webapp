@@ -97,7 +97,9 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         params = self.request.query_params
         if params.get("legacy") == "1":
             qs = qs.filter(cycle__kind="legacy")
-        else:
+        elif self.action != "retrieve":
+            # La scheda (retrieve) apre anche i rischi del metodo superato, in sola
+            # lettura; scritture e azioni li rifiutano (services.is_legacy).
             qs = qs.exclude(cycle__kind="legacy")
         plant = params.get("plant")
         if plant == "null":

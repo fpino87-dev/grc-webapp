@@ -692,3 +692,18 @@ def test_register_attention_endpoint(org_user, plant):
     resp = _client(org_user).get(f"/api/v1/risk/assessments/attention/?plant={plant.pk}")
     assert resp.status_code == 200
     assert set(resp.data) == {"critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"}
+
+
+@pytest.mark.django_db
+def test_legacy_risk_readable_not_writable(org_user, plant):
+    from apps.risk.models import RiskAssessment, RiskAssessmentCycle
+
+    legacy = RiskAssessmentCycle.objects.create(plant=plant, kind="legacy", status="archiviato",
+                                                started_at=timezone.now(), closed_at=timezone.now())
+    risk = RiskAssessment.objects.create(plant=plant, cycle=legacy, name="Vecchio", legacy_snapshot={"score": 12})
+    c = _client(org_user)
+    resp = c.get(f"/api/v1/risk/assessments/{risk.pk}/")
+    assert resp.status_code == 200 and resp.data["is_legacy"] is True
+    assert c.patch(f"/api/v1/risk/assessments/{risk.pk}/", {"name": "X"}, format="json").status_code == 404
+    listed = c.get(f"/api/v1/risk/assessments/?plant={plant.pk}").data["results"]
+    assert str(risk.pk) not in [r["id"] for r in listed]

@@ -190,7 +190,7 @@ export function RiskPage() {
       )}
       {ready && tab === "plan" && <PlanTab registerId={registerId} onOpen={setOpenRiskId} />}
       {ready && tab === "acceptances" && <AcceptancesTab registerId={registerId} onOpen={setOpenRiskId} />}
-      {ready && tab === "cycles" && <CyclesTab registerId={registerId} cycles={cycles} />}
+      {ready && tab === "cycles" && <CyclesTab registerId={registerId} cycles={cycles} onOpen={setOpenRiskId} />}
       {ready && tab === "settings" && policy && (
         <SettingsTab registerId={registerId} policy={policy} plants={plants} />
       )}
