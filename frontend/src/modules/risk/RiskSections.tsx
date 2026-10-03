@@ -4,19 +4,30 @@ import { useTranslation } from "react-i18next";
 import { AiMeasuresButton } from "./RiskAi";
 import { apiError, riskApi, type Acceptance, type MitigationPlan, type Risk } from "../../api/endpoints/risk";
 import { controlsApi } from "../../api/endpoints/controls";
+import { plantsApi } from "../../api/endpoints/plants";
 import { usersApi } from "../../api/endpoints/users";
 import { governanceApi } from "../../api/endpoints/governance";
 import { useAuthStore } from "../../store/auth";
 import { MixedOwnerField } from "./MixedOwnerField";
 import { ClassBadge, ErrorBox, Field, Section, inputCls } from "./RiskUi";
 
+// Controlli collegabili a una misura: quelli del sito del registro; per un
+// rischio di gruppo quelli di tutti i siti visibili, col codice del sito
+// davanti (il backend lo ammette, il gruppo vale per ogni sito).
 function useControls(plantId: string | null) {
-  return useQuery({
+  const { data: controls } = useQuery({
     queryKey: ["control-instances", plantId],
     queryFn: () => controlsApi.instances(plantId ? { plant: plantId } : {}),
-    enabled: !!plantId,
     retry: false,
   });
+  const { data: plants = [] } = useQuery({
+    queryKey: ["plants"], queryFn: () => plantsApi.list(), enabled: !plantId, retry: false,
+  });
+  const codes = new Map(plants.map(p => [p.id, p.code]));
+  return (controls?.results ?? []).map(c => ({
+    id: c.id,
+    label: `${plantId ? "" : `[${codes.get(c.plant) ?? "?"}] `}${c.control_external_id} ${c.control_title}`,
+  }));
 }
 
 const fmt = (d: string | null | undefined, lang: string) => (d ? new Date(d).toLocaleDateString(lang) : "—");
@@ -31,7 +42,7 @@ export function MeasuresSection({ risk, editable }: { risk: Risk; editable: bool
   const { data: measures = [] } = useQuery({
     queryKey: ["risk-measures", risk.id], queryFn: () => riskApi.measures(risk.id), retry: false,
   });
-  const { data: controls } = useControls(risk.plant);
+  const controls = useControls(risk.plant);
   const refresh = () => qc.invalidateQueries({ queryKey: ["risk-measures", risk.id] });
   const add = useMutation({
     mutationFn: () => riskApi.createMeasure({
@@ -61,9 +72,9 @@ export function MeasuresSection({ risk, editable }: { risk: Risk; editable: bool
       {editable && (
         <div className="grid grid-cols-6 gap-2 items-start">
           <select value={form.control_instance} onChange={e => setForm({ ...form, control_instance: e.target.value })}
-            className={`${inputCls} col-span-2`} disabled={!risk.plant}>
+            className={`${inputCls} col-span-2`}>
             <option value="">{t("risk.drawer.no_control")}</option>
-            {(controls?.results ?? []).map(c => <option key={c.id} value={c.id}>{c.control_external_id} {c.control_title}</option>)}
+            {controls.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
           <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
             className={`${inputCls} col-span-2`} placeholder={t("risk.drawer.measure_description")} />
@@ -96,7 +107,7 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
     queryKey: ["risk-plans", risk.id], queryFn: () => riskApi.plans({ assessment: risk.id }), retry: false,
   });
   const { data: users = [] } = useQuery({ queryKey: ["users"], queryFn: () => usersApi.list(), retry: false });
-  const { data: controls } = useControls(risk.plant);
+  const controls = useControls(risk.plant);
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["risk-plans", risk.id] });
     qc.invalidateQueries({ queryKey: ["risk", risk.id] });
@@ -211,9 +222,9 @@ export function PlanSection({ risk, canMonitor }: { risk: Risk; canMonitor: bool
               {["probabilita", "impatto", "entrambi"].map(x => <option key={x} value={x}>{t(`risk.effect.${x}`)}</option>)}
             </select>
             <select value={form.control_instance} onChange={e => setForm({ ...form, control_instance: e.target.value })}
-              className={inputCls} disabled={!risk.plant}>
+              className={inputCls}>
               <option value="">{t("risk.drawer.no_control")}</option>
-              {(controls?.results ?? []).map(c => <option key={c.id} value={c.id}>{c.control_external_id} {c.control_title}</option>)}
+              {controls.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
             </select>
             <MixedOwnerField users={users} userId={form.owner || null} external={form.owner_external} small
               noneLabel={t("risk.drawer.measure_owner")}

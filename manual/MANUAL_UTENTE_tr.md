@@ -448,7 +448,7 @@ Yan kartı açmak için bir riske tıklayın:
 
 - **Tanımlama**: tehdit, varlık veya varlık grubu, tedarikçi, BIA süreci, **etkilenen bilgiler** (bilgi sınıfları), zafiyet ve iş hedefleri üzerindeki sonuç
 - **Değerlendirme**: olasılık (geçmiş sıklık veya maruziyet faktörü) ve altı boyutta etki — ekonomik, yasal, müşteri ve sözleşme, itibar, kişilerin güvenliği, operasyonel — **her seviyenin yanında prosedür kriterleriyle**. Etki en kötü durumdur; gizlilik tehdidinde etkilenen bilgilerin koruma sınıfının altına düşmez. **Sınıf** (Very Low, Low, Medium, High, Critical) P × E çarpımından değil matristen okunur; yalnızca gerekçeyle bir seviye kaydırabilirsiniz
-- Etkinlikleriyle birlikte **mevcut önlemler**, isteğe bağlı olarak kontrollere bağlı
+- Etkinlikleriyle birlikte **mevcut önlemler**, isteğe bağlı olarak kontrollere bağlı (sahanın; grup riski için köşeli parantez içinde belirtilen herhangi bir sahanın kontrollerine)
 - **İşlem**: kaçınma, azaltma, transfer veya kabul; gerekçe ve **beklenen risk** ile; Risk Sahibi (iş sorumlusu) ve işlem sorumlusu (portal kullanıcısı veya serbest metin)
 - **NIS2**: kapsam, madde 21(2) alanı, etkilenen sistemler, olası ciddi olay
 

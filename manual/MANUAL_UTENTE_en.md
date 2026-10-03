@@ -448,7 +448,7 @@ Click a risk to open the side card:
 
 - **Identification**: threat, asset or group of assets, supplier, BIA process, **affected information** (information classes), vulnerability and consequence on business objectives
 - **Assessment**: probability (historical frequency or exposure factor) and impact on six dimensions — economic, legal, customer and contractual, reputational, people safety, operational — with the **procedure criteria next to each level**. Impact is the worst case; with a confidentiality threat it cannot fall below the protection class of the affected information. The **class** (Very Low, Low, Medium, High, Critical) is read from the matrix, not from the P × I product; you can move it by one level only with a rationale
-- **Existing measures** with their effectiveness, also linked to controls
+- **Existing measures** with their effectiveness, also linked to controls (of the site; for a group risk, to controls of any site, shown in square brackets)
 - **Treatment**: avoid, mitigate, transfer or accept, with rationale and **expected risk**; Risk Owner (business manager) and treatment owner (portal user or free text)
 - **NIS2**: scope, art. 21(2) area, impacted systems, possible significant incident
 

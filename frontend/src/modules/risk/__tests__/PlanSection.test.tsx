@@ -12,6 +12,7 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock("../../../api/endpoints/risk", () => ({ apiError: (_e: unknown, f: string) => f, riskApi: api }));
 vi.mock("../../../api/endpoints/controls", () => ({ controlsApi: { instances: vi.fn(() => Promise.resolve({ results: [] })) } }));
+vi.mock("../../../api/endpoints/plants", () => ({ plantsApi: { list: vi.fn(() => Promise.resolve([])) } }));
 vi.mock("../../../api/endpoints/users", () => ({ usersApi: { list: vi.fn(() => Promise.resolve([])) } }));
 vi.mock("../../../api/endpoints/governance", () => ({ governanceApi: { committees: vi.fn(() => Promise.resolve([])) } }));
 vi.mock("../RiskAi", () => ({ AiMeasuresButton: () => null }));

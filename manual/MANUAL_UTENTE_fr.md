@@ -448,7 +448,7 @@ Cliquez sur un risque pour ouvrir la fiche latérale :
 
 - **Identification** : menace, actif ou groupe d'actifs, fournisseur, processus BIA, **informations touchées** (classes d'informations), vulnérabilité et conséquence sur les objectifs de l'entreprise
 - **Évaluation** : probabilité (fréquence historique ou facteur d'exposition) et impact sur six dimensions — économique, juridique, client et contractuel, réputation, sécurité des personnes, opérationnel — avec les **critères de la procédure à côté de chaque niveau**. L'impact est le pire cas ; pour une menace sur la confidentialité il ne descend pas sous la classe de protection des informations touchées. La **classe** (Very Low, Low, Medium, High, Critical) se lit dans la matrice et non dans le produit P × I ; vous pouvez la déplacer d'un niveau uniquement avec une justification
-- **Mesures existantes** avec leur efficacité, éventuellement liées aux contrôles
+- **Mesures existantes** avec leur efficacité, éventuellement liées aux contrôles (du site ; pour un risque de groupe, aux contrôles de n'importe quel site, indiqué entre crochets)
 - **Traitement** : éviter, atténuer, transférer ou accepter, avec justification et **risque attendu** ; Risk Owner (responsable métier) et responsable du traitement (utilisateur du portail ou texte libre)
 - **NIS2** : périmètre, domaine art. 21(2), systèmes impactés, incident important possible
 
