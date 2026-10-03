@@ -368,6 +368,44 @@ def test_wrong_risk_becomes_not_applicable(org_user, plant, threats, cycle):
 
 
 @pytest.mark.django_db
+def test_migration_moves_remote_access_threats_to_single_asset_type(org_user, plant, cycle):
+    import importlib
+
+    from django.apps import apps as django_apps
+
+    from apps.assets.models import AssetIT
+    from apps.risk.models import RiskAssessment, RiskExistingMeasure
+    from apps.suppliers.models import Supplier
+
+    def mk(code, types):
+        return ThreatCatalogEntry.objects.create(code=code, asset_types=types, cia=["C", "I", "A"], source="catalog",
+                                                 translations={"it": {"title": code}})
+    fo, ot = mk("FO_RMT", ["FORNITORI", "IT"]), mk("OT_RMT", ["OT", "FORNITORI"])
+    server = AssetIT.objects.create(plant=plant, name="Server MES", asset_type="IT")
+    it_risk = _completed_risk(org_user, plant, fo, asset=server)
+    RiskExistingMeasure.objects.create(risk=it_risk, description="VPN con MFA")
+    na_dup = services.mark_not_applicable(org_user, plant, "FORNITORI", fo, "Valutato come IT")
+    vendor = Supplier.objects.create(name="Manutentore PLC")
+    ot_risk = _completed_risk(org_user, plant, ot, asset_type="FORNITORI", supplier=vendor)
+
+    migration = importlib.import_module("apps.risk.migrations.0023_remote_access_single_asset_type")
+    migration.forwards(django_apps, None)
+
+    fo.refresh_from_db()
+    ot.refresh_from_db()
+    assert fo.asset_types == ["FORNITORI"] and ot.asset_types == ["OT"]
+    it_risk.refresh_from_db()
+    assert it_risk.asset_type == "FORNITORI" and it_risk.asset_id is None
+    assert it_risk.asset_group_label == "Server MES" and it_risk.status == "completato"
+    assert it_risk.existing_measures.count() == 1  # valutazione e misure intatte
+    assert not RiskAssessment.objects.filter(pk=na_dup.pk).exists()  # non applicabilità doppia archiviata
+    ot_risk.refresh_from_db()
+    assert ot_risk.asset_type == "OT" and ot_risk.supplier_id is None and ot_risk.asset_group_label == "Manutentore PLC"
+    states = {(p["asset_type"], p["threat_code"]): p["state"] for p in services.register_coverage(plant)["pairs"]}
+    assert states.get(("FORNITORI", "FO_RMT")) == "evaluated" and ("IT", "FO_RMT") not in states
+
+
+@pytest.mark.django_db
 def test_submit_requires_full_coverage_then_approve_freezes_snapshot(org_user, plant, threats, cycle):
     from apps.governance.models import SecurityCommittee
 

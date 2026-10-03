@@ -199,8 +199,7 @@
     {
       "code": "FO_RMT",
       "asset_types": [
-        "FORNITORI",
-        "IT"
+        "FORNITORI"
       ],
       "cia": [
         "C",
@@ -1164,8 +1163,7 @@
     {
       "code": "OT_RMT",
       "asset_types": [
-        "OT",
-        "FORNITORI"
+        "OT"
       ],
       "cia": [
         "C",
