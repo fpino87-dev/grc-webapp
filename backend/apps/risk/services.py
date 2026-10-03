@@ -1008,6 +1008,20 @@ def mark_not_applicable(user, plant, asset_type: str, threat, reason: str):
     return risk
 
 
+def convert_to_not_applicable(user, risk, reason: str):
+    """Rischio inserito per errore: lo toglie dal registro e dichiara la coppia
+    tipologia × minaccia non applicabile, in un solo passo (§6.5)."""
+    from django.utils.translation import gettext as _
+
+    if not risk.applicable:
+        raise _err(_("Il rischio è già dichiarato non applicabile."))
+    if not (reason or "").strip():
+        raise _err(_("Motiva perché la minaccia non è applicabile."))
+    with transaction.atomic():
+        delete_risk(user, risk)
+        return mark_not_applicable(user, risk.plant, risk.asset_type, risk.threat, reason)
+
+
 def delete_risk(user, risk) -> None:
     """Toglie un rischio dal registro durante una valutazione in corso."""
     from django.utils.translation import gettext as _

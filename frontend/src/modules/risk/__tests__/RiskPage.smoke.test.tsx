@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { RiskPage } from "../RiskPage";
@@ -15,6 +15,7 @@ vi.mock("../../../components/ui/ModuleHelp", () => ({ ModuleHelp: () => null }))
 vi.mock("../../../lib/scrollAndHighlight", () => ({ scrollAndHighlight: vi.fn() }));
 vi.mock("../RiskIntegratedRegisters", () => ({ RiskIntegratedRegisters: () => null }));
 
+const convertNa = vi.hoisted(() => vi.fn(() => Promise.resolve({})));
 const { policy, risk, cycle } = vi.hoisted(() => {
 const CLASSES = ["very_low", "low", "medium", "high", "critical"];
 const rule = { roles: ["risk_owner"], scope: "plant", requires_body: false };
@@ -71,6 +72,7 @@ vi.mock("../../../api/endpoints/risk", () => {
       plans: ok([{ id: "m1", assessment: "r1", action: "EDR", owner: null, owner_external: "MSP", owner_name: "MSP", due_date: "2020-01-01", expected_effect: "probabilita", bcp_plan: null, bcp_plan_title: null, bcp_plan_status: null, control_instance: null, control_title: null, completed_at: null, verified_at: null, verified_by: null, verified_by_name: null, verification_note: "", escalation_level: 1, created_at: "" }]),
       acceptances: ok([]), acceptanceRequirements: ok({ class: "critical", roles: [], scope: "org", requires_body: true, notify: [], upper_opinion: "binding", max_months: 6, not_acceptable: false }),
       localImpactReports: ok([]), exportExcel: ok({ data: "" }), exportCycle: ok({ data: "" }),
+      convertNotApplicable: convertNa, remove: ok({}),
     },
   };
 });
@@ -107,5 +109,13 @@ describe("RiskPage", () => {
     expect(await screen.findByText("risk.drawer.no_security_objectives")).toBeTruthy();
     // niente più correzione manuale della classe
     expect(screen.queryByText("risk.drawer.override")).toBeNull();
+    // rischio inserito per errore: Elimina in testata e conversione in non applicabile con motivo
+    expect(within(screen.getByRole("banner")).getByText("common.delete")).toBeTruthy();
+    fireEvent.click(screen.getByText("risk.drawer.make_not_applicable"));
+    const confirmNa = screen.getByText("risk.drawer.make_not_applicable_confirm");
+    expect(confirmNa).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("risk.drawer.not_applicable_reason"), { target: { value: "Nessun MES nel sito" } });
+    fireEvent.click(confirmNa);
+    await waitFor(() => expect(convertNa).toHaveBeenCalledWith("r1", "Nessun MES nel sito"));
   });
 });

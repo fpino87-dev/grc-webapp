@@ -3536,7 +3536,13 @@
       "acceptance_reason": "Acceptance rationale",
       "acceptance_reason_hint": "Why the residual risk is acceptable with the existing measures.",
       "acceptance_reason_hint_high": "Required: cost of further measures versus the achievable reduction (cost/benefit analysis).",
-      "temporary_acceptance": "Temporary acceptance of the exposure while the measures are implemented"
+      "temporary_acceptance": "Temporary acceptance of the exposure while the measures are implemented",
+      "make_not_applicable": "Not applicable",
+      "make_not_applicable_hint": "Risk entered by mistake: it leaves the register (with measures and plan) and the threat is recorded as not applicable to this asset type. A reason that can be checked against the data is required.",
+      "make_not_applicable_confirm": "Declare not applicable",
+      "not_applicable_reason": "Why the threat does not apply (e.g. no exposed asset)",
+      "delete_na_confirm": "Remove the not-applicable declaration? The threat goes back to be assessed in Coverage.",
+      "not_applicable_undo_hint": "To assess it again use Delete: the threat goes back to be assessed in the Coverage tab."
     },
     "register": {
       "search": "Search",

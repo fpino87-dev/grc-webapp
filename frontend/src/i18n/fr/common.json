@@ -3536,7 +3536,13 @@
       "acceptance_reason": "Justification de l'acceptation",
       "acceptance_reason_hint": "Pourquoi le risque résiduel est acceptable avec les mesures existantes.",
       "acceptance_reason_hint_high": "Obligatoire : coût des mesures supplémentaires par rapport à la réduction possible (analyse coûts/bénéfices).",
-      "temporary_acceptance": "Acceptation temporaire de l'exposition pendant la mise en œuvre des mesures"
+      "temporary_acceptance": "Acceptation temporaire de l'exposition pendant la mise en œuvre des mesures",
+      "make_not_applicable": "Non applicable",
+      "make_not_applicable_hint": "Risque saisi par erreur : il sort du registre (avec mesures et plan) et la menace est déclarée non applicable à ce type d'actif. Un motif vérifiable à partir des données est requis.",
+      "make_not_applicable_confirm": "Déclarer non applicable",
+      "not_applicable_reason": "Pourquoi la menace ne s'applique pas (ex. aucun actif exposé)",
+      "delete_na_confirm": "Retirer la déclaration de non-applicabilité ? La menace redevient à évaluer dans la Couverture.",
+      "not_applicable_undo_hint": "Pour l'évaluer à nouveau, utilisez Supprimer : la menace redevient à évaluer dans l'onglet Couverture."
     },
     "register": {
       "search": "Rechercher",

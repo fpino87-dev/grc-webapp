@@ -440,7 +440,7 @@ Rejestr sprzed nowej procedury pozostaje dostępny tylko do odczytu w zakładce 
 
 ### Pokrycie i nowe ryzyko
 
-Zakładka **Pokrycie** zestawia typy aktywów obecnych w zakładzie (IT, OT, zakład, personel, dostawcy, prototypy) z **katalogiem zagrożeń**: każda para musi być **oceniona** lub oznaczona jako **nie dotyczy** z uzasadnieniem. **Nowe ryzyko** zawsze zaczyna się od katalogu: wybierz typ i zagrożenie, a następnie dokończ ocenę w karcie ryzyka. Z BIA przycisk **Utwórz ryzyko** otwiera ryzyko już powiązane z procesem. Nazwa scenariusza jest opcjonalna: jeśli pozostanie pusta, każdy użytkownik widzi tytuł zagrożenia we własnym języku.
+Zakładka **Pokrycie** zestawia typy aktywów obecnych w zakładzie (IT, OT, zakład, personel, dostawcy, prototypy) z **katalogiem zagrożeń**: każda para musi być **oceniona** lub oznaczona jako **nie dotyczy** z uzasadnieniem. **Nowe ryzyko** zawsze zaczyna się od katalogu: wybierz typ i zagrożenie, a następnie dokończ ocenę w karcie ryzyka. Z BIA przycisk **Utwórz ryzyko** otwiera ryzyko już powiązane z procesem. Nazwa scenariusza jest opcjonalna: jeśli pozostanie pusta, każdy użytkownik widzi tytuł zagrożenia we własnym języku. Ryzyko wprowadzone przez pomyłkę usuwa się z nagłówka karty: **Usuń** (zagrożenie wraca do oceny) albo **Nie dotyczy** z powodem (wychodzi z rejestru ze środkami i planem, a zagrożenie zostaje oznaczone jako nie dotyczy). Oznaczenie „nie dotyczy” również cofa się przyciskiem **Usuń**.
 
 ### Karta ryzyka
 

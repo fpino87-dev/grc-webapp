@@ -3550,3 +3550,6 @@ msgstr "Oczekiwany wpływ nie może spaść poniżej %(floor)s: zagrożenie doty
 #, python-format
 msgid "Impatto atteso portato a %(floor)s: è la soglia di riservatezza delle informazioni colpite."
 msgstr "Oczekiwany wpływ podniesiony do %(floor)s: to próg poufności informacji, których dotyczy zagrożenie."
+
+msgid "Il rischio è già dichiarato non applicabile."
+msgstr "Ryzyko jest już oznaczone jako nie dotyczy."

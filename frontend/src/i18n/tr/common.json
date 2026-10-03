@@ -3536,7 +3536,13 @@
       "acceptance_reason": "Kabul gerekçesi",
       "acceptance_reason_hint": "Mevcut önlemlerle artık riskin neden kabul edilebilir olduğu.",
       "acceptance_reason_hint_high": "Zorunlu: ek önlemlerin maliyeti ile elde edilebilecek azalma (maliyet/fayda analizi).",
-      "temporary_acceptance": "Önlemler uygulanırken maruziyetin geçici kabulü"
+      "temporary_acceptance": "Önlemler uygulanırken maruziyetin geçici kabulü",
+      "make_not_applicable": "Uygulanamaz",
+      "make_not_applicable_hint": "Yanlışlıkla girilen risk: kayıttan çıkar (önlemler ve planla birlikte) ve tehdit bu varlık türü için uygulanamaz olarak kaydedilir. Verilerle doğrulanabilir bir gerekçe gerekir.",
+      "make_not_applicable_confirm": "Uygulanamaz olarak beyan et",
+      "not_applicable_reason": "Tehdit neden uygulanmıyor (ör. maruz kalan varlık yok)",
+      "delete_na_confirm": "Uygulanamazlık beyanı kaldırılsın mı? Tehdit Kapsam'da yeniden değerlendirilecek duruma döner.",
+      "not_applicable_undo_hint": "Yeniden değerlendirmek için Sil'i kullanın: tehdit Kapsam sekmesinde değerlendirilecek duruma döner."
     },
     "register": {
       "search": "Ara",

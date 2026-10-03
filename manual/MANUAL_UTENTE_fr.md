@@ -440,7 +440,7 @@ Le registre antérieur à la nouvelle procédure reste consultable en lecture se
 
 ### Couverture et nouveau risque
 
-L'onglet **Couverture** croise les types d'actifs présents sur le site (IT, OT, site, personnel, fournisseurs, prototypes) avec le **catalogue des menaces** : chaque couple doit être **évalué** ou déclaré **non applicable** avec le motif. **Nouveau risque** part toujours du catalogue : choisissez le type et la menace, puis terminez l'évaluation dans la fiche du risque. Depuis la BIA, **Créer un risque** ouvre un risque déjà lié au processus. Le nom du scénario est facultatif : s'il reste vide, chaque utilisateur voit le titre de la menace dans sa propre langue.
+L'onglet **Couverture** croise les types d'actifs présents sur le site (IT, OT, site, personnel, fournisseurs, prototypes) avec le **catalogue des menaces** : chaque couple doit être **évalué** ou déclaré **non applicable** avec le motif. **Nouveau risque** part toujours du catalogue : choisissez le type et la menace, puis terminez l'évaluation dans la fiche du risque. Depuis la BIA, **Créer un risque** ouvre un risque déjà lié au processus. Le nom du scénario est facultatif : s'il reste vide, chaque utilisateur voit le titre de la menace dans sa propre langue. Un risque saisi par erreur se retire depuis l'en-tête de la fiche : **Supprimer** (la menace redevient à évaluer) ou **Non applicable** avec le motif (il sort du registre avec mesures et plan, et la menace est déclarée non applicable). Une déclaration de non-applicabilité s'annule aussi avec **Supprimer**.
 
 ### Fiche du risque
 

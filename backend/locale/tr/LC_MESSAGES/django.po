@@ -3529,3 +3529,6 @@ msgstr "Beklenen etki %(floor)s altına inemez: tehdit, bu koruma sınıfına sa
 #, python-format
 msgid "Impatto atteso portato a %(floor)s: è la soglia di riservatezza delle informazioni colpite."
 msgstr "Beklenen etki %(floor)s seviyesine yükseltildi: etkilenen bilgilerin gizlilik eşiğidir."
+
+msgid "Il rischio è già dichiarato non applicabile."
+msgstr "Risk zaten uygulanamaz olarak beyan edildi."

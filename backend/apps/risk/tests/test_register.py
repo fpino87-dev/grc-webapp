@@ -341,6 +341,33 @@ def test_coverage_and_not_applicable(org_user, plant, threats, cycle):
 
 
 @pytest.mark.django_db
+def test_wrong_risk_becomes_not_applicable(org_user, plant, threats, cycle):
+    from apps.risk.models import RiskAssessment, RiskExistingMeasure
+
+    risk = _planned_risk(org_user, plant, threats["malware"])
+    RiskExistingMeasure.objects.create(risk=risk, description="Antivirus")
+    res = _client(org_user).post(f"/api/v1/risk/assessments/{risk.pk}/convert-not-applicable/",
+                                 {"reason": ""}, format="json")
+    assert res.status_code == 400  # serve il motivo
+    res = _client(org_user).post(f"/api/v1/risk/assessments/{risk.pk}/convert-not-applicable/",
+                                 {"reason": "Nessun sistema IT nel sito"}, format="json")
+    assert res.status_code == 201, res.content
+    assert not RiskAssessment.objects.filter(pk=risk.pk).exists()  # soft delete, con piano e misure
+    assert not RiskMitigationPlan.objects.filter(assessment_id=risk.pk).exists()
+    assert not RiskExistingMeasure.objects.filter(risk_id=risk.pk).exists()
+    na = RiskAssessment.objects.get(pk=res.json()["id"])
+    assert not na.applicable and na.not_applicable_reason == "Nessun sistema IT nel sito"
+    states = {p["threat_code"]: p["state"] for p in services.register_coverage(plant)["pairs"]}
+    assert states["IN_MAL"] == "not_applicable"
+    # già non applicabile: niente doppia conversione; eliminarlo lo riporta "da valutare"
+    with pytest.raises(ValidationError):
+        services.convert_to_not_applicable(org_user, na, "x")
+    services.delete_risk(org_user, na)
+    states = {p["threat_code"]: p["state"] for p in services.register_coverage(plant)["pairs"]}
+    assert states["IN_MAL"] == "missing"
+
+
+@pytest.mark.django_db
 def test_submit_requires_full_coverage_then_approve_freezes_snapshot(org_user, plant, threats, cycle):
     from apps.governance.models import SecurityCommittee
 

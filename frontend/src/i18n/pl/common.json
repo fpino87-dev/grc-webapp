@@ -3536,7 +3536,13 @@
       "acceptance_reason": "Uzasadnienie akceptacji",
       "acceptance_reason_hint": "Dlaczego ryzyko rezydualne jest akceptowalne przy istniejących środkach.",
       "acceptance_reason_hint_high": "Obowiązkowe: koszt dodatkowych środków w porównaniu z możliwym obniżeniem (analiza kosztów i korzyści).",
-      "temporary_acceptance": "Tymczasowa akceptacja ekspozycji w trakcie wdrażania środków"
+      "temporary_acceptance": "Tymczasowa akceptacja ekspozycji w trakcie wdrażania środków",
+      "make_not_applicable": "Nie dotyczy",
+      "make_not_applicable_hint": "Ryzyko wprowadzone przez pomyłkę: wychodzi z rejestru (ze środkami i planem), a zagrożenie zostaje oznaczone jako nie dotyczy tego typu zasobu. Wymagany jest powód możliwy do sprawdzenia na podstawie danych.",
+      "make_not_applicable_confirm": "Oznacz jako nie dotyczy",
+      "not_applicable_reason": "Dlaczego zagrożenie nie dotyczy (np. brak narażonego zasobu)",
+      "delete_na_confirm": "Usunąć oznaczenie „nie dotyczy”? Zagrożenie wraca do oceny w Pokryciu.",
+      "not_applicable_undo_hint": "Aby ocenić je ponownie, użyj Usuń: zagrożenie wraca do oceny w zakładce Pokrycie."
     },
     "register": {
       "search": "Szukaj",

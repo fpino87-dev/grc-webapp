@@ -440,7 +440,7 @@ Il registro precedente alla nuova procedura resta consultabile in sola lettura d
 
 ### Copertura e nuovo rischio
 
-La scheda **Copertura** incrocia le tipologie presenti nel sito (IT, OT, sede, personale, fornitori, prototipi) con il **catalogo minacce**: ogni coppia va **valutata** o dichiarata **non applicabile** con il motivo. **Nuovo rischio** parte sempre dal catalogo: scegli tipologia e minaccia, poi completi la valutazione nella scheda del rischio. Dalla BIA, **Crea rischio** apre un rischio già collegato al processo. Il nome dello scenario è facoltativo: se resta vuoto, ogni utente vede il titolo della minaccia nella propria lingua.
+La scheda **Copertura** incrocia le tipologie presenti nel sito (IT, OT, sede, personale, fornitori, prototipi) con il **catalogo minacce**: ogni coppia va **valutata** o dichiarata **non applicabile** con il motivo. **Nuovo rischio** parte sempre dal catalogo: scegli tipologia e minaccia, poi completi la valutazione nella scheda del rischio. Dalla BIA, **Crea rischio** apre un rischio già collegato al processo. Il nome dello scenario è facoltativo: se resta vuoto, ogni utente vede il titolo della minaccia nella propria lingua. Un rischio inserito per errore si toglie dalla testata della scheda: **Elimina** (la minaccia torna da valutare) oppure **Non applicabile** con il motivo (esce dal registro con misure e piano e la minaccia risulta non applicabile). Anche una dichiarazione di non applicabilità si annulla con **Elimina**.
 
 ### Scheda del rischio
 

@@ -393,6 +393,8 @@ export const riskApi = {
   create: (payload: RiskInput) => data(apiClient.post<Risk>("/risk/assessments/", payload)),
   update: (id: string, payload: RiskInput) => data(apiClient.patch<Risk>(`/risk/assessments/${id}/`, payload)),
   remove: (id: string) => apiClient.delete(`/risk/assessments/${id}/`),
+  convertNotApplicable: (id: string, reason: string) =>
+    data(apiClient.post<Risk>(`/risk/assessments/${id}/convert-not-applicable/`, { reason })),
   complete: (id: string) => data(apiClient.post<Risk>(`/risk/assessments/${id}/complete/`)),
   confirm: (id: string) => data(apiClient.post<Risk>(`/risk/assessments/${id}/confirm/`)),
   reopen: (id: string) => data(apiClient.post<Risk>(`/risk/assessments/${id}/reopen/`)),

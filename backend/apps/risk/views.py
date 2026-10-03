@@ -137,6 +137,13 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         _call_service(services.delete_risk, request.user, self.get_object())
         return Response(status=204)
 
+    @action(detail=True, methods=["post"], url_path="convert-not-applicable")
+    def convert_not_applicable(self, request, pk=None):
+        """Body: {reason}. Il rischio esce dal registro, la coppia diventa non applicabile."""
+        risk = _call_service(services.convert_to_not_applicable, request.user, self.get_object(),
+                             request.data.get("reason", ""))
+        return Response(self.get_serializer(risk).data, status=201)
+
     def _risk_action(self, fn, *args, **kwargs):
         risk = _call_service(fn, self.request.user, self.get_object(), *args, **kwargs)
         return Response(self.get_serializer(risk).data)

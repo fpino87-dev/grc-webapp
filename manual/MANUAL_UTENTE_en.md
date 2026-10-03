@@ -440,7 +440,7 @@ The register prior to the new procedure remains available read-only from the Ass
 
 ### Coverage and new risk
 
-The **Coverage** tab crosses the asset types present on the site (IT, OT, site, personnel, suppliers, prototypes) with the **threat catalogue**: each pair must be **assessed** or declared **not applicable** with the reason. **New risk** always starts from the catalogue: choose the type and threat, then complete the assessment in the risk card. From the BIA, **Create risk** opens a risk already linked to the process. The scenario name is optional: if left empty, each user sees the threat title in their own language.
+The **Coverage** tab crosses the asset types present on the site (IT, OT, site, personnel, suppliers, prototypes) with the **threat catalogue**: each pair must be **assessed** or declared **not applicable** with the reason. **New risk** always starts from the catalogue: choose the type and threat, then complete the assessment in the risk card. From the BIA, **Create risk** opens a risk already linked to the process. The scenario name is optional: if left empty, each user sees the threat title in their own language. A risk entered by mistake is removed from the sheet header: **Delete** (the threat goes back to be assessed) or **Not applicable** with the reason (it leaves the register with measures and plan, and the threat is recorded as not applicable). A not-applicable declaration is also undone with **Delete**.
 
 ### Risk card
 

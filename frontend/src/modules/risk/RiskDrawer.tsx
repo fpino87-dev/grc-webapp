@@ -82,6 +82,13 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
     onSuccess: () => { refresh(); onClose(); },
     onError: onErr,
   });
+  // Rischio inserito per errore: esce dal registro e la coppia diventa non applicabile.
+  const [naReason, setNaReason] = useState<string | null>(null);
+  const convertNa = useMutation({
+    mutationFn: () => riskApi.convertNotApplicable(riskId, naReason ?? ""),
+    onSuccess: () => { refresh(); onClose(); },
+    onError: onErr,
+  });
 
   const dirty = !!risk && !!form && JSON.stringify(form) !== JSON.stringify(initialEvaluation(risk));
   const needsConfirm = !!risk && cycleKind === "periodico" && evaluating && risk.status === "completato"
@@ -114,24 +121,46 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
             <div className="flex flex-wrap items-center gap-2">
               {risk && editable && (
                 <>
-                  {risk.status === "completato" && (
+                  <button onClick={() => { if (window.confirm(t(risk.applicable ? "risk.drawer.delete_confirm" : "risk.drawer.delete_na_confirm"))) remove.mutate(); }}
+                    className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded">{t("common.delete")}</button>
+                  {risk.applicable && (
+                    <button onClick={() => setNaReason(naReason === null ? "" : null)} aria-expanded={naReason !== null}
+                      className="px-3 py-1.5 border rounded text-sm">{t("risk.drawer.make_not_applicable")}</button>
+                  )}
+                  {risk.applicable && risk.status === "completato" && (
                     <button onClick={() => reopen.mutate()} className="px-3 py-1.5 border rounded text-sm">{t("risk.drawer.reopen")}</button>
                   )}
-                  {needsConfirm && !dirty && (
+                  {risk.applicable && needsConfirm && !dirty && (
                     <button onClick={() => confirm.mutate()} className="px-3 py-1.5 border rounded text-sm">{t("risk.drawer.confirm")}</button>
                   )}
-                  <button onClick={() => save.mutate()} disabled={!dirty || save.isPending} className="px-3 py-1.5 border rounded text-sm disabled:opacity-50">
-                    {t("common.save")}
-                  </button>
-                  <button onClick={() => complete.mutate()} disabled={complete.isPending}
-                    className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm disabled:opacity-50">
-                    {t("risk.drawer.complete")}
-                  </button>
+                  {risk.applicable && (
+                    <>
+                      <button onClick={() => save.mutate()} disabled={!dirty || save.isPending} className="px-3 py-1.5 border rounded text-sm disabled:opacity-50">
+                        {t("common.save")}
+                      </button>
+                      <button onClick={() => complete.mutate()} disabled={complete.isPending}
+                        className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm disabled:opacity-50">
+                        {t("risk.drawer.complete")}
+                      </button>
+                    </>
+                  )}
                 </>
               )}
               <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none px-1" aria-label={t("common.close")}>×</button>
             </div>
           </div>
+          {risk && editable && naReason !== null && (
+            <div className="mt-3 border border-amber-200 bg-amber-50 rounded p-3">
+              <p className="text-xs text-amber-900 mb-2">{t("risk.drawer.make_not_applicable_hint")}</p>
+              <textarea value={naReason} onChange={e => setNaReason(e.target.value)} rows={2} className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm"
+                placeholder={t("risk.drawer.not_applicable_reason")} aria-label={t("risk.drawer.not_applicable_reason")} />
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => convertNa.mutate()} disabled={!naReason.trim() || convertNa.isPending}
+                  className="px-3 py-1.5 bg-amber-600 text-white rounded text-sm disabled:opacity-50">{t("risk.drawer.make_not_applicable_confirm")}</button>
+                <button onClick={() => setNaReason(null)} className="px-3 py-1.5 text-sm text-gray-600 hover:underline">{t("common.cancel")}</button>
+              </div>
+            </div>
+          )}
           {risk && !editable && !risk.is_legacy && ownRegister && (
             <p className="text-[11px] text-gray-500 mt-2">{t(evaluating ? "risk.drawer.read_only_rights" : "risk.drawer.read_only_no_cycle")}</p>
           )}
@@ -151,11 +180,11 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
           ) : !risk.applicable ? (
             <Section title={t("risk.drawer.not_applicable_title")}>
               <p className="text-sm text-gray-700">{risk.not_applicable_reason}</p>
+              {editable && <p className="text-xs text-gray-500 mt-2">{t("risk.drawer.not_applicable_undo_hint")}</p>}
             </Section>
           ) : (
             <RiskSheet risk={risk} form={form} setForm={setForm} editable={editable} canMonitor={canMonitor}
-              policy={policy} registerId={registerId} orgScope={orgScope}
-              onDelete={editable ? () => { if (window.confirm(t("risk.drawer.delete_confirm"))) remove.mutate(); } : undefined} />
+              policy={policy} registerId={registerId} orgScope={orgScope} />
           )}
         </div>
       </aside>
@@ -165,9 +194,9 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
 
 const STEP_IDS = ["risk-step-1", "risk-step-2", "risk-step-3", "risk-step-4", "risk-step-5"];
 
-function RiskSheet({ risk, form, setForm, editable, canMonitor, policy, registerId, orgScope, onDelete }: {
+function RiskSheet({ risk, form, setForm, editable, canMonitor, policy, registerId, orgScope }: {
   risk: Risk; form: EvaluationState; setForm: (f: EvaluationState) => void; editable: boolean; canMonitor: boolean;
-  policy?: ResolvedPolicy; registerId: RegisterId; orgScope: boolean; onDelete?: () => void;
+  policy?: ResolvedPolicy; registerId: RegisterId; orgScope: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const model = useEvaluationModel(risk, form);
@@ -259,11 +288,6 @@ function RiskSheet({ risk, form, setForm, editable, canMonitor, policy, register
               })}
             </p>
           </Section>
-          {onDelete && (
-            <div className="pt-3 mt-3 border-t border-gray-100">
-              <button onClick={onDelete} className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded">{t("common.delete")}</button>
-            </div>
-          )}
         </Step>
       </div>
     </div>

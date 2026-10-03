@@ -440,7 +440,7 @@ Yeni prosedürden önceki kayıt, Değerlendirmeler sekmesinden salt okunur olar
 
 ### Kapsam ve yeni risk
 
-**Kapsam** sekmesi, tesiste bulunan varlık türlerini (BT, OT, tesis, personel, tedarikçiler, prototipler) **tehdit kataloğu** ile eşleştirir: her çift ya **değerlendirilmeli** ya da gerekçesiyle **uygulanamaz** olarak işaretlenmelidir. **Yeni risk** her zaman katalogdan başlar: türü ve tehdidi seçin, ardından değerlendirmeyi risk kartında tamamlayın. BIA'dan **Risk oluştur**, süreçle zaten bağlantılı bir risk açar. Senaryo adı isteğe bağlıdır: boş bırakılırsa her kullanıcı tehdit başlığını kendi dilinde görür.
+**Kapsam** sekmesi, tesiste bulunan varlık türlerini (BT, OT, tesis, personel, tedarikçiler, prototipler) **tehdit kataloğu** ile eşleştirir: her çift ya **değerlendirilmeli** ya da gerekçesiyle **uygulanamaz** olarak işaretlenmelidir. **Yeni risk** her zaman katalogdan başlar: türü ve tehdidi seçin, ardından değerlendirmeyi risk kartında tamamlayın. BIA'dan **Risk oluştur**, süreçle zaten bağlantılı bir risk açar. Senaryo adı isteğe bağlıdır: boş bırakılırsa her kullanıcı tehdit başlığını kendi dilinde görür. Yanlışlıkla girilen bir risk kartın başlığından kaldırılır: **Sil** (tehdit yeniden değerlendirilecek duruma döner) veya gerekçesiyle **Uygulanamaz** (önlemler ve planla birlikte kayıttan çıkar ve tehdit uygulanamaz olarak kaydedilir). Uygulanamazlık beyanı da **Sil** ile geri alınır.
 
 ### Risk kartı
 

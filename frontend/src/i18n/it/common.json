@@ -3536,7 +3536,13 @@
       "acceptance_reason": "Motivazione dell'accettazione",
       "acceptance_reason_hint": "Perché il residuo è accettabile con le misure esistenti.",
       "acceptance_reason_hint_high": "Obbligatoria: costi delle misure ulteriori rispetto alla riduzione ottenibile (analisi costi/benefici).",
-      "temporary_acceptance": "Accettazione temporanea dell'esposizione mentre le misure vengono attuate"
+      "temporary_acceptance": "Accettazione temporanea dell'esposizione mentre le misure vengono attuate",
+      "make_not_applicable": "Non applicabile",
+      "make_not_applicable_hint": "Rischio inserito per errore: esce dal registro (con misure e piano) e la minaccia risulta non applicabile a questa tipologia. Serve il motivo, verificabile dai dati.",
+      "make_not_applicable_confirm": "Dichiara non applicabile",
+      "not_applicable_reason": "Perché la minaccia non si applica (es. nessun asset esposto)",
+      "delete_na_confirm": "Togliere la dichiarazione di non applicabilità? La minaccia torna da valutare nella Copertura.",
+      "not_applicable_undo_hint": "Per valutarla di nuovo usa Elimina: la minaccia torna da valutare nella scheda Copertura."
     },
     "register": {
       "search": "Cerca",

@@ -3595,3 +3595,6 @@ msgstr "L'impact attendu ne peut pas descendre sous %(floor)s : la menace touche
 #, python-format
 msgid "Impatto atteso portato a %(floor)s: è la soglia di riservatezza delle informazioni colpite."
 msgstr "Impact attendu porté à %(floor)s : c'est le seuil de confidentialité des informations touchées."
+
+msgid "Il rischio è già dichiarato non applicabile."
+msgstr "Le risque est déjà déclaré non applicable."
