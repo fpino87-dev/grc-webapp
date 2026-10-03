@@ -3560,7 +3560,10 @@
       "plans_progress": "önlemler {{done}}/{{total}} ({{verified}} doğrulandı)",
       "accepted": "kabul edildi",
       "acceptance_pending": "kabul sürüyor",
-      "inherited_hint": "Saha tarafından devralınan grup riski"
+      "inherited_hint": "Saha tarafından devralınan grup riski",
+      "col_affected_plants": "Devralan sahalar",
+      "no_affected_plants": "Saha yok",
+      "no_affected_plants_hint": "Bu grup riskini hiçbir saha devralmıyor: sahaları kartta seçin (Senaryo adımı)."
     },
     "attention": {
       "label": "Eylem gerektirenler",

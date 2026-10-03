@@ -3560,7 +3560,10 @@
       "plans_progress": "działania {{done}}/{{total}} (zweryfikowane {{verified}})",
       "accepted": "zaakceptowane",
       "acceptance_pending": "akceptacja w toku",
-      "inherited_hint": "Ryzyko grupy dziedziczone przez zakład"
+      "inherited_hint": "Ryzyko grupy dziedziczone przez zakład",
+      "col_affected_plants": "Zakłady, które je dziedziczą",
+      "no_affected_plants": "Brak zakładu",
+      "no_affected_plants_hint": "Żaden zakład nie dziedziczy tego ryzyka grupowego: wskaż zakłady w karcie (krok Scenariusz)."
     },
     "attention": {
       "label": "Co wymaga działania",

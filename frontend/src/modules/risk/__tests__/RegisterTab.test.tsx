@@ -20,11 +20,14 @@ vi.mock("../../../api/endpoints/risk", () => ({
   ATTENTION_KEYS: ["critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures"],
   riskApi: { list: (...a: unknown[]) => list(...a), attention: (...a: unknown[]) => attention(...a) },
 }));
+vi.mock("../../../api/endpoints/plants", () => ({
+  plantsApi: { list: () => Promise.resolve([{ id: "p1", code: "S1", name: "Sito Nord" }, { id: "p2", code: "S2", name: "Sito Sud" }]) },
+}));
 const none = { count: 0, risk_ids: [] };
 
-function renderTab(onOpen = vi.fn()) {
+function renderTab(onOpen = vi.fn(), registerId: string | null = "p1") {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  render(<QueryClientProvider client={qc}><RegisterTab registerId="p1" onOpen={onOpen} /></QueryClientProvider>);
+  render(<QueryClientProvider client={qc}><RegisterTab registerId={registerId} onOpen={onOpen} /></QueryClientProvider>);
   return onOpen;
 }
 
@@ -65,5 +68,32 @@ describe("RegisterTab", () => {
     expect(list).toHaveBeenCalledWith("p1", { include_inherited: "1" });
     fireEvent.click(rows[1]);
     expect(onOpen).toHaveBeenCalledWith("b");
+  });
+
+  it("vista gruppo: ultima colonna con i siti che ereditano il rischio", async () => {
+    list.mockResolvedValue([
+      { ...base, plant: null, id: "g1", name: "Accesso remoto", display_name: "Accesso remoto", threat_code: "FO_RMT",
+        asset_type: "FORNITORI", applicable: true, current_class: "high", expected_class: "", affected_plants: ["p1", "p2"] },
+      { ...base, plant: null, id: "g2", name: "Phishing", display_name: "Phishing", threat_code: "PE_PHI",
+        asset_type: "PERSONALE", applicable: true, current_class: "medium", expected_class: "", affected_plants: [] },
+    ]);
+    attention.mockResolvedValue({
+      critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: { ...none, measures: 0 },
+    });
+    renderTab(vi.fn(), null);
+    expect(await screen.findByText("risk.register.col_affected_plants")).toBeTruthy();
+    expect(await screen.findByText("S2")).toBeTruthy();
+    expect(screen.getByText("S1").closest("span[title]")!.getAttribute("title")).toBe("Sito Nord, Sito Sud");
+    expect(screen.getByText("risk.register.no_affected_plants")).toBeTruthy();
+  });
+
+  it("vista sito: niente colonna dei siti", async () => {
+    list.mockResolvedValue([]);
+    attention.mockResolvedValue({
+      critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: { ...none, measures: 0 },
+    });
+    renderTab();
+    await screen.findByText("risk.register.empty");
+    expect(screen.queryByText("risk.register.col_affected_plants")).toBeNull();
   });
 });

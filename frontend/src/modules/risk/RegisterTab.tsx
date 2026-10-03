@@ -5,6 +5,7 @@ import { ASSET_TYPES, ATTENTION_KEYS, riskApi, type Attention, type AttentionKey
 import { RISK_CLASSES, classRank } from "./riskClasses";
 import { ClassTransition } from "./RiskUi";
 import type { RegisterId } from "./RiskPage";
+import { plantsApi } from "../../api/endpoints/plants";
 
 /** Riga di stato compatta (regola UX: niente testi lunghi negli elenchi). */
 function StatusLine({ r }: { r: Risk }) {
@@ -75,6 +76,10 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
   const [attentionKey, setAttentionKey] = useState<AttentionKey | null>(null);
   const [inheritedOnly, setInheritedOnly] = useState(false);
 
+  // Registro di gruppo: un rischio arriva solo ai siti indicati (nessuno = a nessun sito).
+  const isGroup = registerId === null;
+  const { data: plants = [] } = useQuery({ queryKey: ["plants"], queryFn: () => plantsApi.list(), enabled: isGroup, retry: false });
+  const plantById = useMemo(() => new Map(plants.map(p => [p.id, p])), [plants]);
   const { data: risks = [], isLoading } = useQuery({
     queryKey: ["risk-register", registerId, inherited],
     queryFn: () => riskApi.list(registerId, registerId && inherited ? { include_inherited: "1" } : {}),
@@ -152,6 +157,7 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
                 <th className="text-left px-3 py-2 font-medium">{t("risk.register.col_class")}</th>
                 <th className="text-left px-3 py-2 font-medium">{t("risk.register.col_treatment")}</th>
                 <th className="text-left px-3 py-2 font-medium">{t("risk.register.col_status")}</th>
+                {isGroup && <th className="text-left px-3 py-2 font-medium">{t("risk.register.col_affected_plants")}</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -179,6 +185,20 @@ export function RegisterTab({ registerId, onOpen }: { registerId: RegisterId; on
                     {r.treatment ? t(`risk.treatment_${r.treatment}`) : "—"}
                   </td>
                   <td className="px-3 py-2 align-top"><StatusLine r={r} /></td>
+                  {isGroup && (
+                    <td className="px-3 py-2 align-top text-xs">
+                      {(r.affected_plants ?? []).length ? (
+                        <span className="flex flex-wrap gap-1"
+                          title={(r.affected_plants ?? []).map(id => plantById.get(id)?.name ?? "").filter(Boolean).join(", ")}>
+                          {(r.affected_plants ?? []).map(id => (
+                            <span key={id} className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 font-mono">{plantById.get(id)?.code ?? "?"}</span>
+                          ))}
+                        </span>
+                      ) : (
+                        <span className="text-amber-700" title={t("risk.register.no_affected_plants_hint")}>{t("risk.register.no_affected_plants")}</span>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

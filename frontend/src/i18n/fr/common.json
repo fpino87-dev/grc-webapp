@@ -3560,7 +3560,10 @@
       "plans_progress": "mesures {{done}}/{{total}} ({{verified}} vérifiées)",
       "accepted": "accepté",
       "acceptance_pending": "acceptation en cours",
-      "inherited_hint": "Risque de groupe hérité par le site"
+      "inherited_hint": "Risque de groupe hérité par le site",
+      "col_affected_plants": "Sites qui l'héritent",
+      "no_affected_plants": "Aucun site",
+      "no_affected_plants_hint": "Aucun site n'hérite de ce risque de groupe : indiquez les sites dans la fiche (étape Scénario)."
     },
     "attention": {
       "label": "Ce qui exige d'agir",

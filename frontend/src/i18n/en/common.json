@@ -3560,7 +3560,10 @@
       "plans_progress": "measures {{done}}/{{total}} ({{verified}} verified)",
       "accepted": "accepted",
       "acceptance_pending": "acceptance in progress",
-      "inherited_hint": "Group risk inherited by the site"
+      "inherited_hint": "Group risk inherited by the site",
+      "col_affected_plants": "Sites inheriting it",
+      "no_affected_plants": "No site",
+      "no_affected_plants_hint": "No site inherits this group risk: choose the sites in the sheet (Scenario step)."
     },
     "attention": {
       "label": "What requires action",
