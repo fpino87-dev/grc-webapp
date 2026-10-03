@@ -127,14 +127,6 @@ def class_rank(cls: str | None) -> int:
     return RISK_CLASSES.index(cls) if cls in RISK_CLASSES else -1
 
 
-def shift_class(cls: str, delta: int, floor: str | None = None) -> str:
-    """Override del Risk Owner (§8): sposta di `delta` livelli, mai sotto `floor`."""
-    rank = max(0, min(len(RISK_CLASSES) - 1, class_rank(cls) + delta))
-    if floor is not None:
-        rank = max(rank, class_rank(floor))
-    return RISK_CLASSES[rank]
-
-
 def confidentiality_floor(levels) -> int | None:
     """Impatto minimo dato dalle classi di protezione delle informazioni colpite."""
     values = [CONFIDENTIALITY_FLOOR[lv] for lv in levels if lv in CONFIDENTIALITY_FLOOR]
@@ -657,7 +649,7 @@ EVALUATION_FIELDS = (
     "probability", "probability_method", "probability_rationale",
     "impact_economic", "impact_legal", "impact_customer", "impact_reputational",
     "impact_people", "impact_operational", "impact_rationale",
-    "class_override", "override_rationale", "legal_or_contract_violation",
+    "legal_or_contract_violation",
     "treatment", "treatment_rationale", "expected_probability", "expected_impact",
     "owner", "treatment_owner", "treatment_owner_external", "plan_due_date",
     "nis2_in_scope", "nis2_art21_category", "impacted_systems",
@@ -762,12 +754,9 @@ def recompute_risk(risk) -> None:
     dims = {d: getattr(risk, f"impact_{d}") for d in IMPACT_DIMENSIONS}
     floor = risk_impact_floor(risk)
     risk.impact = overall_impact(dims, floor)
+    # La classe si legge solo dalla matrice: la correzione manuale è stata tolta.
     risk.matrix_class = risk_class(risk.probability, risk.impact) or ""
-    if risk.matrix_class:
-        floor_cls = risk_class(risk.probability, floor) if floor else None
-        risk.current_class = shift_class(risk.matrix_class, int(risk.class_override or 0), floor_cls)
-    else:
-        risk.current_class = ""
+    risk.current_class = risk.matrix_class
     risk.expected_class = expected_risk_class(risk, floor)
 
 
@@ -801,8 +790,6 @@ def _validate_risk_links(risk, information_classes, affected_plants, business_ob
             raise _err(_("Gli obiettivi aziendali devono essere del sito del registro o di gruppo."))
     if affected_plants and plant is not None:
         raise _err(_("Solo i rischi di gruppo indicano i siti che li ereditano."))
-    if risk.class_override not in (-1, 0, 1):
-        raise _err(_("L'override della classe può spostare al massimo di un livello."))
 
 
 def _apply_fields(risk, data: dict) -> dict:
@@ -911,8 +898,6 @@ def risk_completeness_errors(risk) -> list:
         errors.append(_("Indica la probabilità e la sua motivazione."))
     if not risk.impact or not risk.impact_rationale.strip():
         errors.append(_("Indica almeno una dimensione d'impatto e la motivazione."))
-    if risk.class_override and not risk.override_rationale.strip():
-        errors.append(_("Motiva lo spostamento della classe."))
     if not risk.owner_id:
         errors.append(_("Indica il Risk Owner."))
     if not risk.treatment:
@@ -1168,7 +1153,6 @@ def apply_expected_risk(user, risk, note: str = ""):
             value = getattr(risk, f"impact_{dim}")
             if value:
                 setattr(risk, f"impact_{dim}", min(value, risk.expected_impact))
-        risk.class_override = 0
         recompute_risk(risk)
         risk.save()
         _close_stale_acceptance(user, risk)
@@ -2116,7 +2100,7 @@ def generate_risk_excel(plant=None) -> bytes:
         "Motivo non applicabile",
         "Misure esistenti", "Probabilità", "Motivazione probabilità",
         "Imp. economico", "Imp. legale", "Imp. cliente", "Imp. reputazionale", "Imp. persone", "Imp. operativo",
-        "Impatto", "Motivazione impatto", "Classe matrice", "Override", "Motivazione override", "Classe attuale",
+        "Impatto", "Motivazione impatto", "Classe attuale",
         "Non accettabile", "Trattamento", "Motivazione trattamento", "Prob. attesa", "Imp. atteso", "Classe attesa",
         "Risk Owner", "Responsabile trattamento", "Scadenza piano", "NIS2 in perimetro", "Art. 21 NIS2",
         "Sistemi impattati", "Possibile incidente significativo", "Stato", "Valutato il",
@@ -2136,8 +2120,7 @@ def generate_risk_excel(plant=None) -> bytes:
             "Sì" if r.applicable else "No", r.not_applicable_reason, measures,
             r.probability, r.probability_rationale,
             r.impact_economic, r.impact_legal, r.impact_customer, r.impact_reputational, r.impact_people,
-            r.impact_operational, r.impact, r.impact_rationale, CLASS_LABELS.get(r.matrix_class, ""),
-            r.class_override or "", r.override_rationale, CLASS_LABELS.get(r.current_class, ""),
+            r.impact_operational, r.impact, r.impact_rationale, CLASS_LABELS.get(r.current_class, ""),
             "Sì" if r.legal_or_contract_violation else "", r.treatment, r.treatment_rationale,
             r.expected_probability, r.expected_impact, CLASS_LABELS.get(r.expected_class, ""),
             name(r.owner), mixed_owner_name(r.treatment_owner, r.treatment_owner_external) or "",

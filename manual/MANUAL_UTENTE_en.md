@@ -444,15 +444,15 @@ The **Coverage** tab crosses the asset types present on the site (IT, OT, site, 
 
 ### Risk card
 
-Click a risk to open the side card:
+Click a risk to open the side sheet. The steps follow the order of the reasoning; the index on the left shows which are complete and what is missing, the header always keeps current → expected class, **Save** and **Complete** within reach:
 
-- **Identification**: threat, asset or group of assets, supplier, BIA process, **affected information** (information classes), vulnerability and consequence on business objectives
-- **Assessment**: probability (historical frequency or exposure factor) and impact on six dimensions — economic, legal, customer and contractual, reputational, people safety, operational — with the **procedure criteria next to each level**. Impact is the worst case; with a confidentiality threat it cannot fall below the protection class of the affected information. The **class** (Very Low, Low, Medium, High, Critical) is read from the matrix, not from the P × I product; you can move it by one level only with a rationale
-- **Existing measures** with their effectiveness, also linked to controls (of the site; for a group risk, to controls of any site, shown in square brackets)
-- **Treatment**: avoid, mitigate, transfer or accept, with rationale and **expected risk** (with a confidentiality threat the expected impact cannot go below the threshold of the affected information either: treatment can only reduce the probability, and a lower expected impact blocks completion); Risk Owner (business manager) and treatment owner (portal user or free text)
-- **NIS2**: scope, art. 21(2) area, impacted systems, possible significant incident
+1. **Scenario**: threat, asset or asset group, supplier, BIA process, **affected information** (information classes), threatened business objectives, vulnerability and consequence, **Risk Owner** (business manager) and NIS2 (scope, art. 21(2) area, impacted systems, possible significant incident). Once filled in, it starts closed with a one-line summary
+2. **Existing measures**: what is already in place today, with its effectiveness (high = technical, everywhere, verified; medium = in place with gaps or not verified; low = procedural only), also linked to controls (of the site; for a group risk, to controls of any site, shown in square brackets). Each measure is corrected with **Edit**
+3. **Current risk**: probability (historical frequency or exposure factor) and impact on six dimensions — economic, legal, customer and contractual, reputational, people safety, operational — rated **taking the existing measures into account**, with the **procedure criteria next to each level**. The impact is the worst case; with a confidentiality threat it does not go below the protection class of the affected information. The **class** (Very Low, Low, Medium, High, Critical) is read from the matrix, not from the P × I product, and the result explains where it comes from
+4. **Decision**: starts from the class rule and asks **"Is the current risk acceptable?"**. **Yes**: the residual risk is accepted, no treatment plan; a rationale is required (for High and Critical the cost/benefit analysis) and the roles required by the policy sign, a Critical only with a resolution of the governing body. **No**: choose between mitigate, transfer and avoid, with rationale, treatment owner (portal user or free text), deadline, **plan of measures** and **expected risk** (with a confidentiality threat the expected impact cannot go below the threshold of the affected information either: treatment can only reduce the probability, and a lower expected impact blocks completion). A risk involving a breach of law or contract cannot be accepted
+5. **Links and history**: local impact (group risks), linked security objectives, who assessed and when
 
-**Complete the assessment** checks that everything is there (rationales, Risk Owner, treatment, expected risk). A High or Critical risk creates the treatment plan task and the notification.
+**Complete the assessment** checks that everything is there (rationales, Risk Owner, decision, expected risk). A High or Critical risk creates the treatment plan task and the notification. The class is not corrected by hand: if the result is not convincing, review probability, impacts or existing measures.
 
 ### Probability: historical frequency or FER
 
@@ -462,10 +462,6 @@ For each risk you choose how to estimate the probability:
 - **FER — Risk Exposure Factor**: when historical series are missing or unreliable. You estimate how exposed the risk is by assessing how effective the existing protection measures are against the capability and motivation of whoever could cause the event (a person or a natural event). Example: 5 = unprotected vulnerabilities or ineffective controls, 1 = multiple verified controls, no credible agent
 
 Next to each level the card shows the criteria of the chosen method. The probability rationale is mandatory in both cases.
-
-### Class correction
-
-The class is read from the matrix. If the assessment falls on the border between two cells, the assessor can move it by **one level only**, up or down, writing the rationale: the correction stays visible in the card and in the register. It is meant for borderline cases, not for changing the result of the assessment.
 
 ### Treatment plan and expected risk
 

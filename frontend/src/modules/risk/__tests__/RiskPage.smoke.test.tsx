@@ -35,8 +35,8 @@ const risk = {
   critical_process: null, critical_process_name: null, vulnerability: "", consequence: "", applicable: true,
   not_applicable_reason: "", probability: 4, probability_method: "fer", probability_rationale: "x",
   impact_economic: null, impact_legal: null, impact_customer: null, impact_reputational: null, impact_people: null,
-  impact_operational: 4, impact: 4, impact_rationale: "y", matrix_class: "critical", class_override: 0,
-  override_rationale: "", current_class: "critical", legal_or_contract_violation: false, treatment: "mitigare",
+  impact_operational: 4, impact: 4, impact_rationale: "y", matrix_class: "critical",
+  current_class: "critical", legal_or_contract_violation: false, treatment: "mitigare",
   treatment_rationale: "", treatment_rule: { rule: "mandatory", months: 3 }, expected_probability: 2,
   expected_impact: 4, expected_class: "high", can_apply_expected: false, owner: 1, owner_name: "Mario",
   treatment_owner: null, treatment_owner_external: "MSP", treatment_owner_name: "MSP", plan_due_date: null,
@@ -95,12 +95,17 @@ describe("RiskPage", () => {
       await waitFor(() => expect(screen.getByText(`risk.page.tabs.${tab}`)).toBeTruthy());
     }
     fireEvent.click(await screen.findByText("Ransomware MES"));
-    expect(await screen.findByText("risk.drawer.identification")).toBeTruthy();
+    expect((await screen.findAllByText(/risk.drawer.step_decision/)).length).toBeGreaterThan(0);
     expect(await screen.findByText("risk.drawer.treatment_plan")).toBeTruthy();
     expect(screen.getByText("risk.drawer.complete")).toBeTruthy();
+    // scenario compilato: parte chiuso, si apre dall'indice dei passi
+    fireEvent.click(screen.getByText("1 · risk.drawer.step_scenario"));
     // obiettivi aziendali nella scheda, con quello collegato selezionato
-    expect(screen.getByText("risk.drawer.business_objectives")).toBeTruthy();
-    expect((screen.getByLabelText(/OEM supply/) as HTMLInputElement).checked).toBe(true);
-    expect(screen.getByText("risk.drawer.no_security_objectives")).toBeTruthy();
+    expect(await screen.findByText("risk.drawer.business_objectives")).toBeTruthy();
+    expect(((await screen.findByLabelText(/OEM supply/)) as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(screen.getByText("5 · risk.drawer.step_links"));
+    expect(await screen.findByText("risk.drawer.no_security_objectives")).toBeTruthy();
+    // niente più correzione manuale della classe
+    expect(screen.queryByText("risk.drawer.override")).toBeNull();
   });
 });

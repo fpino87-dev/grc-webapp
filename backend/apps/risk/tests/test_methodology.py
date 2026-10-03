@@ -101,13 +101,6 @@ def test_risk_class_missing_or_out_of_range():
     assert services.risk_class(6, 3) is None
 
 
-def test_shift_class_respects_bounds_and_floor():
-    assert services.shift_class("medium", +1) == "high"
-    assert services.shift_class("critical", +1) == "critical"
-    assert services.shift_class("very_low", -1) == "very_low"
-    assert services.shift_class("high", -1, floor="high") == "high"
-
-
 def test_overall_impact_is_worst_case_with_confidentiality_floor():
     dims = {"economic": 2, "legal": 3, "operational": None, "unknown": 5}
     assert services.overall_impact(dims) == 3

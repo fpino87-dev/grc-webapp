@@ -444,15 +444,15 @@ La scheda **Copertura** incrocia le tipologie presenti nel sito (IT, OT, sede, p
 
 ### Scheda del rischio
 
-Clicca un rischio per aprire la scheda laterale:
+Clicca un rischio per aprire la scheda laterale. I passi seguono l'ordine del ragionamento; l'indice a sinistra mostra quali sono completi e cosa manca, la testata tiene sempre a portata classe attuale → attesa, **Salva** e **Completa**:
 
-- **Identificazione**: minaccia, asset o gruppo di asset, fornitore, processo BIA, **informazioni colpite** (classi di informazioni), vulnerabilità e conseguenza sugli obiettivi aziendali
-- **Valutazione**: probabilità (frequenza storica o fattore di esposizione) e impatto su sei dimensioni — economico, legale, cliente e contrattuale, reputazionale, sicurezza delle persone, operativo — con i **criteri della procedura accanto a ogni livello**. L'impatto è il caso peggiore; con una minaccia alla riservatezza non scende sotto la classe di protezione delle informazioni colpite. La **classe** (Very Low, Low, Medium, High, Critical) si legge dalla matrice, non dal prodotto P × I; puoi spostarla di un livello solo con motivazione
-- **Misure esistenti** con la loro efficacia, anche collegate ai controlli (del sito; per un rischio di gruppo, ai controlli di qualsiasi sito, indicato fra parentesi quadre)
-- **Trattamento**: evitare, mitigare, trasferire o accettare, con motivazione e **rischio atteso** (con una minaccia alla riservatezza anche l'impatto atteso non scende sotto la soglia delle informazioni colpite: il trattamento può ridurre solo la probabilità, e un impatto atteso più basso blocca il completamento); Risk Owner (responsabile di business) e responsabile del trattamento (utente del portale o testo libero)
-- **NIS2**: perimetro, area art. 21(2), sistemi impattati, possibile incidente significativo
+1. **Scenario**: minaccia, asset o gruppo di asset, fornitore, processo BIA, **informazioni colpite** (classi di informazioni), obiettivi aziendali minacciati, vulnerabilità e conseguenza, **Risk Owner** (responsabile di business) e NIS2 (perimetro, area art. 21(2), sistemi impattati, possibile incidente significativo). Già compilato, parte chiuso con un riassunto di una riga
+2. **Misure esistenti**: quello che c'è già oggi, con l'efficacia (alta = tecnica, ovunque, verificata; media = attuata con buchi o non verificata; bassa = solo procedurale), anche collegate ai controlli (del sito; per un rischio di gruppo, ai controlli di qualsiasi sito, indicato fra parentesi quadre). Ogni misura si corregge con **Modifica**
+3. **Rischio attuale**: probabilità (frequenza storica o fattore di esposizione) e impatto su sei dimensioni — economico, legale, cliente e contrattuale, reputazionale, sicurezza delle persone, operativo — dati **tenendo conto delle misure esistenti**, con i **criteri della procedura accanto a ogni livello**. L'impatto è il caso peggiore; con una minaccia alla riservatezza non scende sotto la classe di protezione delle informazioni colpite. La **classe** (Very Low, Low, Medium, High, Critical) si legge dalla matrice, non dal prodotto P × I, e il risultato spiega da dove viene
+4. **Decisione**: parte dalla regola della classe e chiede **«Il rischio attuale è accettabile?»**. **Sì**: si accetta il residuo, nessun piano di trattamento; serve la motivazione (per High e Critical l'analisi costi/benefici) e firmano i ruoli previsti dalla policy, un Critical solo con delibera dell'organo. **No**: si sceglie fra mitigare, trasferire ed evitare, con motivazione, responsabile del trattamento (utente del portale o testo libero), scadenza, **piano delle misure** e **rischio atteso** (con una minaccia alla riservatezza anche l'impatto atteso non scende sotto la soglia delle informazioni colpite: il trattamento può ridurre solo la probabilità, e un impatto atteso più basso blocca il completamento). Un rischio che comporta una violazione di legge o di contratto non si può accettare
+5. **Collegamenti e storico**: impatto locale (rischi di gruppo), obiettivi di sicurezza collegati, chi ha valutato e quando
 
-**Completa la valutazione** controlla che ci sia tutto (motivazioni, Risk Owner, trattamento, rischio atteso). Un rischio High o Critical crea il task del piano di trattamento e la notifica.
+**Completa la valutazione** controlla che ci sia tutto (motivazioni, Risk Owner, decisione, rischio atteso). Un rischio High o Critical crea il task del piano di trattamento e la notifica. La classe non si corregge a mano: se il risultato non convince, si rivedono probabilità, impatti o misure esistenti.
 
 ### Probabilità: frequenza storica o FER
 
@@ -462,10 +462,6 @@ Per ogni rischio si sceglie come stimare la probabilità:
 - **FER — Fattore di Esposizione al Rischio**: quando le serie storiche non ci sono o non sono affidabili. Si stima quanto il rischio è esposto valutando l'efficacia delle misure di protezione in essere rispetto alla capacità e alla motivazione di chi potrebbe causare l'evento (una persona o un evento naturale). Esempio: 5 = vulnerabilità non presidiate o controlli non efficaci, 1 = controlli multipli e verificati, nessun agente credibile
 
 Accanto a ogni livello la scheda mostra i criteri del metodo scelto. La motivazione della probabilità resta obbligatoria in entrambi i casi.
-
-### Correzione della classe
-
-La classe si legge dalla matrice. Se la valutazione cade al limite fra due celle, chi valuta può spostarla di **un solo livello**, in su o in giù, scrivendo la motivazione: la correzione resta visibile nella scheda e nel registro. Serve per i casi limite, non per cambiare il risultato della valutazione.
 
 ### Piano di trattamento e rischio atteso
 

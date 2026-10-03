@@ -79,7 +79,7 @@ class RiskAssessmentSerializer(serializers.ModelSerializer):
             "probability", "probability_method", "probability_rationale",
             "impact_economic", "impact_legal", "impact_customer", "impact_reputational",
             "impact_people", "impact_operational", "impact", "impact_rationale",
-            "matrix_class", "class_override", "override_rationale", "current_class",
+            "matrix_class", "current_class",
             "legal_or_contract_violation",
             "treatment", "treatment_rationale", "treatment_rule",
             "expected_probability", "expected_impact", "expected_class", "can_apply_expected",
@@ -197,8 +197,6 @@ class RiskEvaluationInputSerializer(serializers.Serializer):
     impact_people = _score_field()
     impact_operational = _score_field()
     impact_rationale = serializers.CharField(required=False, allow_blank=True)
-    class_override = serializers.IntegerField(required=False, min_value=-1, max_value=1)
-    override_rationale = serializers.CharField(required=False, allow_blank=True)
     legal_or_contract_violation = serializers.BooleanField(required=False)
     treatment = serializers.ChoiceField(choices=["", "mitigare", "accettare", "trasferire", "evitare"], required=False)
     treatment_rationale = serializers.CharField(required=False, allow_blank=True)

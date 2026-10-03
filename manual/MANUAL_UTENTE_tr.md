@@ -444,15 +444,15 @@ Yeni prosedürden önceki kayıt, Değerlendirmeler sekmesinden salt okunur olar
 
 ### Risk kartı
 
-Yan kartı açmak için bir riske tıklayın:
+Yan kartı açmak için bir riske tıklayın. Adımlar akıl yürütme sırasını izler; soldaki dizin hangilerinin tamamlandığını ve neyin eksik olduğunu gösterir, başlık mevcut → beklenen sınıfı, **Kaydet** ve **Tamamla** düğmelerini her zaman elinizin altında tutar:
 
-- **Tanımlama**: tehdit, varlık veya varlık grubu, tedarikçi, BIA süreci, **etkilenen bilgiler** (bilgi sınıfları), zafiyet ve iş hedefleri üzerindeki sonuç
-- **Değerlendirme**: olasılık (geçmiş sıklık veya maruziyet faktörü) ve altı boyutta etki — ekonomik, yasal, müşteri ve sözleşme, itibar, kişilerin güvenliği, operasyonel — **her seviyenin yanında prosedür kriterleriyle**. Etki en kötü durumdur; gizlilik tehdidinde etkilenen bilgilerin koruma sınıfının altına düşmez. **Sınıf** (Very Low, Low, Medium, High, Critical) P × E çarpımından değil matristen okunur; yalnızca gerekçeyle bir seviye kaydırabilirsiniz
-- Etkinlikleriyle birlikte **mevcut önlemler**, isteğe bağlı olarak kontrollere bağlı (sahanın; grup riski için köşeli parantez içinde belirtilen herhangi bir sahanın kontrollerine)
-- **İşlem**: kaçınma, azaltma, transfer veya kabul; gerekçe ve **beklenen risk** ile (gizlilik tehdidinde beklenen etki de etkilenen bilgilerin eşiğinin altına inmez: risk işleme yalnızca olasılığı azaltabilir ve daha düşük bir beklenen etki tamamlamayı engeller); Risk Sahibi (iş sorumlusu) ve işlem sorumlusu (portal kullanıcısı veya serbest metin)
-- **NIS2**: kapsam, madde 21(2) alanı, etkilenen sistemler, olası ciddi olay
+1. **Senaryo**: tehdit, varlık veya varlık grubu, tedarikçi, BIA süreci, **etkilenen bilgiler** (bilgi sınıfları), tehdit altındaki iş hedefleri, zafiyet ve sonuç, **Risk Sahibi** (iş sorumlusu) ve NIS2 (kapsam, md. 21(2) alanı, etkilenen sistemler, olası önemli olay). Doldurulduktan sonra tek satırlık bir özetle kapalı açılır
+2. **Mevcut önlemler**: bugün zaten mevcut olanlar, etkinlikleriyle (yüksek = teknik, her yerde, doğrulanmış; orta = boşluklarla uygulanmış veya doğrulanmamış; düşük = yalnızca prosedürel), isteğe bağlı olarak kontrollere bağlı (sahanın; grup riski için köşeli parantez içinde belirtilen herhangi bir sahanın kontrollerine). Her önlem **Düzenle** ile düzeltilir
+3. **Mevcut risk**: olasılık (geçmiş sıklık veya maruziyet faktörü) ve altı boyutta etki — ekonomik, yasal, müşteri ve sözleşme, itibar, kişi güvenliği, operasyonel — **mevcut önlemler dikkate alınarak**, **her seviyenin yanında prosedür kriterleriyle** verilir. Etki en kötü durumdur; gizlilik tehdidinde etkilenen bilgilerin koruma sınıfının altına inmez. **Sınıf** (Very Low, Low, Medium, High, Critical) P × I çarpımından değil matristen okunur ve sonuç nereden geldiğini açıklar
+4. **Karar**: sınıf kuralından başlar ve **"Mevcut risk kabul edilebilir mi?"** diye sorar. **Evet**: artık risk kabul edilir, işlem planı yoktur; gerekçe gerekir (High ve Critical için maliyet/fayda analizi) ve politikanın öngördüğü roller imzalar, Critical yalnızca organ kararıyla. **Hayır**: azaltma, transfer ve kaçınma arasından seçilir; gerekçe, işlem sorumlusu (portal kullanıcısı veya serbest metin), son tarih, **önlem planı** ve **beklenen risk** ile (gizlilik tehdidinde beklenen etki de etkilenen bilgilerin eşiğinin altına inmez: risk işleme yalnızca olasılığı azaltabilir ve daha düşük bir beklenen etki tamamlamayı engeller). Yasa veya sözleşme ihlali içeren bir risk kabul edilemez
+5. **Bağlantılar ve geçmiş**: yerel etki (grup riskleri), bağlı güvenlik hedefleri, kimin ne zaman değerlendirdiği
 
-**Değerlendirmeyi tamamla**, her şeyin doldurulduğunu kontrol eder (gerekçeler, Risk Sahibi, işlem, beklenen risk). High veya Critical bir risk, işlem planı görevini ve bildirimi oluşturur.
+**Değerlendirmeyi tamamla** her şeyin mevcut olduğunu kontrol eder (gerekçeler, Risk Sahibi, karar, beklenen risk). High veya Critical bir risk, işlem planı görevini ve bildirimi oluşturur. Sınıf elle düzeltilmez: sonuç ikna edici değilse olasılık, etkiler veya mevcut önlemler gözden geçirilir.
 
 ### Olasılık: geçmiş sıklık veya FER
 
@@ -462,10 +462,6 @@ Her risk için olasılığın nasıl tahmin edileceği seçilir:
 - **FER — Risk Maruziyet Faktörü**: geçmiş seriler olmadığında veya güvenilir olmadığında. Mevcut koruma önlemlerinin, olaya neden olabilecek kişinin (veya doğal olayın) yeteneği ve motivasyonuna karşı etkinliği değerlendirilerek riskin ne kadar açık olduğu tahmin edilir. Örnek: 5 = korunmayan zafiyetler veya etkisiz kontroller, 1 = birden çok doğrulanmış kontrol, inandırıcı bir etken yok
 
 Kart her seviyenin yanında seçilen yöntemin kriterlerini gösterir. Olasılık gerekçesi her iki durumda da zorunludur.
-
-### Sınıf düzeltmesi
-
-Sınıf matristen okunur. Değerlendirme iki hücre arasındaki sınıra düşerse, değerlendiren kişi gerekçe yazarak sınıfı yukarı veya aşağı **yalnızca bir seviye** kaydırabilir: düzeltme kartta ve kayıtta görünür kalır. Sınır durumlar içindir, değerlendirmenin sonucunu değiştirmek için değil.
 
 ### İşlem planı ve beklenen risk
 

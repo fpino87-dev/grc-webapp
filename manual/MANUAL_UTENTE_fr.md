@@ -444,15 +444,15 @@ L'onglet **Couverture** croise les types d'actifs présents sur le site (IT, OT,
 
 ### Fiche du risque
 
-Cliquez sur un risque pour ouvrir la fiche latérale :
+Cliquez sur un risque pour ouvrir la fiche latérale. Les étapes suivent l'ordre du raisonnement ; l'index à gauche indique celles qui sont complètes et ce qui manque, l'en-tête garde toujours à portée classe actuelle → attendue, **Enregistrer** et **Terminer** :
 
-- **Identification** : menace, actif ou groupe d'actifs, fournisseur, processus BIA, **informations touchées** (classes d'informations), vulnérabilité et conséquence sur les objectifs de l'entreprise
-- **Évaluation** : probabilité (fréquence historique ou facteur d'exposition) et impact sur six dimensions — économique, juridique, client et contractuel, réputation, sécurité des personnes, opérationnel — avec les **critères de la procédure à côté de chaque niveau**. L'impact est le pire cas ; pour une menace sur la confidentialité il ne descend pas sous la classe de protection des informations touchées. La **classe** (Very Low, Low, Medium, High, Critical) se lit dans la matrice et non dans le produit P × I ; vous pouvez la déplacer d'un niveau uniquement avec une justification
-- **Mesures existantes** avec leur efficacité, éventuellement liées aux contrôles (du site ; pour un risque de groupe, aux contrôles de n'importe quel site, indiqué entre crochets)
-- **Traitement** : éviter, atténuer, transférer ou accepter, avec justification et **risque attendu** (avec une menace sur la confidentialité, l'impact attendu ne descend pas non plus sous le seuil des informations touchées : le traitement ne peut réduire que la probabilité, et un impact attendu plus bas bloque la finalisation) ; Risk Owner (responsable métier) et responsable du traitement (utilisateur du portail ou texte libre)
-- **NIS2** : périmètre, domaine art. 21(2), systèmes impactés, incident important possible
+1. **Scénario** : menace, actif ou groupe d'actifs, fournisseur, processus BIA, **informations touchées** (classes d'informations), objectifs de l'entreprise menacés, vulnérabilité et conséquence, **Risk Owner** (responsable métier) et NIS2 (périmètre, domaine art. 21(2), systèmes impactés, incident significatif possible). Une fois renseignée, elle s'ouvre fermée avec un résumé d'une ligne
+2. **Mesures existantes** : ce qui existe déjà aujourd'hui, avec son efficacité (élevée = technique, partout, vérifiée ; moyenne = en place avec des lacunes ou non vérifiée ; faible = uniquement procédurale), éventuellement liées aux contrôles (du site ; pour un risque de groupe, aux contrôles de n'importe quel site, indiqué entre crochets). Chaque mesure se corrige avec **Modifier**
+3. **Risque actuel** : probabilité (fréquence historique ou facteur d'exposition) et impact sur six dimensions — économique, juridique, client et contractuel, réputationnel, sécurité des personnes, opérationnel — évalués **en tenant compte des mesures existantes**, avec les **critères de la procédure à côté de chaque niveau**. L'impact est le pire cas ; avec une menace sur la confidentialité, il ne descend pas sous la classe de protection des informations touchées. La **classe** (Very Low, Low, Medium, High, Critical) se lit dans la matrice, pas dans le produit P × I, et le résultat explique d'où elle vient
+4. **Décision** : part de la règle de la classe et demande **« Le risque actuel est-il acceptable ? »**. **Oui** : le risque résiduel est accepté, sans plan de traitement ; une justification est requise (pour High et Critical l'analyse coûts/bénéfices) et les rôles prévus par la politique signent, un Critical seulement avec une délibération de l'organe. **Non** : choisir entre atténuer, transférer et éviter, avec justification, responsable du traitement (utilisateur du portail ou texte libre), échéance, **plan de mesures** et **risque attendu** (avec une menace sur la confidentialité, l'impact attendu ne descend pas non plus sous le seuil des informations touchées : le traitement ne peut réduire que la probabilité, et un impact attendu plus bas bloque la finalisation). Un risque impliquant une violation de la loi ou d'un contrat ne peut pas être accepté
+5. **Liens et historique** : impact local (risques de groupe), objectifs de sécurité liés, qui a évalué et quand
 
-**Terminer l'évaluation** vérifie que tout est renseigné (justifications, Risk Owner, traitement, risque attendu). Un risque High ou Critical crée la tâche du plan de traitement et la notification.
+**Terminer l'évaluation** vérifie que tout est présent (justifications, Risk Owner, décision, risque attendu). Un risque High ou Critical crée la tâche du plan de traitement et la notification. La classe ne se corrige pas à la main : si le résultat ne convainc pas, revoyez probabilité, impacts ou mesures existantes.
 
 ### Probabilité : fréquence historique ou FER
 
@@ -462,10 +462,6 @@ Pour chaque risque, on choisit comment estimer la probabilité :
 - **FER — Facteur d'Exposition au Risque** : lorsque les séries historiques manquent ou ne sont pas fiables. On estime l'exposition du risque en évaluant l'efficacité des mesures de protection en place face à la capacité et à la motivation de qui pourrait causer l'événement (une personne ou un événement naturel). Exemple : 5 = vulnérabilités non maîtrisées ou contrôles inefficaces, 1 = contrôles multiples et vérifiés, aucun agent crédible
 
 À côté de chaque niveau, la fiche affiche les critères de la méthode choisie. La justification de la probabilité reste obligatoire dans les deux cas.
-
-### Correction de la classe
-
-La classe se lit dans la matrice. Si l'évaluation se situe à la limite entre deux cellules, l'évaluateur peut la déplacer d'**un seul niveau**, vers le haut ou vers le bas, en rédigeant une justification : la correction reste visible dans la fiche et dans le registre. Elle sert aux cas limites, pas à modifier le résultat de l'évaluation.
 
 ### Plan de traitement et risque attendu
 

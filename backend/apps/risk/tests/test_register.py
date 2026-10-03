@@ -170,9 +170,6 @@ def test_confidentiality_floor_from_information_class(org_user, plant, threats, 
         "information_classes": [ic],
     })
     assert risk.impact == 5 and risk.current_class == "high"
-    # l'override non scende sotto la soglia di riservatezza
-    risk = services.update_risk(org_user, risk, {"class_override": -1, "override_rationale": "Al limite"})
-    assert risk.current_class == "high"
 
 
 def _floor_risk(user, plant, threat, **extra):
@@ -708,7 +705,7 @@ def test_excel_export_sheets(org_user, plant, threats, cycle):
                              "Copertura informazioni", "Copertura", "Criteri"]
     reg = wb["Registro"]
     assert reg.cell(row=2, column=3).value == "IN_MAL"
-    assert reg.cell(row=2, column=29).value == "Critical"
+    assert reg.cell(row=2, column=26).value == "Critical"
     res = _client(org_user).get(f"/api/v1/risk/assessments/export/?plant={plant.pk}")
     assert res.status_code == 200
 

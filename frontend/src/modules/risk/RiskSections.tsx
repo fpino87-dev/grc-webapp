@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { AiMeasuresButton } from "./RiskAi";
-import { apiError, riskApi, type Acceptance, type MitigationPlan, type Risk } from "../../api/endpoints/risk";
+import { apiError, riskApi, type Acceptance, type ExistingMeasure, type MitigationPlan, type Risk } from "../../api/endpoints/risk";
 import { controlsApi } from "../../api/endpoints/controls";
 import { plantsApi } from "../../api/endpoints/plants";
 import { usersApi } from "../../api/endpoints/users";
@@ -37,56 +37,88 @@ const fmt = (d: string | null | undefined, lang: string) => (d ? new Date(d).toL
 export function MeasuresSection({ risk, editable }: { risk: Risk; editable: boolean }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [form, setForm] = useState({ control_instance: "", description: "", effectiveness: "media" });
+  const emptyForm = { control_instance: "", description: "", effectiveness: "media" };
+  const [form, setForm] = useState(emptyForm);
+  // Misura in modifica: il modulo sotto l'elenco passa da "aggiungi" a "salva".
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { data: measures = [] } = useQuery({
     queryKey: ["risk-measures", risk.id], queryFn: () => riskApi.measures(risk.id), retry: false,
   });
   const controls = useControls(risk.plant);
   const refresh = () => qc.invalidateQueries({ queryKey: ["risk-measures", risk.id] });
-  const add = useMutation({
-    mutationFn: () => riskApi.createMeasure({
-      risk: risk.id, control_instance: form.control_instance || null, description: form.description,
-      effectiveness: form.effectiveness as "alta" | "media" | "bassa",
-    }),
-    onSuccess: () => { setForm({ control_instance: "", description: "", effectiveness: "media" }); setError(null); refresh(); },
+  const save = useMutation({
+    mutationFn: () => {
+      const payload = {
+        control_instance: form.control_instance || null, description: form.description,
+        effectiveness: form.effectiveness as ExistingMeasure["effectiveness"],
+      };
+      return editingId ? riskApi.updateMeasure(editingId, payload) : riskApi.createMeasure({ risk: risk.id, ...payload });
+    },
+    onSuccess: () => { setForm(emptyForm); setEditingId(null); setError(null); refresh(); },
     onError: e => setError(apiError(e, t("risk.errors.generic"))),
   });
   const remove = useMutation({ mutationFn: (id: string) => riskApi.deleteMeasure(id), onSuccess: refresh });
+  const startEdit = (m: ExistingMeasure) => {
+    setEditingId(m.id); setError(null);
+    setForm({ control_instance: m.control_instance ?? "", description: m.description, effectiveness: m.effectiveness });
+  };
+  const effectivenessCls = { alta: "bg-green-100 text-green-800", media: "bg-yellow-100 text-yellow-900", bassa: "bg-gray-100 text-gray-700" };
 
   return (
-    <Section title={t("risk.drawer.existing_measures")}>
+    <div>
+      <p className="text-xs text-gray-600 mb-2">{t("risk.drawer.existing_measures_hint")}</p>
       {measures.length === 0 && <p className="text-xs text-gray-400 mb-2">{t("risk.drawer.no_measures")}</p>}
       <ul className="space-y-1 mb-2">
         {measures.map(m => (
-          <li key={m.id} className="flex items-start justify-between gap-2 text-sm border rounded px-2 py-1.5">
-            <span>
+          <li key={m.id} className={`flex items-center justify-between gap-2 text-sm border rounded px-2 py-1.5 ${editingId === m.id ? "border-primary-400 ring-1 ring-primary-200" : ""}`}>
+            <span className="flex-1">
               {m.control_title && <span className="font-mono text-xs text-gray-500 mr-1">{m.control_title}</span>}
               {m.description}
-              <span className="ml-2 text-[11px] text-gray-500">{t("risk.drawer.effectiveness")}: {t(`risk.effectiveness.${m.effectiveness}`)}</span>
             </span>
-            {editable && <button onClick={() => remove.mutate(m.id)} className="text-xs text-red-600 hover:underline">{t("common.delete")}</button>}
+            <span className={`text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap ${effectivenessCls[m.effectiveness]}`}>
+              {t("risk.drawer.effectiveness")}: {t(`risk.effectiveness.${m.effectiveness}`)}
+            </span>
+            {editable && (
+              <span className="flex gap-2 text-xs">
+                <button onClick={() => startEdit(m)} className="text-gray-700 hover:underline">{t("common.edit")}</button>
+                <button onClick={() => remove.mutate(m.id)} className="text-red-600 hover:underline">{t("common.delete")}</button>
+              </span>
+            )}
           </li>
         ))}
       </ul>
       {editable && (
-        <div className="grid grid-cols-6 gap-2 items-start">
-          <select value={form.control_instance} onChange={e => setForm({ ...form, control_instance: e.target.value })}
-            className={`${inputCls} col-span-2`}>
-            <option value="">{t("risk.drawer.no_control")}</option>
-            {controls.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-          </select>
-          <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-            className={`${inputCls} col-span-2`} placeholder={t("risk.drawer.measure_description")} />
-          <select value={form.effectiveness} onChange={e => setForm({ ...form, effectiveness: e.target.value })} className={inputCls}>
-            {["alta", "media", "bassa"].map(x => <option key={x} value={x}>{t(`risk.effectiveness.${x}`)}</option>)}
-          </select>
-          <button onClick={() => add.mutate()} disabled={(!form.description && !form.control_instance) || add.isPending}
-            className="px-2 py-1.5 border rounded text-sm hover:bg-gray-50 disabled:opacity-50">{t("common.add")}</button>
+        <div className={`border rounded p-2 ${editingId ? "bg-primary-50 border-primary-300" : "bg-gray-50"}`}>
+          <div className="grid grid-cols-6 gap-2 items-start">
+            <select value={form.control_instance} onChange={e => setForm({ ...form, control_instance: e.target.value })}
+              className={`${inputCls} col-span-2`} aria-label={t("risk.drawer.no_control")}>
+              <option value="">{t("risk.drawer.no_control")}</option>
+              {controls.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+            </select>
+            <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
+              className={`${inputCls} col-span-3`} placeholder={t("risk.drawer.measure_description")} />
+            <select value={form.effectiveness} onChange={e => setForm({ ...form, effectiveness: e.target.value })} className={inputCls}
+              aria-label={t("risk.drawer.effectiveness")}>
+              {["alta", "media", "bassa"].map(x => <option key={x} value={x}>{t(`risk.effectiveness.${x}`)}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <button onClick={() => save.mutate()} disabled={(!form.description && !form.control_instance) || save.isPending}
+              className="px-3 py-1.5 border rounded text-sm bg-white hover:bg-gray-50 disabled:opacity-50">
+              {editingId ? t("common.save") : `+ ${t("common.add")}`}
+            </button>
+            {editingId && (
+              <button onClick={() => { setEditingId(null); setForm(emptyForm); }} className="px-3 py-1.5 text-sm text-gray-600 hover:underline">
+                {t("common.cancel")}
+              </button>
+            )}
+            <span className="text-[11px] text-gray-500 ml-auto">{t("risk.drawer.effectiveness_guide")}</span>
+          </div>
         </div>
       )}
       <ErrorBox message={error} />
-    </Section>
+    </div>
   );
 }
 

@@ -114,6 +114,38 @@ export function Section({ title, children, right }: { title: string; children: R
   );
 }
 
+/** Passo numerato della scheda del rischio: aperto mostra il contenuto, chiuso
+ * un riassunto di una riga. `done` = null per un passo facoltativo. */
+export function Step({ id, n, title, done, open, onToggle, summary, right, children }: {
+  id: string; n: number; title: string; done: boolean | null; open: boolean; onToggle: () => void;
+  summary?: React.ReactNode; right?: React.ReactNode; children: React.ReactNode;
+}) {
+  return (
+    <section id={id} className="border border-gray-200 rounded-lg scroll-mt-4">
+      <div className="flex items-center gap-3 px-4 py-3">
+        <button type="button" onClick={onToggle} aria-expanded={open} className="flex-1 min-w-0 flex items-center gap-3 text-left">
+          <StepDot n={n} done={done} />
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold text-gray-900">{title}</span>
+            {!open && summary && <span className="block text-xs text-gray-600 truncate">{summary}</span>}
+          </span>
+        </button>
+        {open && right}
+      </div>
+      {open && <div className="px-4 pb-4">{children}</div>}
+    </section>
+  );
+}
+
+export function StepDot({ n, done }: { n: number; done: boolean | null }) {
+  return done ? (
+    <span className="w-6 h-6 shrink-0 rounded-full bg-green-700 text-white text-xs inline-flex items-center justify-center" aria-hidden="true">✓</span>
+  ) : (
+    <span className={`w-6 h-6 shrink-0 rounded-full border-2 text-xs inline-flex items-center justify-center ${done === false
+      ? "border-primary-600 text-primary-700" : "border-gray-300 text-gray-500"}`} aria-hidden="true">{n}</span>
+  );
+}
+
 export function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
     <label className="block mb-3">

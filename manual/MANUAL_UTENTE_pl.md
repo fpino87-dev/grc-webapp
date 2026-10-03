@@ -444,15 +444,15 @@ Zakładka **Pokrycie** zestawia typy aktywów obecnych w zakładzie (IT, OT, zak
 
 ### Karta ryzyka
 
-Kliknij ryzyko, aby otworzyć kartę boczną:
+Kliknij ryzyko, aby otworzyć kartę boczną. Kroki odpowiadają kolejności rozumowania; spis po lewej pokazuje, które są kompletne i czego brakuje, a nagłówek zawsze trzyma pod ręką klasę bieżącą → oczekiwaną, **Zapisz** i **Zakończ**:
 
-- **Identyfikacja**: zagrożenie, aktywo lub grupa aktywów, dostawca, proces BIA, **dotknięte informacje** (klasy informacji), podatność i skutek dla celów biznesowych
-- **Ocena**: prawdopodobieństwo (częstotliwość historyczna lub czynnik ekspozycji) i wpływ w sześciu wymiarach — ekonomicznym, prawnym, klient i umowy, reputacja, bezpieczeństwo osób, operacyjnym — z **kryteriami procedury przy każdym poziomie**. Wpływ to najgorszy przypadek; dla zagrożenia poufności nie spada poniżej klasy ochrony dotkniętych informacji. **Klasę** (Very Low, Low, Medium, High, Critical) odczytuje się z macierzy, a nie z iloczynu P × W; można ją przesunąć o jeden poziom tylko z uzasadnieniem
-- **Istniejące środki** wraz ze skutecznością, opcjonalnie powiązane z kontrolami (zakładu; dla ryzyka grupowego z kontrolami dowolnego zakładu, wskazanego w nawiasach kwadratowych)
-- **Postępowanie**: unikanie, ograniczanie, przeniesienie lub akceptacja, z uzasadnieniem i **ryzykiem oczekiwanym** (przy zagrożeniu poufności również oczekiwany wpływ nie spada poniżej progu informacji, których dotyczy: postępowanie może obniżyć tylko prawdopodobieństwo, a niższy oczekiwany wpływ blokuje zakończenie oceny); Właściciel ryzyka (odpowiedzialny biznesowo) i odpowiedzialny za postępowanie (użytkownik portalu lub tekst dowolny)
-- **NIS2**: zakres, obszar art. 21 ust. 2, systemy, których dotyczy, możliwy poważny incydent
+1. **Scenariusz**: zagrożenie, zasób lub grupa zasobów, dostawca, proces BIA, **informacje, których dotyczy** (klasy informacji), zagrożone cele biznesowe, podatność i skutek, **Właściciel ryzyka** (odpowiedzialny biznesowo) i NIS2 (zakres, obszar art. 21(2), systemy, których dotyczy, możliwy poważny incydent). Po wypełnieniu otwiera się zwinięty, z jednowierszowym podsumowaniem
+2. **Istniejące środki**: to, co już dziś działa, wraz ze skutecznością (wysoka = techniczna, wszędzie, zweryfikowana; średnia = wdrożona z lukami lub niezweryfikowana; niska = tylko proceduralna), opcjonalnie powiązane z kontrolami (zakładu; dla ryzyka grupowego z kontrolami dowolnego zakładu, wskazanego w nawiasach kwadratowych). Każdy środek poprawia się przyciskiem **Edytuj**
+3. **Ryzyko bieżące**: prawdopodobieństwo (częstość historyczna lub współczynnik ekspozycji) i wpływ w sześciu wymiarach — ekonomicznym, prawnym, klienta i umownym, reputacyjnym, bezpieczeństwa osób, operacyjnym — oceniane **z uwzględnieniem istniejących środków**, z **kryteriami procedury przy każdym poziomie**. Wpływ to najgorszy przypadek; przy zagrożeniu poufności nie spada poniżej klasy ochrony informacji, których dotyczy. **Klasę** (Very Low, Low, Medium, High, Critical) odczytuje się z macierzy, a nie z iloczynu P × I, a wynik wyjaśnia, skąd pochodzi
+4. **Decyzja**: wychodzi od reguły klasy i pyta **„Czy ryzyko bieżące jest akceptowalne?”**. **Tak**: ryzyko rezydualne jest akceptowane, bez planu postępowania; wymagane jest uzasadnienie (dla High i Critical analiza kosztów i korzyści), a podpisują role wymagane przez politykę, Critical tylko z uchwałą organu. **Nie**: wybiera się ograniczenie, przeniesienie lub unikanie, z uzasadnieniem, odpowiedzialnym za postępowanie (użytkownik portalu lub tekst dowolny), terminem, **planem środków** i **ryzykiem oczekiwanym** (przy zagrożeniu poufności również oczekiwany wpływ nie spada poniżej progu informacji, których dotyczy: postępowanie może obniżyć tylko prawdopodobieństwo, a niższy oczekiwany wpływ blokuje zakończenie oceny). Ryzyka wiążącego się z naruszeniem prawa lub umowy nie można zaakceptować
+5. **Powiązania i historia**: wpływ lokalny (ryzyka grupowe), powiązane cele bezpieczeństwa, kto i kiedy ocenił
 
-**Zakończ ocenę** sprawdza, czy wszystko jest uzupełnione (uzasadnienia, Właściciel ryzyka, postępowanie, ryzyko oczekiwane). Ryzyko High lub Critical tworzy zadanie planu postępowania i powiadomienie.
+**Zakończ ocenę** sprawdza, czy jest wszystko (uzasadnienia, Właściciel ryzyka, decyzja, ryzyko oczekiwane). Ryzyko High lub Critical tworzy zadanie planu postępowania i powiadomienie. Klasy nie poprawia się ręcznie: jeśli wynik nie przekonuje, przegląda się prawdopodobieństwo, wpływy lub istniejące środki.
 
 ### Prawdopodobieństwo: częstość historyczna lub FER
 
@@ -462,10 +462,6 @@ Dla każdego ryzyka wybiera się sposób szacowania prawdopodobieństwa:
 - **FER — Współczynnik Ekspozycji na Ryzyko**: gdy brak serii historycznych lub nie są one wiarygodne. Ekspozycję szacuje się, oceniając skuteczność istniejących środków ochrony wobec możliwości i motywacji tego, kto mógłby spowodować zdarzenie (osoby lub zjawiska naturalnego). Przykład: 5 = niechronione podatności lub nieskuteczne kontrole, 1 = wiele zweryfikowanych kontroli, brak wiarygodnego sprawcy
 
 Przy każdym poziomie karta pokazuje kryteria wybranej metody. Uzasadnienie prawdopodobieństwa jest obowiązkowe w obu przypadkach.
-
-### Korekta klasy
-
-Klasę odczytuje się z macierzy. Jeśli ocena wypada na granicy dwóch komórek, oceniający może przesunąć ją o **jeden poziom**, w górę lub w dół, wpisując uzasadnienie: korekta pozostaje widoczna w karcie i w rejestrze. Służy do przypadków granicznych, a nie do zmiany wyniku oceny.
 
 ### Plan postępowania i ryzyko oczekiwane
 

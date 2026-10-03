@@ -145,8 +145,6 @@ class RiskAssessment(BaseModel):
     impact_operational = models.IntegerField(null=True, blank=True, choices=IMPACT_CHOICES)
     impact_rationale = models.TextField(blank=True, default="")
     matrix_class = models.CharField(max_length=10, blank=True, default="")
-    class_override = models.SmallIntegerField(default=0)
-    override_rationale = models.TextField(blank=True, default="")
     current_class = models.CharField(max_length=10, blank=True, default="", db_index=True)
     legal_or_contract_violation = models.BooleanField(
         default=False,

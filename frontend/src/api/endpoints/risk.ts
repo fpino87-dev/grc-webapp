@@ -66,8 +66,6 @@ export interface Risk {
   impact: number | null;
   impact_rationale: string;
   matrix_class: RiskClass | "";
-  class_override: number;
-  override_rationale: string;
   current_class: RiskClass | "";
   legal_or_contract_violation: boolean;
   treatment: Treatment;
@@ -106,7 +104,7 @@ export type RiskInput = Partial<Pick<Risk,
   | "business_objectives"
   | "critical_process" | "vulnerability" | "consequence" | "probability" | "probability_method"
   | "probability_rationale" | "impact_economic" | "impact_legal" | "impact_customer" | "impact_reputational"
-  | "impact_people" | "impact_operational" | "impact_rationale" | "class_override" | "override_rationale"
+  | "impact_people" | "impact_operational" | "impact_rationale"
   | "legal_or_contract_violation" | "treatment" | "treatment_rationale" | "expected_probability"
   | "expected_impact" | "owner" | "treatment_owner" | "treatment_owner_external" | "plan_due_date"
   | "nis2_in_scope" | "nis2_art21_category" | "impacted_systems" | "significant_incident_potential"
