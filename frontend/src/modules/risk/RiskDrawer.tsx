@@ -10,8 +10,10 @@ import type { RegisterId } from "./RiskPage";
 import { Link } from "react-router-dom";
 import { TrackBadge } from "../objectives/objectiveBadges";
 import type { ObjectiveTrack } from "../../api/endpoints/securityObjectives";
+import { useUiStore } from "../../store/ui";
 
-/** Scheda del rischio in un pannello laterale (pattern UserDrawer). */
+/** Scheda del rischio in un pannello laterale (pattern UserDrawer), largo
+ * fino alla barra dei menu: la scheda ha molti campi affiancati. */
 export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite, orgScope, onClose }: {
   riskId: string;
   registerId: RegisterId;
@@ -42,6 +44,7 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const sidebarCollapsed = useUiStore(s => s.sidebarCollapsed);
   const ownRegister = !!risk && (risk.plant ?? null) === registerId;
   const editable = !!risk && !risk.is_legacy && ownRegister && evaluating && canWrite;
   const canMonitor = !!risk && !risk.is_legacy && ownRegister && canWrite;
@@ -82,9 +85,9 @@ export function RiskDrawer({ riskId, registerId, evaluating, cycleKind, canWrite
     && risk.evaluated_in_cycle !== null && risk.applicable;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={risk?.display_name ?? t("risk.drawer.title")}>
+    <div className={`fixed inset-0 z-50 flex justify-end ${sidebarCollapsed ? "pl-14" : "pl-56"}`} role="dialog" aria-modal="true" aria-label={risk?.display_name ?? t("risk.drawer.title")}>
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <aside className="relative h-full w-full max-w-3xl bg-white shadow-2xl flex flex-col">
+      <aside className="relative h-full w-full bg-white shadow-2xl flex flex-col">
         <header className="px-6 pt-5 pb-3 border-b border-gray-100">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
