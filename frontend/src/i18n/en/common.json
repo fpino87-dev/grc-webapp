@@ -3426,6 +3426,7 @@
       "treatment_option": "Option",
       "plan_due_date": "Plan deadline",
       "treatment_rationale": "Treatment rationale",
+      "treatment_rationale_hint": "Why this treatment and not the others: the class rule, why not accept, transfer or avoid, what is reduced (probability or impact) and why the expected risk is achievable; for High or acceptance also costs and benefits. The measures go in the treatment plan.",
       "expected_probability": "Expected probability",
       "expected_impact": "Expected impact",
       "expected_risk": "Expected risk",

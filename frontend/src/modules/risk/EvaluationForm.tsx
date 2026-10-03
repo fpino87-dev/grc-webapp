@@ -338,7 +338,7 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
               disabled={!editable} className={inputCls} />
           </Field>
         </div>
-        <Field label={t("risk.drawer.treatment_rationale")}>{textarea("treatment_rationale")}</Field>
+        <Field label={t("risk.drawer.treatment_rationale")} hint={t("risk.drawer.treatment_rationale_hint")}>{textarea("treatment_rationale")}</Field>
         {value.treatment && value.treatment !== "accettare" && (
           <div className="grid grid-cols-3 gap-x-3 items-end">
             <Field label={t("risk.drawer.expected_probability")}>

@@ -3426,6 +3426,7 @@
       "treatment_option": "Opcja",
       "plan_due_date": "Termin planu",
       "treatment_rationale": "Uzasadnienie postępowania",
+      "treatment_rationale_hint": "Dlaczego to postępowanie, a nie inne: reguła klasy, dlaczego nie akceptacja, przeniesienie lub unikanie, co jest obniżane (prawdopodobieństwo czy wpływ) i dlaczego ryzyko oczekiwane jest osiągalne; dla High lub akceptacji także koszty i korzyści. Środki wpisuje się w plan postępowania.",
       "expected_probability": "Oczekiwane prawdopodobieństwo",
       "expected_impact": "Oczekiwany wpływ",
       "expected_risk": "Oczekiwane ryzyko",

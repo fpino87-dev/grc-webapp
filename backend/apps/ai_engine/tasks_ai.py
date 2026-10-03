@@ -513,13 +513,18 @@ _RISK_DRAFT_RULES = """- "probability_method": un solo valore, "frequenza" oppur
   una; [] solo se nessuna è coinvolta). Processo BIA: il numero del più colpito, o null.
 - Motiva probabilità e impatto citando il criterio del livello scelto, dimensione per dimensione, e i dati.
 - Trattamento fra: mitigare, evitare, trasferire, accettare. Se non accetti indica il rischio atteso dopo le misure.
+- "treatment_rationale" spiega PERCHÉ si sceglie quel trattamento, NON elenca le misure (quelle vanno nel piano di
+  trattamento, proposto a parte): regola della classe (Critical va trattato, High va valutato, Medium e sotto
+  accettabili), perché non le alternative (accettare, trasferire, evitare), cosa si riduce (probabilità, impatto o
+  entrambi) e perché il rischio atteso è raggiungibile; per High o accettare anche costi rispetto ai benefici.
 - Minaccia alla riservatezza (C): l'impatto, anche quello atteso, non scende sotto la classe di protezione delle
   informazioni colpite (very_high=5, high=4, normal=3, low=2); il trattamento può ridurre solo la probabilità."""
 
 _RISK_DRAFT_FIELDS = """"vulnerability": "...", "consequence": "conseguenza sugli obiettivi aziendali",
  "probability_method": "fer", "probability": 3, "probability_rationale": "...",
  "impacts": {"economic": 3, "legal": null, "customer": 4, "reputational": 2, "people": null, "operational": 4},
- "impact_rationale": "...", "treatment": "mitigare", "treatment_rationale": "...",
+ "impact_rationale": "...", "treatment": "mitigare",
+ "treatment_rationale": "perché questo trattamento e non gli altri, cosa riduce, perché l'atteso è raggiungibile",
  "expected_probability": 2, "expected_impact": 3, "objectives": [1], "information": [2], "process": 1"""
 
 

@@ -3426,6 +3426,7 @@
       "treatment_option": "Option",
       "plan_due_date": "Échéance du plan",
       "treatment_rationale": "Justification du traitement",
+      "treatment_rationale_hint": "Pourquoi ce traitement et pas les autres : règle de la classe, pourquoi ne pas accepter, transférer ou éviter, ce qui est réduit (probabilité ou impact) et pourquoi le risque attendu est atteignable ; pour High ou une acceptation, aussi coûts et bénéfices. Les mesures vont dans le plan de traitement.",
       "expected_probability": "Probabilité attendue",
       "expected_impact": "Impact attendu",
       "expected_risk": "Risque attendu",

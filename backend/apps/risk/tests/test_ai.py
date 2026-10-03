@@ -271,3 +271,18 @@ def test_ai_measures_on_draft_risk(org_user, plant, threats, cycle):
     with patch("apps.ai_engine.tasks_ai.route", _fake_route(answer)):
         res = _client(org_user).post(f"/api/v1/risk/assessments/{risk.pk}/ai-measures/")
     assert res.status_code == 200 and res.json()["measures"][0]["action"] == "MFA per gli accessi remoti"
+
+
+@pytest.mark.django_db
+def test_ai_prompts_ask_why_not_measures_in_treatment_rationale(org_user, plant, threats, cycle):
+    """La motivazione del trattamento è il perché della scelta: le misure vanno nel piano."""
+    prompts = []
+
+    def route(**kwargs):
+        prompts.append(kwargs["prompt"])
+        return _fake_route("{}")(**kwargs)
+
+    risk = services.create_risk(org_user, plant, {"asset_type": "IT", "threat": threats["malware"]})
+    with patch("apps.ai_engine.tasks_ai.route", route):
+        _client(org_user).post(f"/api/v1/risk/assessments/{risk.pk}/ai-draft/")
+    assert prompts and all("NON elenca le misure" in p and "piano di" in p for p in prompts)

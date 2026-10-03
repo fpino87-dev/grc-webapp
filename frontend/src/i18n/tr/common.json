@@ -3426,6 +3426,7 @@
       "treatment_option": "Seçenek",
       "plan_due_date": "Plan son tarihi",
       "treatment_rationale": "İşlem gerekçesi",
+      "treatment_rationale_hint": "Neden diğerleri değil de bu işlem: sınıf kuralı, neden kabul, transfer veya kaçınma değil, neyin azaltıldığı (olasılık veya etki) ve beklenen riskin neden ulaşılabilir olduğu; High veya kabul için maliyet ve faydalar da. Önlemler işlem planına yazılır.",
       "expected_probability": "Beklenen olasılık",
       "expected_impact": "Beklenen etki",
       "expected_risk": "Beklenen risk",
