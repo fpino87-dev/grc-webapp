@@ -3521,3 +3521,11 @@ msgstr "Etkinliği doğrulanmış bir önlem değiştirilemez: önce yeniden aç
 #, python-format
 msgid "Rischi High o Critical da trattare senza misure nel piano di trattamento: %(count)s."
 msgstr "İşlem planında önlemi olmayan, işlem görecek High veya Critical riskler: %(count)s."
+
+#, python-format
+msgid "L'impatto atteso non può scendere sotto %(floor)s: la minaccia colpisce la riservatezza di informazioni con quella classe di protezione. Il trattamento può ridurre solo la probabilità."
+msgstr "Beklenen etki %(floor)s altına inemez: tehdit, bu koruma sınıfına sahip bilgilerin gizliliğini etkiliyor. Risk işleme yalnızca olasılığı azaltabilir."
+
+#, python-format
+msgid "Impatto atteso portato a %(floor)s: è la soglia di riservatezza delle informazioni colpite."
+msgstr "Beklenen etki %(floor)s seviyesine yükseltildi: etkilenen bilgilerin gizlilik eşiğidir."

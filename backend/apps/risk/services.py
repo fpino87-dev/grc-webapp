@@ -731,15 +731,36 @@ def _require_not_legacy(risk) -> None:
         raise _err(_("Il rischio appartiene alla valutazione precedente (metodo superato): è in sola lettura."))
 
 
+def threat_impact_floor(threat, confidentiality_levels) -> int | None:
+    """Soglia minima d'impatto (§7.2): solo per minacce alla riservatezza."""
+    if threat is None or "C" not in (threat.cia or []):
+        return None
+    return confidentiality_floor(confidentiality_levels)
+
+
+def risk_impact_floor(risk) -> int | None:
+    """Soglia del rischio salvato; vale per l'impatto attuale e per quello atteso."""
+    if not risk.pk or not risk.threat_id:
+        return None
+    return threat_impact_floor(risk.threat, [ic.confidentiality for ic in risk.information_classes.all()])
+
+
+def expected_risk_class(risk, floor: int | None) -> str:
+    """Classe attesa: impatto atteso mai sotto la soglia di riservatezza, come
+    il rischio attuale che `apply_expected_risk` otterrà davvero."""
+    if not risk.expected_impact:
+        return risk_class(risk.expected_probability, risk.expected_impact) or ""
+    impact = max(int(risk.expected_impact), floor or 0)
+    return risk_class(risk.expected_probability, impact) or ""
+
+
 def recompute_risk(risk) -> None:
     """Ricalcola impatto, classe attuale e classe attesa con le regole uniche.
 
     Le classi di informazioni (M2M) contano solo a rischio salvato.
     """
     dims = {d: getattr(risk, f"impact_{d}") for d in IMPACT_DIMENSIONS}
-    floor = None
-    if risk.pk and risk.threat_id and "C" in (risk.threat.cia or []):
-        floor = confidentiality_floor(risk.information_classes.values_list("confidentiality", flat=True))
+    floor = risk_impact_floor(risk)
     risk.impact = overall_impact(dims, floor)
     risk.matrix_class = risk_class(risk.probability, risk.impact) or ""
     if risk.matrix_class:
@@ -747,7 +768,7 @@ def recompute_risk(risk) -> None:
         risk.current_class = shift_class(risk.matrix_class, int(risk.class_override or 0), floor_cls)
     else:
         risk.current_class = ""
-    risk.expected_class = risk_class(risk.expected_probability, risk.expected_impact) or ""
+    risk.expected_class = expected_risk_class(risk, floor)
 
 
 def _validate_risk_links(risk, information_classes, affected_plants, business_objectives=None) -> None:
@@ -902,6 +923,12 @@ def risk_completeness_errors(risk) -> list:
         errors.append(_("Per un rischio High o Critical non trattato serve la motivazione (analisi costi/benefici)."))
     if risk.treatment in ("mitigare", "evitare", "trasferire") and not risk.expected_class:
         errors.append(_("Indica il rischio atteso dopo il trattamento."))
+    floor = risk_impact_floor(risk)
+    if risk.treatment in ("mitigare", "evitare", "trasferire") and floor and risk.expected_impact \
+            and risk.expected_impact < floor:
+        errors.append(_("L'impatto atteso non può scendere sotto %(floor)s: la minaccia colpisce la riservatezza "
+                        "di informazioni con quella classe di protezione. Il trattamento può ridurre solo la "
+                        "probabilità.") % {"floor": floor})
     return errors
 
 
@@ -2447,6 +2474,27 @@ def _ai_method(value) -> str:
     return v if v in ("frequenza", "fer") else ""
 
 
+def clamp_ai_expected_impact(proposal: dict, threat, information_class_ids) -> dict:
+    """L'IA non può proporre un impatto atteso sotto la soglia di riservatezza:
+    lo si alza alla soglia e lo si scrive nella motivazione del trattamento."""
+    from django.utils.translation import gettext as _
+
+    from .models import InformationClass
+
+    expected = proposal.get("expected_impact")
+    if not expected:
+        return proposal
+    levels = InformationClass.objects.filter(pk__in=list(information_class_ids or [])) \
+        .values_list("confidentiality", flat=True)
+    floor = threat_impact_floor(threat, levels)
+    if floor and expected < floor:
+        note = _("Impatto atteso portato a %(floor)s: è la soglia di riservatezza delle informazioni colpite.") \
+            % {"floor": floor}
+        proposal = {**proposal, "expected_impact": floor,
+                    "treatment_rationale": " ".join(x for x in (proposal.get("treatment_rationale"), note) if x)}
+    return proposal
+
+
 def validate_ai_draft(data: dict) -> dict:
     """Proposta di valutazione ripulita: solo campi noti, livelli 1–5, valori
     ammessi. La classe NON arriva dall'IA: la calcola la matrice."""
@@ -2675,8 +2723,8 @@ def validate_ai_identification(items, threats: list, links: dict) -> list:
         row = {"threat_id": str(threat.pk), "threat_code": threat.code, "applicable": applicable,
                "reason": _clip(item.get("reason"), 600)}
         if applicable:
-            row["proposal"] = validate_ai_draft(item)
             row.update(validate_ai_links(item, links))
+            row["proposal"] = clamp_ai_expected_impact(validate_ai_draft(item), threat, row["information_classes"])
         elif not row["reason"]:
             continue  # "non applicabile" senza motivo non si può dichiarare (§6.5)
         out.append(row)
@@ -2770,6 +2818,10 @@ def register_consistency_checks(plant=None) -> list:
         if r.treatment in ("mitigare", "evitare", "trasferire") and r.expected_class and r.current_class \
                 and class_rank(r.expected_class) >= class_rank(r.current_class):
             add("expected_not_lower", r)
+        floor = risk_impact_floor(r)
+        if r.treatment in ("mitigare", "evitare", "trasferire") and floor and r.expected_impact \
+                and r.expected_impact < floor:
+            add("expected_below_floor", r, severity="error", expected=r.expected_impact, floor=floor)
     groups: dict = {}
     for r in risks:
         if r.threat_id and r.impact:

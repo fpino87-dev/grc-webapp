@@ -3542,3 +3542,11 @@ msgstr "Działania o zweryfikowanej skuteczności nie można zmienić: najpierw 
 #, python-format
 msgid "Rischi High o Critical da trattare senza misure nel piano di trattamento: %(count)s."
 msgstr "Ryzyka High lub Critical do postępowania bez działań w planie postępowania: %(count)s."
+
+#, python-format
+msgid "L'impatto atteso non può scendere sotto %(floor)s: la minaccia colpisce la riservatezza di informazioni con quella classe di protezione. Il trattamento può ridurre solo la probabilità."
+msgstr "Oczekiwany wpływ nie może spaść poniżej %(floor)s: zagrożenie dotyczy poufności informacji o tej klasie ochrony. Postępowanie z ryzykiem może obniżyć tylko prawdopodobieństwo."
+
+#, python-format
+msgid "Impatto atteso portato a %(floor)s: è la soglia di riservatezza delle informazioni colpite."
+msgstr "Oczekiwany wpływ podniesiony do %(floor)s: to próg poufności informacji, których dotyczy zagrożenie."

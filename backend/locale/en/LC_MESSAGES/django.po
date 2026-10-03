@@ -3520,3 +3520,11 @@ msgstr "A measure with verified effectiveness cannot be changed: reopen it first
 #, python-format
 msgid "Rischi High o Critical da trattare senza misure nel piano di trattamento: %(count)s."
 msgstr "High or Critical risks to be treated without measures in the treatment plan: %(count)s."
+
+#, python-format
+msgid "L'impatto atteso non può scendere sotto %(floor)s: la minaccia colpisce la riservatezza di informazioni con quella classe di protezione. Il trattamento può ridurre solo la probabilità."
+msgstr "The expected impact cannot go below %(floor)s: the threat affects the confidentiality of information with that protection class. Treatment can only reduce the probability."
+
+#, python-format
+msgid "Impatto atteso portato a %(floor)s: è la soglia di riservatezza delle informazioni colpite."
+msgstr "Expected impact raised to %(floor)s: it is the confidentiality threshold of the affected information."

@@ -3516,7 +3516,10 @@
       "suggested": "önerilen",
       "use_suggested": "Önerilen hedefleri kullan",
       "security_objectives": "Bağlı güvenlik hedefleri",
-      "no_security_objectives": "Bu riski işleyen bir güvenlik hedefi yok. Organizasyon › Güvenlik hedefleri'nden «Risk değerlendirmesi» kaynağıyla bağlayın."
+      "no_security_objectives": "Bu riski işleyen bir güvenlik hedefi yok. Organizasyon › Güvenlik hedefleri'nden «Risk değerlendirmesi» kaynağıyla bağlayın.",
+      "impact_floor_note": "(etki {{floor}} seviyesine yükseltildi: etkilenen bilgilerin gizlilik eşiği)",
+      "expected_floor_note": "Tehdit, eşiği {{floor}} olan bilgilerin gizliliğini etkiliyor: beklenen etki {{floor}} altına inemez, risk işleme yalnızca olasılığı azaltabilir.",
+      "expected_below_floor": "Beklenen etki {{value}}, gizlilik eşiği {{floor}} altında: beklenen risk {{floor}} ile hesaplanır. Değerlendirmeyi tamamlamak için {{floor}} veya üzeri bir etki seçin."
     },
     "register": {
       "search": "Ara",
@@ -3856,7 +3859,8 @@
         "high_without_plan": "Planda önlem olmayan, işlenmesi gereken High veya Critical risk.",
         "rationale_too_short": "Gerekçe çok kısa: {{field}}.",
         "expected_not_lower": "İşlem önlem öngördüğü halde beklenen risk mevcut riskten düşük değil.",
-        "impact_spread": "«{{other}}» ile aynı tehdit ve tür, çok farklı etki ({{low}} / {{high}}): gerekçeli olduğunu kontrol edin."
+        "impact_spread": "«{{other}}» ile aynı tehdit ve tür, çok farklı etki ({{low}} / {{high}}): gerekçeli olduğunu kontrol edin.",
+        "expected_below_floor": "Beklenen etki {{expected}}, etkilenen bilgilerin gizlilik eşiği {{floor}} altında: beklenen risk {{floor}} ile hesaplanır, beklenen etkiyi düzeltin."
       },
       "summary_button": "Organ için özet",
       "summary_title": "Organ için kayıt özeti",

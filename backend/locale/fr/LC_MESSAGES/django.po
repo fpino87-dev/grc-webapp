@@ -3587,3 +3587,11 @@ msgstr "Une mesure dont l'efficacité a été vérifiée ne peut pas être modif
 #, python-format
 msgid "Rischi High o Critical da trattare senza misure nel piano di trattamento: %(count)s."
 msgstr "Risques High ou Critical à traiter sans mesures dans le plan de traitement : %(count)s."
+
+#, python-format
+msgid "L'impatto atteso non può scendere sotto %(floor)s: la minaccia colpisce la riservatezza di informazioni con quella classe di protezione. Il trattamento può ridurre solo la probabilità."
+msgstr "L'impact attendu ne peut pas descendre sous %(floor)s : la menace touche la confidentialité d'informations ayant cette classe de protection. Le traitement ne peut réduire que la probabilité."
+
+#, python-format
+msgid "Impatto atteso portato a %(floor)s: è la soglia di riservatezza delle informazioni colpite."
+msgstr "Impact attendu porté à %(floor)s : c'est le seuil de confidentialité des informations touchées."

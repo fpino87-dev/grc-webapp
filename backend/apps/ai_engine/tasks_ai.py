@@ -512,7 +512,9 @@ _RISK_DRAFT_RULES = """- "probability_method": un solo valore, "frequenza" oppur
 - Classi di informazioni: i numeri delle classi colpite (per minacce a riservatezza o integrità quasi sempre almeno
   una; [] solo se nessuna è coinvolta). Processo BIA: il numero del più colpito, o null.
 - Motiva probabilità e impatto citando il criterio del livello scelto, dimensione per dimensione, e i dati.
-- Trattamento fra: mitigare, evitare, trasferire, accettare. Se non accetti indica il rischio atteso dopo le misure."""
+- Trattamento fra: mitigare, evitare, trasferire, accettare. Se non accetti indica il rischio atteso dopo le misure.
+- Minaccia alla riservatezza (C): l'impatto, anche quello atteso, non scende sotto la classe di protezione delle
+  informazioni colpite (very_high=5, high=4, normal=3, low=2); il trattamento può ridurre solo la probabilità."""
 
 _RISK_DRAFT_FIELDS = """"vulnerability": "...", "consequence": "conseguenza sugli obiettivi aziendali",
  "probability_method": "fer", "probability": 3, "probability_rationale": "...",
@@ -530,8 +532,8 @@ def draft_risk_assessment(risk, user, lang: str = "it") -> dict:
     probabilità, impatto per dimensione, trattamento, rischio atteso e
     riferimenti (obiettivi aziendali, classi di informazioni, processo BIA)."""
     from apps.risk.services import (
-        PROCEDURE_CRITERIA, ai_link_candidates, ai_link_names, ai_link_payload, economic_criteria,
-        risk_ai_context, validate_ai_draft, validate_ai_links,
+        PROCEDURE_CRITERIA, ai_link_candidates, ai_link_names, ai_link_payload, clamp_ai_expected_impact,
+        economic_criteria, risk_ai_context, validate_ai_draft, validate_ai_links,
     )
 
     criteria = {**PROCEDURE_CRITERIA, "economic": economic_criteria(risk.plant)}
@@ -559,6 +561,9 @@ Rispondi con questo JSON (i valori sono solo un esempio di formato):
     )
     data = _parse_json_object(result["text"])
     proposal = {**validate_ai_draft(data), **{k: v for k, v in validate_ai_links(data, links).items() if v}}
+    # Soglia di riservatezza sulle classi proposte, altrimenti su quelle già collegate.
+    info_ids = proposal.get("information_classes") or list(risk.information_classes.values_list("pk", flat=True))
+    proposal = clamp_ai_expected_impact(proposal, risk.threat, info_ids)
     return {**result, "proposal": proposal, "names": ai_link_names(links)}
 
 

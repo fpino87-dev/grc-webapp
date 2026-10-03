@@ -3516,7 +3516,10 @@
       "suggested": "proposto",
       "use_suggested": "Usa gli obiettivi proposti",
       "security_objectives": "Obiettivi di sicurezza collegati",
-      "no_security_objectives": "Nessun obiettivo di sicurezza tratta questo rischio. Si collegano da Organizzazione › Obiettivi di sicurezza, con origine «Valutazione del rischio»."
+      "no_security_objectives": "Nessun obiettivo di sicurezza tratta questo rischio. Si collegano da Organizzazione › Obiettivi di sicurezza, con origine «Valutazione del rischio».",
+      "impact_floor_note": "(impatto alzato a {{floor}}: soglia di riservatezza delle informazioni colpite)",
+      "expected_floor_note": "La minaccia colpisce la riservatezza di informazioni con soglia {{floor}}: l'impatto atteso non può scendere sotto {{floor}}, il trattamento può ridurre solo la probabilità.",
+      "expected_below_floor": "Impatto atteso {{value}} sotto la soglia di riservatezza {{floor}}: il rischio atteso è calcolato con {{floor}}. Scegli un impatto da {{floor}} in su per completare la valutazione."
     },
     "register": {
       "search": "Cerca",
@@ -3856,7 +3859,8 @@
         "high_without_plan": "Rischio High o Critical da trattare senza misure nel piano.",
         "rationale_too_short": "Motivazione troppo breve: {{field}}.",
         "expected_not_lower": "Il rischio atteso non è più basso dell'attuale, ma il trattamento prevede misure.",
-        "impact_spread": "Stessa minaccia e tipologia di «{{other}}» con impatto molto diverso ({{low}} contro {{high}}): verifica che sia giustificato."
+        "impact_spread": "Stessa minaccia e tipologia di «{{other}}» con impatto molto diverso ({{low}} contro {{high}}): verifica che sia giustificato.",
+        "expected_below_floor": "Impatto atteso {{expected}} sotto la soglia di riservatezza {{floor}} delle informazioni colpite: il rischio atteso è calcolato con {{floor}}, correggi l'impatto atteso."
       },
       "summary_button": "Sintesi per l'organo",
       "summary_title": "Sintesi del registro per l'organo",

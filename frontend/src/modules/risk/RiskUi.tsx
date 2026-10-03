@@ -76,12 +76,29 @@ export function overallImpact(values: ImpactValues): number | null {
   return nums.length ? Math.max(...nums) : null;
 }
 
-/** Anteprima della classe dalla matrice (la classe vera la calcola il backend). */
-export function previewClass(probability: number | null, impact: number | null, override = 0): RiskClass | null {
-  const base = riskClass(probability, impact);
+/** Impatto minimo dato dalla classe di protezione delle informazioni colpite
+ * (§7.2): vale solo per minacce alla riservatezza. Specchio di
+ * `threat_impact_floor` nel backend. */
+const CONFIDENTIALITY_FLOOR: Record<string, number> = { very_high: 5, high: 4, normal: 3, low: 2 };
+
+export function impactFloor(cia: readonly string[] | undefined, levels: readonly string[]): number | null {
+  if (!cia?.includes("C")) return null;
+  const values = levels.map(l => CONFIDENTIALITY_FLOOR[l]).filter((v): v is number => !!v);
+  return values.length ? Math.max(...values) : null;
+}
+
+/** Anteprima della classe dalla matrice (la classe vera la calcola il backend):
+ * impatto mai sotto la soglia e override mai sotto la classe della soglia. */
+export function previewClass(
+  probability: number | null, impact: number | null, override = 0, floor: number | null = null,
+): RiskClass | null {
+  const effective = impact && floor ? Math.max(impact, floor) : impact;
+  const base = riskClass(probability, effective);
   if (!base) return null;
   const order: RiskClass[] = ["very_low", "low", "medium", "high", "critical"];
-  const idx = Math.max(0, Math.min(4, order.indexOf(base) + override));
+  const floorCls = floor ? riskClass(probability, floor) : null;
+  const min = floorCls ? order.indexOf(floorCls) : 0;
+  const idx = Math.max(min, Math.min(4, order.indexOf(base) + override));
   return order[idx];
 }
 

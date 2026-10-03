@@ -10,7 +10,7 @@ import { biaApi } from "../../api/endpoints/bia";
 import { usersApi } from "../../api/endpoints/users";
 import { plantsApi } from "../../api/endpoints/plants";
 import { MixedOwnerField } from "./MixedOwnerField";
-import { ClassBadge, Field, LevelPicker, Section, inputCls, overallImpact, previewClass } from "./RiskUi";
+import { ClassBadge, Field, LevelPicker, Section, impactFloor, inputCls, overallImpact, previewClass } from "./RiskUi";
 
 const NIS2_AREAS = ["art21_a", "art21_b", "art21_c", "art21_d", "art21_e", "art21_f", "art21_g", "art21_h", "art21_i", "art21_j"];
 
@@ -100,9 +100,16 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
   const dims = useMemo(() => Object.fromEntries(
     IMPACT_DIMENSIONS.map(d => [d, value[`impact_${d}` as keyof EvaluationState] as number | null]),
   ) as Record<ImpactDimension, number | null>, [value]);
-  const impact = overallImpact(dims);
-  const current = previewClass(value.probability ?? null, impact, value.class_override ?? 0);
-  const expected = previewClass(value.expected_probability ?? null, value.expected_impact ?? null);
+  // Soglia di riservatezza: come nel backend vale per l'impatto attuale e per quello atteso.
+  const floor = useMemo(() => impactFloor(
+    threats.find(th => th.id === value.threat)?.cia,
+    infoClasses.filter(ic => (value.information_classes ?? []).includes(ic.id)).map(ic => ic.confidentiality),
+  ), [threats, infoClasses, value.threat, value.information_classes]);
+  const dimsImpact = overallImpact(dims);
+  const impact = floor ? Math.max(dimsImpact ?? 0, floor) : dimsImpact;
+  const current = previewClass(value.probability ?? null, impact, value.class_override ?? 0, floor);
+  const expected = previewClass(value.expected_probability ?? null, value.expected_impact ?? null, 0, floor);
+  const expectedBelowFloor = !!floor && !!value.expected_impact && value.expected_impact < floor;
   const rule = current ? { critical: "mandatory", high: "evaluate" }[current as "critical" | "high"] ?? "acceptable" : null;
 
   const thresholds = policy?.economic_thresholds;
@@ -250,6 +257,9 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
           <span>{t("risk.drawer.current_risk")}:</span>
           <span className="text-gray-600">P {value.probability ?? "—"} × I {impact ?? "—"}</span>
           <ClassBadge cls={current} />
+          {floor && impact === floor && (dimsImpact ?? 0) < floor && (
+            <span className="text-[11px] text-gray-500">{t("risk.drawer.impact_floor_note", { floor })}</span>
+          )}
           {risk.current_class && current !== risk.current_class && (
             <span className="text-[11px] text-gray-400">{t("risk.drawer.saved_class")}: {t(`risk.classes.${risk.current_class}`)}</span>
           )}
@@ -342,10 +352,19 @@ export function EvaluationForm({ risk, value, onChange, editable, policy }: {
               <select value={value.expected_impact ?? ""} disabled={!editable} className={inputCls}
                 onChange={e => set("expected_impact", e.target.value ? Number(e.target.value) : null)}>
                 <option value="">—</option>
-                {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
+                {[1, 2, 3, 4, 5].map(n => (
+                  <option key={n} value={n} disabled={!!floor && n < floor}>{n}</option>
+                ))}
               </select>
             </Field>
             <div className="mb-3"><span className="text-xs text-gray-500 mr-1">{t("risk.drawer.expected_risk")}:</span><ClassBadge cls={expected} /></div>
+            {floor && (
+              <p className={`col-span-3 -mt-1 mb-3 text-xs ${expectedBelowFloor ? "text-red-700" : "text-gray-500"}`}>
+                {t(expectedBelowFloor ? "risk.drawer.expected_below_floor" : "risk.drawer.expected_floor_note", {
+                  floor, value: value.expected_impact,
+                })}
+              </p>
+            )}
           </div>
         )}
         <div className="grid grid-cols-2 gap-x-3">

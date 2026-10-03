@@ -3516,7 +3516,10 @@
       "suggested": "suggested",
       "use_suggested": "Use the suggested objectives",
       "security_objectives": "Linked security objectives",
-      "no_security_objectives": "No security objective treats this risk. Link them from Organisation › Security objectives, with origin \"Risk assessment\"."
+      "no_security_objectives": "No security objective treats this risk. Link them from Organisation › Security objectives, with origin \"Risk assessment\".",
+      "impact_floor_note": "(impact raised to {{floor}}: confidentiality threshold of the affected information)",
+      "expected_floor_note": "The threat affects the confidentiality of information with threshold {{floor}}: the expected impact cannot go below {{floor}}, treatment can only reduce the probability.",
+      "expected_below_floor": "Expected impact {{value}} is below the confidentiality threshold {{floor}}: the expected risk is calculated with {{floor}}. Choose an impact of {{floor}} or higher to complete the assessment."
     },
     "register": {
       "search": "Search",
@@ -3856,7 +3859,8 @@
         "high_without_plan": "High or Critical risk to treat with no measures in the plan.",
         "rationale_too_short": "Rationale too short: {{field}}.",
         "expected_not_lower": "The expected risk is not lower than the current one, but the treatment includes measures.",
-        "impact_spread": "Same threat and type as \"{{other}}\" with a very different impact ({{low}} vs {{high}}): check that it is justified."
+        "impact_spread": "Same threat and type as \"{{other}}\" with a very different impact ({{low}} vs {{high}}): check that it is justified.",
+        "expected_below_floor": "Expected impact {{expected}} is below the confidentiality threshold {{floor}} of the affected information: the expected risk is calculated with {{floor}}, correct the expected impact."
       },
       "summary_button": "Summary for the board",
       "summary_title": "Register summary for the governing body",

@@ -175,6 +175,89 @@ def test_confidentiality_floor_from_information_class(org_user, plant, threats, 
     assert risk.current_class == "high"
 
 
+def _floor_risk(user, plant, threat, **extra):
+    """Rischio su informazioni very_high (soglia 5) con impatto atteso 3."""
+    from apps.risk.models import InformationClass
+
+    ic = InformationClass.objects.create(plant=plant, name="Disegni OEM", confidentiality="very_high")
+    return services.create_risk(user, plant, {
+        **_eval(user, impact_operational=3, probability=4, expected_probability=2, expected_impact=3),
+        "threat": threat, "information_classes": [ic], **extra,
+    })
+
+
+@pytest.mark.django_db
+def test_expected_class_respects_confidentiality_floor(org_user, plant, threats, cycle):
+    risk = _floor_risk(org_user, plant, threats["malware"])
+    # 2 × 3 sarebbe Medium, ma l'impatto atteso non scende sotto 5: 2 × 5
+    assert risk.expected_class == services.risk_class(2, 5) == "high"
+    assert risk.expected_impact == 3  # il valore inserito resta: lo segnala la completezza
+    with pytest.raises(ValidationError, match="5"):
+        services.complete_risk(org_user, risk)
+    risk = services.update_risk(org_user, risk, {"expected_impact": 5})
+    risk = services.complete_risk(org_user, risk)
+    # applicando l'atteso si ottiene proprio la classe attesa disegnata
+    plan = RiskMitigationPlan.objects.create(assessment=risk, action="DLP", due_date=datetime.date(2030, 1, 1),
+                                             completed_at=timezone.now())
+    services.verify_mitigation_plan(org_user, plan, "Test DLP superato")
+    expected = risk.expected_class
+    risk = services.apply_expected_risk(org_user, risk)
+    assert risk.current_class == expected
+
+
+@pytest.mark.django_db
+def test_expected_floor_only_for_confidentiality_threats(org_user, plant, threats, cycle):
+    from apps.risk.models import InformationClass
+
+    ic = InformationClass.objects.create(plant=plant, name="Disegni OEM", confidentiality="very_high")
+    risk = services.create_risk(org_user, plant, {
+        **_eval(org_user, asset_type="SEDE", expected_probability=2, expected_impact=3),
+        "threat": threats["fire"], "information_classes": [ic],
+    })
+    assert risk.expected_class == services.risk_class(2, 3)
+    # rischio accettato: l'impatto atteso non conta, la completezza non lo blocca
+    risk = _floor_risk(org_user, plant, threats["malware"], treatment="accettare",
+                       treatment_rationale="Costi superiori ai benefici")
+    services.complete_risk(org_user, risk)
+
+
+@pytest.mark.django_db
+def test_consistency_flags_expected_below_floor(org_user, plant, threats, cycle):
+    risk = _floor_risk(org_user, plant, threats["malware"])
+    found = [f for f in services.register_consistency_checks(plant) if f["code"] == "expected_below_floor"]
+    assert found and found[0]["risk_id"] == str(risk.pk) and found[0]["severity"] == "error"
+    assert found[0]["params"] == {"expected": 3, "floor": 5}
+
+
+@pytest.mark.django_db
+def test_ai_expected_impact_raised_to_floor(plant, threats):
+    from apps.risk.models import InformationClass
+
+    ic = InformationClass.objects.create(plant=plant, name="Disegni OEM", confidentiality="high")
+    out = services.clamp_ai_expected_impact({"expected_impact": 2, "treatment_rationale": "MFA"},
+                                            threats["malware"], [ic.pk])
+    assert out["expected_impact"] == 4 and out["treatment_rationale"].startswith("MFA ")
+    same = {"expected_impact": 2}
+    assert services.clamp_ai_expected_impact(same, threats["fire"], [ic.pk]) == same
+    assert services.clamp_ai_expected_impact(same, threats["malware"], []) == same
+
+
+@pytest.mark.django_db
+def test_migration_recomputes_stored_expected_class(org_user, plant, threats, cycle):
+    import importlib
+
+    from django.apps import apps as django_apps
+
+    from apps.risk.models import RiskAssessment
+
+    risk = _floor_risk(org_user, plant, threats["malware"])
+    RiskAssessment.objects.filter(pk=risk.pk).update(expected_class="medium")  # valore pre-correzione
+    migration = importlib.import_module("apps.risk.migrations.0021_expected_class_confidentiality_floor")
+    migration.forwards(django_apps, None)
+    risk.refresh_from_db()
+    assert risk.expected_class == "high" and risk.expected_impact == 3
+
+
 @pytest.mark.django_db
 def test_complete_validates_rationales_and_expected(org_user, plant, threats, cycle):
     risk = services.create_risk(org_user, plant, {
@@ -837,7 +920,7 @@ def test_information_coverage(org_user, plant, threats, cycle):
     InformationClass.objects.create(name="Brochures", confidentiality="low")
     state = {i["name"]: i["state"] for i in services.information_coverage(plant)}
     assert state == {"Prototype CAD": "missing"}
-    _completed_risk(org_user, plant, threats["malware"], information_classes=[secret])
+    _completed_risk(org_user, plant, threats["malware"], information_classes=[secret], expected_impact=5)
     item = services.information_coverage(plant)[0]
     assert item["state"] == "evaluated" and item["worst_class"] == "critical"
     # una minaccia senza riservatezza (incendio) non copre la classe

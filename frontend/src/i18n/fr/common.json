@@ -3516,7 +3516,10 @@
       "suggested": "proposé",
       "use_suggested": "Utiliser les objectifs proposés",
       "security_objectives": "Objectifs de sécurité liés",
-      "no_security_objectives": "Aucun objectif de sécurité ne traite ce risque. Liez-les depuis Organisation › Objectifs de sécurité, avec l'origine « Appréciation des risques »."
+      "no_security_objectives": "Aucun objectif de sécurité ne traite ce risque. Liez-les depuis Organisation › Objectifs de sécurité, avec l'origine « Appréciation des risques ».",
+      "impact_floor_note": "(impact relevé à {{floor}} : seuil de confidentialité des informations touchées)",
+      "expected_floor_note": "La menace touche la confidentialité d'informations de seuil {{floor}} : l'impact attendu ne peut pas descendre sous {{floor}}, le traitement ne peut réduire que la probabilité.",
+      "expected_below_floor": "Impact attendu {{value}} sous le seuil de confidentialité {{floor}} : le risque attendu est calculé avec {{floor}}. Choisissez un impact de {{floor}} ou plus pour terminer l'évaluation."
     },
     "register": {
       "search": "Rechercher",
@@ -3856,7 +3859,8 @@
         "high_without_plan": "Risque High ou Critical à traiter sans mesures dans le plan.",
         "rationale_too_short": "Justification trop courte : {{field}}.",
         "expected_not_lower": "Le risque attendu n'est pas inférieur au risque actuel, alors que le traitement prévoit des mesures.",
-        "impact_spread": "Même menace et même type que « {{other}} » avec un impact très différent ({{low}} contre {{high}}) : vérifiez que c'est justifié."
+        "impact_spread": "Même menace et même type que « {{other}} » avec un impact très différent ({{low}} contre {{high}}) : vérifiez que c'est justifié.",
+        "expected_below_floor": "Impact attendu {{expected}} sous le seuil de confidentialité {{floor}} des informations touchées : le risque attendu est calculé avec {{floor}}, corrigez l'impact attendu."
       },
       "summary_button": "Synthèse pour l'organe",
       "summary_title": "Synthèse du registre pour l'organe",

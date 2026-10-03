@@ -3516,7 +3516,10 @@
       "suggested": "proponowany",
       "use_suggested": "Użyj proponowanych celów",
       "security_objectives": "Powiązane cele bezpieczeństwa",
-      "no_security_objectives": "Żaden cel bezpieczeństwa nie dotyczy tego ryzyka. Powiąż je w Organizacja › Cele bezpieczeństwa, ze źródłem „Ocena ryzyka”."
+      "no_security_objectives": "Żaden cel bezpieczeństwa nie dotyczy tego ryzyka. Powiąż je w Organizacja › Cele bezpieczeństwa, ze źródłem „Ocena ryzyka”.",
+      "impact_floor_note": "(wpływ podniesiony do {{floor}}: próg poufności informacji, których dotyczy zagrożenie)",
+      "expected_floor_note": "Zagrożenie dotyczy poufności informacji o progu {{floor}}: oczekiwany wpływ nie może spaść poniżej {{floor}}, postępowanie z ryzykiem może obniżyć tylko prawdopodobieństwo.",
+      "expected_below_floor": "Oczekiwany wpływ {{value}} jest poniżej progu poufności {{floor}}: oczekiwane ryzyko jest liczone z {{floor}}. Wybierz wpływ od {{floor}} wzwyż, aby zakończyć ocenę."
     },
     "register": {
       "search": "Szukaj",
@@ -3856,7 +3859,8 @@
         "high_without_plan": "Ryzyko High lub Critical do postępowania bez działań w planie.",
         "rationale_too_short": "Zbyt krótkie uzasadnienie: {{field}}.",
         "expected_not_lower": "Ryzyko oczekiwane nie jest niższe od bieżącego, choć postępowanie przewiduje działania.",
-        "impact_spread": "To samo zagrożenie i typ co „{{other}}” z bardzo różnym wpływem ({{low}} wobec {{high}}): sprawdź, czy jest to uzasadnione."
+        "impact_spread": "To samo zagrożenie i typ co „{{other}}” z bardzo różnym wpływem ({{low}} wobec {{high}}): sprawdź, czy jest to uzasadnione.",
+        "expected_below_floor": "Oczekiwany wpływ {{expected}} jest poniżej progu poufności {{floor}} informacji, których dotyczy zagrożenie: oczekiwane ryzyko jest liczone z {{floor}}, popraw oczekiwany wpływ."
       },
       "summary_button": "Podsumowanie dla organu",
       "summary_title": "Podsumowanie rejestru dla organu",
