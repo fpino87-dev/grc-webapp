@@ -1193,8 +1193,8 @@ msgid "Nessun dato disponibile"
 msgstr "No data available"
 
 #: apps/management_review/report/builder.py:192
-msgid "Controlli in gap (primi 5 per framework)"
-msgstr "Controls with gaps (top 5 per framework)"
+msgid "Controlli in gap"
+msgstr "Controls with gaps"
 
 #: apps/management_review/report/builder.py:193
 msgid "Controllo"

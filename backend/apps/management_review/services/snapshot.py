@@ -6,8 +6,11 @@ from ..models import ManagementReview, ReviewAction
 
 # Gli elenchi di dettaglio nello snapshot sono pensati per la direzione:
 # pochi elementi, i più rilevanti; il totale resta nei contatori.
-# Eccezione: documenti e rischi sono elencati per intero, perché il verbale
-# approvato deve riportare tutto ciò che la direzione ha esaminato e approvato.
+# Eccezione: documenti, rischi, controlli in gap, audit e finding, incidenti
+# e PDCA sono elencati per intero, perché il verbale approvato deve riportare
+# tutto ciò che la direzione ha esaminato e approvato. I task scaduti restano
+# solo un contatore: sono lavoro operativo, le azioni che contano per la
+# direzione arrivano già da PDCA, finding e azioni dei riesami precedenti.
 SNAPSHOT_LIST_LIMIT = 10
 
 # Versione delle regole con cui lo snapshot calcola conformità, rischi e BCP:
@@ -388,14 +391,14 @@ def _audit_block(scope: dict, today, since_12m) -> dict:
         "finding_chiusi_12m": findings.filter(
             status__in=["closed", "accepted_by_auditor"], closed_at__gte=since_12m
         ).count(),
-        "elenco_audit": audit_rows[:SNAPSHOT_LIST_LIMIT],
-        "elenco_nc_aperte": [_finding(f) for f in open_nc[:SNAPSHOT_LIST_LIMIT]],
-        "elenco_opportunita": [_finding(f) for f in opportunities[:SNAPSHOT_LIST_LIMIT]],
+        "elenco_audit": audit_rows,
+        "elenco_nc_aperte": [_finding(f) for f in open_nc],
+        "elenco_opportunita": [_finding(f) for f in opportunities],
         # Osservazioni e opportunità valutate e scartate negli ultimi 12 mesi,
         # con il motivo: la direzione vede cosa si è deciso di non fare.
         "finding_non_perseguiti_12m": not_pursued.count(),
         "elenco_non_perseguiti": [
-            {**_finding(f), "motivo": f.closure_notes[:300]} for f in not_pursued[:SNAPSHOT_LIST_LIMIT]
+            {**_finding(f), "motivo": f.closure_notes[:300]} for f in not_pursued
         ],
     }
 
@@ -479,7 +482,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
         # Lo snapshot è il contenuto del verbale approvato: non si riscrive.
         raise ValidationError(_("Il riesame è approvato: lo snapshot non può essere rigenerato."))
 
-    from django.db.models import Case, Count, IntegerField, Q, Value, When
+    from django.db.models import Count, Q
     from apps.controls.models import ControlInstance
     from apps.documents.models import Document, Evidence
     from apps.incidents.models import Incident
@@ -545,7 +548,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
             }
             for item in _instances(fw_rows, {"gap"}).order_by("control__external_id").values(
                 "id", "control__external_id", "control__translations",
-            )[:SNAPSHOT_LIST_LIMIT]
+            )
         ]
 
         expired_evidence_count = (
@@ -797,7 +800,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
             }
             for i in incidents_qs.filter(q).order_by("-detected_at").values(
                 "id", "title", "detected_at", "severity", "status",
-            )[:SNAPSHOT_LIST_LIMIT]
+            )
         ]
 
     incidents_summary = {
@@ -824,13 +827,13 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
              "target_date": _iso(c["target_date"])}
             for c in pdca_qs.filter(overdue_q).order_by("target_date").values(
                 "id", "title", "action_owner", "target_date",
-            )[:SNAPSHOT_LIST_LIMIT]
+            )
         ],
         "elenco_bloccati": [
             {"id": str(c["id"]), "title": c["title"], "created_at": _iso(c["created_at"])}
             for c in pdca_qs.filter(blocked_q).order_by("created_at").values(
                 "id", "title", "created_at",
-            )[:SNAPSHOT_LIST_LIMIT]
+            )
         ],
     }
 
@@ -852,29 +855,9 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
     # ── 7. Task scaduti ──
     open_tasks_qs = Task.objects.filter(**scope, status__in=["aperto", "in_corso"])
     overdue_qs = open_tasks_qs.filter(due_date__lt=today)
-    priority_rank = Case(
-        When(priority="critica", then=Value(0)),
-        When(priority="alta", then=Value(1)),
-        When(priority="media", then=Value(2)),
-        default=Value(3),
-        output_field=IntegerField(),
-    )
     tasks_summary = {
         "scaduti": overdue_qs.count(),
         "critici_aperti": open_tasks_qs.filter(priority="critica").count(),
-        # Prima i più gravi, poi i più in ritardo.
-        "elenco_scaduti": [
-            {
-                "id": str(t["id"]),
-                "title": t["title"],
-                "priority": t["priority"],
-                "due_date": _iso(t["due_date"]),
-                "assigned_role": t["assigned_role"],
-            }
-            for t in overdue_qs.annotate(rank=priority_rank).order_by("rank", "due_date").values(
-                "id", "title", "priority", "due_date", "assigned_role",
-            )[:SNAPSHOT_LIST_LIMIT]
-        ],
     }
 
     snapshot = {

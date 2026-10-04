@@ -222,3 +222,23 @@ def test_report_shows_revision_column(plant, user):
     )
     assert [str(h) for h in table["headers"]] == ["Documento", "Tipo", "Stato", "Revisione", "Creato il"]
     assert table["rows"][0][3] == "Rev. 07"
+
+
+def test_incidents_complete_and_tasks_only_counted(plant, user):
+    """Incidenti elencati per intero; i task scaduti restano solo un contatore."""
+    from apps.incidents.models import Incident
+    from apps.management_review.services import SNAPSHOT_LIST_LIMIT
+    from apps.tasks.models import Task
+
+    n = SNAPSHOT_LIST_LIMIT + 2
+    for i in range(n):
+        Incident.objects.create(plant=plant, title=f"Inc {i:02d}", description="x", detected_at=timezone.now(),
+                                severity="media", status="aperto")
+        Task.objects.create(plant=plant, title=f"Task {i:02d}", priority="media", status="aperto",
+                            due_date=timezone.localdate() - datetime.timedelta(days=3), created_by=user)
+
+    snap = generate_snapshot(_review(plant, user, timezone.localdate()), user)
+
+    assert len(snap["incidenti"]["elenco_aperti"]) == snap["incidenti"]["aperti"] == n
+    assert snap["task"]["scaduti"] == n
+    assert "elenco_scaduti" not in snap["task"]

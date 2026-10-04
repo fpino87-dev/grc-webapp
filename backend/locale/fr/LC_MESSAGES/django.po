@@ -1219,8 +1219,8 @@ msgid "Nessun dato disponibile"
 msgstr "Aucune donnée disponible"
 
 #: apps/management_review/report/builder.py:192
-msgid "Controlli in gap (primi 5 per framework)"
-msgstr "Mesures en écart (5 premières par référentiel)"
+msgid "Controlli in gap"
+msgstr "Mesures en écart"
 
 #: apps/management_review/report/builder.py:193
 msgid "Controllo"

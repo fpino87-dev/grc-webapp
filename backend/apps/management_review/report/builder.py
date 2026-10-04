@@ -181,7 +181,7 @@ def _compliance_blocks(snap) -> list:
             str(bs.get("non_valutato", 0)),
             str(fw.get("expired_evidence_count", 0)),
         ])
-        gaps = fw.get("gap_controls", [])[:5]
+        gaps = fw.get("gap_controls", [])
         gap_total += bs.get("gap", 0)
         for g in gaps:
             titles = g.get("titles") or {}
@@ -202,7 +202,7 @@ def _compliance_blocks(snap) -> list:
             note += " " + _("Controlli TISAX L2 valutati tramite il controllo VH di L3 e non contati a parte: %(n)s.") % {"n": superseded}
         blocks.append({"type": "paragraph", "label": None, "text": note})
     if gap_rows:
-        blocks.append(_table(_("Controlli in gap (primi 5 per framework)"),
+        blocks.append(_table(_("Controlli in gap"),
                              [_("Framework"), _("Controllo"), _("Titolo")], gap_rows, gap_total))
     return blocks
 
@@ -302,6 +302,8 @@ def _improvement_status_blocks(snap) -> list:
                [[c.get("title"), c.get("action_owner") or "—", {"text": fmt_date(c.get("target_date")), "tone": "red"}]
                 for c in pdca.get("elenco_in_ritardo", [])],
                pdca.get("in_ritardo")),
+        # Solo negli snapshot congelati prima di ottobre 2026: oggi i task
+        # scaduti sono solo un contatore.
         _table(_("Task scaduti (per priorità)"), [_("Task"), _("Priorità"), _("Scadenza"), _("Ruolo")],
                [[t.get("title"), SEVERITY.get(t.get("priority"), _dash(t.get("priority"))),
                  {"text": fmt_date(t.get("due_date")), "tone": "red"}, ROLE.get(t.get("assigned_role"), _dash(t.get("assigned_role")))]

@@ -1206,8 +1206,8 @@ msgid "Nessun dato disponibile"
 msgstr "Brak dostępnych danych"
 
 #: apps/management_review/report/builder.py:192
-msgid "Controlli in gap (primi 5 per framework)"
-msgstr "Zabezpieczenia z lukami (5 pierwszych na standard)"
+msgid "Controlli in gap"
+msgstr "Zabezpieczenia z lukami"
 
 #: apps/management_review/report/builder.py:193
 msgid "Controllo"

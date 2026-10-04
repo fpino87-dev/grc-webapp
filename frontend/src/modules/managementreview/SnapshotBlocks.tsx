@@ -85,15 +85,12 @@ export function ComplianceBlock({ snap }: { snap: Snap }) {
             {fw.gap_controls && fw.gap_controls.length > 0 && (
               <div className="mt-1 pl-2 border-l-2 border-red-200">
                 <p className="text-xs text-gray-500">{t("management_review.snap.gap_controls")}</p>
-                {fw.gap_controls.slice(0, 5).map(g => (
+                {fw.gap_controls.map(g => (
                   <p key={g.id} className="text-xs text-gray-700 truncate">
                     <span className="font-medium">{g.control__external_id}</span>{" "}
                     {g.titles?.[lang] || g.titles?.it || g.titles?.en || ""}
                   </p>
                 ))}
-                {(fw.by_status?.gap ?? 0) > 5 && (
-                  <p className="text-xs text-gray-400">{t("management_review.snap.more", { count: (fw.by_status?.gap ?? 0) - 5 })}</p>
-                )}
               </div>
             )}
           </div>
@@ -290,6 +287,7 @@ export function PdcaTasksBlock({ snap }: { snap: Snap }) {
         rows={((pdca.elenco_in_ritardo ?? []) as SnapPdcaOverdue[]).map(c => [c.title, c.action_owner || "—", fmtDate(c.target_date)])}
         total={pdca.in_ritardo}
       />
+      {/* Solo negli snapshot congelati prima di ottobre 2026 */}
       <DetailTable
         title={t("management_review.snap.tasks_overdue_list")}
         headers={[

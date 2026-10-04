@@ -1195,8 +1195,8 @@ msgid "Nessun dato disponibile"
 msgstr "Kullanılabilir veri yok"
 
 #: apps/management_review/report/builder.py:192
-msgid "Controlli in gap (primi 5 per framework)"
-msgstr "Boşluklu kontroller (çerçeve başına ilk 5)"
+msgid "Controlli in gap"
+msgstr "Boşluklu kontroller"
 
 #: apps/management_review/report/builder.py:193
 msgid "Controllo"
