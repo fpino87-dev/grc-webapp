@@ -20,8 +20,9 @@ Nessuna migrazione nuova da questa revisione, ma cambiano configurazione e compo
 3. Usare **sempre** `--env-file .env.prod` in ogni comando: `docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build` (anche per `exec` e `config`).
 4. Le porte di backend e frontend ora sono legate a `127.0.0.1`: verificare che il reverse proxy le raggiunga (proxy sull'host → `127.0.0.1`; proxy in container → rete Docker condivisa, vedi INFRASTRUCTURE.md, «Gate per il pilota»).
 5. `python manage.py migrate` (applica le eventuali migrazioni delle altre voci qui sotto) e riavvio di `celery` e `celery-beat`.
-6. **Avvisare gli utenti**: dopo l'aggiornamento tutti dovranno rifare il login.
-7. Il **ripristino completo dalla UI non è disponibile** con `MEDIA_ROOT` montata come bind mount (Compose di produzione): il restore va fatto offline, con la procedura in INFRASTRUCTURE.md, «Ripristino: limitazioni e prova obbligatoria».
+6. **Pianificazioni obsolete**: `python manage.py verify_schedule`. Se compaiono come «EXTRA» `cleanup-audit-logs` (retention dell'audit log, rimossa perché il log è append-only) o `check-expiring-risk-acceptances-daily` (sostituita da `check-risk-treatments-daily`), disattivarle: richiamano task che non esistono più. Comando: `python manage.py shell -c "from django_celery_beat.models import PeriodicTask as P; P.objects.filter(name__in=['cleanup-audit-logs','check-expiring-risk-acceptances-daily']).update(enabled=False)"`, poi riavvio di `celery-beat`. Dopo la disattivazione `verify_schedule` le elenca ancora come «EXTRA», ma non è un errore.
+7. **Avvisare gli utenti**: dopo l'aggiornamento tutti dovranno rifare il login.
+8. Il **ripristino completo dalla UI non è disponibile** con `MEDIA_ROOT` montata come bind mount (Compose di produzione): il restore va fatto offline, con la procedura in INFRASTRUCTURE.md, «Ripristino: limitazioni e prova obbligatoria».
 
 ### Added
 - **Risk Assessment (M06) — siti che ereditano i rischi di gruppo**: nel registro di Gruppo l'ultima colonna mostra i siti che ereditano ciascun rischio, con il nome completo al passaggio del mouse. «Nessun sito» segnala i rischi di gruppo che non arrivano a nessun sito.
