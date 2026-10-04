@@ -143,6 +143,24 @@ def test_pending_mandatory_documents_in_snapshot(plant, user):
     assert riga["created_at"]
 
 
+def test_document_lists_are_complete(plant, user):
+    """Il verbale approvato deve riportare tutti i documenti esaminati, non
+    solo i primi: oltre il limite degli altri elenchi, nessun «… e altri»."""
+    from apps.management_review.report.builder import _document_blocks
+    from apps.management_review.services import SNAPSHOT_LIST_LIMIT
+
+    n = SNAPSHOT_LIST_LIMIT + 3
+    for i in range(n):
+        _document(plant, user, f"Policy {i:02d}")
+        _document(plant, user, f"Approvato {i:02d}", status="approvato", approved_at=timezone.now())
+
+    docs = generate_snapshot(_review(plant, user, timezone.localdate()), user)["documenti"]
+
+    assert len(docs["elenco_non_approvati"]) == docs["non_approvati_obbligatori"] == n
+    assert len(docs["elenco_approvati_periodo"]) == docs["approvati_periodo"] == n
+    assert all(b.get("more", 0) == 0 for b in _document_blocks({"documenti": docs}))
+
+
 def test_pending_mandatory_documents_empty(plant, user):
     _document(plant, user, "Policy approvata", status="approvato")
 

@@ -6,6 +6,8 @@ from ..models import ManagementReview, ReviewAction
 
 # Gli elenchi di dettaglio nello snapshot sono pensati per la direzione:
 # pochi elementi, i più rilevanti; il totale resta nei contatori.
+# Eccezione: documenti e rischi sono elencati per intero, perché il verbale
+# approvato deve riportare tutto ciò che la direzione ha esaminato e approvato.
 SNAPSHOT_LIST_LIMIT = 10
 
 # Versione delle regole con cui lo snapshot calcola conformità, rischi e BCP:
@@ -613,7 +615,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
             .values(
                 "id", "title", "document_code", "document_type", "status", "created_at",
                 "v_label", "v_number",
-            )[:SNAPSHOT_LIST_LIMIT]
+            )
         )
         return [
             {
@@ -640,7 +642,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
             for d in docs_qs.filter(q).order_by(order).values(
                 "id", "title", "review_due_date", "approved_at",
                 "owner__first_name", "owner__last_name", "owner__email",
-            )[:SNAPSHOT_LIST_LIMIT]
+            )
         ]
 
     docs_summary = {
@@ -725,7 +727,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
                 "owner": _display_name(r.owner.first_name, r.owner.last_name, r.owner.email) if r.owner else None,
                 "has_plan": r.n_plans > 0,
             }
-            for r in rows[:SNAPSHOT_LIST_LIMIT]
+            for r in rows
         ]
 
     risk_summary["top_critici"] = _risk_items(over_qs)
@@ -764,7 +766,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
             "elenco": [
                 {"name": risk_label(r), "current_class": r.current_class, "treatment": r.treatment or None,
                  "accettato": r.pk in inherited_accepted}
-                for r in sorted(inherited, key=lambda x: class_rank(x.current_class), reverse=True)[:SNAPSHOT_LIST_LIMIT]
+                for r in sorted(inherited, key=lambda x: class_rank(x.current_class), reverse=True)
             ],
         }
     risk_summary["elenco_accettati"] = [
@@ -776,7 +778,7 @@ def generate_snapshot(review: ManagementReview, user) -> dict:
             "body": a.body.name if a.body else None,
             "acceptance_expiry": _iso(a.expires_on),
         }
-        for a in acceptances.select_related("risk", "risk__threat", "body").order_by("expires_on")[:SNAPSHOT_LIST_LIMIT]
+        for a in acceptances.select_related("risk", "risk__threat", "body").order_by("expires_on")
     ]
 
     # ── 4. Incidenti ──
