@@ -247,6 +247,24 @@ def _jwt_response(user, extra: dict | None = None) -> Response:
     return response
 
 
+def _check_browser_origin(request):
+    """Protect cookie endpoints against cross-origin same-site requests too."""
+    from rest_framework.exceptions import PermissionDenied
+    origin = request.headers.get("Origin")
+    # A same-origin frontend behind a proxy needs no CORS grant, but its
+    # public origin may be explicitly trusted for CSRF. The proxy can rewrite
+    # Host, so use the configured origins rather than inferring trust from it.
+    # Match exact origins only; do not broaden cookie access to subdomains.
+    allowed = {
+        value.rstrip("/")
+        for value in (*settings.CORS_ALLOWED_ORIGINS, *settings.CSRF_TRUSTED_ORIGINS)
+    }
+    if origin and origin.rstrip("/") not in allowed:
+        raise PermissionDenied("Untrusted request origin.")
+    if request.headers.get("Sec-Fetch-Site") == "cross-site":
+        raise PermissionDenied("Cross-site authentication request denied.")
+
+
 class GrcTokenObtainPairView(TokenObtainPairView):
     """
     POST /api/token/
@@ -257,6 +275,7 @@ class GrcTokenObtainPairView(TokenObtainPairView):
     throttle_classes = [LoginRateThrottle]
 
     def post(self, request, *args, **kwargs):
+        _check_browser_origin(request)
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
@@ -391,7 +410,7 @@ class MfaVerifyView(APIView):
         from django.contrib.auth import get_user_model
         User = get_user_model()
         try:
-            user = User.objects.get(pk=data["uid"])
+            user = User.objects.get(pk=data["uid"], is_active=True)
         except (User.DoesNotExist, KeyError):
             return Response({"detail": "Utente non trovato."}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -470,7 +489,8 @@ class MfaVerifyView(APIView):
         # OTP corretto: azzera il counter di tentativi falliti e marca il
         # mfa_token come speso (one-time-use, newfix #12).
         cache.delete(_mfa_attempts_key(user.pk))
-        cache.set(_mfa_used_key(mfa_token), 1, timeout=_MFA_TTL)
+        if not cache.add(_mfa_used_key(mfa_token), 1, timeout=_MFA_TTL):
+            return Response({"detail": "Token non valido."}, status=status.HTTP_401_UNAUTHORIZED)
 
         # newfix F2 — log MFA success (path distinto dal "no_mfa" per audit).
         _audit_login(user, success=True, request=request, extra={"path": "mfa_otp"})
@@ -492,6 +512,22 @@ class MfaVerifyView(APIView):
         return _jwt_response(user, extra=extra)
 
 
+def _validate_refresh_serialized(serializer, token):
+    import hashlib
+    from django.db import connection, transaction
+    from rest_framework_simplejwt.authentication import JWTAuthentication
+
+    with transaction.atomic():
+        if connection.vendor == "postgresql":
+            key = int.from_bytes(hashlib.sha256(("refresh:" + token).encode()).digest()[:8], "big", signed=True)
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT pg_advisory_xact_lock(%s)", [key])
+        # RefreshSerializer only checks is_active; also invalidate refreshes
+        # after password changes, consistently with access authentication.
+        JWTAuthentication().get_user(RefreshToken(token))
+        serializer.is_valid(raise_exception=True)
+
+
 class GrcTokenRefreshView(TokenRefreshView):
     """
     POST /api/token/refresh/
@@ -503,6 +539,7 @@ class GrcTokenRefreshView(TokenRefreshView):
     throttle_classes = [RefreshRateThrottle]
 
     def post(self, request, *args, **kwargs):
+        _check_browser_origin(request)
         refresh = (
             request.COOKIES.get(REFRESH_COOKIE_NAME)
             or request.data.get("refresh")
@@ -516,7 +553,7 @@ class GrcTokenRefreshView(TokenRefreshView):
 
         serializer = self.get_serializer(data={"refresh": refresh})
         try:
-            serializer.is_valid(raise_exception=True)
+            _validate_refresh_serialized(serializer, refresh)
         except Exception:
             # Cookie scaduto/blacklistato: lo rimuoviamo così il client non
             # continua a rigiocare un token morto.

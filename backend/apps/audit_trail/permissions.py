@@ -33,7 +33,7 @@ def _user_has_any_role(user, allowed: frozenset) -> bool:
     if getattr(user, "is_superuser", False):
         return True
     return UserPlantAccess.objects.filter(
-        user=user, role__in=allowed, deleted_at__isnull=True,
+        user=user, role__in=allowed, scope_type="org", deleted_at__isnull=True,
     ).exists()
 
 

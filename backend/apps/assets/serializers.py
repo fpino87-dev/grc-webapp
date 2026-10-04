@@ -40,6 +40,27 @@ class MaintenanceScheduleMixin:
 
     maintenance_is_overdue = serializers.BooleanField(read_only=True)
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        request = self.context.get("request")
+        if request:
+            from core.scoping import user_can_access_plant
+            related = list(attrs.get("processes", []))
+            if attrs.get("network_zone"):
+                related.append(attrs["network_zone"])
+            if any(not user_can_access_plant(request.user, obj.plant_id) for obj in related):
+                raise serializers.ValidationError("Oggetto collegato fuori dal perimetro dei tuoi siti.")
+            # Stessa regola dell'elenco fornitori: visibile se di organizzazione
+            # (nessun sito) o se almeno uno dei suoi siti è accessibile.
+            supplier = attrs.get("maintainer_supplier")
+            supplier_plants = list(supplier.plants.values_list("pk", flat=True)) if supplier else []
+            if supplier_plants and not any(
+                user_can_access_plant(request.user, pk) for pk in supplier_plants
+            ):
+                raise serializers.ValidationError("Fornitore fuori dal perimetro dei tuoi siti.")
+        return attrs
+
+
     def create(self, validated_data):
         from .services import apply_maintenance_schedule
 
@@ -266,10 +287,20 @@ class AssetFacilitySerializer(MaintenanceScheduleMixin, serializers.ModelSeriali
                     "L'autonomia nominale si applica solo a UPS e gruppi elettrogeni."
                 )
             })
-        return attrs
+        return super().validate(attrs)
 
 
 class AssetDependencySerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        from core.scoping import user_can_access_plant
+        request = self.context.get("request")
+        if request:
+            for field in ("from_asset", "to_asset"):
+                asset = attrs.get(field, getattr(self.instance, field, None))
+                if asset and not user_can_access_plant(request.user, asset.plant_id):
+                    raise serializers.ValidationError({field: "Asset fuori dal perimetro dei tuoi siti."})
+        return attrs
+
     from_asset_name = serializers.CharField(source="from_asset.name", read_only=True)
     to_asset_name = serializers.CharField(source="to_asset.name", read_only=True)
 

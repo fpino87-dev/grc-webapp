@@ -996,3 +996,22 @@ def delete_evidence(evidence, user) -> None:
         entity=evidence,
         payload={"id": str(evidence.pk), "title": evidence.title},
     )
+
+
+@transaction.atomic
+def link_document_controls(document, user, raw_ids):
+    from rest_framework import serializers
+    from rest_framework.exceptions import PermissionDenied
+    from apps.controls.models import ControlInstance
+    from core.scoping import scope_queryset_by_plant
+
+    ids = serializers.ListField(child=serializers.UUIDField(), max_length=1000).run_validation(raw_ids)
+    controls = list(scope_queryset_by_plant(ControlInstance.objects.filter(pk__in=ids), user))
+    if {obj.pk for obj in controls} != set(ids):
+        raise PermissionDenied("Control outside your site scope or unavailable.")
+    for control in controls:
+        control.documents.add(document)
+    linked = [str(obj.pk) for obj in controls]
+    log_action(user=user, action_code="documents.controls.linked", level="L2", entity=document,
+               payload={"control_instance_ids": linked})
+    return linked

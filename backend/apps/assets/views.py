@@ -142,7 +142,7 @@ class AssetITViewSet(MaintenanceActionsMixin, PlantScopedQuerysetMixin, viewsets
 
     @action(detail=False, methods=["get"], url_path="eol")
     def eol(self, request):
-        qs = get_eol_assets()
+        qs = self.get_queryset().filter(pk__in=get_eol_assets().values("pk"))
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 

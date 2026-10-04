@@ -60,6 +60,9 @@ def get_user_plant_ids(user) -> set | None:
         return None
 
     access_qs = UserPlantAccess.objects.filter(user=user, deleted_at__isnull=True)
+    scoped_roles = getattr(user, "_grc_scope_roles", None)
+    if scoped_roles is not None:
+        access_qs = access_qs.filter(role__in=scoped_roles)
     if not access_qs.exists():
         return set()
     if access_qs.filter(scope_type="org").exists():

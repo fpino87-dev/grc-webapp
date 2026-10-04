@@ -76,6 +76,15 @@ class KpiIngestView(APIView):
                 {"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
             )
         data = serializer.validated_data
+        # The deployment API key is organization-wide. A staff JWT is scoped
+        # exactly like the user's other API calls, not an organization bypass.
+        configured = getattr(settings, "KPI_INGEST_API_KEY", "") or ""
+        via_api_key = bool(configured) and constant_time_compare(
+            request.headers.get("X-API-Key", ""), configured,
+        )
+        if not via_api_key:
+            from core.scoping import require_plant_access
+            require_plant_access(request.user, data["plant"])
 
         from apps.tasks import services
 

@@ -66,10 +66,11 @@ class RoleScopedPermission(BasePermission):
     write_roles: Iterable[str] = ()
 
     def has_permission(self, request, view) -> bool:  # type: ignore[override]
-        if request.method in _SAFE_METHODS:
-            return user_has_any_role(request.user, self.read_roles)
-        write = self.write_roles or self.read_roles
-        return user_has_any_role(request.user, write)
+        roles = self.read_roles if request.method in _SAFE_METHODS else (self.write_roles or self.read_roles)
+        permitted = user_has_any_role(request.user, roles)
+        if permitted:
+            request.user._grc_scope_roles = frozenset(roles)
+        return permitted
 
 
 def org_wide_write_allowed(request, plant_id) -> bool:
