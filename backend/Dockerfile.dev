@@ -1,5 +1,12 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-trixie
+ARG POSTGRES_MAJOR=16
 WORKDIR /app
-RUN apt-get update && apt-get install -y gcc libpq-dev gettext libmagic1 fonts-dejavu-core postgresql-client && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gcc libpq-dev gettext libmagic1 fonts-dejavu-core curl ca-certificates \
+    && curl --fail --silent --show-error https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/keyrings/postgresql.asc \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.asc] https://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update && apt-get install -y --no-install-recommends postgresql-client-${POSTGRES_MAJOR} \
+    && rm -rf /var/lib/apt/lists/*
 COPY requirements/ requirements/
-RUN pip install --no-cache-dir -r requirements/dev.txt
+RUN python -m pip install --no-cache-dir -r requirements/build.txt \
+    && python -m pip install --no-cache-dir -r requirements/dev.txt \
+    && python -m pip check

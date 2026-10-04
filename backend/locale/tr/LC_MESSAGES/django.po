@@ -2653,6 +2653,11 @@ msgstr "Dosya çok büyük. Maksimum boyut: %(mb)s MB."
 msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
 msgstr "İzin verilmeyen dosya uzantısı. İzin verilen formatlar: %(formats)s."
 
+#: core/uploads.py:150
+#, python-format
+msgid "Archivio .%(ext)s non valido o oltre i limiti di sicurezza."
+msgstr "Geçersiz .%(ext)s arşivi veya güvenlik sınırları aşıldı."
+
 #: core/uploads.py:154
 msgid ""
 "Tipo di file non consentito. Il contenuto del file non corrisponde "

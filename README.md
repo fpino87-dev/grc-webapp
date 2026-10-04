@@ -49,7 +49,7 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 - Gestione incidenti NIS2 con timer countdown 24h/72h/30gg e template ACN precompilato
 - PDCA controller con trigger automatici e storico maturità per auditor
 - Formazione e awareness basate sulle evidenze: piano, erogazioni con file di prova collegate ai controlli, copertura del personale per conteggi (nessuna integrazione e-learning)
-- AI Engine opzionale (M20) con human-in-the-loop e sanitization layer GDPR-safe
+- AI Engine opzionale (M20) con human-in-the-loop e sanitization layer con minimizzazione dei dati (non garanzia di anonimato)
 - Interfaccia multilingua IT · EN · FR · PL · TR
 
 ---
@@ -78,7 +78,7 @@ La piattaforma GRC consolida in un'unica soluzione la gestione di tutti i framew
 | M17 | Audit Preparation | Preparazione audit TISAX/ISO/NIS2, finding, evidence pack, annulla con soft delete | Implementato |
 | M18 | Reporting & Dashboard | KPI snapshot settimanale con connettori interni, matrice accessi & responsabilità (ISO A.5.18), export report, dashboard cross-modulo | Implementato |
 | M19 | Notifiche | Notifiche email per evento con regole e profili per ruolo, iscrizioni personali, configurazione SMTP cifrata | Implementato |
-| M20 | AI Engine *(opzionale)* | Classificazione incidenti, bozze RCA, azioni per i gap, spiegazioni dei controlli, bozze del riesame, assistente — sanitizzazione GDPR e human-in-the-loop | Implementato |
+| M20 | AI Engine *(opzionale)* | Classificazione incidenti, bozze RCA, azioni per i gap, spiegazioni dei controlli, bozze del riesame, assistente — minimizzazione dei dati e human-in-the-loop | Implementato |
 | M21 | Centro Operativo | Posture score, advisor automatici, problemi/configurazioni mancanti e azioni consigliate in vista prioritizzata, widget dashboard | Implementato |
 | — | OSINT Monitor *(trasversale)* | Monitoraggio superficie di attacco e reputazione domini, enricher CTI, scoring esposizione, alert e semaforo salute chiavi | Implementato |
 
@@ -101,7 +101,7 @@ cp .env.example .env
 # Genera SECRET_KEY (min 50 caratteri)
 python -c "import secrets; print(secrets.token_urlsafe(50))"
 
-# Genera FERNET_KEY (cifratura AES-256 credenziali SMTP)
+# Genera FERNET_KEY (cifratura Fernet credenziali SMTP)
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
 # Inserisci i valori generati in .env
@@ -140,17 +140,17 @@ make prod-migrate
 make prod-seed
 # Solo alla prima installazione: policy di workflow documentale predefinite
 # (aggiorna quelle di organizzazione già presenti — usare --dry-run per vedere cosa cambia)
-docker compose -f docker-compose.prod.yml exec backend python manage.py load_document_workflow_policies
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py load_document_workflow_policies
 
 # 4. Crea superuser iniziale
-docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py createsuperuser
 
 # 5. Verifica deploy
 make prod-check
 
 # 6. Configurare Nginx Proxy Manager
 #    - Frontend (React): http://localhost:3001 → dominio grc.azienda.com
-#    - Backend API:      http://localhost:8001 → dominio grc.azienda.com/api/*
+#    - Backend API:      http://localhost:8000 → dominio grc.azienda.com/api/*
 #    - SSL Let's Encrypt con auto-renewal
 ```
 
@@ -170,7 +170,7 @@ Browser → Nginx Proxy Manager → Frontend React/Vite (porta 3001)
                                               → Celery Worker
                                               → Celery Beat
 
-                                       → MinIO / S3 (documenti ed evidenze)
+                                       → MEDIA_ROOT persistente (documenti ed evidenze)
 
 Integrazioni esterne:
 SMTP aziendale · Sentry (opzionale) · enricher CTI dell'OSINT Monitor
@@ -276,14 +276,14 @@ Audit Prep → Finding → PDCA → Lesson Learned
 - MFA (TOTP) con dispositivi fidati
 - Rate limiting: login 5/min, utenti autenticati 2000/h, anonimi 20/h, chiamate IA ed export limitate a parte
 - MIME check upload file con python-magic (whitelist estensioni + tipo reale)
-- Fernet AES-256 per credenziali SMTP in database (FERNET_KEY)
+- Fernet per credenziali SMTP in database (FERNET_KEY)
 - Password minimo 12 caratteri + validatori Django (CommonPassword, NumericPassword, UserAttributeSimilarity)
 - Audit trail append-only con hash chain SHA-256 — trigger PostgreSQL impedisce UPDATE/DELETE
 - Docker produzione con utente non-root + Gunicorn
 - Header HTTP sicurezza: HSTS, CSP, X-Frame-Options, X-Content-Type-Options
 - GDPR: `anonymize_user()` in `auth_grc/services.py`; audit log immutabile e pseudonimizzato (nessuna cancellazione per retention); log interazioni IA conservati 365 giorni; export dei dati (`export_portable_data`)
 - Output HTML degli export con escape dei testi utente; errori imprevisti senza dettagli interni verso il client
-- Supply chain: `pip-audit` e `npm audit` ogni notte, GitHub CodeQL, Dependabot, secret scanning con push protection, SBOM CycloneDX a ogni release
+- Supply chain: workflow `pip-audit` e `npm audit` ogni notte, SBOM CycloneDX a ogni release. L'attivazione di CodeQL, Dependabot e secret scanning/push protection nelle impostazioni GitHub va verificata separatamente.
 
 ---
 
@@ -296,7 +296,7 @@ Il repository include `.env.example` (sviluppo) e `.env.prod.example` (produzion
 | Variabile | Obbligatoria | Default dev | Descrizione |
 |-----------|-------------|-------------|-------------|
 | `SECRET_KEY` | Si | — | Chiave Django (min 50 char, generare con `secrets.token_urlsafe(50)`) |
-| `FERNET_KEY` | Si | — | Cifratura AES-256 credenziali SMTP (generare con `Fernet.generate_key()`) |
+| `FERNET_KEY` | Si | — | Cifratura Fernet credenziali SMTP (generare con `Fernet.generate_key()`) |
 | `DEBUG` | No | `True` | Impostare `False` in produzione |
 | `ALLOWED_HOSTS` | Si in prod | `localhost` | Host ammessi separati da virgola |
 | `DATABASE_URL` | Si | `postgresql://grc:REPLACE_DB_PASSWORD@db:5432/grc_dev` | URL connessione PostgreSQL |
@@ -352,7 +352,7 @@ Per l'elenco completo di tutte le variabili (storage, email, SSO, AI Engine) ved
 | Ollama | M20 | HTTP locale | Modello on-prem, nessun trasferimento extra-UE |
 | SMTP aziendale | M19 | SMTP | Notifiche email, credenziali cifrate Fernet |
 | VirusTotal, HIBP, AbuseIPDB, OTX, Google Safe Browsing, abuse.ch, crt.sh, RDAP | OSINT | API REST — opt-in per chiave | Enricher CTI con difesa SSRF |
-| Sentry | trasversale | SDK — opzionale | Error monitoring GDPR-safe, attivo se `SENTRY_DSN` impostato |
+| Sentry | trasversale | SDK — opzionale | Error monitoring con minimizzazione dei dati (non garanzia di anonimato), attivo se `SENTRY_DSN` impostato |
 | ACN (NIS2) | M09 | Documento generato | Notifica precompilata da inviare tramite il portale ACN |
 
 ---

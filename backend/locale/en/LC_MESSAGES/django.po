@@ -2652,6 +2652,11 @@ msgstr "File too large. Maximum size: %(mb)sMB."
 msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
 msgstr "File extension not allowed. Allowed formats: %(formats)s."
 
+#: core/uploads.py:150
+#, python-format
+msgid "Archivio .%(ext)s non valido o oltre i limiti di sicurezza."
+msgstr "Invalid .%(ext)s archive or archive exceeds security limits."
+
 #: core/uploads.py:154
 msgid ""
 "Tipo di file non consentito. Il contenuto del file non corrisponde "

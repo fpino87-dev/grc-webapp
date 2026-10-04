@@ -9,6 +9,7 @@ User = get_user_model()
 
 URL_MATRIX = "/api/v1/governance/role-assignments/coverage-matrix/"
 URL_REQUIREMENTS = "/api/v1/governance/role-requirements/"
+pytestmark = pytest.mark.usefixtures("role_requirements")
 
 
 @pytest.fixture

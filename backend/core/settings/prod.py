@@ -4,6 +4,10 @@ from urllib.parse import urlparse
 
 DEBUG = False
 
+MIDDLEWARE = list(MIDDLEWARE)
+MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+WHITENOISE_ALLOW_ALL_ORIGINS = False
+
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["grc.azienda.com"])
 
 # HSTS — 2 anni, includi sottodomini e preload
@@ -16,7 +20,7 @@ CSRF_COOKIE_SECURE    = True
 SECURE_SSL_REDIRECT   = True
 
 # Celery: usa Redis come result backend in produzione (evita contention su DB)
-CELERY_RESULT_BACKEND = env("REDIS_URL") + "/1"
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=env("REDIS_URL").rsplit("/", 1)[0] + "/1")
 CELERY_RESULT_EXPIRES = 86400  # 24h in secondi
 
 # --- Swagger/OpenAPI: disabilitato di default in produzione ---
@@ -34,8 +38,8 @@ if not _frontend_url:
 _parsed = urlparse(_frontend_url)
 if not _parsed.scheme or not _parsed.netloc:
     raise ImproperlyConfigured("FRONTEND_URL deve essere un URL valido (es. https://grc.azienda.com).")
-if _parsed.scheme not in ("http", "https"):
-    raise ImproperlyConfigured("FRONTEND_URL deve usare schema http o https.")
+if _parsed.scheme != "https":
+    raise ImproperlyConfigured("FRONTEND_URL deve usare schema https.")
 CORS_ALLOWED_ORIGINS = [_frontend_url.rstrip("/")]
 
 # Sentry: in produzione forziamo environment=production e sample rate più alto

@@ -17,6 +17,7 @@ backend/media/
 .coverage
 coverage.xml
 htmlcov/
+frontend/coverage/
 .pytest_cache/
 
 # IDE / editor

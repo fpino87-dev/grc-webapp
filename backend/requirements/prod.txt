@@ -2,3 +2,5 @@
 gunicorn==22.*
 sentry-sdk==2.*
 
+# Serve collectstatic assets with Gunicorn (never user-uploaded media).
+whitenoise==6.12.0

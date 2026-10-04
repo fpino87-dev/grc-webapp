@@ -36,7 +36,7 @@
                                             |
                         +-------------------+------------------+
                         |                   |                  |
-                   PostgreSQL 17          Redis 7         File caricati
+                   PostgreSQL 16          Redis 7         File caricati
                    (volume pgdata)        broker +        /srv/grc/media
                                           cache           (bind mount)
                         |
@@ -93,7 +93,7 @@
 
 | Componente | Tecnologia | Note |
 |-----------|-----------|------|
-| Database principale | PostgreSQL | 17 in produzione (`postgres:17-alpine`), 16 nello stack di sviluppo |
+| Database principale | PostgreSQL | 16 per nuove installazioni DEV/PROD/CI; major PROD esplicita per proteggere i volumi esistenti |
 | Cache / broker | Redis | 7, con password in produzione |
 | File caricati | Filesystem (`MEDIA_ROOT`) | in produzione bind mount `/srv/grc/media`, condiviso da backend e worker Celery |
 
@@ -255,7 +255,7 @@ sudo mkdir -p /srv/grc/media
 make prod-build
 make prod-up
 # il backend gira come utente non-root `grc`: rende scrivibili media e backup
-docker compose -f docker-compose.prod.yml exec --user root backend chown -R grc:grc /app/media /app/backups
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec --user root backend chown -R grc:grc /app/media /app/backups
 ```
 
 **6. Migrazioni e dati di riferimento**
@@ -265,15 +265,15 @@ make prod-migrate
 make prod-seed            # framework, profili notifica, competenze, requisiti di ruolo,
                           # documenti richiesti, controlli provati dalla formazione (idempotente)
 # solo alla prima installazione: aggiorna anche le policy di organizzazione esistenti
-docker compose -f docker-compose.prod.yml exec backend python manage.py load_document_workflow_policies
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py load_document_workflow_policies
 # backup automatico notturno (02:00)
-docker compose -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task
 ```
 
 **7. Superuser iniziale**
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend python manage.py createsuperuser
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py createsuperuser
 ```
 
 **8. Reverse proxy** — vedi [Reverse proxy](#reverse-proxy)
@@ -283,10 +283,10 @@ docker compose -f docker-compose.prod.yml exec backend python manage.py createsu
 ```bash
 make prod-check                               # manage.py check --deploy
 curl -s http://127.0.0.1:8000/api/health/     # {"status": "ok", "db": true, ...}
-docker compose -f docker-compose.prod.yml exec backend python manage.py verify_schedule
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py verify_schedule
 ```
 
-**Aggiornamenti di versione**: leggere prima la sezione della release nel `CHANGELOG.md`, che riporta la sequenza di deploy quando servono passi particolari (es. anteprime prima di `migrate`). Dopo ogni aggiornamento del codice dei task o della schedule: `docker compose -f docker-compose.prod.yml restart celery celery-beat`.
+**Aggiornamenti di versione**: leggere prima la sezione della release nel `CHANGELOG.md`, che riporta la sequenza di deploy quando servono passi particolari (es. anteprime prima di `migrate`). Dopo ogni aggiornamento del codice dei task o della schedule: `docker compose --env-file .env.prod -f docker-compose.prod.yml restart celery celery-beat`.
 
 ### Docker Compose sviluppo — estratto
 
@@ -558,7 +558,7 @@ Il repository non include uno stack di metriche: si consiglia un monitor esterno
 
 ### Error monitoring
 
-Sentry (opzionale) su backend (Django, Celery, Redis) e frontend (React), attivo se `SENTRY_DSN` / `VITE_SENTRY_DSN` sono valorizzati. Configurazione GDPR-safe: `send_default_pii=False`, header Authorization rimosso, Session Replay disattivo di default e con testo mascherato.
+Sentry (opzionale) su backend (Django, Celery, Redis) e frontend (React), attivo se `SENTRY_DSN` / `VITE_SENTRY_DSN` sono valorizzati. Configurazione con minimizzazione dei dati (non garanzia di anonimato): `send_default_pii=False`, header Authorization rimosso, Session Replay disattivo di default e con testo mascherato.
 
 ### Log
 
@@ -651,3 +651,80 @@ Ogni interazione è registrata in `AiInteractionLog` con l'hash dell'input (mai 
 - [ ] Routing per funzione deciso (locale per i dati più sensibili)
 - [ ] Sanitizzazione verificata: nessun dato personale nei prompt inviati al cloud
 - [ ] Human-in-the-loop verificato per le funzioni abilitate
+
+## Gate per il pilota — review 2026-10-04
+
+Vedere [il report tecnico](docs/PILOT_READINESS_REVIEW_2026-10-04.md) prima del deployment.
+Le modifiche del repository non riconfigurano i container già in esecuzione.
+
+- **PostgreSQL:** standard per nuove installazioni e CI = 16. In produzione
+  `POSTGRES_MAJOR` è obbligatorio: controllare `SHOW server_version` / `PG_VERSION`
+  del volume esistente prima di valorizzarlo. Un volume 17 deve mantenere 17;
+  non fare downgrade a 16. Non riutilizzare un data directory con una major
+  diversa. Per un upgrade: dump verificato, nuovo volume/database, restore e
+  collaudo separati, poi cutover con rollback; conservare il volume originale.
+  Il build argument `POSTGRES_MAJOR` installa la stessa major del client tramite
+  il repository APT ufficiale PostgreSQL. Ricostruire backend e worker quando
+  cambia la major: un dump prodotto dal client 17 non è garantito ripristinabile
+  sul server 16 (riscontrato nel collaudo: `transaction_timeout`).
+- **Compose:** usare sempre `--env-file .env.prod`, anche per `up`, `exec` e
+  `config`. `env_file` nei servizi non governa l'interpolazione `${...}` di
+  Compose. Le porte DEV e PROD ora sono bindate su loopback. Un proxy in un
+  container bridge deve usare una rete condivisa o una configurazione host
+  esplicita: `127.0.0.1` nel container non è l'host.
+- **Statici:** WhiteNoise serve solo `STATIC_ROOT` con Gunicorn. Non esporre
+  direttamente `MEDIA_ROOT`: i download devono passare per gli endpoint
+  autenticati. Inoltrare `Host` e sovrascrivere `X-Forwarded-Proto` al proxy.
+- **Cloud AI:** `AI_CLOUD_ENABLED=false` forza il locale anche se il database
+  contiene routing cloud. `true` è un consenso operativo esplicito; verificare
+  provider, condizioni di trattamento/retention e prompt rappresentativi prima
+  di abilitarlo. Nomi non registrati, indirizzi liberi, hostname e identificativi
+  non riconosciuti possono restare nel testo. La pseudonimizzazione non è una
+  garanzia di anonimato. OSINT e Sentry hanno configurazioni esterne indipendenti.
+- **Budget AI:** reset al primo utilizzo dopo l'inizio del periodo, con giorni
+  29–31 adattati alla fine del mese e timezone Django. Prenotazioni atomiche
+  conservative prima della richiesta; conguaglio sul consumo restituito. Errori
+  ambigui/time-out/crash mantengono la prenotazione fino al reset: può ridurre il
+  budget disponibile. Il limite resta un controllo applicativo, non un tetto
+  contrattuale di fatturazione del provider. Fallback `notify`/`disabled` non
+  esegue automaticamente il modello locale; `notify` non implementa un nuovo
+  flusso UI di conferma.
+- **Chiavi:** i nuovi campi cifrati usano la chiave Fernet configurata. I vecchi
+  valori derivati da `SECRET_KEY` restano leggibili e vengono ricifrati quando
+  salvati. Conservare **SECRET_KEY storica, FERNET_KEY e BACKUP_ENCRYPTION_KEY**
+  fuori dal server: il solo archivio cifrato non basta per recuperare i segreti
+  applicativi. Nessuna chiave reale è stata ruotata da questa review.
+
+### Ripristino: limitazioni e prova obbligatoria
+
+Il restore DB usa `--single-transaction --exit-on-error` e considera fallimento
+qualsiasi exit code non-zero. Gli archivi rifiutano traversal, link, device,
+nomi duplicati, oltre 100.000 membri o 20 GiB espansi (limite configurabile via
+setting `BACKUP_ARCHIVE_MAX_BYTES`). La cifratura GRC1 è streaming, compatibile
+con gli archivi precedenti; i file temporanei hanno permessi 0600.
+
+**Il restore completo dalla UI non è disponibile con MEDIA_ROOT montata
+ direttamente come bind mount**, come nel Compose PROD attuale: ora fallisce
+prima di modificare il DB. Lo scambio di un mount point tramite rename non è
+supportato. La patch evita un restore parziale; non rende atomico l'insieme
+PostgreSQL + filesystem né introduce modalità manutenzione/distributed lock.
+
+Prima del pilota eseguire un ripristino offline su una **nuova installazione**:
+
+1. Fermare le scritture nell'ambiente sorgente durante il backup di collaudo;
+   database e media copiati in momenti diversi non sono uno snapshot congiunto.
+2. Copiare archivio e chiavi tramite un canale amministrativo protetto; verificare
+   autenticità/provenienza del dump (pg_restore può eseguire SQL contenuto nel dump).
+3. Decifrare in una directory privata con `encryption.decrypt_file`; validare
+   tutti i membri con `archive.validate_archive` ed estrarre il dump con
+   `archive.extract_db_dump`, usando lo stesso codice della release.
+4. Ripristinare con client PostgreSQL compatibile in un database **nuovo**, mai
+   nel database operativo. Ripristinare i media in una directory ordinaria nuova,
+   quindi montarla nella nuova installazione; mantenere l'originale intatto.
+5. Verificare migrazioni, conteggi, hash dei file campione, catena audit, login,
+   autorizzazioni e download. Registrare tempi RTO/RPO e risultato.
+6. Solo dopo il collaudo concordare fermo, cutover e rollback. Non cancellare
+   automaticamente il volume o gli archivi originali.
+
+Il check locale eseguito durante questa review non sostituisce questo collaudo
+su un archivio rappresentativo del cliente. Non dichiarare RTO/RPO garantiti.

@@ -12,7 +12,7 @@ migrate:
 
 test:
 	cd backend && pytest
-	cd frontend && npm test -- --watchAll=false
+	cd frontend && npm test
 
 lint:
 	cd backend && ruff check . && ruff format --check .
@@ -31,40 +31,40 @@ shell:
 
 # ── Produzione ──────────────────────────────────────────────────────────────
 prod-build:
-	docker compose -f docker-compose.prod.yml build
+	docker compose --env-file .env.prod -f docker-compose.prod.yml build
 
 prod-up:
-	docker compose -f docker-compose.prod.yml up -d
+	docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
 
 prod-down:
-	docker compose -f docker-compose.prod.yml down
+	docker compose --env-file .env.prod -f docker-compose.prod.yml down
 
 prod-migrate:
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py migrate
 
 prod-seed:
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py load_frameworks
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py load_notification_profiles
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py load_competency_requirements
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py load_required_documents
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py load_role_requirements
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py load_training_evidence_controls
 
 prod-logs:
-	docker compose -f docker-compose.prod.yml logs -f --tail=50
+	docker compose --env-file .env.prod -f docker-compose.prod.yml logs -f --tail=50
 
 prod-shell:
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py shell
 
 prod-check:
-	docker compose -f docker-compose.prod.yml exec backend \
+	docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend \
 	  python manage.py check --deploy
 

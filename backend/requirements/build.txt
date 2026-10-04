@@ -1,0 +1,4 @@
+# Explicit packaging tools: the Python base image can bundle vulnerable versions.
+# Audited separately from application requirements; review pins periodically.
+pip==26.2.1
+setuptools==84.0.0

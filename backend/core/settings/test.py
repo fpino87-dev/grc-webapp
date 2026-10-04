@@ -33,3 +33,6 @@ REST_FRAMEWORK = {
 # Nessuna chiamata di rete verso Gotenberg nei test: i test della conversione
 # PDF impostano l'URL e simulano la risposta.
 GOTENBERG_URL = ""
+
+# Synthetic provider calls are mocked by the AI tests.
+AI_CLOUD_ENABLED = True

@@ -64,8 +64,8 @@ def test_data_upload_max_memory_size_set():
 
 
 def test_file_upload_max_memory_size_set():
-    """File >50 MB vengono streamati su disco invece di stare in RAM."""
-    assert settings.FILE_UPLOAD_MAX_MEMORY_SIZE == 50 * 1024 * 1024
+    """File >2 MB vengono streamati su disco invece di stare in RAM."""
+    assert settings.FILE_UPLOAD_MAX_MEMORY_SIZE == 2 * 1024 * 1024
 
 
 def test_data_upload_max_number_fields_set():

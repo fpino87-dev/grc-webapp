@@ -190,11 +190,12 @@ Use a stable branch or release tag for production.
 
 The default `docker-compose.prod.yml` maps:
 
-- **Frontend**: `3001:80` (host → container)
+- **Frontend**: `127.0.0.1:3001:80` (host → container)
+- **Backend**: `127.0.0.1:8000:8000` (already configured)
 
 The **backend** must be reachable by the reverse proxy on the host. Recommended: publish **only on localhost**:
 
-Create `docker-compose.override.yml` next to `docker-compose.prod.yml`:
+An override is only needed if your topology differs. The default backend mapping is already:
 
 ```yaml
 services:
@@ -223,8 +224,8 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose
 Check containers:
 
 ```bash
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml ps
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml logs -f --tail=50 backend
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml ps
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml logs -f --tail=50 backend
 ```
 
 ---
@@ -232,25 +233,25 @@ docker compose -f docker-compose.prod.yml -f docker-compose.override.yml logs -f
 ## 10. Database migrations and seed data
 
 ```bash
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py migrate
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_frameworks
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_notification_profiles
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_competency_requirements
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_required_documents
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_risk_catalog
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py createsuperuser
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py migrate
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_frameworks
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_notification_profiles
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_competency_requirements
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_required_documents
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py load_risk_catalog
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py createsuperuser
 ```
 
 Optional: schedule backups (if your project provides a management command):
 
 ```bash
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py schedule_backup_task
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py schedule_backup_task
 ```
 
 Run `check --deploy`:
 
 ```bash
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py check --deploy
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py check --deploy
 ```
 
 ---
@@ -265,7 +266,8 @@ Often run as a separate Docker stack. Create **Proxy Hosts**:
 
    - Domain: `grc.example.com` (your domain)
    - Scheme: `http`
-   - Forward hostname: `172.17.0.1` or host Docker bridge IP / `host.docker.internal` depending on your setup
+   - With host networking: forward hostname `127.0.0.1`, port `3001`.
+   - With bridge networking: join an explicitly shared network and address the frontend container on port `80`. Host loopback bindings cannot be reached through `host.docker.internal` or the bridge IP.
    - Forward port: `3001`
    - Enable **Block Common Exploits**, **Websockets Support** if needed
    - SSL: request Let's Encrypt certificate; force SSL
@@ -329,8 +331,8 @@ Log in through the browser, verify login, language switch, and a sample API call
 
 ## 13. Backups and operations
 
-- **Backups**: the app's **Backup** module (Settings → Backup) creates full `.tar` archives with the database dump and the uploaded files, encrypted when `BACKUP_ENCRYPTION_KEY` is set. Schedule the nightly run (02:00, 30-day retention) once with `docker compose -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task`; archives can be downloaded, imported and restored from the UI. Keep a copy of the archives **off the server** (they live in the `backupdata` volume) and store `BACKUP_ENCRYPTION_KEY` separately: without it encrypted backups cannot be restored.
-- **Uploaded files**: stored on the filesystem in `/srv/grc/media` (bind mount shared by `backend` and `celery`); create it before the first start and make it writable by the `grc` user (`docker compose -f docker-compose.prod.yml exec --user root backend chown -R grc:grc /app/media /app/backups`). There is no object-storage backend.
+- **Backups**: the app's **Backup** module (Settings → Backup) creates full `.tar` archives with the database dump and the uploaded files, encrypted when `BACKUP_ENCRYPTION_KEY` is set. Schedule the nightly run (02:00, 30-day retention) once with `docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py schedule_backup_task`; archives can be downloaded, imported and restored from the UI. Keep a copy of the archives **off the server** (they live in the `backupdata` volume) and store `BACKUP_ENCRYPTION_KEY` separately: without it encrypted backups cannot be restored.
+- **Uploaded files**: stored on the filesystem in `/srv/grc/media` (bind mount shared by `backend` and `celery`); create it before the first start and make it writable by the `grc` user (`docker compose --env-file .env.prod -f docker-compose.prod.yml exec --user root backend chown -R grc:grc /app/media /app/backups`). There is no object-storage backend.
 - **Secrets**: store `.env.prod` outside version control; restrict file permissions (`chmod 600 .env.prod`).
 
 ---
@@ -424,7 +426,7 @@ Default profiles were loaded by **`load_notification_profiles`** (section 10).
 If you have not already run:
 
 ```bash
-docker compose -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py schedule_backup_task
+docker compose --env-file .env.prod -f docker-compose.prod.yml -f docker-compose.override.yml exec backend python manage.py schedule_backup_task
 ```
 
 schedule the **automatic backup** task according to your operations guide, and verify backup files or retention in your chosen storage.
@@ -446,3 +448,6 @@ You can then roll out further modules (assets, BIA, risk, documents, incidents) 
 - [`.env.example`](../.env.example) — local development template  
 - [`../README.md`](../README.md) — project overview and quick starts  
 - [`../INFRASTRUCTURE.md`](../INFRASTRUCTURE.md) — extended infrastructure reference  
+
+
+Before deployment, follow the [pilot review and restore limitations](../INFRASTRUCTURE.md#gate-per-il-pilota--review-2026-10-04). Set POSTGRES_MAJOR=16 for a new installation; existing PostgreSQL 17 data directories must keep 17. Never switch a populated volume between major versions.

@@ -2,10 +2,7 @@
 # Aggiornare regolarmente e verificare CVE con: pip-audit
 # Django 5.2 LTS: la serie 5.1 e' EOL e non riceve piu' fix di sicurezza.
 # Bump da 5.1.* a 5.2.* per chiudere 6 CVE (min fix 5.2.16).
-# DRF resta a 3.15.*: 3.16 auto-genera un UniqueTogetherValidator dai
-# UniqueConstraint condizionali (pattern soft-delete deleted_at) che va in
-# KeyError sui partial update. 3.15 non ha upper-bound su Django e gira su 5.2.
-Django==5.2.*
+Django>=5.2.17,<5.3
 djangorestframework==3.17.*
 django-environ==0.11.*
 django-cors-headers==4.4.*
@@ -54,3 +51,5 @@ python-whois==0.9.*
 # non li copriva. requests: enricher OSINT; httpx: ai_engine/router.py.
 requests==2.34.*
 httpx>=0.27
+# Explicit floor for the JWT parser security fix found in the pilot audit.
+PyJWT>=2.15.0,<3

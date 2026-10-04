@@ -10,9 +10,9 @@ I preset coprono i casi tipici: documenti d'ufficio, evidenze (PDF + immagini),
 allegati incidente. Per casi nuovi, comporre `validate_uploaded_file(file, allowed_extensions=..., allowed_mimes=..., max_bytes=...)`.
 """
 
-import io
 import os
 import zipfile
+from pathlib import PurePosixPath
 
 import magic
 from django.core.exceptions import ValidationError
@@ -83,21 +83,30 @@ _OOXML_EXT_MARKERS = {
 _ZIP_LIKE_MIMES = {"application/zip", "application/octet-stream"}
 
 
-def _looks_like_ooxml(content: bytes, part_prefix: str) -> bool:
-    """True se ``content`` è un pacchetto OPC (OOXML) con la parte attesa.
-
-    Ispeziona solo la central directory (namelist), non estrae nulla: sicuro
-    anche su archivi ostili. Un non-ZIP (es. PDF rinominato .docx) solleva
-    BadZipFile → False; un altro OOXML rinominato (xlsx→.docx) non ha la
-    cartella attesa → False (cross-check estensione preservato)."""
+def _looks_like_ooxml(uploaded_file, part_prefix: str) -> bool:
+    """Inspect a seekable upload without decompressing or reading it into RAM."""
     try:
-        with zipfile.ZipFile(io.BytesIO(content)) as zf:
-            names = zf.namelist()
-    except zipfile.BadZipFile:
+        with zipfile.ZipFile(uploaded_file) as zf:
+            entries = zf.infolist()
+            if len(entries) > 10000:
+                return False
+            total = 0
+            for entry in entries:
+                parts = PurePosixPath(entry.filename).parts
+                total += entry.file_size
+                if (
+                    entry.filename.startswith("/") or ".." in parts
+                    or "\\" in entry.filename or entry.flag_bits & 1
+                    or total > 250 * 1024 * 1024
+                    or entry.file_size > max(entry.compress_size, 1) * 200
+                ):
+                    return False
+            names = {entry.filename for entry in entries}
+            return "[Content_Types].xml" in names and any(n.startswith(part_prefix) for n in names)
+    except (zipfile.BadZipFile, OSError, ValueError):
         return False
-    if "[Content_Types].xml" not in names:
-        return False
-    return any(name.startswith(part_prefix) for name in names)
+    finally:
+        uploaded_file.seek(0)
 
 
 def validate_uploaded_file(
@@ -129,25 +138,18 @@ def validate_uploaded_file(
             % {"formats": ", ".join(sorted(allowed_extensions))}
         )
 
-    # NB: leggere l'intero contenuto, non solo i primi 2048 byte. Il size cap
-    # sopra garantisce che qui il file sia ≤ max_bytes, e il contenuto serve
-    # comunque interamente per l'eventuale ispezione OPC (vedi sotto).
     uploaded_file.seek(0)
-    content = uploaded_file.read()
+    content = uploaded_file.read(8192)
     uploaded_file.seek(0)
     mime_type = magic.from_buffer(content, mime=True)
 
-    # Fallback OOXML: se l'estensione è docx/xlsx/pptx ma libmagic ha restituito
-    # un MIME ZIP-generico (perché `[Content_Types].xml` non è il primo entry),
-    # verifichiamo la struttura OPC via zipfile e, se valida, normalizziamo il
-    # MIME a quello atteso per l'estensione. Vedi _looks_like_ooxml.
+    # Validate every OOXML container, even when libmagic recognizes its MIME.
     part_prefix = _OOXML_EXT_MARKERS.get(ext)
-    if (
-        part_prefix is not None
-        and mime_type in _ZIP_LIKE_MIMES
-        and _looks_like_ooxml(content, part_prefix)
-    ):
-        mime_type = next(iter(EXT_TO_MIME[ext]))
+    if part_prefix is not None:
+        if not _looks_like_ooxml(uploaded_file, part_prefix):
+            raise ValidationError(_("Archivio .%(ext)s non valido o oltre i limiti di sicurezza.") % {"ext": ext})
+        if mime_type in _ZIP_LIKE_MIMES:
+            mime_type = next(iter(EXT_TO_MIME[ext]))
 
     if mime_type not in allowed_mimes:
         raise ValidationError(

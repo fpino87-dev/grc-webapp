@@ -49,14 +49,14 @@ jobs:
           # PYSEC-2025-183 (pyjwt) exemption removed 2026-06-09: OSV now caps
           # the advisory at <=2.10.1 and PyJWT 2.13.0 is available upstream.
           pip-audit --strict \
-            --requirement backend/requirements/base.txt \
-            --no-deps
+            --requirement backend/requirements/prod.txt
+      - name: Audit packaging tools (strict)
+        run: pip-audit --strict --requirement backend/requirements/build.txt
       - name: Audit dev deps (warning-only)
         if: always()
         run: |
           pip-audit \
-            --requirement backend/requirements/dev.txt \
-            --no-deps || true
+            --requirement backend/requirements/dev.txt || true
 
   npm-audit:
     name: npm audit (frontend)
@@ -80,6 +80,8 @@ jobs:
           # sono accettabili in attesa di patch upstream. Vedi lo script per la
           # lista delle eccezioni e la relativa giustificazione.
           node ../.github/scripts/npm-audit-gate.mjs
+      - name: Audit gate regressions (offline)
+        run: node --test .github/scripts/npm-audit-gate.test.mjs
       - name: Save full audit report (always)
         if: always()
         working-directory: frontend

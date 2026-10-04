@@ -39,6 +39,10 @@ function runAudit() {
 }
 
 const report = JSON.parse(runAudit());
+if (report.error || !report.vulnerabilities || !report.metadata?.vulnerabilities) {
+  console.error("npm audit failed or returned an incomplete report; security status unknown.");
+  process.exit(1);
+}
 const vulns = report.vulnerabilities ?? {};
 
 const blocking = [];

@@ -65,9 +65,18 @@ export function initSentry(): void {
     beforeSend(event) {
       // Rimuovi Authorization header se presente
       if (event.request?.headers) {
-        delete event.request.headers["Authorization"];
-        delete event.request.headers["authorization"];
+        for (const name of Object.keys(event.request.headers)) {
+          if (["authorization", "cookie", "x-csrftoken", "x-api-key"].includes(name.toLowerCase())) {
+            delete event.request.headers[name];
+          }
+        }
       }
+      if (event.request) {
+        delete event.request.data;
+        delete event.request.cookies;
+        delete event.request.query_string;
+      }
+      delete event.user;
       return event;
     },
   });

@@ -2716,6 +2716,11 @@ msgstr "Fichier trop volumineux. Taille maximale : %(mb)s Mo."
 msgid "Estensione file non consentita. Formati ammessi: %(formats)s."
 msgstr "Extension de fichier non autorisée. Formats admis : %(formats)s."
 
+#: core/uploads.py:150
+#, python-format
+msgid "Archivio .%(ext)s non valido o oltre i limiti di sicurezza."
+msgstr "Archive .%(ext)s non valide ou dépassant les limites de sécurité."
+
 #: core/uploads.py:154
 msgid ""
 "Tipo di file non consentito. Il contenuto del file non corrisponde "

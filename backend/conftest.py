@@ -6,6 +6,14 @@ User = get_user_model()
 
 
 @pytest.fixture
+def role_requirements(db):
+    """Explicit reference data, also after TransactionTestCase flush/reuse-db."""
+    from django.core.management import call_command
+
+    call_command("load_role_requirements", verbosity=0)
+
+
+@pytest.fixture
 def plant_nis2(db):
     from apps.plants.models import Plant
 

@@ -170,7 +170,7 @@ OVEREOF
       - "127.0.0.1:3001:80"
 OVEREOF
   else
-    warn "Docker Compose < 2.24.4: il frontend resta pubblicato su 0.0.0.0:3001 — aggiorna Docker e rilancia"
+    warn "Docker Compose < 2.24.4: mantenuto il binding frontend del Compose PROD (loopback)"
   fi
   if [[ "${ENABLE_OLLAMA:-false}" == "true" ]]; then
     cat >> "${INSTALL_DIR}/docker-compose.override.yml" << 'OLLAMAEOF'
@@ -231,9 +231,9 @@ load_reference_data() {
 wait_backend() {
   local wait=0
   info "Attendo disponibilità backend..."
-  until curl -sf http://127.0.0.1:8001/api/health/ &>/dev/null; do
+  until ${COMPOSE} exec -T backend python /app/healthcheck.py &>/dev/null; do
     sleep 5; wait=$((wait+5)); echo -n "."
-    [[ ${wait} -ge 180 ]] && { echo ""; warn "Timeout — verifico comunque..."; break; }
+    [[ ${wait} -ge 180 ]] && { echo ""; warn "Timeout readiness backend — interrompo"; return 1; }
   done
   echo ""
 }
@@ -590,6 +590,7 @@ DRF_NUM_PROXIES=1
 
 # --- PostgreSQL ---------------------------------------------------------------
 DATABASE_URL=postgresql://grc:${DB_PASSWORD}@db:5432/grc_prod
+POSTGRES_MAJOR=16
 POSTGRES_DB=grc_prod
 POSTGRES_USER=grc
 POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -793,6 +794,7 @@ server {
 
     # ── Static / Media Django ─────────────────────────────────────────────────
     location /static/ {
+        proxy_set_header   Host \$host;
         proxy_pass         http://127.0.0.1:8001;
         proxy_set_header   X-Forwarded-Proto https;
     }
@@ -812,7 +814,6 @@ server {
         proxy_set_header        Upgrade           \$http_upgrade;
         proxy_set_header        Connection        "upgrade";
         proxy_hide_header       X-Frame-Options;
-        proxy_hide_header       Content-Security-Policy;
         proxy_hide_header       Referrer-Policy;
         proxy_hide_header       Permissions-Policy;
         proxy_hide_header       X-Content-Type-Options;

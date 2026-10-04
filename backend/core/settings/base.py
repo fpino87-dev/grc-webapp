@@ -288,6 +288,9 @@ KPI_INGEST_API_KEY = env("KPI_INGEST_API_KEY", default="")
 
 # Retention (giorni) del log interazioni AI (human-in-the-loop): l'output può
 # contenere PII incidentale → minimizzazione GDPR Art. 5.1.e. Default 12 mesi.
+# Cloud egress requires explicit deployment opt-in, independently of UI routing.
+AI_CLOUD_ENABLED = env.bool("AI_CLOUD_ENABLED", default=False)
+
 AI_LOG_RETENTION_DAYS = env.int("AI_LOG_RETENTION_DAYS", default=365)
 
 # Età minima (giorni) oltre la quale i record soft-deleted possono essere purgati
@@ -319,14 +322,13 @@ GOTENBERG_TIMEOUT = env.int("GOTENBERG_TIMEOUT", default=150)  # secondi, oltre 
 # - DATA_UPLOAD_MAX_MEMORY_SIZE  : limite del corpo NON-multipart (JSON, form
 #   classico). 5 MB e' largo per qualunque payload GRC realistico (le
 #   evidenze multimediali passano per multipart, non per JSON).
-# - FILE_UPLOAD_MAX_MEMORY_SIZE  : soglia in cui i file vengono streamati su
-#   disco invece di stare in RAM. 50 MB e' sufficiente per evidenze
-#   PDF/DOCX/PNG; oltre questa soglia il file finisce su /tmp.
+# - FILE_UPLOAD_MAX_MEMORY_SIZE: oltre 2 MB il file viene scritto su disco;
+#   il limite applicativo dei documenti resta 50 MB.
 # - DATA_UPLOAD_MAX_NUMBER_FIELDS: tetto al numero di campi POST/GET per
 #   richiesta (default 1000 e' OK ma e' meglio fissarlo esplicitamente per
 #   evidenziare la scelta in code review).
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024     # 5 MB JSON / form
-FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024    # 50 MB soglia in-memory
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024    # 2 MB soglia in-memory
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 
 REST_FRAMEWORK = {
@@ -385,6 +387,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME":   timedelta(days=7),
     "ROTATE_REFRESH_TOKENS":    True,
     "BLACKLIST_AFTER_ROTATION": True,
+    "CHECK_REVOKE_TOKEN":       True,
     "UPDATE_LAST_LOGIN":        True,
     "AUTH_HEADER_TYPES":        ("Bearer",),
 }
@@ -458,13 +461,19 @@ FERNET_KEYS = [env("FERNET_KEY")]
 
 # ─── Sentry ───────────────────────────────────────────────────────────────────
 def _sentry_before_send(event, hint):
-    """Strip any residual PII from Sentry events before sending."""
+    """Minimize request data; free-text error messages may still contain PII."""
     # Rimuovi header Authorization e Cookie da request data
     request = event.get("request", {})
     headers = request.get("headers", {})
-    for h in ("Authorization", "Cookie", "X-Csrftoken"):
-        headers.pop(h, None)
-        headers.pop(h.lower(), None)
+    for h in list(headers):
+        if h.lower() in {"authorization", "cookie", "x-csrftoken", "x-api-key"}:
+            headers.pop(h, None)
+    for field in ("data", "cookies", "query_string"):
+        request.pop(field, None)
+    event.pop("user", None)
+    for value in event.get("exception", {}).get("values", []):
+        for frame in value.get("stacktrace", {}).get("frames", []):
+            frame.pop("vars", None)
     return event
 
 
@@ -494,6 +503,8 @@ if _SENTRY_DSN:
         release=env("APP_VERSION", default="unknown"),
         # GDPR: non inviare dati personali
         send_default_pii=False,
+        include_local_variables=False,
+        max_request_body_size="never",
         before_send=_sentry_before_send,
     )
 
@@ -520,4 +531,3 @@ LOGGING = {
         "celery":  {"handlers": ["console"], "level": "WARNING"},
     },
 }
-

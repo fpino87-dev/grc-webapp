@@ -243,7 +243,7 @@ class TestNewAdvisors:
         out = mgmt_review_overdue_advisor(AdvisorContext())
         assert any(i.code == "mgmt_review.overdue" and i.plant_id == str(plant.pk) for i in out)
 
-    def test_vacant_roles(self):
+    def test_vacant_roles(self, role_requirements):
         from apps.cockpit.advisors_builtin import vacant_roles_advisor
         # DB di test vuoto → ruoli obbligatori NIS2/ISO tutti vacanti
         out = vacant_roles_advisor(AdvisorContext())

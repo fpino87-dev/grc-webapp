@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-trixie
+ARG POSTGRES_MAJOR=16
 
 # Utente non-root per sicurezza
 RUN groupadd -r grc && useradd -r -g grc grc
@@ -12,34 +13,37 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libpng-dev \
     libpq-dev \
-    postgresql-client \
     curl \
+    ca-certificates \
     gettext \
+    && curl --fail --silent --show-error https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/keyrings/postgresql.asc \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.asc] https://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update && apt-get install -y --no-install-recommends postgresql-client-${POSTGRES_MAJOR} \
     && rm -rf /var/lib/apt/lists/*
 
 # Dipendenze Python (context = project root)
 COPY backend/requirements/ requirements/
-RUN pip install --no-cache-dir -r requirements/prod.txt
+RUN python -m pip install --no-cache-dir -r requirements/build.txt \
+    && python -m pip install --no-cache-dir -r requirements/prod.txt \
+    && python -m pip check
 
 # Codice sorgente backend + manuali multilingua
-COPY backend/ .
-COPY manual/ manual/
+COPY --chown=grc:grc backend/ .
+COPY --chown=grc:grc manual/ manual/
 
 # Colleziona static files (SECRET_KEY placeholder solo per il build step)
-ENV DJANGO_SETTINGS_MODULE=core.settings.prod \
+# Build placeholders exist only in this RUN; they never become runtime defaults.
+RUN DJANGO_SETTINGS_MODULE=core.settings.prod \
     SECRET_KEY=collectstatic-build-placeholder \
     DATABASE_URL=postgresql://x:x@x:5432/x \
     REDIS_URL=redis://x:6379/0 \
-    FRONTEND_URL=https://build-placeholder.example.com \
-    # Placeholder only for collectstatic/build; real FERNET_KEY must be provided at runtime.
-    FERNET_KEY=
-# Compila i cataloghi i18n (.po → .mo): senza questo passo Django cade sempre
-# sul testo italiano (msgid) per ogni lingua, perché usa i .mo a runtime.
-RUN python manage.py compilemessages
-RUN python manage.py collectstatic --noinput
+    FRONTEND_URL=https://build-placeholder.example.com FERNET_KEY= \
+    python manage.py collectstatic --noinput
+RUN django-admin compilemessages
+ENV DJANGO_SETTINGS_MODULE=core.settings.prod
 
 # Utente non-root
-RUN chown -R grc:grc /app
+RUN mkdir -p /app/backups /app/media && chown grc:grc /app/backups /app/media
 USER grc
 
 EXPOSE 8000

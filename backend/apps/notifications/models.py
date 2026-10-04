@@ -24,22 +24,19 @@ class NotificationSubscription(BaseModel):
 
 import base64
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, MultiFernet, InvalidToken
 from django.conf import settings
 from django.db.models import TextField
 
 
 def _get_fernet():
-    key = getattr(settings, "FERNET_KEY", None)
-    if not key:
-        # derive a stable key from SECRET_KEY
-        import hashlib
-        raw = settings.SECRET_KEY.encode()
-        digest = hashlib.sha256(raw).digest()
-        key = base64.urlsafe_b64encode(digest)
-    elif isinstance(key, str):
-        key = key.encode()
-    return Fernet(key)
+    # Encrypt with the explicit key. The former implementation accidentally
+    # ignored FERNET_KEYS and derived its key from SECRET_KEY. Retain that key
+    # for reads so existing ciphertext does not require a destructive migration.
+    import hashlib
+    configured = getattr(settings, "FERNET_KEY", None) or settings.FERNET_KEYS[0]
+    legacy = base64.urlsafe_b64encode(hashlib.sha256(settings.SECRET_KEY.encode()).digest())
+    return MultiFernet([Fernet(configured), Fernet(legacy)])
 
 
 class EncryptedCharField(TextField):
@@ -50,8 +47,10 @@ class EncryptedCharField(TextField):
             return value
         try:
             return _get_fernet().decrypt(value.encode()).decode()
-        except Exception:
-            return value  # already plaintext (legacy) or unreadable
+        except InvalidToken:
+            if value.startswith("gAAAAA"):
+                raise ValueError("Encrypted field cannot be decrypted with configured keys.") from None
+            return value  # Legacy plaintext is migrated on its next save.
 
     def get_prep_value(self, value):
         if value is None:
@@ -59,8 +58,8 @@ class EncryptedCharField(TextField):
         try:
             # If already encrypted (starts with 'gAAAAA') skip re-encryption
             _get_fernet().decrypt(value.encode())
-            return value
-        except Exception:
+            return _get_fernet().rotate(value.encode()).decode()
+        except InvalidToken:
             return _get_fernet().encrypt(value.encode()).decode()
 
 
