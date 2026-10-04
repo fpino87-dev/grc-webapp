@@ -33,9 +33,39 @@ def logged_client(user):
 
 
 @pytest.mark.django_db
-def test_logout_requires_authentication():
+def test_logout_without_any_token_is_204_and_clears_cookie():
     res = APIClient().post("/api/token/logout/", {"refresh": "x"})
-    assert res.status_code == 401
+    assert res.status_code == 204
+    assert res.cookies["grc_refresh"].value == ""
+
+
+@pytest.mark.django_db
+def test_logout_with_expired_access_still_revokes_refresh(logged_client, user):
+    """Regressione: dopo 30 min di inattività l'access è scaduto; il logout
+    rispondeva 401 e il refresh (7 giorni) restava valido."""
+    from core.audit import AuditLog
+
+    refresh_value = logged_client._refresh_value
+    logged_client.credentials(HTTP_AUTHORIZATION="Bearer scaduto.non.valido")
+
+    res = logged_client.post("/api/token/logout/", {})
+    assert res.status_code == 204
+    assert res.cookies["grc_refresh"].value == ""
+
+    res2 = APIClient().post("/api/token/refresh/", {"refresh": refresh_value})
+    assert res2.status_code == 401
+
+    log = AuditLog.objects.filter(action_code="auth.logout").order_by("-timestamp_utc").first()
+    assert log is not None and log.payload.get("refresh_blacklisted") is True
+
+
+@pytest.mark.django_db
+def test_logout_rejects_untrusted_origin(logged_client):
+    refresh_value = logged_client._refresh_value
+    res = logged_client.post("/api/token/logout/", {}, HTTP_ORIGIN="https://evil.example")
+    assert res.status_code == 403
+    res2 = APIClient().post("/api/token/refresh/", {"refresh": refresh_value})
+    assert res2.status_code == 200
 
 
 @pytest.mark.django_db

@@ -282,7 +282,7 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend pyth
 
 ```bash
 make prod-check                               # manage.py check --deploy
-curl -s http://127.0.0.1:8000/api/health/     # {"status": "ok", "db": true, ...}
+curl -s http://127.0.0.1:8000/api/health/     # {"status": "ok", "db": true, "cache": true, ...} — 503 se DB o Redis sono giù
 docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py verify_schedule
 ```
 
@@ -541,8 +541,9 @@ Eseguire almeno ogni trimestre, in un ambiente separato, e registrare l'esito co
 
 ```
 GET /api/health/
--> 200 {"status": "ok", "db": true, "schedule": {"expected": N, "problems": [...]}}
+-> 200 {"status": "ok", "db": true, "cache": true, "schedule": {"expected": N, "problems": [...]}}
 -> 503 {"status": "error", "db": false, ...}          # database non raggiungibile
+-> 503 {"status": "error", "cache": false, ...}       # Redis non raggiungibile (login e API non funzionano)
 ```
 
 `schedule` segnala task periodici mancanti o disallineati rispetto a `CELERY_BEAT_SCHEDULE` (informativo, non cambia lo stato HTTP).

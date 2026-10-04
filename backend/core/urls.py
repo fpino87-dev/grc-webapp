@@ -65,6 +65,15 @@ def health_check(request):
     except Exception:
         db_ok = False
 
+    # Redis regge cache, throttling e broker Celery: se cade, login e API
+    # rispondono 500. Un health "ok" in quel caso era fuorviante.
+    from django.core.cache import cache
+    try:
+        cache.set("grc:health", 1, 10)
+        cache_ok = cache.get("grc:health") == 1
+    except Exception:
+        cache_ok = False
+
     # Drift pianificazione Celery (settings vs PeriodicTask) — informativo, NON
     # influenza lo status HTTP: un job non schedulato è un problema ops, non un
     # outage. Best-effort: se django_celery_beat non è pronto, si omette.
@@ -79,8 +88,9 @@ def health_check(request):
     except Exception:
         schedule = None
 
-    status = 200 if db_ok else 503
-    payload = {"status": "ok" if db_ok else "error", "db": db_ok}
+    healthy = db_ok and cache_ok
+    status = 200 if healthy else 503
+    payload = {"status": "ok" if healthy else "error", "db": db_ok, "cache": cache_ok}
     if schedule is not None:
         payload["schedule"] = schedule
     return JsonResponse(payload, status=status)

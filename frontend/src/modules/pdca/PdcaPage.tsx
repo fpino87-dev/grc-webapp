@@ -1,7 +1,8 @@
 import { useEffect, useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { pdcaApi, type PdcaCycle, type PdcaLinkedFinding, type PdcaPhase } from "../../api/endpoints/pdca";
+import { pdcaApi, type PdcaCycle, type PdcaLinkedFinding, type PdcaPhase, type PdcaPhaseEvidence } from "../../api/endpoints/pdca";
+import { downloadEvidenceFile } from "../../components/ui/EvidencePreviewModal";
 import { auditPrepApi } from "../../api/endpoints/auditPrep";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { plantsApi } from "../../api/endpoints/plants";
@@ -864,6 +865,15 @@ function fmtDateTime(d?: string | null): string {
 
 function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () => void }) {
   const { t } = useTranslation();
+
+  async function handleDownloadPhaseEvidence(ev: PdcaPhaseEvidence) {
+    const fileName = ev.file_url ? decodeURIComponent(ev.file_url.split("/").pop() || "") : "";
+    try {
+      await downloadEvidenceFile({ id: ev.id, title: ev.title, file_name: fileName || null });
+    } catch {
+      alert(t("documents.errors.evidence_download_failed"));
+    }
+  }
   const phases = cycle.phases ?? [];
   const byPhase = (p: string) => phases.find((ph) => ph.phase === p);
 
@@ -995,14 +1005,15 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
                     <div className="mt-2 text-xs">
                       <div className="text-gray-500 mb-0.5">{t("pdca.dossier.evidence_label")}</div>
                       {ph.evidence.file_url ? (
-                        <a
-                          href={ph.evidence.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="print-url inline-flex items-center gap-1 text-primary-700 hover:underline break-all"
+                        // Download autenticato: in produzione /media/ non è
+                        // servito, il link diretto al file_url dava 404.
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadPhaseEvidence(ph.evidence!)}
+                          className="inline-flex items-center gap-1 text-primary-700 hover:underline break-all text-left"
                         >
                           📎 {ph.evidence.title}
-                        </a>
+                        </button>
                       ) : (
                         <span className="text-gray-800">📎 {ph.evidence.title} <span className="text-gray-400">{t("pdca.dossier.no_file")}</span></span>
                       )}
@@ -1038,7 +1049,6 @@ function CycleDossierModal({ cycle, onClose }: { cycle: PdcaCycle; onClose: () =
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
           }
           .no-print { display: none !important; }
-          .print-url::after { content: " — " attr(href); font-size: 9px; color: #555; word-break: break-all; }
           @page { margin: 1.5cm; }
         }
       `}</style>

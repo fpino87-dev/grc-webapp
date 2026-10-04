@@ -30,14 +30,15 @@ export async function verifyMfaApi(mfa_token: string, otp_code: string, trust_de
  */
 export async function logoutApi(): Promise<void> {
   const { token } = useAuthStore.getState();
-  if (!token) return;
   try {
     // Il refresh da blacklistare viaggia nel cookie httpOnly; la risposta
-    // cancella il cookie stesso.
+    // cancella il cookie stesso. Si chiama anche senza access token in
+    // memoria (dopo un F5 o a token scaduto): il backend revoca il refresh
+    // del cookie senza richiedere un access valido.
     await axios.post(
       "/api/token/logout/",
       {},
-      { headers: { Authorization: `Bearer ${token}` } },
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
     );
   } catch {
     // best-effort: il logout client non deve dipendere dal server

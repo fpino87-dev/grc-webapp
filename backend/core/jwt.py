@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core import signing
 from django_otp import devices_for_user
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
@@ -336,42 +335,73 @@ class LogoutView(APIView):
 
     Risponde sempre 204: un refresh assente/scaduto/già blacklistato non deve
     impedire la disconnessione lato client.
+
+    Non richiede un access token valido: dopo 30 minuti di inattività l'access
+    è scaduto e con IsAuthenticated il logout rispondeva 401, lasciando il
+    refresh (7 giorni) valido e il cookie nel browser. La prova di possesso è
+    il refresh stesso; l'utente dell'audit si ricava dal token.
     """
-    permission_classes = [IsAuthenticated]
+    authentication_classes: list = []
+    permission_classes: list = []
+    throttle_classes = [RefreshRateThrottle]
 
     def post(self, request):
+        _check_browser_origin(request)
         # newfix #6: il refresh ora vive nel cookie httpOnly; il body resta
         # come fallback per client legacy/machine-to-machine.
         refresh = request.COOKIES.get(REFRESH_COOKIE_NAME) or request.data.get("refresh", "")
         blacklisted = False
+        user = None
         if refresh:
             try:
-                RefreshToken(refresh).blacklist()
+                token = RefreshToken(refresh)
+                user = _token_user(token)
+                token.blacklist()
                 blacklisted = True
             except TokenError:
                 pass  # già scaduto/blacklistato/malformato: logout comunque OK
+        if user is None:
+            user = _bearer_user(request)
 
-        try:
-            from core.audit import log_action
-            from core.network import get_client_ip
-            log_action(
-                user=request.user,
-                action_code="auth.logout",
-                level="L1",
-                entity=request.user,
-                payload={
-                    "refresh_blacklisted": blacklisted,
-                    "ip": get_client_ip(request),
-                    "user_agent": (request.META.get("HTTP_USER_AGENT") or "")[:200],
-                },
-            )
-        except Exception:
-            # Come per _audit_login: l'audit non deve bloccare la disconnessione.
-            pass
+        if user is not None:
+            try:
+                from core.audit import log_action
+                from core.network import get_client_ip
+                log_action(
+                    user=user,
+                    action_code="auth.logout",
+                    level="L1",
+                    entity=user,
+                    payload={
+                        "refresh_blacklisted": blacklisted,
+                        "ip": get_client_ip(request),
+                        "user_agent": (request.META.get("HTTP_USER_AGENT") or "")[:200],
+                    },
+                )
+            except Exception:
+                # Come per _audit_login: l'audit non deve bloccare la disconnessione.
+                pass
 
         response = Response(status=status.HTTP_204_NO_CONTENT)
         _delete_refresh_cookie(response)
         return response
+
+
+def _token_user(token):
+    """Utente attivo a cui appartiene un token JWT, o None."""
+    from django.contrib.auth import get_user_model
+    claim = settings.SIMPLE_JWT.get("USER_ID_CLAIM", "user_id")
+    return get_user_model().objects.filter(pk=token.get(claim), is_active=True).first()
+
+
+def _bearer_user(request):
+    """Utente dell'access token valido nell'header, o None (scaduto/assente)."""
+    from rest_framework_simplejwt.authentication import JWTAuthentication
+    try:
+        result = JWTAuthentication().authenticate(request)
+    except Exception:
+        return None
+    return result[0] if result else None
 
 
 class MfaVerifyView(APIView):

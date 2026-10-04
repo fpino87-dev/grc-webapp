@@ -110,6 +110,8 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
     Ritorna una vista integrata BIA + Risk + BCP per un processo critico.
     Non effettua side-effect né logging audit: è solo read-model per API/UI.
     """
+    from django.db.models import Q
+
     from apps.bcp.models import BcpPlan
 
     # BIA / BCP targets e impatti
@@ -153,16 +155,15 @@ def get_process_risk_bcp_snapshot(process: CriticalProcess) -> dict:
     ]
 
     # BCP collegati (FK + M2M)
-    direct_plans = BcpPlan.objects.filter(
-        deleted_at__isnull=True,
-        critical_process=process,
+    # Un solo filtro con OR + distinct: union() non ammette select_related()
+    # (NotSupportedError → 500 sullo snapshot di ogni processo).
+    plans_qs = (
+        BcpPlan.objects.filter(deleted_at__isnull=True)
+        .filter(Q(critical_process=process) | Q(critical_processes=process))
+        .select_related("plant")
+        .order_by("title")
+        .distinct()
     )
-    m2m_plans = BcpPlan.objects.filter(
-        deleted_at__isnull=True,
-        critical_processes=process,
-    ).exclude(pk__in=direct_plans.values_list("pk", flat=True))
-
-    plans_qs = direct_plans.union(m2m_plans).select_related("plant")
 
     bcp_plans = []
     for p in plans_qs:
