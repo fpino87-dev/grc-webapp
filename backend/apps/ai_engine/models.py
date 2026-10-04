@@ -179,21 +179,6 @@ class AiProviderConfig(BaseModel):
         return routing.get(task_type, defaults.get(task_type, "ollama"))
 
     def reset_budget_if_needed(self):
-        from django.utils import timezone
+        from .services import reset_budget
 
-        today = timezone.localdate()
-        if self.last_budget_reset is None or (
-            today.day == self.budget_reset_day and today != self.last_budget_reset
-        ):
-            self.tokens_used_month = 0
-            self.fallback_notified = False
-            self.last_budget_reset = today
-            self.save(
-                update_fields=[
-                    "tokens_used_month",
-                    "fallback_notified",
-                    "last_budget_reset",
-                    "updated_at",
-                ]
-            )
-
+        reset_budget(self)

@@ -95,13 +95,13 @@ class AiProviderConfigViewSet(viewsets.ModelViewSet):
                 "model": model, "substituted_from": substituted,
             }
         except Exception as exc:
-            results["cloud"] = {"ok": False, "error": str(exc)[:200]}
+            results["cloud"] = {"ok": False, "error": type(exc).__name__}
         try:
             text = _call_ollama("Rispondi solo: ok", config.local_model, config.local_endpoint)
             results["local"] = {"ok": True, "response": (text or "").strip()[:50],
                                 "model": config.local_model}
         except Exception as exc:
-            results["local"] = {"ok": False, "error": str(exc)[:200]}
+            results["local"] = {"ok": False, "error": type(exc).__name__}
 
         log_action(user=request.user, action_code="ai.config.test", level="L3", entity=config, payload=results)
         return Response(results)
@@ -182,10 +182,18 @@ class AiConfirmView(APIView):
 
     def post(self, request):
         from .router import confirm_output, ignore_output
+        from django.shortcuts import get_object_or_404
+        from rest_framework import serializers
+        from .models import AiInteractionLog
 
-        interaction_id = request.data.get("interaction_id")
+        interaction_id = serializers.UUIDField().run_validation(request.data.get("interaction_id"))
+        # The generic HIL endpoint has no entity-specific authorization:
+        # only the author may acknowledge this interaction here.
+        get_object_or_404(AiInteractionLog, id=interaction_id, user_id=request.user.pk)
         action_type = request.data.get("action")
-        final_text = request.data.get("final_text", "")
+        final_text = serializers.CharField(allow_blank=True, max_length=5000).run_validation(
+            request.data.get("final_text", "")
+        )
 
         if not interaction_id:
             return Response({"error": "interaction_id obbligatorio"}, status=400)

@@ -7,6 +7,7 @@ import logging
 import uuid
 
 from django.utils import timezone
+from django.conf import settings
 
 from . import circuit_breaker
 from .catalog import resolve_cloud_model
@@ -115,15 +116,20 @@ def route(
     config.reset_budget_if_needed()
 
     token_map = {}
-    if sanitize:
+    if sanitize or settings.AI_CLOUD_ENABLED:
         from .sanitizer import Sanitizer
 
         sanitized, token_map = Sanitizer().sanitize({"text": prompt}, plant_ids or [])
         prompt_to_send = sanitized["text"]
+        sanitized_system, system_map = Sanitizer().sanitize({"text": system}, plant_ids or [])
+        system = sanitized_system["text"]
+        token_map.update(system_map)
     else:
         prompt_to_send = prompt
 
     task_provider = config.get_task_provider(task_type)
+    if not settings.AI_CLOUD_ENABLED or config.cloud_provider == "ollama":
+        task_provider = "ollama"
     used_fallback = False
     text = ""
     tokens_used = 0
@@ -151,6 +157,21 @@ def route(
         used_fallback = True
         task_provider = "ollama"
 
+    reservation = None
+    # UTF-8 bytes plus output limit is deliberately conservative; settlement
+    # replaces this estimate with provider usage. Failed/ambiguous requests
+    # keep the reservation, including process crashes, until the next reset.
+    reserved = len(prompt_to_send.encode()) + len(system.encode()) + max_tokens + 256
+    if task_provider == "cloud":
+        from .services import reserve_budget
+        reservation = reserve_budget(config, reserved)
+        if reservation is None:
+            used_fallback = True
+            task_provider = "ollama"
+
+    if used_fallback and config.fallback_mode != "auto":
+        raise LlmUnavailable("Cloud unavailable or budget exhausted; automatic fallback disabled.")
+
     cloud_error = ""
     model_substituted = None
     if task_provider == "cloud":
@@ -166,13 +187,15 @@ def route(
                     "Modello '%s' non più offerto da %s: usato '%s'. Aggiornare la configurazione.",
                     model_substituted, config.cloud_provider, model,
                 )
-            config.tokens_used_month += tokens_used
-            config.save(update_fields=["tokens_used_month", "updated_at"])
+            from .services import settle_budget
+            settle_budget(config, reserved, reservation, tokens_used)
             circuit_breaker.record_success(cloud_key)
         except Exception as exc:
-            cloud_error = str(exc)[:200]
-            logger.warning("Cloud AI error (%s): %s — fallback Ollama", config.cloud_provider, exc)
+            cloud_error = type(exc).__name__
+            logger.warning("Cloud AI error (%s): %s", config.cloud_provider, type(exc).__name__)
             circuit_breaker.record_failure(cloud_key)
+            if config.fallback_mode != "auto":
+                raise LlmUnavailable("Cloud unavailable; automatic fallback disabled.") from None
             used_fallback = True
             task_provider = "ollama"
 
@@ -186,12 +209,12 @@ def route(
         except Exception as exc:
             circuit_breaker.record_failure(ollama_key)
             logger.error(
-                "LLM non disponibile (cloud_fallback=%s, ollama giù): %s", used_fallback, exc
+                "LLM non disponibile (cloud_fallback=%s, ollama giù): %s", used_fallback, type(exc).__name__
             )
             # Il messaggio dice QUALE dei due percorsi ha ceduto e perché: con
             # il testo generico di prima, un modello dismesso dal provider e un
             # Ollama spento erano indistinguibili.
-            detail = f"Modello locale '{config.local_model}': {str(exc)[:120]}"
+            detail = f"Modello locale '{config.local_model}': {type(exc).__name__}"
             if cloud_error:
                 detail = f"Cloud {config.cloud_provider} ({cloud_error}); {detail}"
             raise LlmUnavailable(f"Nessun provider AI disponibile. {detail}") from exc
@@ -199,7 +222,7 @@ def route(
         model_used = config.local_model
         tokens_used = 0
 
-    if sanitize and token_map:
+    if token_map:
         from .sanitizer import Sanitizer
 
         text = Sanitizer().desanitize(text, token_map)
@@ -242,6 +265,8 @@ def route(
 def _call_cloud(config, prompt: str, system: str, max_tokens: int = 2048, model: str = "") -> tuple[str, int]:
     """`model` esplicito quando il chiamante ha già risolto il catalogo vivo
     (vedi `resolve_cloud_model`); altrimenti quello in configurazione."""
+    if not settings.AI_CLOUD_ENABLED:
+        raise LlmUnavailable("Cloud AI disabled by deployment policy.")
     provider = config.cloud_provider
     model = model or config.cloud_model
     api_key = config.api_key

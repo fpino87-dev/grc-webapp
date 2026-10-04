@@ -61,6 +61,9 @@ def fetch_cloud_models(config, refresh: bool = False) -> dict:
     non solleva: un provider irraggiungibile è un'informazione da mostrare,
     non un errore che deve rompere la pagina delle impostazioni.
     """
+    from django.conf import settings
+    if not settings.AI_CLOUD_ENABLED:
+        return {"models": [], "error": "cloud_disabled", "fetched_at": time.time()}
     key = _cache_key("cloud", config)
     if not refresh:
         cached = cache.get(key)
@@ -98,8 +101,8 @@ def fetch_cloud_models(config, refresh: bool = False) -> dict:
     except Exception as exc:  # rete, chiave revocata, provider in errore
         # Mai loggare la chiave: `exc` dei client HTTP non la contiene, ma si
         # tronca comunque il messaggio (regola #11).
-        logger.warning("Elenco modelli non disponibile per %s: %s", config.cloud_provider, str(exc)[:200])
-        result["error"] = str(exc)[:200]
+        logger.warning("Elenco modelli non disponibile per %s: %s", config.cloud_provider, type(exc).__name__)
+        result["error"] = type(exc).__name__
 
     cache.set(key, result, CACHE_TTL)
     return result
@@ -123,8 +126,8 @@ def fetch_local_models(config, refresh: bool = False) -> dict:
             m["name"] for m in resp.json().get("models", []) if m.get("name")
         )
     except Exception as exc:
-        logger.warning("Elenco modelli locali non disponibile: %s", str(exc)[:200])
-        result["error"] = str(exc)[:200]
+        logger.warning("Elenco modelli locali non disponibile: %s", type(exc).__name__)
+        result["error"] = type(exc).__name__
 
     cache.set(key, result, CACHE_TTL)
     return result

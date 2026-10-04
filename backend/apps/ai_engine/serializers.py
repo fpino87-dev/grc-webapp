@@ -10,9 +10,13 @@ class AiInteractionLogSerializer(serializers.ModelSerializer):
 
 
 class AiProviderConfigSerializer(serializers.ModelSerializer):
+    monthly_token_budget = serializers.IntegerField(min_value=0, required=False)
+    budget_reset_day = serializers.IntegerField(min_value=1, max_value=31, required=False)
+
     class Meta:
         model = AiProviderConfig
         fields = "__all__"
+        read_only_fields = ["tokens_used_month", "last_budget_reset", "fallback_notified", "created_by", "deleted_at"]
         # La chiave API non deve mai essere restituita in chiaro nella risposta
         # di create/update (è cifrata a riposo, ma write_only evita l'echo).
         extra_kwargs = {"api_key": {"write_only": True, "required": False, "allow_blank": True}}

@@ -76,7 +76,7 @@ def test_provider_error_is_reported_not_raised(config):
     from apps.ai_engine.catalog import fetch_cloud_models
     with patch("httpx.get", side_effect=RuntimeError("connessione rifiutata")):
         out = fetch_cloud_models(config, refresh=True)
-    assert out["models"] == [] and "connessione rifiutata" in out["error"]
+    assert out["models"] == [] and out["error"] == "RuntimeError"
 
 
 @pytest.mark.django_db
@@ -174,7 +174,8 @@ def test_error_message_names_both_failures(config):
         with pytest.raises(router.LlmUnavailable) as exc:
             router.route("chatbot", "prompt", sanitize=False)
     message = str(exc.value)
-    assert "model_not_found" in message and "llama3.2:3b" in message and "timed out" in message
+    assert "RuntimeError" in message and "llama3.2:3b" in message
+    assert "model_not_found" not in message and "timed out" not in message
 
 
 # ── API ───────────────────────────────────────────────────────────────────
