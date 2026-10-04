@@ -58,7 +58,6 @@ FRAMEWORK: {framework}
 CONTROLLO: {control.external_id} — {control.get_title("it")}
 STATO ATTUALE: {control_instance.status}
 NOTE VALUTAZIONE: {control_instance.last_evaluated_note or "nessuna"}
-SITO: {control_instance.plant.name if control_instance.plant else "—"}
 
 Fornisci 3-5 azioni concrete e prioritizzate per raggiungere la conformità.
 Rispondi SOLO con JSON valido:
@@ -165,7 +164,11 @@ Rispondi SOLO con JSON valido: {{"summary": "..."}}"""
 
 
 def draft_rca(incident, user) -> dict:
-    assets_str = ", ".join(a.name for a in incident.assets.all()[:5]) or "non specificati"
+    # Minimizzazione: per la RCA contano tipo e criticità degli asset, non i
+    # nomi dei sistemi.
+    assets_str = ", ".join(
+        f"{a.get_asset_type_display()} (criticità {a.criticality}/5)" for a in incident.assets.all()[:5]
+    ) or "non specificati"
     prompt = f"""Genera una bozza RCA per questo incidente:
 - Titolo: {incident.title}
 - Severità: {incident.severity}

@@ -232,17 +232,11 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         Human-in-the-loop: l'output è sempre revisionato dall'utente prima dell'applicazione.
         """
         from apps.ai_engine.router import AiNotConfigured, ai_not_configured_message, route
-        from apps.ai_engine.sanitizer import Sanitizer
-
         description = (request.data.get("description") or "").strip()
         if not description:
             return Response({"error": "La descrizione è obbligatoria."}, status=400)
         if len(description) > 2000:
             return Response({"error": "La descrizione non può superare 2000 caratteri."}, status=400)
-
-        sanitizer = Sanitizer()
-        sanitized_ctx, _ = sanitizer.sanitize({"text": description})
-        safe_description = sanitized_ctx["text"]
 
         system = (
             "Sei un esperto di appalti pubblici europei. "
@@ -250,7 +244,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "Non aggiungere testo prima o dopo il JSON."
         )
         prompt = (
-            f"Sulla base di questa descrizione di fornitura:\n\n\"{safe_description}\"\n\n"
+            f"Sulla base di questa descrizione di fornitura:\n\n\"{description}\"\n\n"
             "Suggerisci i 3-5 codici CPV (Common Procurement Vocabulary) più appropriati "
             "secondo il Regolamento (CE) n. 213/2008 e successivi aggiornamenti. "
             "Rispondi ESCLUSIVAMENTE con un array JSON nel formato:\n"
@@ -270,7 +264,7 @@ class SupplierViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
                 system=system,
                 user=request.user,
                 module_source="M14",
-                sanitize=False,  # già sanitizzato manualmente sopra
+                sanitize=True,  # la descrizione è testo libero: tokenizzata dal router
             )
         except AiNotConfigured:
             return Response({"error": ai_not_configured_message()}, status=503)

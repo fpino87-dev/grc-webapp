@@ -836,12 +836,15 @@ anonymize_user(user_id)
 ```python
 from apps.ai_engine.sanitizer import Sanitizer
 
-sanitizer = Sanitizer()
-sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=[plant.id])
-# Anonimleştirir: e-posta, IP, VAT no, vergi no, telefon, tesis adları/kodları
-# Sonucun geri-anonimleştirilmesi için (sanitized_context, token_map) döndürür
-# Bulut LLM'ye göndermeden önce DAIMA kullanın
+s = Sanitizer()                      # istek başına bir örnek (prompt + system)
+prompt = s.tokenize(raw_prompt)      # "Mario Rossi [SITE_1]'de" → "[PERSON_1] [SITE_1]'de"
+system = s.tokenize(raw_system)      # aynı değer → aynı token
+answer = s.desanitize(llm_text, s.token_map)
 ```
+
+**Geri döndürülebilir, tipli token'laştırma** (`[PERSON_n]`, `[SITE_n]`, `[SITE_n_CODE]`, `[BU_n]`, `[ASSET_n]`, `[HOST_n]`, `[SUPPLIER_n]`, `[DOMAIN_n]`, `[EMAIL_n]`, `[PHONE_n]`, `[IBAN_n]`, `[VAT_n]`, `[TAXID_n]`, `[NUMBER_n]`, `[IP_n]`, `[URL_n]`, `[ADDRESS_n]`). Token → değer tablosu yalnızca istek süresince sunucu belleğinde kalır, asla loglara yazılmaz. Kaynaklar: biçim kuralları (e-posta, URL, IP, IBAN, AB KDV numarası, İtalyan vergi kodu, `phonenumbers` ile tüm ülkelerin telefonları), **tüm organizasyon** için veritabanı sözlüğü (birden çok ad varyantıyla kullanıcılar, tesisler, BU'lar, FQDN/IP'li varlıklar, tedarikçiler, OSINT alan adları, serbest metin alanlarında geçen kişiler), sezgisel kurallar (iç alan adları, host adları, adresler, unvanlı veya yaygın adlı kişiler — sözlük `privacy_lexicon.py` içinde —, ≥ 9 haneli kimlik numaraları). Kontrol kodları, standartlar, CVE'ler, tarihler, süreler ve tutarlar değiştirilmez. Bu anonimleştirme değil, takma adlandırmadır.
+
+**Çıkış koruması** (`EgressGuard`): `route()` her bulut gönderiminden önce token'laştırılmış metni yeniden kontrol eder; bir şey kalmışsa (e-posta, `://`, IP, IBAN, vergi kodu, iç alan adları, sözlük varlıkları, kimlik numaraları) **bulut kullanılmaz**: `fallback_mode=auto` ile yerel modele geçilir, aksi halde `LlmUnavailable`. `route()` sonucu `privacy = {"tokens": {tür: sayı}, "guard": {"blocked", "findings"}}` içerir; loglarda yalnızca sayılar bulunur.
 
 ### Denetim günlüğü saklama ve değişmezlik
 
@@ -1107,29 +1110,24 @@ class AiInteractionLog(models.Model):              # append-only, UUID pk
 ```python
 # apps/ai_engine/sanitizer.py
 class Sanitizer:
-    """
-    Bulut LLM'ye göndermeden önce bağlamı anonimleştirir.
-    Sonucu anonim kaldırma için token'ları gerçek değerlerle eşleştirir.
-    """
+    def tokenize(self, text: str) -> str: ...             # tipli token'lar, örnek içinde sabit
+    def sanitize(self, context: dict, plant_ids=None) -> tuple[dict, dict]: ...  # uyumluluk
+    def desanitize(self, text: str, token_map: dict) -> str: ...
+    token_map: dict    # {"[PERSON_1]": "Mario Rossi", "[SITE_1]": "Kuzey Tesisi", ...}
+    counts: Counter    # türe göre sayılar (loglanabilir)
 
-    def sanitize(self, context: dict) -> tuple[dict, dict]:
-        """
-        Döndürür: (sanitized_context, token_map)
-        token_map: { "[PLANT_A]": "Milano Tesisi", ... }
-        """
-        ...
-
-    def desanitize(self, text: str, token_map: dict) -> str:
-        """Oluşturulan metindeki token'ları gerçek değerlerle değiştirir."""
-        ...
+class EgressGuard:
+    def check(self, *texts) -> GuardResult: ...           # blocked + findings (yalnızca sayılar)
 ```
+
+Veri minimizasyonu: prompt'lar yalnızca işlevin ihtiyaç duyduğu verileri içerir (ör. RCA'da varlık adları yerine tür ve kritiklik; asistan araçlarında e-posta yok).
 
 ### Bir service'den AI fonksiyonu çağırma
 
 ```python
 from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, route
 
-# Bir serviste (kural #2): plant_ids içindeki tesis adları token'a dönüştürülür
+# Bir serviste (kural #2): route() prompt ve system'i token'laştırır ve buluta göndermeden önce metni kontrol eder
 def suggest_severity(incident, user) -> dict | None:
     try:
         result = route(

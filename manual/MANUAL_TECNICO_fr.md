@@ -836,12 +836,15 @@ anonymize_user(user_id)
 ```python
 from apps.ai_engine.sanitizer import Sanitizer
 
-sanitizer = Sanitizer()
-sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=[plant.id])
-# Anonymise : email, IP, numéro de TVA, code fiscal, téléphone, noms/codes de plants
-# Retourne (sanitized_context, token_map) pour la désanonymisation du résultat
-# TOUJOURS utiliser avant d'envoyer au LLM cloud
+s = Sanitizer()                      # une instance par requête (prompt + system)
+prompt = s.tokenize(raw_prompt)      # "Mario Rossi à [SITE_1]" → "[PERSON_1] à [SITE_1]"
+system = s.tokenize(raw_system)      # même valeur → même jeton
+answer = s.desanitize(llm_text, s.token_map)
 ```
+
+**Tokenisation réversible et typée** (`[PERSON_n]`, `[SITE_n]`, `[SITE_n_CODE]`, `[BU_n]`, `[ASSET_n]`, `[HOST_n]`, `[SUPPLIER_n]`, `[DOMAIN_n]`, `[EMAIL_n]`, `[PHONE_n]`, `[IBAN_n]`, `[VAT_n]`, `[TAXID_n]`, `[NUMBER_n]`, `[IP_n]`, `[URL_n]`, `[ADDRESS_n]`). La table jeton → valeur reste en mémoire sur le serveur pour la seule requête, jamais dans les journaux. Sources : règles de format (e-mail, URL, IP, IBAN, TVA UE, code fiscal italien, téléphones de tous les pays via `phonenumbers`), dictionnaire issu de la base **sur toute l'organisation** (utilisateurs sous plusieurs variantes du nom, sites, BU, actifs avec FQDN/IP, fournisseurs, domaines OSINT, personnes citées en texte libre), heuristiques (domaines internes, noms d'hôte, adresses, personnes avec titre ou prénom courant — lexique dans `privacy_lexicon.py` —, numéros identifiants ≥ 9 chiffres). Codes des contrôles, normes, CVE, dates, durées et montants restent intacts. Il s'agit de pseudonymisation, pas d'anonymisation.
+
+**Garde en sortie** (`EgressGuard`) : `route()` revérifie le texte tokenisé avant chaque envoi au cloud ; s'il reste quelque chose (e-mail, `://`, IP, IBAN, code fiscal, domaines internes, entités du dictionnaire, numéros identifiants) **le cloud n'est pas utilisé** : repli local avec `fallback_mode=auto`, sinon `LlmUnavailable`. Le résultat de `route()` contient `privacy = {"tokens": {type: nombre}, "guard": {"blocked", "findings"}}` ; les journaux ne contiennent que des nombres.
 
 ### Rétention et immuabilité de l'audit log
 
@@ -1107,29 +1110,24 @@ class AiInteractionLog(models.Model):              # append-only, UUID pk
 ```python
 # apps/ai_engine/sanitizer.py
 class Sanitizer:
-    """
-    Anonymise le contexte avant de l'envoyer au LLM cloud.
-    Mappe les tokens aux valeurs réelles pour la dé-anonymisation du résultat.
-    """
+    def tokenize(self, text: str) -> str: ...             # jetons typés, stables dans l'instance
+    def sanitize(self, context: dict, plant_ids=None) -> tuple[dict, dict]: ...  # compatibilité
+    def desanitize(self, text: str, token_map: dict) -> str: ...
+    token_map: dict    # {"[PERSON_1]": "Mario Rossi", "[SITE_1]": "Site Nord", ...}
+    counts: Counter    # nombres par type (journalisables)
 
-    def sanitize(self, context: dict) -> tuple[dict, dict]:
-        """
-        Returns: (sanitized_context, token_map)
-        token_map: { "[PLANT_A]": "Établissement Milan", ... }
-        """
-        ...
-
-    def desanitize(self, text: str, token_map: dict) -> str:
-        """Remplace les tokens par les valeurs réelles dans le texte généré."""
-        ...
+class EgressGuard:
+    def check(self, *texts) -> GuardResult: ...           # blocked + findings (nombres uniquement)
 ```
+
+Minimisation : les prompts ne contiennent que les données utiles à la fonction (ex. RCA avec type et criticité des actifs au lieu des noms ; outils de l'assistant sans adresses e-mail).
 
 ### Appeler une fonction IA depuis un service
 
 ```python
 from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, route
 
-# Dans un service (règle #2) : les noms des sites de plant_ids sont remplacés par des jetons
+# Dans un service (règle #2) : route() tokenise prompt et system et contrôle le texte avant le cloud
 def suggest_severity(incident, user) -> dict | None:
     try:
         result = route(

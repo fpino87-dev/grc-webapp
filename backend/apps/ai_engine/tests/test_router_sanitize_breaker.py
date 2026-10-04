@@ -73,7 +73,7 @@ def test_no_pii_reaches_cloud_provider(ai_config, plant):
 
     def fake_cloud(config, prompt, system, max_tokens, model=""):
         captured["prompt"] = prompt
-        return "[PLANT_A] presenta un gap di conformità.", 42
+        return "[SITE_1] presenta un gap di conformità.", 42
 
     with patch("apps.ai_engine.router._call_cloud", side_effect=fake_cloud):
         result = route(task_type="unit_test", prompt=raw, plant_ids=[plant.pk])
@@ -82,14 +82,15 @@ def test_no_pii_reaches_cloud_provider(ai_config, plant):
     # Nessun PII in chiaro nel prompt inviato
     for pii in (PII_EMAIL, PII_IP, PII_CF, PII_PHONE, PII_PIVA, plant.name):
         assert pii not in sent, f"PII trapelata al provider: {pii!r}"
-    # I placeholder ci sono
-    assert "[EMAIL_REMOVED]" in sent
-    assert "[IP_REMOVED]" in sent
-    assert "[CF_REMOVED]" in sent
-    assert "[PLANT_A]" in sent
-    # La risposta è stata de-sanitizzata (token plant → nome reale)
+    # I token tipizzati ci sono
+    for token in ("[EMAIL_1]", "[IP_1]", "[TAXID_1]", "[SITE_1]"):
+        assert token in sent
+    # La risposta è stata de-sanitizzata (token sito → nome reale)
     assert plant.name in result["text"]
-    assert "[PLANT_A]" not in result["text"]
+    assert "[SITE_1]" not in result["text"]
+    # Conteggi per tipo (mai i valori) e guardia superata
+    assert result["privacy"]["tokens"]["EMAIL"] == 1
+    assert result["privacy"]["guard"] == {"blocked": False, "findings": {}}
 
 
 @pytest.mark.django_db

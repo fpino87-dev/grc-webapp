@@ -679,9 +679,15 @@ Le modifiche del repository non riconfigurano i container già in esecuzione.
 - **Cloud AI:** `AI_CLOUD_ENABLED=false` forza il locale anche se il database
   contiene routing cloud. `true` è un consenso operativo esplicito; verificare
   provider, condizioni di trattamento/retention e prompt rappresentativi prima
-  di abilitarlo. Nomi non registrati, indirizzi liberi, hostname e identificativi
-  non riconosciuti possono restare nel testo. La pseudonimizzazione non è una
-  garanzia di anonimato. OSINT e Sentry hanno configurazioni esterne indipendenti.
+  di abilitarlo. Prima dell'invio i dati identificativi vengono sostituiti da
+  token reversibili (persone, siti, BU, asset, fornitori, domini, email,
+  telefoni di tutti i paesi, IBAN, P.IVA, CF, IP, URL, hostname, indirizzi,
+  numeri identificativi), con dizionario su tutta l'organizzazione; una guardia
+  ricontrolla il testo e, se resta qualcosa, il cloud non viene usato (fallback
+  locale o errore). Restano possibili nomi non registrati senza titolo né nome
+  proprio comune e dettagli descrittivi nel testo libero: la pseudonimizzazione
+  non è una garanzia di anonimato. OSINT e Sentry hanno configurazioni esterne
+  indipendenti.
 - **Budget AI:** reset al primo utilizzo dopo l'inizio del periodo, con giorni
   29–31 adattati alla fine del mese e timezone Django. Prenotazioni atomiche
   conservative prima della richiesta; conguaglio sul consumo restituito. Errori

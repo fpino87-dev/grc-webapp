@@ -837,12 +837,15 @@ anonymize_user(user_id)
 ```python
 from apps.ai_engine.sanitizer import Sanitizer
 
-sanitizer = Sanitizer()
-sanitized_context, token_map = sanitizer.sanitize({"text": raw_text}, plant_ids=[plant.id])
-# Anonymises: email, IP, VAT number, tax code, phone, plant names/codes
-# Returns (sanitized_context, token_map) for de-anonymising the result
-# ALWAYS use before sending to a cloud LLM
+s = Sanitizer()                      # one instance per request (prompt + system)
+prompt = s.tokenize(raw_prompt)      # "Mario Rossi at [SITE_1]" → "[PERSON_1] at [SITE_1]"
+system = s.tokenize(raw_system)      # same value → same token
+answer = s.desanitize(llm_text, s.token_map)
 ```
+
+**Reversible, typed tokenisation** (`[PERSON_n]`, `[SITE_n]`, `[SITE_n_CODE]`, `[BU_n]`, `[ASSET_n]`, `[HOST_n]`, `[SUPPLIER_n]`, `[DOMAIN_n]`, `[EMAIL_n]`, `[PHONE_n]`, `[IBAN_n]`, `[VAT_n]`, `[TAXID_n]`, `[NUMBER_n]`, `[IP_n]`, `[URL_n]`, `[ADDRESS_n]`). The token → value table stays in server memory for the request only, never in logs. Sources: format rules (email, URL, IP, IBAN, EU VAT, Italian tax code, phone numbers of every country via `phonenumbers`), a dictionary from the DB **across the whole organisation** (users in several name variants, sites, BUs, assets with FQDN/IP, suppliers, OSINT domains, people named in free-text fields), heuristics (internal domains, hostnames, addresses, people with a title or a common first name — lexicon in `privacy_lexicon.py` —, identifier numbers ≥ 9 digits). Control codes, standards, CVEs, dates, durations and amounts are left untouched. This is pseudonymisation, not anonymisation.
+
+**Egress guard** (`EgressGuard`): `route()` re-checks the tokenised text before every cloud call; if anything is left (email, `://`, IP, IBAN, tax code, internal domains, dictionary entities, identifier numbers) **the cloud is not used**: local fallback with `fallback_mode=auto`, otherwise `LlmUnavailable`. The result of `route()` includes `privacy = {"tokens": {type: count}, "guard": {"blocked", "findings"}}`; logs hold counts only.
 
 ### Audit log retention and immutability
 
@@ -1108,29 +1111,24 @@ class AiInteractionLog(models.Model):              # append-only, UUID pk
 ```python
 # apps/ai_engine/sanitizer.py
 class Sanitizer:
-    """
-    Anonymises the context before sending it to the cloud LLM.
-    Maps tokens to real values for de-anonymising the result.
-    """
+    def tokenize(self, text: str) -> str: ...             # typed tokens, stable within the instance
+    def sanitize(self, context: dict, plant_ids=None) -> tuple[dict, dict]: ...  # compatibility
+    def desanitize(self, text: str, token_map: dict) -> str: ...
+    token_map: dict    # {"[PERSON_1]": "Mario Rossi", "[SITE_1]": "North Plant", ...}
+    counts: Counter    # counts per type (safe to log)
 
-    def sanitize(self, context: dict) -> tuple[dict, dict]:
-        """
-        Returns: (sanitized_context, token_map)
-        token_map: { "[PLANT_A]": "Milan Plant", ... }
-        """
-        ...
-
-    def desanitize(self, text: str, token_map: dict) -> str:
-        """Replaces tokens with real values in the generated text."""
-        ...
+class EgressGuard:
+    def check(self, *texts) -> GuardResult: ...           # blocked + findings (counts only)
 ```
+
+Minimisation: prompts carry only the data the function needs (e.g. RCA with asset type and criticality instead of names; assistant tools without e-mail addresses).
 
 ### Calling an AI function from a service
 
 ```python
 from apps.ai_engine.router import AiNotConfigured, LlmUnavailable, route
 
-# In a service (rule #2): site names in plant_ids are tokenised
+# In a service (rule #2): route() tokenises prompt and system and checks the text before the cloud
 def suggest_severity(incident, user) -> dict | None:
     try:
         result = route(

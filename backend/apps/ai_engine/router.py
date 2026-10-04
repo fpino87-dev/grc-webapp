@@ -116,16 +116,19 @@ def route(
     config.reset_budget_if_needed()
 
     token_map = {}
+    sanitizer = None
     if sanitize or settings.AI_CLOUD_ENABLED:
         from .sanitizer import Sanitizer
 
-        sanitized, token_map = Sanitizer().sanitize({"text": prompt}, plant_ids or [])
-        prompt_to_send = sanitized["text"]
-        sanitized_system, system_map = Sanitizer().sanitize({"text": system}, plant_ids or [])
-        system = sanitized_system["text"]
-        token_map.update(system_map)
+        # Una sola istanza per prompt e system: stesso valore → stesso token,
+        # nessuna collisione di numerazione fra i due testi.
+        sanitizer = Sanitizer()
+        prompt_to_send = sanitizer.tokenize(prompt)
+        system = sanitizer.tokenize(system)
+        token_map = sanitizer.token_map
     else:
         prompt_to_send = prompt
+    privacy = {"tokens": dict(sanitizer.counts) if sanitizer else {}, "guard": None}
 
     task_provider = config.get_task_provider(task_type)
     if not settings.AI_CLOUD_ENABLED or config.cloud_provider == "ollama":
@@ -156,6 +159,20 @@ def route(
         )
         used_fallback = True
         task_provider = "ollama"
+
+    # Guardia in uscita: un residuo dopo la tokenizzazione blocca il cloud
+    # (fail-closed). Nei log vanno solo i conteggi per tipo, mai i valori.
+    if task_provider == "cloud":
+        from .sanitizer import EgressGuard, Sanitizer
+
+        guard = EgressGuard(sanitizer or Sanitizer()).check(prompt_to_send, system)
+        privacy["guard"] = guard.as_dict()
+        if guard.blocked:
+            logger.warning("AI privacy guard: invio al cloud bloccato (%s)", guard.findings)
+            used_fallback = True
+            task_provider = "ollama"
+            if config.fallback_mode != "auto":
+                raise LlmUnavailable("Privacy guard: residual identifying data; cloud request blocked.")
 
     reservation = None
     # UTF-8 bytes plus output limit is deliberately conservative; settlement
@@ -223,9 +240,7 @@ def route(
         tokens_used = 0
 
     if token_map:
-        from .sanitizer import Sanitizer
-
-        text = Sanitizer().desanitize(text, token_map)
+        text = sanitizer.desanitize(text, token_map)
 
     interaction_id = None
     # `entity_id` è una UUIDField: i chiamanti che lavorano su entità sintetiche
@@ -259,6 +274,7 @@ def route(
         "model_substituted": model_substituted,
         "tokens_used": tokens_used,
         "interaction_id": interaction_id,
+        "privacy": privacy,
     }
 
 

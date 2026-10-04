@@ -24,13 +24,6 @@ def _verify_plant_access(user, plant_id) -> bool:
     return str(plant_id) in {str(p) for p in allowed}
 
 
-def _mask_email(email: str) -> str:
-    if not email or "@" not in email:
-        return "***"
-    local, domain = email.split("@", 1)
-    return f"{local[:2]}***@{domain}"
-
-
 def get_expired_documents(user, plant_id, today=None) -> list[dict]:
     """
     Documenti del plant con expiry_date <= oggi OPPURE review_due_date <= oggi.
@@ -46,7 +39,7 @@ def get_expired_documents(user, plant_id, today=None) -> list[dict]:
         Q(plant_id=plant_id) | Q(shared_plants__id=plant_id)
     ).filter(
         Q(expiry_date__lte=today) | Q(review_due_date__lte=today)
-    ).distinct().select_related("plant", "owner")
+    ).distinct().select_related("plant")
     qs = scope_queryset_by_plant(qs, user, plant_field="plant", allow_null_plant=True)
 
     out = []
@@ -64,7 +57,9 @@ def get_expired_documents(user, plant_id, today=None) -> list[dict]:
             "expiry_date": str(doc.expiry_date) if doc.expiry_date else None,
             "review_due_date": str(doc.review_due_date) if doc.review_due_date else None,
             "days_overdue": days_overdue,
-            "owner_email_masked": _mask_email(doc.owner.email) if doc.owner else None,
+            # Minimizzazione: all'assistente IA basta sapere se c'è un
+            # responsabile; l'email, anche mascherata, lasciava il dominio.
+            "has_owner": doc.owner_id is not None,
             "frontend_url": f"/documents?id={doc.id}",
         })
     return out

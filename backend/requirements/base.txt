@@ -51,5 +51,8 @@ python-whois==0.9.*
 # non li copriva. requests: enricher OSINT; httpx: ai_engine/router.py.
 requests==2.34.*
 httpx>=0.27
+# AI Engine: riconoscimento dei numeri di telefono di tutti i paesi nella
+# tokenizzazione dei prompt verso il cloud (sanitizer).
+phonenumbers==9.*
 # Explicit floor for the JWT parser security fix found in the pilot audit.
 PyJWT>=2.15.0,<3
