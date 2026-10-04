@@ -8,6 +8,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) — versioning:
 
 ## [Unreleased]
 
+### Aggiornamento — sequenza di deploy (revisione di sicurezza per il pilota)
+
+Nessuna migrazione nuova da questa revisione, ma cambiano configurazione e comportamento all'avvio. In produzione, nell'ordine:
+
+1. **Backup completo** (DB + media) prima di aggiornare.
+2. **`.env.prod`** — aggiungere le nuove variabili (vedi `.env.prod.example`):
+   - `POSTGRES_MAJOR` **obbligatorio**, uguale alla major del volume esistente (`cat <volume>/PG_VERSION` oppure `SHOW server_version`). Un volume 17 resta 17: mai impostare 16 su un volume 17.
+   - `AI_CLOUD_ENABLED=true` solo se si usa un provider IA cloud: il default `false` forza il solo modello locale anche se in Impostazioni → AI Engine è configurato un provider cloud.
+   - `FRONTEND_URL` deve essere `https://…`, altrimenti il backend non parte.
+3. Usare **sempre** `--env-file .env.prod` in ogni comando: `docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build` (anche per `exec` e `config`).
+4. Le porte di backend e frontend ora sono legate a `127.0.0.1`: verificare che il reverse proxy le raggiunga (proxy sull'host → `127.0.0.1`; proxy in container → rete Docker condivisa, vedi INFRASTRUCTURE.md, «Gate per il pilota»).
+5. `python manage.py migrate` (applica le eventuali migrazioni delle altre voci qui sotto) e riavvio di `celery` e `celery-beat`.
+6. **Avvisare gli utenti**: dopo l'aggiornamento tutti dovranno rifare il login.
+7. Il **ripristino completo dalla UI non è disponibile** con `MEDIA_ROOT` montata come bind mount (Compose di produzione): il restore va fatto offline, con la procedura in INFRASTRUCTURE.md, «Ripristino: limitazioni e prova obbligatoria».
+
 ### Added
 - **Risk Assessment (M06) — siti che ereditano i rischi di gruppo**: nel registro di Gruppo l'ultima colonna mostra i siti che ereditano ciascun rischio, con il nome completo al passaggio del mouse. «Nessun sito» segnala i rischi di gruppo che non arrivano a nessun sito.
 - **Risk Assessment (M06) — nuova metodologia secondo la procedura di risk management**: il modulo è stato riscritto per rispondere al rilievo dell'audit TISAX, che chiedeva di valutare i rischi a partire dagli obiettivi aziendali e con criteri coerenti fra un rischio e l'altro.

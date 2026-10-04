@@ -654,7 +654,7 @@ Ogni interazione è registrata in `AiInteractionLog` con l'hash dell'input (mai 
 
 ## Gate per il pilota — review 2026-10-04
 
-Vedere [il report tecnico](docs/PILOT_READINESS_REVIEW_2026-10-04.md) prima del deployment.
+Sequenza di aggiornamento: CHANGELOG.md, sezione `[Unreleased]` → «Aggiornamento — sequenza di deploy».
 Le modifiche del repository non riconfigurano i container già in esecuzione.
 
 - **PostgreSQL:** standard per nuove installazioni e CI = 16. In produzione
