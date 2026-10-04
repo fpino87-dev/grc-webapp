@@ -13,9 +13,8 @@ resti retro-compatibile con i vecchi `.dump` (solo DB, nessun media).
 Lo swap del media in restore è atomico (``os.rename`` sullo stesso filesystem):
 MEDIA_ROOT non resta mai in uno stato parzialmente scritto.
 
-Nota: la cifratura at-rest (encryption.py) è single-shot e carica l'intero
-archivio in memoria. Con i media inclusi l'archivio può crescere: per dataset
-nell'ordine dei GB valutare uno streaming cipher (vedi commento in encryption.py).
+La cifratura at-rest (encryption.py) usa streaming AES-GCM e file temporanei
+privati, pubblicati solo dopo la verifica del tag di autenticazione.
 """
 from __future__ import annotations
 
@@ -23,7 +22,8 @@ import logging
 import os
 import shutil
 import tarfile
-from pathlib import Path
+import uuid
+from pathlib import Path, PurePosixPath
 
 from django.conf import settings
 
@@ -45,7 +45,8 @@ def build_archive(dump_path: Path, archive_path: Path) -> None:
     solo dump: il restore di un archivio simile lascerà il media invariato.
     """
     media_root = _media_root()
-    with tarfile.open(archive_path, "w") as tar:
+    with open(archive_path, "xb", opener=lambda path, flags: os.open(path, flags, 0o600)) as output, \
+            tarfile.open(fileobj=output, mode="w") as tar:
         tar.add(dump_path, arcname=DB_MEMBER)
         if media_root.exists():
             tar.add(media_root, arcname=MEDIA_PREFIX)
@@ -82,21 +83,40 @@ def _chown_tree(root: Path, uid: int, gid: int) -> None:
 
 def _iter_safe_members(tar: tarfile.TarFile):
     """Restituisce i soli membri attesi (``database.dump`` o ``media/...``),
-    sollevando ValueError su path assoluti o traversal. Membri inattesi
-    vengono ignorati."""
-    for m in tar.getmembers():
+    sollevando ValueError su path assoluti, traversal o membri inattesi."""
+    seen = set()
+    total = 0
+    max_bytes = getattr(settings, "BACKUP_ARCHIVE_MAX_BYTES", 20 * 1024**3)
+    for m in tar:
         name = m.name
-        if name != DB_MEMBER and name != MEDIA_PREFIX and not name.startswith(MEDIA_PREFIX + "/"):
-            continue
-        norm = os.path.normpath(name)
-        if os.path.isabs(norm) or norm.startswith(".."):
-            raise ValueError(f"Membro non sicuro nell'archivio: {name!r}")
+        parts = PurePosixPath(name).parts
+        if (
+            not parts or name.startswith("/") or ".." in parts or "\\" in name
+            or (name != DB_MEMBER and parts[0] != MEDIA_PREFIX)
+            or not (m.isfile() or m.isdir())
+            or (name == DB_MEMBER and not m.isfile())
+            or name in seen
+        ):
+            raise ValueError("Unsafe or duplicate backup archive member.")
+        seen.add(name)
+        total += m.size
+        if len(seen) > 100000 or total > max_bytes:
+            raise ValueError("Backup archive exceeds extraction limits.")
         yield m
+
+
+def validate_archive(path: Path) -> None:
+    """Validate ALL members before any database restore or media extraction."""
+    with tarfile.open(path, "r") as tar:
+        members = list(_iter_safe_members(tar))
+        if not any(m.name == DB_MEMBER for m in members):
+            raise ValueError("Archive has no database.dump.")
 
 
 def read_db_dump_head(path: Path, n: int = len(PGDMP_MAGIC)) -> bytes:
     """Legge i primi ``n`` byte del membro ``database.dump`` nel tar (per la
     verifica del magic PGDMP in fase di import)."""
+    validate_archive(path)
     with tarfile.open(path, "r") as tar:
         try:
             member = tar.getmember(DB_MEMBER)
@@ -111,6 +131,7 @@ def read_db_dump_head(path: Path, n: int = len(PGDMP_MAGIC)) -> bytes:
 
 def extract_db_dump(path: Path, dest_dump: Path) -> None:
     """Estrae il solo ``database.dump`` dall'archivio in ``dest_dump``."""
+    validate_archive(path)
     with tarfile.open(path, "r") as tar:
         try:
             member = tar.getmember(DB_MEMBER)
@@ -119,7 +140,7 @@ def extract_db_dump(path: Path, dest_dump: Path) -> None:
         src = tar.extractfile(member)
         if src is None:
             raise ValueError("database.dump non leggibile nell'archivio.")
-        with src, open(dest_dump, "wb") as out:
+        with src, open(dest_dump, "wb", opener=lambda path, flags: os.open(path, flags, 0o600)) as out:
             shutil.copyfileobj(src, out)
 
 
@@ -135,8 +156,9 @@ def restore_media(path: Path) -> bool:
     """
     media_root = _media_root()
     parent = media_root.parent
-    staging = parent / f".media_restore_{os.getpid()}"
-    old_dir = parent / f".media_old_{os.getpid()}"
+    operation = uuid.uuid4().hex
+    staging = parent / f".media_restore_{operation}"
+    old_dir = parent / f".media_old_{operation}"
 
     if staging.exists():
         shutil.rmtree(staging, ignore_errors=True)
@@ -149,7 +171,7 @@ def restore_media(path: Path) -> bool:
             ]
             if not media_members:
                 return False
-            tar.extractall(path=staging, members=media_members)
+            tar.extractall(path=staging, members=media_members, filter="data")
 
         extracted_media = staging / MEDIA_PREFIX
         if not extracted_media.exists():
@@ -181,4 +203,7 @@ def restore_media(path: Path) -> bool:
         return True
     finally:
         shutil.rmtree(staging, ignore_errors=True)
-        shutil.rmtree(old_dir, ignore_errors=True)
+        # If both installation and rollback failed, old_dir is the only
+        # remaining copy. Never delete it from the failure cleanup path.
+        if media_root.exists():
+            shutil.rmtree(old_dir, ignore_errors=True)

@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import uuid
 from pathlib import Path
 
 from django.conf import settings
@@ -37,7 +38,7 @@ def create_backup(user, backup_type: str = "manual"):
 
     _ensure_backup_dir()
 
-    ts = timezone.now().strftime("%Y%m%d_%H%M%S")
+    ts = timezone.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:12]
     # Backup completo: archivio tar con il dump DB + l'albero MEDIA_ROOT.
     filename = f"backup_{ts}_{backup_type}.tar"
     filepath = BACKUP_DIR / filename
@@ -67,6 +68,8 @@ def create_backup(user, backup_type: str = "manual"):
     ]
 
     try:
+        # pg_dump must never create a world-readable plaintext intermediate.
+        dump_tmp.touch(mode=0o600, exist_ok=False)
         result = subprocess.run(
             cmd, env=env, capture_output=True, text=True, timeout=300
         )
@@ -207,6 +210,10 @@ def create_backup(user, backup_type: str = "manual"):
                 "stage": "unexpected",
             },
         )
+    finally:
+        dump_tmp.unlink(missing_ok=True)
+        if record.status == BackupRecord.Status.FAILED:
+            filepath.unlink(missing_ok=True)
 
     return record
 
@@ -265,7 +272,7 @@ def import_backup(uploaded_file, user):
             "questo server: impossibile verificarlo e ripristinarlo."
         )
 
-    ts = timezone.now().strftime("%Y%m%d_%H%M%S")
+    ts = timezone.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:12]
     filename = f"backup_{ts}_imported{suffix}" + (ENCRYPTED_SUFFIX if encrypted else "")
     filepath = BACKUP_DIR / filename
 
@@ -418,6 +425,11 @@ def restore_backup(backup_id, user):
     db_dump_temp: Path | None = None
     try:
         if is_full:
+            archive.validate_archive(plain_filepath)
+            # A bind mount cannot be renamed. Fail before touching the DB;
+            # use the documented offline restore into a new installation.
+            if os.path.ismount(settings.MEDIA_ROOT):
+                raise RuntimeError("Media root is a mount point: use an offline restore into a new installation.")
             db_dump_temp = plain_filepath.with_suffix(plain_filepath.suffix + ".dbrestore")
             try:
                 archive.extract_db_dump(plain_filepath, db_dump_temp)
@@ -446,6 +458,8 @@ def restore_backup(backup_id, user):
             "-p", db["port"],
             "-U", db["user"],
             "-d", db["name"],
+            "--single-transaction",
+            "--exit-on-error",
             "--clean",
             "--if-exists",
             "--no-owner",
@@ -457,9 +471,8 @@ def restore_backup(backup_id, user):
             cmd, env=env, capture_output=True, text=True, timeout=600
         )
 
-        # pg_restore restituisce returncode=1 anche per warning non fatali
-        # Consideriamo fallimento solo se non c'è output o stderr contiene ERROR
-        if result.returncode > 1 or "ERROR" in result.stderr:
+        # Every non-zero status is a failure, irrespective of stderr language.
+        if result.returncode != 0:
             # newfix F2 — fallimento restore (pg_restore) e' privileged.
             log_action(
                 user=user,

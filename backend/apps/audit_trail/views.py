@@ -81,5 +81,6 @@ class AuditIntegrityView(APIView):
         return Response({
             "status": "ok",
             "checked": result["checked"],
+            "branched": result.get("branched", {}),
             "message": result["message"],
         })

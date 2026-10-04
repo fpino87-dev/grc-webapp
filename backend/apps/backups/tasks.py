@@ -19,6 +19,8 @@ def auto_backup_task(self):
             return
 
         record = create_backup(user, backup_type="auto")
+        if record.status != "completed":
+            raise RuntimeError("Scheduled backup failed; existing backups retained.")
         cleaned = cleanup_old_backups()
         logger.info(
             "auto_backup_task completato: backup=%s status=%s, cleanup=%d",

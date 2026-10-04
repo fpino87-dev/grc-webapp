@@ -153,6 +153,7 @@ def verify_audit_integrity(queryset=None) -> dict:
         groups[log.entity_type].append(log)
         checked += 1
 
+    branched: dict[str, int] = {}
     for entity_type, records in groups.items():
         present = {r.record_hash for r in records}
         heads = [r for r in records if r.prev_hash == GENESIS_HASH]
@@ -164,7 +165,16 @@ def verify_audit_integrity(queryset=None) -> dict:
                 "entity_type": entity_type,
                 "message": f"Più teste di catena per entity_type={entity_type}",
             }
+        successors = set()
         for r in records:
+            # Due record con lo stesso predecessore = scritture concorrenti
+            # (es. backup notturno lanciato due volte prima del lock di catena).
+            # Entrambi i record sono presenti e verificati: non è manomissione,
+            # le cancellazioni restano rilevate da broken_link. Si segnala
+            # come avviso, senza dichiarare corrotto l'audit trail.
+            if r.prev_hash in successors:
+                branched[entity_type] = branched.get(entity_type, 0) + 1
+            successors.add(r.prev_hash)
             if r.prev_hash != GENESIS_HASH and r.prev_hash not in present:
                 return {
                     "ok": False,
@@ -179,17 +189,29 @@ def verify_audit_integrity(queryset=None) -> dict:
                     ),
                 }
 
+    message = f"Integrità verificata — {checked} record ({v1} v1 legacy, {v2} v2 tamper-evident)"
+    if branched:
+        detail = ", ".join(f"{t} ({n})" for t, n in sorted(branched.items()))
+        message += f". Avviso: ramificazioni da scritture concorrenti, nessun record mancante: {detail}"
     return {
         "ok": True,
         "checked": checked,
         "v1": v1,
         "v2": v2,
+        "branched": branched,
         "error": None,
-        "message": f"Integrità verificata — {checked} record ({v1} v1 legacy, {v2} v2 tamper-evident)",
+        "message": message,
     }
 
 
 def _get_prev_hash(entity_type: str) -> str:
+    # Lock the chain itself, including its empty state. Locking the previous
+    # row alone allows concurrent writers to branch off the same predecessor.
+    from django.db import connection
+    if connection.vendor == "postgresql":
+        key = int.from_bytes(hashlib.sha256(entity_type.encode()).digest()[:8], "big", signed=True)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_xact_lock(%s)", [key])
     # Usa SELECT ... FOR UPDATE per serializzare la catena hash per entity_type
     last = (
         AuditLog.objects.select_for_update()
@@ -216,7 +238,7 @@ def log_action(*, user, action_code: str, level: str, entity, payload: dict) -> 
 
     entity_type = entity.__class__.__name__.lower()
     prev_hash = _get_prev_hash(entity_type)
-    user_id = _pk_to_uuid(user.pk)
+    user_id = _pk_to_uuid(user.pk) if user is not None else uuid.UUID(int=0)
     entity_id = _pk_to_uuid(entity.pk)
     # Usa now() per il calcolo dell'hash; auto_now_add scriverà lo stesso valore
     # con tolleranza di pochi microsecondi: il verifier confronta entrambe le rotte
@@ -236,7 +258,7 @@ def log_action(*, user, action_code: str, level: str, entity, payload: dict) -> 
         user_id=user_id,
         # Email pseudonimizzata (GDPR Art. 25 — privacy by design).
         # L'identità completa è ricavabile tramite user_id se necessario per audit legale.
-        user_email_at_time=_pseudonymize_email(user.email),
+        user_email_at_time=_pseudonymize_email(getattr(user, "email", "")),
         user_role_at_time=getattr(user, "role", "") or "",
         action_code=action_code,
         level=level,

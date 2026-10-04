@@ -6,8 +6,7 @@ con chiave derivata dalla passphrase `settings.BACKUP_ENCRYPTION_KEY` tramite
 PBKDF2-HMAC-SHA256 (200_000 iterazioni). Lo stretching della passphrase
 permette di usare valori arbitrari senza degradare la robustezza.
 
-Formato file cifrato (single shot, niente streaming — i dump pg_dump in
-ambiente single-tenant sono dell'ordine dei MB/centinaia di MB, non GB):
+Formato file cifrato (streaming, compatibile con gli archivi GRC1 esistenti):
 
     [magic 4B = b"GRC1"]
     [salt   16B]
@@ -25,7 +24,8 @@ import os
 from pathlib import Path
 
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+import tempfile
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from django.conf import settings
 
@@ -48,41 +48,68 @@ def _derive_key(passphrase: str, salt: bytes) -> bytes:
     return kdf.derive(passphrase.encode("utf-8"))
 
 
+def _write_private(destination, writer):
+    """Publish only complete authenticated output; temporary files are mode 0600."""
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as output:
+            temporary = Path(output.name)
+            writer(output)
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def encrypt_file(plain_path: Path, enc_path: Path) -> None:
-    """Cifra in-place: legge plain_path, scrive enc_path, elimina plain_path."""
     passphrase = settings.BACKUP_ENCRYPTION_KEY
     if not passphrase:
         raise RuntimeError("BACKUP_ENCRYPTION_KEY non configurata.")
-    salt = os.urandom(_SALT_LEN)
-    nonce = os.urandom(_NONCE_LEN)
-    key = _derive_key(passphrase, salt)
-    aesgcm = AESGCM(key)
-    with open(plain_path, "rb") as f:
-        plaintext = f.read()
-    ciphertext = aesgcm.encrypt(nonce, plaintext, None)
-    with open(enc_path, "wb") as f:
-        f.write(_MAGIC)
-        f.write(salt)
-        f.write(nonce)
-        f.write(ciphertext)
+    salt, nonce = os.urandom(_SALT_LEN), os.urandom(_NONCE_LEN)
+    encryptor = Cipher(algorithms.AES(_derive_key(passphrase, salt)), modes.GCM(nonce)).encryptor()
+
+    def write(output):
+        output.write(_MAGIC + salt + nonce)
+        with open(plain_path, "rb") as source:
+            for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                output.write(encryptor.update(chunk))
+        output.write(encryptor.finalize())
+        output.write(encryptor.tag)
+
+    _write_private(enc_path, write)
     plain_path.unlink()
 
 
 def decrypt_file(enc_path: Path, plain_path: Path) -> None:
-    """Decifra: legge enc_path, scrive plain_path. Lascia entrambi i file."""
     passphrase = settings.BACKUP_ENCRYPTION_KEY
     if not passphrase:
         raise RuntimeError("BACKUP_ENCRYPTION_KEY non configurata.")
-    with open(enc_path, "rb") as f:
-        data = f.read()
-    if not data.startswith(_MAGIC):
-        raise ValueError("File non cifrato o magic header errato.")
-    body = data[len(_MAGIC):]
-    salt = body[:_SALT_LEN]
-    nonce = body[_SALT_LEN:_SALT_LEN + _NONCE_LEN]
-    ciphertext = body[_SALT_LEN + _NONCE_LEN:]
-    key = _derive_key(passphrase, salt)
-    aesgcm = AESGCM(key)
-    plaintext = aesgcm.decrypt(nonce, ciphertext, None)
-    with open(plain_path, "wb") as f:
-        f.write(plaintext)
+    header_size = len(_MAGIC) + _SALT_LEN + _NONCE_LEN
+    with open(enc_path, "rb") as source:
+        header = source.read(header_size)
+        if len(header) != header_size or not header.startswith(_MAGIC):
+            raise ValueError("File non cifrato o magic header errato.")
+        size = source.seek(0, os.SEEK_END)
+        remaining = size - header_size - 16
+        if remaining < 0:
+            raise ValueError("Truncated encrypted backup.")
+        source.seek(-16, os.SEEK_END)
+        tag = source.read(16)
+        source.seek(header_size)
+        salt = header[4:4 + _SALT_LEN]
+        nonce = header[4 + _SALT_LEN:]
+        decryptor = Cipher(algorithms.AES(_derive_key(passphrase, salt)), modes.GCM(nonce, tag)).decryptor()
+
+        def write(output):
+            left = remaining
+            while left:
+                chunk = source.read(min(left, 1024 * 1024))
+                if not chunk:
+                    raise ValueError("Truncated encrypted backup.")
+                left -= len(chunk)
+                output.write(decryptor.update(chunk))
+            output.write(decryptor.finalize())
+
+        _write_private(plain_path, write)

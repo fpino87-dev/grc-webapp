@@ -39,6 +39,8 @@ class Command(BaseCommand):
             )
             sys.exit(1)
 
+        if result.get("branched"):
+            self.stdout.write(self.style.WARNING(result["message"]))
         self.stdout.write(
             self.style.SUCCESS(
                 f"Audit trail integrity OK — {result['v1']} record v1 (legacy) + "
