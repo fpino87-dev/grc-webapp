@@ -3584,3 +3584,7 @@ msgstr "Geçerlilik sonu"
 
 msgid "Motivazione dell'accettazione"
 msgstr "Kabul gerekçesi"
+
+#, python-format
+msgid "Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo (delibera nel riesame di direzione)."
+msgstr "Plant Manager riskleri kabul etmez: %(cls)s sınıfı için organı belirtin (yönetim gözden geçirmesinde karar)."

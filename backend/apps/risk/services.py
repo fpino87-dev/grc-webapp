@@ -167,6 +167,12 @@ DEFAULT_ECONOMIC_THRESHOLDS = {
 }
 
 _SITE_ACCEPT = {"roles": ["risk_owner"], "scope": "plant", "requires_body": False}
+# High: firma il Risk Owner, decide l'organo nel riesame di direzione (§10).
+# Il Plant Manager non accetta rischi: non sempre ne risponde e può avere
+# deleghe limitate.
+_SITE_BODY = {"roles": ["risk_owner"], "scope": "plant", "requires_body": True}
+# Ruoli che non possono accettare un rischio (vedi `_validate_policy_data`).
+NON_ACCEPTING_ROLES = ("plant_manager",)
 
 PRESETS = {
     "centralizzato": {
@@ -175,7 +181,7 @@ PRESETS = {
             "very_low": _SITE_ACCEPT,
             "low": _SITE_ACCEPT,
             "medium": {**_SITE_ACCEPT, "notify": ["site_risk_manager"]},
-            "high": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+            "high": _SITE_BODY,
             "critical": {"roles": [], "scope": "org", "requires_body": True},
         },
         "upper_opinion": {"very_low": "none", "low": "none", "medium": "none",
@@ -187,7 +193,7 @@ PRESETS = {
             "very_low": _SITE_ACCEPT,
             "low": _SITE_ACCEPT,
             "medium": {**_SITE_ACCEPT, "notify": ["site_risk_manager"]},
-            "high": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+            "high": _SITE_BODY,
             "critical": {"roles": [], "scope": "plant", "requires_body": True},
         },
         "upper_opinion": {"very_low": "none", "low": "none", "medium": "none",
@@ -199,7 +205,7 @@ PRESETS = {
             "very_low": _SITE_ACCEPT,
             "low": _SITE_ACCEPT,
             "medium": _SITE_ACCEPT,
-            "high": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+            "high": _SITE_BODY,
             "critical": {"roles": [], "scope": "plant", "requires_body": True},
         },
         "upper_opinion": {c: "none" for c in RISK_CLASSES},
@@ -287,6 +293,9 @@ def _validate_policy_data(data: dict) -> None:
     for cls, rule in (data.get("acceptance_matrix") or {}).items():
         if not isinstance(rule, dict) or rule.get("scope") not in ("plant", "org"):
             raise ValidationError(_("Regola di accettazione non valida per la classe %(cls)s") % {"cls": cls})
+        if set(rule.get("roles") or []) & set(NON_ACCEPTING_ROLES):
+            raise ValidationError(_("Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo "
+                                    "(delibera nel riesame di direzione).") % {"cls": cls})
     for months in (data.get("acceptance_max_months") or {}).values():
         if not isinstance(months, int) or months < 1:
             raise ValidationError(_("La validità dell'accettazione deve essere un numero di mesi positivo."))

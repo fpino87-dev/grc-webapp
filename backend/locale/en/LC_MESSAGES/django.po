@@ -3583,3 +3583,7 @@ msgstr "Valid until"
 
 msgid "Motivazione dell'accettazione"
 msgstr "Acceptance rationale"
+
+#, python-format
+msgid "Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo (delibera nel riesame di direzione)."
+msgstr "The Plant Manager does not accept risks: for class %(cls)s select the governing body (resolution in the management review)."

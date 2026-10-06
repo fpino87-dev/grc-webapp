@@ -12,7 +12,9 @@ import type { RegisterId } from "./RiskPage";
 
 const SECTIONS = ["governance", "objectives", "catalog", "information"] as const;
 type SectionKey = typeof SECTIONS[number];
-const ROLE_TOKENS = ["risk_owner", "plant_manager", "site_risk_manager", "it_manager", "hr_manager",
+// Il Plant Manager non accetta rischi (non sempre ne risponde, può avere
+// deleghe limitate): dove serve un livello superiore decide l'organo.
+const ROLE_TOKENS = ["risk_owner", "site_risk_manager", "it_manager", "hr_manager",
   "purchasing_manager", "production_manager", "engineering_manager", "ciso"];
 const LEVELS: ProtectionLevel[] = ["low", "normal", "high", "very_high"];
 

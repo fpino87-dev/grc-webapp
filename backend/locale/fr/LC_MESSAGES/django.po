@@ -3650,3 +3650,7 @@ msgstr "Valable jusqu'au"
 
 msgid "Motivazione dell'accettazione"
 msgstr "Motivation de l'acceptation"
+
+#, python-format
+msgid "Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo (delibera nel riesame di direzione)."
+msgstr "Le Plant Manager n'accepte pas les risques : pour la classe %(cls)s indiquez l'organe (délibération en revue de direction)."

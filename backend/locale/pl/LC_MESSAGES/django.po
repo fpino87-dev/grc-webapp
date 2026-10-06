@@ -3605,3 +3605,7 @@ msgstr "Ważna do"
 
 msgid "Motivazione dell'accettazione"
 msgstr "Uzasadnienie akceptacji"
+
+#, python-format
+msgid "Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo (delibera nel riesame di direzione)."
+msgstr "Plant Manager nie akceptuje ryzyk: dla klasy %(cls)s wskaż organ (uchwała w przeglądzie zarządzania)."

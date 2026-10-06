@@ -537,7 +537,9 @@ def test_medium_accepted_by_risk_owner_alone(org_user, plant, threats, cycle):
 
 
 @pytest.mark.django_db
-def test_high_needs_plant_manager_and_binding_ciso_opinion(org_user, plant, threats, cycle):
+def test_high_needs_body_and_binding_ciso_opinion(org_user, plant, threats, cycle):
+    """High: firma il Risk Owner, parere del CISO e delibera dell'organo nel
+    riesame. Il Plant Manager non firma più."""
     from apps.governance.models import RoleAssignment
 
     _plant("RG-Z")  # due siti → preset centralizzato
@@ -553,18 +555,59 @@ def test_high_needs_plant_manager_and_binding_ciso_opinion(org_user, plant, thre
     risk = services.complete_risk(org_user, risk)
     assert risk.current_class == "high"
     acc = services.request_acceptance(owner, risk, rationale="Analisi costi/benefici allegata")
-    assert acc.status == "pending" and acc.upper_opinion == "pending"
-    assert set(acc.required_roles) == {"risk_owner", "plant_manager"}
+    assert acc.status == "pending" and acc.upper_opinion == "pending" and acc.requires_body
+    assert acc.required_roles == ["risk_owner"]
     with pytest.raises(ValidationError):
-        services.sign_acceptance(owner, acc)  # ha già firmato
-    services.sign_acceptance(pm, acc)
-    acc.refresh_from_db()
-    assert acc.status == "pending"  # manca il parere
-    with pytest.raises(ValidationError):
-        services.give_opinion(pm, acc, favorable=True)
+        services.sign_acceptance(pm, acc)  # nessun ruolo da firmare
     services.give_opinion(ciso, acc, favorable=True, note="Coerente con la policy")
     acc.refresh_from_db()
+    assert acc.status == "pending"  # manca la delibera
+    services.decide_acceptance_in_review(org_user, acc, review=_approved_review(plant), approved=True)
+    acc.refresh_from_db()
     assert acc.status == "active"
+
+
+@pytest.mark.django_db
+def test_policy_rejects_plant_manager_as_acceptor(org_user):
+    with pytest.raises(ValidationError):
+        services.save_governance_policy(org_user, None, {"acceptance_matrix": {
+            "high": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+        }})
+
+
+@pytest.mark.django_db
+def test_migration_moves_plant_manager_to_body(org_user, plant, threats, cycle):
+    """Policy salvate e accettazioni in corso con il Plant Manager passano
+    all'organo; quelle già firmate dal Plant Manager restano com'erano."""
+    import importlib
+
+    from django.apps import apps as global_apps
+
+    from apps.risk.models import RiskAcceptance
+
+    mig = importlib.import_module("apps.risk.migrations.0025_plant_manager_not_accepting")
+    pm_rule = {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False}
+    policy = RiskGovernancePolicy.objects.create(plant=None, preset="centralizzato",
+                                                 acceptance_matrix={"high": dict(pm_rule)})
+    risk = _completed_risk(org_user, plant, threats["malware"], probability=2, impact_operational=3,
+                           treatment="accettare", expected_probability=None, expected_impact=None)
+    other = _completed_risk(org_user, plant, threats["fire"], probability=2, impact_operational=3, asset_type="SEDE",
+                            treatment="accettare", expected_probability=None, expected_impact=None)
+    base = {"risk_class": "medium", "rationale": "x",
+            "expires_on": timezone.localdate() + datetime.timedelta(days=30)}
+    waiting = RiskAcceptance.objects.create(**base, risk=risk, required_roles=["risk_owner", "plant_manager"],
+                                            signatures=[{"role": "risk_owner", "user_id": org_user.pk, "at": ""}])
+    # già firmata dal Plant Manager, in attesa del solo parere: resta com'è
+    signed = RiskAcceptance.objects.create(**base, risk=other, required_roles=["risk_owner", "plant_manager"],
+                                           upper_opinion="pending",
+                                           signatures=[{"role": "plant_manager", "user_id": 0, "at": ""}])
+    mig.forward(global_apps, None)
+    policy.refresh_from_db()
+    waiting.refresh_from_db()
+    signed.refresh_from_db()
+    assert policy.acceptance_matrix["high"] == {"roles": ["risk_owner"], "scope": "plant", "requires_body": True}
+    assert waiting.required_roles == ["risk_owner"] and waiting.requires_body
+    assert signed.required_roles == ["risk_owner", "plant_manager"] and not signed.requires_body
 
 
 @pytest.mark.django_db
@@ -830,7 +873,7 @@ def test_two_signers_need_no_body(org_user, plant, threats, cycle):
     """Con due ruoli firmano due persone diverse: niente organo anche se il
     rischio è autogestito."""
     services.save_governance_policy(org_user, None, {"acceptance_matrix": {
-        "medium": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+        "medium": {"roles": ["risk_owner", "ciso"], "scope": "plant", "requires_body": False},
     }})
     risk = _completed_risk(org_user, plant, threats["malware"], probability=2, impact_operational=3,
                            treatment="accettare", expected_probability=None, expected_impact=None)
@@ -864,7 +907,7 @@ def test_policy_upper_opinion_none_for_single_site(org_user, plant, threats, cyc
                            treatment="accettare", treatment_rationale="x",
                            expected_probability=None, expected_impact=None)
     owner_is_assessor = services.acceptance_requirements(risk)
-    assert "plant_manager" in owner_is_assessor["roles"]
+    assert owner_is_assessor["roles"] == ["risk_owner"] and owner_is_assessor["requires_body"]
     assert owner_is_assessor["upper_opinion"] == "none"
 
 
