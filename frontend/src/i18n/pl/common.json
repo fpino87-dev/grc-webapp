@@ -3272,14 +3272,14 @@
         "3": "W karcie ryzyka przejdź przez kroki: scenariusz (zagrożenie, informacje, zagrożone cele, Właściciel ryzyka), istniejące środki, ryzyko bieżące z uzasadnieniami, a potem decyzja: zaakceptować ryzyko rezydualne lub obniżyć je planem.",
         "4": "Zakończ ocenę: High i Critical otwierają plan postępowania.",
         "5": "Prześlij do zatwierdzenia: organ zatwierdza, a rejestr zostaje zamrożony.",
-        "6": "Monitoruj działania, weryfikacje i akceptacje: klasa spada dopiero po weryfikacji działań."
+        "6": "Monitoruj działania, weryfikacje i akceptacje: klasa spada dopiero po weryfikacji działań. Akceptacje zastrzeżone dla organu (przez politykę lub dlatego, że Risk Owner sam ocenił ryzyko i nim zarządza) są uchwalane w przeglądzie zarządzania."
       },
       "connections": {
         "governance": "Role, organy zarządcze i cele bezpieczeństwa",
         "controls": "Istniejące i planowane działania powiązane z zabezpieczeniami VDA ISA",
         "assets": "Powiązane zasoby i zmiany sugerujące przegląd",
         "bia": "Procesy krytyczne, RTO i MTPD dla wpływu operacyjnego",
-        "review": "Coroczne zatwierdzenie rejestru w przeglądzie zarządzania"
+        "review": "Coroczne zatwierdzenie rejestru i uchwalenie akceptacji zastrzeżonych dla organu w przeglądzie zarządzania"
       },
       "config_needed": {
         "1": "Polityka zarządzania ryzykiem (Ustawienia)",
@@ -3455,11 +3455,11 @@
       "acceptance_needs_completion": "Akceptować można tylko ryzyko z zakończoną oceną.",
       "not_acceptable_notice": "Ryzyko nieakceptowalne: należy je obsłużyć.",
       "who_accepts": "Klasa {{cls}}: akceptuje {{roles}}.",
-      "self_management_note": "Dodano Plant Managera: Risk Owner ocenił ryzyko i sam zarządza postępowaniem, więc nie może go zaakceptować sam (procedura §10). Nie jest potrzebny, jeśli ocenę lub postępowanie powierzono innej osobie.",
+      "self_management_note": "Decyduje organ: Risk Owner ocenił ryzyko i sam zarządza postępowaniem, więc nie może go zaakceptować sam (procedura §10). Nie jest potrzebny, jeśli ocenę lub postępowanie powierzono innej osobie.",
       "governing_body": "organ zarządzający",
       "opinion_binding": "Wymagana pozytywna opinia CISO.",
       "opinion_notify": "CISO zostaje poinformowany.",
-      "body_required": "Wymagana uchwała organu.",
+      "body_required": "Decyduje organ podczas przeglądu zarządzania (pełnego lub celowego): akceptacja staje się aktywna po zatwierdzeniu protokołu.",
       "max_validity": "Maksymalna ważność: {{months}} mies.",
       "expires": "wygasa {{date}}",
       "signatures": "Podpisy",
@@ -3470,8 +3470,6 @@
       "opinion_note": "Uwaga do opinii",
       "favorable": "Pozytywna",
       "unfavorable": "Negatywna",
-      "resolution_ref": "Numer uchwały",
-      "record_decision": "Zapisz uchwałę",
       "revoke_reason": "Powód odwołania",
       "revoke": "Odwołaj",
       "acceptance_rationale": "Uzasadnienie (dla High: analiza kosztów i korzyści)",
@@ -3542,7 +3540,9 @@
       "make_not_applicable_confirm": "Oznacz jako nie dotyczy",
       "not_applicable_reason": "Dlaczego zagrożenie nie dotyczy (np. brak narażonego zasobu)",
       "delete_na_confirm": "Usunąć oznaczenie „nie dotyczy”? Zagrożenie wraca do oceny w Pokryciu.",
-      "not_applicable_undo_hint": "Aby ocenić je ponownie, użyj Usuń: zagrożenie wraca do oceny w zakładce Pokrycie."
+      "not_applicable_undo_hint": "Aby ocenić je ponownie, użyj Usuń: zagrożenie wraca do oceny w zakładce Pokrycie.",
+      "body_on_agenda": "w porządku obrad przeglądu „{{title}}” z dnia {{date}}",
+      "body_awaiting_review": "oczekuje na przegląd zarządzania"
     },
     "register": {
       "search": "Szukaj",
@@ -3671,7 +3671,7 @@
       "review_months": "Przegląd okresowy (miesiące)",
       "group_register": "Rejestr grupy aktywny (ryzyka usług wspólnych, dziedziczone przez zakłady)",
       "acceptance_matrix": "Kto akceptuje, według klasy",
-      "self_management_hint": "Stała zasada procedury (§10): jeśli podpisać miałby Risk Owner, który także ocenił ryzyko i zarządza postępowaniem, do akceptacji dodawany jest Plant Manager.",
+      "self_management_hint": "Stała zasada procedury (§10): jeśli podpisać miałby tylko Risk Owner, który także ocenił ryzyko i zarządza postępowaniem, o akceptacji decyduje organ w przeglądzie zarządzania.",
       "col_class": "Klasa",
       "col_roles": "Wymagane podpisy",
       "col_scope": "Poziom",
@@ -6012,10 +6012,11 @@
         "7": "Napisz podsumowanie dla kierownictwa lub wygeneruj wersję roboczą z AI, sprawdź ją i zaakceptuj",
         "8": "Zatwierdź przegląd: w aplikacji (członek organu z kontem lub governance) albo rejestrując numer i datę uchwały organu. Protokół staje się niezmienny",
         "9": "Pobierz protokół w PDF lub HTML (dołączany także do pakietu audytowego)",
-        "10": "Aby zatwierdzić pojedyncze dokumenty lub drobne decyzje między przeglądami, utwórz przegląd „Ukierunkowany”: wybierz oczekujące dokumenty, zapisz decyzję dla każdego i zatwierdź protokół."
+        "10": "Aby zatwierdzić pojedyncze dokumenty lub drobne decyzje między przeglądami, utwórz przegląd „Ukierunkowany”: wybierz oczekujące dokumenty, zapisz decyzję dla każdego i zatwierdź protokół.",
+        "11": "W każdym przeglądzie, pełnym lub celowym, dodaj akceptacje ryzyka oczekujące na organ i zapisz dla każdej, czy jest zatwierdzona, odłożona czy odrzucona: decyzja jest stosowana do akceptacji po zatwierdzeniu protokołu."
       },
       "connections": {
-        "risk": "Ryzyka krytyczne i formalnie zaakceptowane w snapshocie",
+        "risk": "Ryzyka krytyczne i formalnie zaakceptowane w snapshocie; akceptacje zastrzeżone dla organu są uchwalane jako punkty porządku obrad",
         "incidents": "Incydenty z ostatnich 12 miesięcy w snapshocie",
         "pdca": "Otwarte i zablokowane PDCA w snapshocie",
         "tasks": "Decyzje mogą otwierać zadania przypisane do roli",
@@ -6469,12 +6470,27 @@
       "applied_on": "Zastosowano do dokumentu {{date}}",
       "not_applied": "Niezastosowano: {{reason}}",
       "applies_on_approval": "Stosowane do dokumentu po zatwierdzeniu protokołu.",
-      "outcomes_title": "Decyzje zastosowane do dokumentów",
+      "outcomes_title": "Zastosowane decyzje",
       "retry": "Ponów niezastosowane decyzje",
       "retry_error": "Nie udało się zastosować decyzji.",
-      "outcomes_missing": "Dokumenty bez decyzji: {{count}}. Zapisz decyzję dla każdego dokumentu przed zamknięciem posiedzenia.",
+      "outcomes_missing": "Punkty bez decyzji: {{count}}. Zapisz decyzję dla każdego dokumentu i akceptacji ryzyka przed zamknięciem posiedzenia.",
       "no_next_review": "Przegląd ukierunkowany nie proponuje kolejnego przeglądu: obowiązuje termin z przeglądu okresowego.",
       "approval_hint": "Po zatwierdzeniu protokołu decyzje są stosowane do dokumentów: zatwierdzone wchodzą w życie, odrzucone wracają do wersji roboczej."
+    },
+    "risk_acceptances": {
+      "add": "Dodaj akceptacje ryzyka",
+      "pending_title": "Akceptacje ryzyka oczekujące na organ",
+      "pending_hint": "Akceptacje, które polityka zastrzega dla organu, oraz akceptacje ryzyk ocenionych i obsługiwanych przez tego samego Risk Ownera. Każda wybrana staje się punktem: decyzja jest stosowana po zatwierdzeniu protokołu.",
+      "no_pending": "Brak akceptacji oczekujących na organ.",
+      "group": "Grupa",
+      "valid_until": "ważna do {{date}}",
+      "opinion_pending": "Oczekuje na opinię CISO",
+      "rationale": "Uzasadnienie",
+      "no_longer_pending": "Akceptacja nie jest już w toku ({{status}}): decyzji nie będzie można zastosować.",
+      "applied_on": "Zastosowano do akceptacji dnia {{date}}",
+      "applies_on_approval": "Stosowane do akceptacji po zatwierdzeniu protokołu.",
+      "add_error": "Nie można dodać akceptacji.",
+      "approval_hint": "Po zatwierdzeniu protokołu zatwierdzone akceptacje ryzyka stają się aktywne (o ile nie brakuje opinii CISO), a odrzucone zostają zamknięte."
     }
   },
   "objectives": {

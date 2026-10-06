@@ -11,6 +11,7 @@ import { StatusBadge } from "../../components/ui/StatusBadge";
 import { AGENDA_CODES_WITH_DATA, AgendaData } from "./SnapshotBlocks";
 import { ISO_CLAUSE, fmtDate, isOverdue, userLabel, type Snap } from "./shared";
 import { DocumentOutcomeControls, PendingDocumentsPicker } from "./TargetedDocuments";
+import { AcceptanceOutcomeControls, PendingAcceptancesPicker } from "./RiskAcceptanceItems";
 
 const DECISION_TYPES: DecisionType[] = ["miglioramento", "modifica_sgsi", "risorse", "obiettivo", "altro"];
 const TASK_ROLES = GRC_ACCESS_ROLES.filter(r => r !== "super_admin");
@@ -291,10 +292,12 @@ function AgendaItemCard({
 
   const clause = ISO_CLAUSE[item.code];
   const isDocument = item.code === "document";
-  const title = item.code === "custom" || isDocument ? item.title : t(`management_review.agenda.items.${item.code}`);
+  const isAcceptance = item.code === "risk_acceptance";
+  const toDecide = isDocument || isAcceptance;
+  const title = item.code === "custom" || toDecide ? item.title : t(`management_review.agenda.items.${item.code}`);
   const covered = item.discussion.trim().length > 0 || decisions.length > 0;
-  // Punto documento del riesame mirato: "fatto" quando ha un esito.
-  const pending = isDocument ? !item.document_outcome : !covered;
+  // Punto da decidere (documento, accettazione del rischio): "fatto" quando ha un esito.
+  const pending = toDecide ? !item.document_outcome : !covered;
   const dirty = discussion !== item.discussion;
 
   return (
@@ -306,7 +309,7 @@ function AgendaItemCard({
           {decisions.length > 0 && (
             <span className="text-xs text-gray-500">{t("management_review.agenda.decisions_count", { count: decisions.length })}</span>
           )}
-          {isDocument && (
+          {toDecide && (
             item.document_outcome
               ? <span className={`text-xs px-1.5 py-0.5 rounded ${item.document_outcome === "approvato" ? "bg-green-100 text-green-700"
                   : item.document_outcome === "respinto" ? "bg-red-100 text-red-700" : "bg-amber-50 text-amber-700"}`}>
@@ -326,6 +329,7 @@ function AgendaItemCard({
       {open && (
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-gray-100">
           {isDocument && <DocumentOutcomeControls item={item} locked={locked} />}
+          {isAcceptance && <AcceptanceOutcomeControls item={item} locked={locked} />}
           {AGENDA_CODES_WITH_DATA.has(item.code) && (
             snap
               ? <div className="bg-gray-50/60 rounded p-2">
@@ -483,8 +487,11 @@ export function AgendaSection({
       <p className="text-xs text-gray-400 mb-2">
         {review.kind === "mirato" ? t("management_review.targeted.agenda_intro") : t("management_review.agenda.intro")}
       </p>
-      {review.kind === "mirato" && !locked && review.status !== "completato" && (
-        <div className="mb-2"><PendingDocumentsPicker review={review} /></div>
+      {!locked && review.status !== "completato" && (
+        <div className="mb-2 flex flex-wrap items-start gap-2">
+          {review.kind === "mirato" && <PendingDocumentsPicker review={review} />}
+          <PendingAcceptancesPicker review={review} />
+        </div>
       )}
 
       <div className="space-y-2">

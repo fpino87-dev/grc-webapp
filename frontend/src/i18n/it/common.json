@@ -3272,14 +3272,14 @@
         "3": "Nella scheda del rischio segui i passi: scenario (minaccia, informazioni, obiettivi minacciati, Risk Owner), misure esistenti, rischio attuale con le motivazioni, poi la decisione: accettare il residuo o trattarlo con un piano.",
         "4": "Completa la valutazione: High e Critical aprono il piano di trattamento.",
         "5": "Invia in approvazione: l'organo approva e il registro viene congelato.",
-        "6": "Segui misure, verifiche e accettazioni: la classe scende solo con le misure verificate."
+        "6": "Segui misure, verifiche e accettazioni: la classe scende solo con le misure verificate. Le accettazioni che spettano all'organo (per policy o perché il Risk Owner ha valutato e tratta da solo il rischio) si deliberano nel riesame di direzione."
       },
       "connections": {
         "governance": "Ruoli, organi di governo e obiettivi di sicurezza",
         "controls": "Misure esistenti e del piano collegate ai controlli VDA ISA",
         "assets": "Asset coinvolti e cambiamenti che suggeriscono una revisione",
         "bia": "Processi critici, RTO e MTPD per l'impatto operativo",
-        "review": "Approvazione annuale del registro nel riesame di direzione"
+        "review": "Approvazione annuale del registro e delibera delle accettazioni riservate all'organo nel riesame di direzione"
       },
       "config_needed": {
         "1": "Policy di governo del rischio (Impostazioni)",
@@ -3455,11 +3455,11 @@
       "acceptance_needs_completion": "Si accetta solo un rischio applicabile con valutazione completata.",
       "not_acceptable_notice": "Rischio non accettabile: va trattato.",
       "who_accepts": "Classe {{cls}}: accetta {{roles}}.",
-      "self_management_note": "Plant Manager aggiunto: il Risk Owner ha valutato il rischio e ne gestisce anche il trattamento, quindi non può accettarlo da solo (procedura §10). Non serve se la valutazione o il trattamento sono affidati a un'altra persona.",
+      "self_management_note": "Decide l'organo: il Risk Owner ha valutato il rischio e ne gestisce anche il trattamento, quindi non può accettarlo da solo (procedura §10). Non serve se la valutazione o il trattamento sono affidati a un'altra persona.",
       "governing_body": "l'organo di amministrazione",
       "opinion_binding": "Serve il parere favorevole del CISO.",
       "opinion_notify": "Il CISO viene informato.",
-      "body_required": "Serve la delibera dell'organo.",
+      "body_required": "Decide l'organo in un riesame di direzione (completo o mirato): l'accettazione si attiva con l'approvazione del verbale.",
       "max_validity": "Validità massima: {{months}} mesi.",
       "expires": "scade il {{date}}",
       "signatures": "Firme",
@@ -3470,8 +3470,6 @@
       "opinion_note": "Nota del parere",
       "favorable": "Favorevole",
       "unfavorable": "Contrario",
-      "resolution_ref": "Riferimento della delibera",
-      "record_decision": "Registra delibera",
       "revoke_reason": "Motivo della revoca",
       "revoke": "Revoca",
       "acceptance_rationale": "Motivazione (per High: analisi costi/benefici)",
@@ -3542,7 +3540,9 @@
       "make_not_applicable_confirm": "Dichiara non applicabile",
       "not_applicable_reason": "Perché la minaccia non si applica (es. nessun asset esposto)",
       "delete_na_confirm": "Togliere la dichiarazione di non applicabilità? La minaccia torna da valutare nella Copertura.",
-      "not_applicable_undo_hint": "Per valutarla di nuovo usa Elimina: la minaccia torna da valutare nella scheda Copertura."
+      "not_applicable_undo_hint": "Per valutarla di nuovo usa Elimina: la minaccia torna da valutare nella scheda Copertura.",
+      "body_on_agenda": "all'ordine del giorno del riesame «{{title}}» del {{date}}",
+      "body_awaiting_review": "in attesa di un riesame di direzione"
     },
     "register": {
       "search": "Cerca",
@@ -3671,7 +3671,7 @@
       "review_months": "Revisione periodica (mesi)",
       "group_register": "Registro di gruppo attivo (rischi dei servizi condivisi, ereditati dai siti)",
       "acceptance_matrix": "Chi accetta, per classe",
-      "self_management_hint": "Regola fissa della procedura (§10): se a firmare sarebbe il Risk Owner e lo stesso ha valutato il rischio e ne gestisce il trattamento, all'accettazione si aggiunge il Plant Manager.",
+      "self_management_hint": "Regola fissa della procedura (§10): se a firmare sarebbe soltanto il Risk Owner e lo stesso ha valutato il rischio e ne gestisce il trattamento, l'accettazione la decide l'organo nel riesame di direzione.",
       "col_class": "Classe",
       "col_roles": "Firme richieste",
       "col_scope": "Livello",
@@ -6012,10 +6012,11 @@
         "7": "Scrivi la sintesi executive o genera una bozza con l'IA, rivedila e accettala",
         "8": "Approva il riesame: in app (un componente dell'organo con account, o la governance) oppure registrando numero e data della delibera dell'organo. Il verbale diventa immutabile",
         "9": "Scarica il verbale in PDF o HTML (incluso anche nel pacchetto audit)",
-        "10": "Per approvare singoli documenti o piccole decisioni fra un riesame e l'altro crea un riesame «Mirato»: scegli i documenti in attesa, registra l'esito di ciascuno e approva il verbale."
+        "10": "Per approvare singoli documenti o piccole decisioni fra un riesame e l'altro crea un riesame «Mirato»: scegli i documenti in attesa, registra l'esito di ciascuno e approva il verbale.",
+        "11": "In ogni riesame, completo o mirato, aggiungi le accettazioni del rischio in attesa dell'organo e registra per ciascuna approvata, rinviata o respinta: l'esito si applica all'accettazione con l'approvazione del verbale."
       },
       "connections": {
-        "risk": "Rischi critici e rischi accettati formalmente nello snapshot",
+        "risk": "Rischi critici e rischi accettati formalmente nello snapshot; le accettazioni riservate all'organo si deliberano come punti dell'ordine del giorno",
         "incidents": "Incidenti degli ultimi 12 mesi nello snapshot",
         "pdca": "PDCA aperti e bloccati nello snapshot",
         "tasks": "Le decisioni possono aprire task assegnati a un ruolo",
@@ -6469,12 +6470,27 @@
       "applied_on": "Applicato al documento il {{date}}",
       "not_applied": "Non applicato: {{reason}}",
       "applies_on_approval": "Si applica al documento all'approvazione del verbale.",
-      "outcomes_title": "Esiti applicati ai documenti",
+      "outcomes_title": "Esiti applicati",
       "retry": "Ritenta gli esiti non applicati",
       "retry_error": "Impossibile applicare gli esiti.",
-      "outcomes_missing": "Documenti senza esito: {{count}}. Registra l'esito di ogni documento prima di chiudere la riunione.",
+      "outcomes_missing": "Punti senza esito: {{count}}. Registra l'esito di ogni documento e accettazione del rischio prima di chiudere la riunione.",
       "no_next_review": "Il riesame mirato non propone il prossimo riesame: resta quello del riesame periodico.",
       "approval_hint": "Approvando il verbale, gli esiti si applicano ai documenti: gli approvati entrano in vigore, i respinti tornano in bozza."
+    },
+    "risk_acceptances": {
+      "add": "Aggiungi accettazioni del rischio",
+      "pending_title": "Accettazioni del rischio in attesa dell'organo",
+      "pending_hint": "Accettazioni che la policy riserva all'organo e accettazioni di rischi valutati e trattati dallo stesso Risk Owner. Ognuna scelta diventa un punto: l'esito si applica all'approvazione del verbale.",
+      "no_pending": "Nessuna accettazione in attesa dell'organo.",
+      "group": "Gruppo",
+      "valid_until": "valida fino al {{date}}",
+      "opinion_pending": "Parere CISO in attesa",
+      "rationale": "Motivazione",
+      "no_longer_pending": "L'accettazione non è più in attesa ({{status}}): l'esito non si potrà applicare.",
+      "applied_on": "Applicato all'accettazione il {{date}}",
+      "applies_on_approval": "Si applica all'accettazione all'approvazione del verbale.",
+      "add_error": "Impossibile aggiungere le accettazioni.",
+      "approval_hint": "Approvando il verbale, le accettazioni del rischio approvate si attivano (se il parere CISO non manca) e quelle respinte si chiudono."
     }
   },
   "objectives": {

@@ -73,6 +73,28 @@ export interface ReviewAgendaItem {
     latest_version: string | null;
     version_changed: boolean;
   } | null;
+  /** Accettazione del rischio da deliberare (riesame completo o mirato). */
+  risk_acceptance?: string | null;
+  risk_acceptance_info?: RiskAcceptanceInfo | null;
+}
+
+/** Accettazione del rischio che l'organo delibera nel riesame (procedura §10). */
+export interface RiskAcceptanceInfo {
+  id: string;
+  risk_id: string;
+  risk_name: string;
+  plant_code: string | null;
+  risk_class: string;
+  rationale: string;
+  expires_on: string;
+  status: "pending" | "active" | "rejected" | "revoked" | "expired";
+  upper_opinion: "not_required" | "pending" | "favorable" | "unfavorable";
+}
+
+/** Accettazione in attesa della delibera, selezionabile per l'ordine del giorno. */
+export interface PendingAcceptance extends Omit<RiskAcceptanceInfo, "status"> {
+  requested_at: string;
+  selected: boolean;
 }
 
 export type DocumentOutcome = "approvato" | "rinviato" | "respinto";
@@ -96,8 +118,8 @@ export interface PendingDocument {
 }
 
 export interface OutcomeResult {
-  applied: Array<{ item_id: string; document_id: string; title: string; outcome: DocumentOutcome }>;
-  skipped: Array<{ item_id: string; document_id: string; title: string; outcome: DocumentOutcome; reason: string }>;
+  applied: Array<{ item_id: string; document_id?: string; acceptance_id?: string; title?: string; outcome: DocumentOutcome }>;
+  skipped: Array<{ item_id: string; document_id?: string; acceptance_id?: string; title?: string; outcome: DocumentOutcome; reason: string }>;
 }
 
 export interface ExecutiveSummaryMeta {
@@ -265,6 +287,15 @@ export const managementReviewApi = {
     apiClient
       .post<{ added: string[]; skipped: Array<{ id: string; title?: string; reason: string }>; review: ManagementReview }>(
         `${base}/${id}/document-items/`, { document_ids },
+      )
+      .then((r) => r.data),
+  // Accettazioni del rischio da deliberare (riesame completo o mirato).
+  pendingAcceptances: (id: string) =>
+    apiClient.get<PendingAcceptance[]>(`${base}/${id}/pending-acceptances/`).then((r) => r.data),
+  addAcceptanceItems: (id: string, acceptance_ids: string[]) =>
+    apiClient
+      .post<{ added: string[]; skipped: Array<{ id: string; reason: string }>; review: ManagementReview }>(
+        `${base}/${id}/acceptance-items/`, { acceptance_ids },
       )
       .then((r) => r.data),
   refreshItemVersion: (itemId: string) =>

@@ -469,7 +469,7 @@ Plan measures have an owner, deadline and expected effect. When a measure is com
 
 ### Acceptance
 
-Who can accept depends on the class and on the **risk governance policy** (Settings): signatures of the required roles, the CISO's opinion (binding or informative) and, for Critical, the governing body resolution. Maximum validity depends on the class. Risks involving breaches of law, VDA ISA requirements or confidentiality obligations can never be accepted; if the Risk Owner assessed and treated the risk alone, the Plant Manager's signature is also required. If the class changes, the acceptance lapses. Expiring acceptances create a task 30 days in advance. The additional Plant Manager signature applies only if the Risk Owner would be the one signing: if the policy has another role accept (for example only the CISO), nobody is added, and the card always states why the Plant Manager was added. If the treatment is "accept", the acceptance rationale is taken from the treatment rationale and can be corrected; if the risk is being treated, the acceptance covers the current exposure until the measures are completed and verified.
+Who can accept depends on the class and on the **risk governance policy** (Settings): signatures of the required roles, the CISO's opinion (binding or informative) and, for Critical, the governing body resolution. Maximum validity depends on the class. Risks involving breaches of law, VDA ISA requirements or confidentiality obligations can never be accepted; if the Risk Owner assessed and treated the risk alone, the governing body decides the acceptance in the management review. If the class changes, the acceptance lapses. Expiring acceptances create a task 30 days in advance. The referral to the governing body applies only if the Risk Owner alone would be the one signing: if the policy has another role accept (for example only the CISO) or two roles (two different people must sign) independent control already exists, and the card always states why the governing body decides. Acceptances reserved to the governing body (by policy, like Critical ones, or because of self-management) stay *pending approval* until a management review decides them: the card shows whether they are already on a review agenda or waiting, and they are no longer recorded by hand. If the treatment is "accept", the acceptance rationale is taken from the treatment rationale and can be corrected; if the risk is being treated, the acceptance covers the current exposure until the measures are completed and verified.
 
 ### Inherited group risks
 
@@ -811,6 +811,16 @@ Between one full review and the next, the body can meet on specific items, for e
 5. **Close the meeting**: at least one item is required and every document must have an outcome
 6. **Approve the minutes** (in the app or by recording the resolution): the outcomes are applied to the documents. *Approved* ones take effect by resolution of the body, with the date of the resolution or of the meeting; *rejected* ones go back to draft; *postponed* ones stay pending. If an outcome cannot be applied (for example a new revision was uploaded after the meeting) it is shown with the reason and can be retried
 7. The **minutes** of the targeted review list the documents examined with revision and outcome, the items and the decisions; in the **audit pack** targeted meetings are in `09_management_review/sedute_intermedie/`
+
+### Risk acceptances to decide
+
+In the review, **full or targeted**, the governing body decides the risk acceptances the policy reserves to it (for example Critical ones) and those of risks the Risk Owner assessed and treats alone (risk management procedure §10).
+
+1. **"Add risk acceptances"** (the number next to it says how many are waiting) opens the list of acceptances awaiting the governing body: a site review shows the site's ones, the organisation review also those of group risks and of the classes the policy reserves to the organisation. An acceptance already on the agenda of another review not yet approved is not listed
+2. Each acceptance chosen becomes an item with risk, class, site, proposed expiry and rationale; record the **outcome**: *Approved*, *Postponed* or *Rejected* (the item discussion becomes the rejection reason)
+3. To close the meeting every acceptance on the agenda needs an outcome
+4. **When the minutes are approved** approved acceptances become active, with the review as the resolution (if the binding CISO opinion is still missing they become active when it arrives); rejected ones are closed; postponed ones stay pending for a later review. If an acceptance has meanwhile been revoked or has expired, the outcome stays on the item with the reason
+5. The **minutes** include the table of the decided acceptances with their outcome
 
 ---
 

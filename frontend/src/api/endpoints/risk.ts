@@ -168,7 +168,20 @@ export interface Acceptance {
   close_reason: string;
   can_sign: boolean;
   can_give_opinion: boolean;
+  /** Riesame in cui l'organo ha deliberato l'accettazione. */
+  review: string | null;
+  review_info: AcceptanceReview | null;
+  /** Riesame non ancora approvato che la ha all'ordine del giorno. */
+  on_review_agenda: AcceptanceReview | null;
   created_at: string;
+}
+
+export interface AcceptanceReview {
+  id: string;
+  title: string;
+  kind: "completo" | "mirato";
+  review_date: string;
+  approval_status: string;
 }
 
 export interface AcceptanceRequirements {
@@ -180,8 +193,8 @@ export interface AcceptanceRequirements {
   upper_opinion: "none" | "notify" | "binding";
   max_months: number;
   not_acceptable: boolean;
-  /** Plant Manager aggiunto perché chi ha valutato e tratta il rischio lo accetterebbe da solo (§10). */
-  added_for_self_management: boolean;
+  /** Organo richiesto perché chi ha valutato e tratta il rischio lo accetterebbe da solo (§10). */
+  body_for_self_management: boolean;
 }
 
 export interface LocalImpactReport {
@@ -477,13 +490,11 @@ export const riskApi = {
   // Accettazioni
   acceptances: (params: Record<string, string>) => fetchAllPages<Acceptance>("/risk/acceptances/", params),
   requestAcceptance: (payload: {
-    risk: string; rationale: string; expires_on?: string; body?: string; body_resolution_ref?: string;
+    risk: string; rationale: string; expires_on?: string;
   }) => data(apiClient.post<Acceptance>("/risk/acceptances/", payload)),
   signAcceptance: (id: string) => data(apiClient.post<Acceptance>(`/risk/acceptances/${id}/sign/`)),
   giveOpinion: (id: string, favorable: boolean, note: string) =>
     data(apiClient.post<Acceptance>(`/risk/acceptances/${id}/opinion/`, { favorable, note })),
-  bodyDecision: (id: string, body: string, resolution_ref: string) =>
-    data(apiClient.post<Acceptance>(`/risk/acceptances/${id}/body-decision/`, { body, resolution_ref })),
   revokeAcceptance: (id: string, reason: string) =>
     data(apiClient.post<Acceptance>(`/risk/acceptances/${id}/revoke/`, { reason })),
 

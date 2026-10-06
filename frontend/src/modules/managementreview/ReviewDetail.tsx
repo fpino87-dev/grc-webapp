@@ -236,9 +236,8 @@ export function ReviewDetail({ review, users, plants, onClose }: { review: Manag
 
           <ApprovalSection review={review} isGovernance={isGovernance} onMissing={setMissing} />
 
-          {isTargeted
-            ? <OutcomeSummary review={review} isGovernance={isGovernance} />
-            : <DeliberatedDocuments review={review} snap={snap} isGovernance={isGovernance} />}
+          {!isTargeted && <DeliberatedDocuments review={review} snap={snap} isGovernance={isGovernance} />}
+          <OutcomeSummary review={review} isGovernance={isGovernance} />
         </div>
       </div>
     </div>

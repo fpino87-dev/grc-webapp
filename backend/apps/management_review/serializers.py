@@ -59,6 +59,27 @@ def _version_label(version):
 
 class ReviewAgendaItemSerializer(serializers.ModelSerializer):
     document_info = serializers.SerializerMethodField()
+    risk_acceptance_info = serializers.SerializerMethodField()
+
+    def get_risk_acceptance_info(self, obj):
+        """Accettazione del rischio da deliberare: rischio, classe, motivazione
+        e stato attuale (rischio e sito arrivano con select_related dalla view)."""
+        if obj.risk_acceptance_id is None:
+            return None
+        from apps.risk.services import risk_label
+
+        acc = obj.risk_acceptance
+        return {
+            "id": str(acc.pk),
+            "risk_id": str(acc.risk_id),
+            "risk_name": risk_label(acc.risk),
+            "plant_code": acc.risk.plant.code if acc.risk.plant_id else None,
+            "risk_class": acc.risk_class,
+            "rationale": acc.rationale,
+            "expires_on": acc.expires_on,
+            "status": acc.status,
+            "upper_opinion": acc.upper_opinion,
+        }
 
     def get_document_info(self, obj):
         """Documento del punto (riesame mirato): revisione esaminata e, se nel
@@ -94,7 +115,7 @@ class ReviewAgendaItemSerializer(serializers.ModelSerializer):
             "id", "review", "code", "title", "order", "mandatory", "discussion",
             "discussion_meta", "discussion_draft", "discussion_draft_meta", "updated_at",
             "document", "document_version", "document_outcome", "document_outcome_applied_at",
-            "document_outcome_error", "document_info",
+            "document_outcome_error", "document_info", "risk_acceptance", "risk_acceptance_info",
         ]
         # La bozza IA e la sua provenienza non si scrivono via PATCH: passano
         # dalle azioni discussion-draft / discussion, che registrano chi ha
@@ -105,6 +126,7 @@ class ReviewAgendaItemSerializer(serializers.ModelSerializer):
             "id", "code", "order", "mandatory", "updated_at",
             "discussion_meta", "discussion_draft", "discussion_draft_meta",
             "document", "document_version", "document_outcome_applied_at", "document_outcome_error",
+            "risk_acceptance",
         ]
 
     def validate(self, attrs):

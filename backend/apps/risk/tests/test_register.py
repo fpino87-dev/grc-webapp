@@ -581,6 +581,15 @@ def test_unfavorable_opinion_rejects(org_user, plant, threats, cycle):
     assert acc.status == "rejected"
 
 
+def _approved_review(plant=None, **extra):
+    from apps.management_review.models import ManagementReview
+
+    return ManagementReview.objects.create(
+        title="Riesame", review_date=timezone.localdate(), plant=plant, kind="mirato",
+        status="completato", approval_status="approvato", **extra,
+    )
+
+
 @pytest.mark.django_db
 def test_critical_requires_body_resolution(org_user, plant, threats, cycle):
     from apps.governance.models import SecurityCommittee
@@ -594,9 +603,13 @@ def test_critical_requires_body_resolution(org_user, plant, threats, cycle):
     with pytest.raises(ValidationError):
         services.request_acceptance(org_user, risk, rationale="doppia")
     body = SecurityCommittee.objects.create(name="CdA", committee_type="cda")
-    services.record_body_decision(org_user, acc, body=body, resolution_ref="Delibera 12/2026")
+    review = _approved_review(plant, governing_body=body, approval_resolution_ref="12/2026")
+    services.decide_acceptance_in_review(org_user, acc, review=review, approved=True)
     acc.refresh_from_db()
-    assert acc.status == "active"
+    assert acc.status == "active" and acc.review == review and acc.body == body
+    assert "12/2026" in acc.body_resolution_ref
+    with pytest.raises(ValidationError):
+        services.decide_acceptance_in_review(org_user, acc, review=review, approved=True)
     assert acc.expires_on <= timezone.localdate() + datetime.timedelta(days=180)
 
 
@@ -792,18 +805,43 @@ def test_revaluation_triggers_after_approval(org_user, plant, threats, cycle):
 
 
 @pytest.mark.django_db
-def test_self_managed_risk_needs_plant_manager(org_user, plant, threats, cycle):
+def test_self_managed_risk_goes_to_governing_body(org_user, plant, threats, cycle):
+    """Chi ha valutato e tratta il rischio non lo accetta da solo: decide
+    l'organo nel riesame (non più il Plant Manager)."""
     risk = _completed_risk(org_user, plant, threats["malware"], probability=2, impact_operational=3,
                            treatment="accettare", expected_probability=None, expected_impact=None)
+    req = services.acceptance_requirements(risk)
+    assert req["body_for_self_management"] is True and req["requires_body"] is True
+    assert "plant_manager" not in req["roles"]
     acc = services.request_acceptance(org_user, risk, rationale="ok")
-    assert acc.status == "pending" and "plant_manager" in acc.required_roles
-    assert services.acceptance_requirements(risk)["added_for_self_management"] is True
+    assert acc.status == "pending" and acc.requires_body
+    assert acc in services.acceptances_awaiting_body(plant.pk)
+    assert acc in services.acceptances_awaiting_body(None)
+
+    services.decide_acceptance_in_review(org_user, acc, review=_approved_review(plant), approved=False,
+                                         note="Serve una misura compensativa")
+    acc.refresh_from_db()
+    assert acc.status == "rejected" and acc.close_reason == "Serve una misura compensativa"
+    assert acc not in services.acceptances_awaiting_body(None)
+
+
+@pytest.mark.django_db
+def test_two_signers_need_no_body(org_user, plant, threats, cycle):
+    """Con due ruoli firmano due persone diverse: niente organo anche se il
+    rischio è autogestito."""
+    services.save_governance_policy(org_user, None, {"acceptance_matrix": {
+        "medium": {"roles": ["risk_owner", "plant_manager"], "scope": "plant", "requires_body": False},
+    }})
+    risk = _completed_risk(org_user, plant, threats["malware"], probability=2, impact_operational=3,
+                           treatment="accettare", expected_probability=None, expected_impact=None)
+    req = services.acceptance_requirements(risk)
+    assert req["body_for_self_management"] is False and req["requires_body"] is False
 
 
 @pytest.mark.django_db
 def test_self_managed_rule_only_when_owner_would_sign(org_user, plant, threats, cycle):
     """Se la policy fa accettare un altro ruolo (es. solo il CISO), chi ha
-    valutato e tratta il rischio non lo accetta da solo: niente Plant Manager."""
+    valutato e tratta il rischio non lo accetta da solo: niente organo."""
     services.save_governance_policy(org_user, None, {"acceptance_matrix": {
         "high": {"roles": ["ciso"], "scope": "plant", "requires_body": False},
         "medium": {"roles": ["ciso"], "scope": "plant", "requires_body": False},
@@ -811,7 +849,7 @@ def test_self_managed_rule_only_when_owner_would_sign(org_user, plant, threats, 
     risk = _completed_risk(org_user, plant, threats["malware"], probability=2, impact_operational=3,
                            treatment="accettare", expected_probability=None, expected_impact=None)
     req = services.acceptance_requirements(risk)
-    assert req["roles"] == ["ciso"] and req["added_for_self_management"] is False
+    assert req["roles"] == ["ciso"] and req["body_for_self_management"] is False
     # responsabile del trattamento esterno: non è autogestito
     risk.treatment_owner_external = "MSP"
     services.save_governance_policy(org_user, None, {"acceptance_matrix": {

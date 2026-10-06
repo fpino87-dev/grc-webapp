@@ -3272,14 +3272,14 @@
         "3": "Risk kartında adımları izleyin: senaryo (tehdit, bilgiler, tehdit altındaki hedefler, Risk Sahibi), mevcut önlemler, gerekçeleriyle mevcut risk, ardından karar: artık riski kabul etmek veya bir planla işlemek.",
         "4": "Değerlendirmeyi tamamlayın: High ve Critical işlem planını açar.",
         "5": "Onaya gönderin: organ onaylar ve kayıt dondurulur.",
-        "6": "Önlemleri, doğrulamaları ve kabulleri izleyin: sınıf yalnızca doğrulanmış önlemlerle düşer."
+        "6": "Önlemleri, doğrulamaları ve kabulleri izleyin: sınıf yalnızca doğrulanmış önlemlerle düşer. Organa ayrılan kabuller (politika gereği veya Risk Sahibi riski tek başına değerlendirip işlediği için) yönetim gözden geçirmesinde karara bağlanır."
       },
       "connections": {
         "governance": "Roller, yönetim organları ve güvenlik hedefleri",
         "controls": "VDA ISA kontrollerine bağlı mevcut ve planlı önlemler",
         "assets": "İlgili varlıklar ve gözden geçirme öneren değişiklikler",
         "bia": "Operasyonel etki için kritik süreçler, RTO ve MTPD",
-        "review": "Yönetim gözden geçirmesinde kaydın yıllık onayı"
+        "review": "Yönetim gözden geçirmesinde kaydın yıllık onayı ve organa ayrılan kabullerin karara bağlanması"
       },
       "config_needed": {
         "1": "Risk yönetişimi politikası (Ayarlar)",
@@ -3455,11 +3455,11 @@
       "acceptance_needs_completion": "Yalnızca değerlendirmesi tamamlanmış bir risk kabul edilebilir.",
       "not_acceptable_notice": "Risk kabul edilemez: işlem görmelidir.",
       "who_accepts": "{{cls}} sınıfı: kabul eden {{roles}}.",
-      "self_management_note": "Plant Manager eklendi: Risk Sahibi riski değerlendirdi ve işlemini de kendisi yönetiyor, bu nedenle riski tek başına kabul edemez (prosedür §10). Değerlendirme veya işlem başka birine verilirse gerekmez.",
+      "self_management_note": "Karar organındır: Risk Sahibi riski değerlendirdi ve işlemini de kendisi yönetiyor, bu nedenle riski tek başına kabul edemez (prosedür §10). Değerlendirme veya işlem başka birine verilirse gerekmez.",
       "governing_body": "yönetim organı",
       "opinion_binding": "CISO'nun olumlu görüşü gerekir.",
       "opinion_notify": "CISO bilgilendirilir.",
-      "body_required": "Organ kararı gerekir.",
+      "body_required": "Organ, bir yönetim gözden geçirmesinde (tam veya hedefli) karar verir: kabul, tutanak onaylandığında etkin olur.",
       "max_validity": "Azami geçerlilik: {{months}} ay.",
       "expires": "{{date}} tarihinde sona erer",
       "signatures": "İmzalar",
@@ -3470,8 +3470,6 @@
       "opinion_note": "Görüş notu",
       "favorable": "Olumlu",
       "unfavorable": "Olumsuz",
-      "resolution_ref": "Karar referansı",
-      "record_decision": "Kararı kaydet",
       "revoke_reason": "İptal nedeni",
       "revoke": "İptal et",
       "acceptance_rationale": "Gerekçe (High için: maliyet/fayda analizi)",
@@ -3542,7 +3540,9 @@
       "make_not_applicable_confirm": "Uygulanamaz olarak beyan et",
       "not_applicable_reason": "Tehdit neden uygulanmıyor (ör. maruz kalan varlık yok)",
       "delete_na_confirm": "Uygulanamazlık beyanı kaldırılsın mı? Tehdit Kapsam'da yeniden değerlendirilecek duruma döner.",
-      "not_applicable_undo_hint": "Yeniden değerlendirmek için Sil'i kullanın: tehdit Kapsam sekmesinde değerlendirilecek duruma döner."
+      "not_applicable_undo_hint": "Yeniden değerlendirmek için Sil'i kullanın: tehdit Kapsam sekmesinde değerlendirilecek duruma döner.",
+      "body_on_agenda": "{{date}} tarihli “{{title}}” gözden geçirmesinin gündeminde",
+      "body_awaiting_review": "bir yönetim gözden geçirmesi bekleniyor"
     },
     "register": {
       "search": "Ara",
@@ -3671,7 +3671,7 @@
       "review_months": "Periyodik gözden geçirme (ay)",
       "group_register": "Grup kaydı etkin (paylaşılan hizmet riskleri, sahalarca devralınır)",
       "acceptance_matrix": "Sınıfa göre kim kabul eder",
-      "self_management_hint": "Prosedürün sabit kuralı (§10): imzalayacak kişi Risk Sahibi ise ve riski kendisi değerlendirip işlemini de yönetiyorsa, kabule Plant Manager eklenir.",
+      "self_management_hint": "Prosedürün sabit kuralı (§10): yalnızca Risk Sahibi imzalayacaksa ve riski kendisi değerlendirip işlemini de yönetiyorsa, kabule organ yönetim gözden geçirmesinde karar verir.",
       "col_class": "Sınıf",
       "col_roles": "Gerekli imzalar",
       "col_scope": "Seviye",
@@ -6012,10 +6012,11 @@
         "7": "Yönetici özetini yazın veya yapay zekâ ile taslak oluşturun, gözden geçirin ve kabul edin",
         "8": "Gözden geçirmeyi onaylayın: uygulamada (hesabı olan bir organ üyesi veya yönetişim) ya da organ kararının numarası ve tarihini kaydederek. Tutanak değiştirilemez hale gelir",
         "9": "Tutanağı PDF veya HTML olarak indirin (denetim paketine de eklenir)",
-        "10": "İki gözden geçirme arasında tekil belgeleri veya küçük kararları onaylamak için “Hedefli” bir gözden geçirme oluşturun: bekleyen belgeleri seçin, her birinin kararını kaydedin ve tutanağı onaylayın."
+        "10": "İki gözden geçirme arasında tekil belgeleri veya küçük kararları onaylamak için “Hedefli” bir gözden geçirme oluşturun: bekleyen belgeleri seçin, her birinin kararını kaydedin ve tutanağı onaylayın.",
+        "11": "Her gözden geçirmede, tam veya hedefli, organ kararı bekleyen risk kabullerini ekleyin ve her biri için onaylandı, ertelendi veya reddedildi kaydını yapın: karar, tutanak onaylandığında kabule uygulanır."
       },
       "connections": {
-        "risk": "Anlık görüntüde kritik riskler ve resmi olarak kabul edilen riskler",
+        "risk": "Anlık görüntüde kritik riskler ve resmi olarak kabul edilen riskler; organa ayrılan kabuller gündem maddesi olarak karara bağlanır",
         "incidents": "Anlık görüntüde son 12 ayın olayları",
         "pdca": "Anlık görüntüde açık ve bloke PDCA",
         "tasks": "Kararlar bir role atanmış görevler açabilir",
@@ -6469,12 +6470,27 @@
       "applied_on": "{{date}} tarihinde belgeye uygulandı",
       "not_applied": "Uygulanmadı: {{reason}}",
       "applies_on_approval": "Tutanak onaylandığında belgeye uygulanır.",
-      "outcomes_title": "Belgelere uygulanan kararlar",
+      "outcomes_title": "Uygulanan kararlar",
       "retry": "Uygulanmayan kararları yeniden dene",
       "retry_error": "Kararlar uygulanamadı.",
-      "outcomes_missing": "Kararı olmayan belgeler: {{count}}. Toplantıyı kapatmadan önce her belgenin kararını kaydedin.",
+      "outcomes_missing": "Kararı olmayan maddeler: {{count}}. Toplantıyı kapatmadan önce her belgenin ve risk kabulünün kararını kaydedin.",
       "no_next_review": "Hedefli gözden geçirme bir sonraki gözden geçirmeyi önermez: periyodik gözden geçirmenin tarihi geçerli kalır.",
       "approval_hint": "Tutanak onaylandığında kararlar belgelere uygulanır: onaylananlar yürürlüğe girer, reddedilenler taslağa döner."
+    },
+    "risk_acceptances": {
+      "add": "Risk kabulleri ekle",
+      "pending_title": "Organ kararı bekleyen risk kabulleri",
+      "pending_hint": "Politikanın organa ayırdığı kabuller ile aynı Risk Sahibi tarafından değerlendirilip işlenen risklerin kabulleri. Seçilen her kabul bir madde olur: karar, tutanak onaylandığında uygulanır.",
+      "no_pending": "Organ kararı bekleyen kabul yok.",
+      "group": "Grup",
+      "valid_until": "{{date}} tarihine kadar geçerli",
+      "opinion_pending": "CISO görüşü bekleniyor",
+      "rationale": "Gerekçe",
+      "no_longer_pending": "Kabul artık beklemede değil ({{status}}): karar uygulanamayacak.",
+      "applied_on": "{{date}} tarihinde kabule uygulandı",
+      "applies_on_approval": "Tutanak onaylandığında kabule uygulanır.",
+      "add_error": "Kabuller eklenemedi.",
+      "approval_hint": "Tutanak onaylandığında onaylanan risk kabulleri etkin olur (CISO görüşü eksik değilse), reddedilenler kapatılır."
     }
   },
   "objectives": {

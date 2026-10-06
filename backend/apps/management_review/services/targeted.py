@@ -222,13 +222,18 @@ def refresh_item_version(item: ReviewAgendaItem, user) -> ReviewAgendaItem:
 
 
 def validate_document_outcome(item: ReviewAgendaItem, outcome: str) -> str:
-    """Esito del punto documento: solo sui punti documento, e solo se il punto
-    è sulla revisione corrente (una revisione più recente va prima riallineata)."""
+    """Esito del punto da decidere (documento o accettazione del rischio).
+    Documento: solo se il punto è sulla revisione corrente (una revisione più
+    recente va prima riallineata). Accettazione: solo se è ancora in attesa."""
+    from .risk_acceptances import RISK_ACCEPTANCE_ITEM_CODE, validate_acceptance_outcome
+
     outcome = outcome or ""
-    if item.code != DOCUMENT_ITEM_CODE:
-        raise ValidationError(_("L'esito si registra solo sui punti relativi a un documento."))
+    if item.code not in (DOCUMENT_ITEM_CODE, RISK_ACCEPTANCE_ITEM_CODE):
+        raise ValidationError(_("L'esito si registra solo sui punti relativi a un documento o a un'accettazione del rischio."))
     if outcome and outcome not in dict(ReviewAgendaItem.OUTCOME_CHOICES):
         raise ValidationError(_("Esito non valido."))
+    if item.code == RISK_ACCEPTANCE_ITEM_CODE:
+        return validate_acceptance_outcome(item, outcome)
     if outcome:
         latest = latest_version(item.document)
         if latest is not None and latest.pk != item.document_version_id:
@@ -239,11 +244,15 @@ def validate_document_outcome(item: ReviewAgendaItem, outcome: str) -> str:
     return outcome
 
 
-def uncovered_targeted_items(review: ManagementReview) -> list[str]:
-    """Punti documento senza esito (ne blocca la chiusura)."""
+def uncovered_decision_items(review: ManagementReview) -> list[str]:
+    """Punti da decidere (documenti, accettazioni del rischio) senza esito:
+    ne bloccano la chiusura della riunione, completa o mirata."""
+    from .risk_acceptances import RISK_ACCEPTANCE_ITEM_CODE
+
     return [
         str(i.pk) for i in review.agenda_items.filter(
-            deleted_at__isnull=True, code=DOCUMENT_ITEM_CODE, document_outcome="",
+            deleted_at__isnull=True, code__in=(DOCUMENT_ITEM_CODE, RISK_ACCEPTANCE_ITEM_CODE),
+            document_outcome="",
         )
     ]
 

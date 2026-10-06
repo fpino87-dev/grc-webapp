@@ -201,6 +201,15 @@ class ReviewAgendaItem(BaseModel):
         "documents.DocumentVersion", on_delete=models.PROTECT, null=True, blank=True,
         related_name="+",
     )
+    # Punto "accettazione del rischio" (code="risk_acceptance", riesame completo
+    # o mirato): l'organo delibera sull'accettazione che la policy gli
+    # riserva (procedura di risk management §10). Esito, applicazione ed
+    # eventuale errore usano gli stessi campi del punto documento.
+    risk_acceptance = models.ForeignKey(
+        "risk.RiskAcceptance", on_delete=models.PROTECT, null=True, blank=True,
+        related_name="review_items",
+    )
+    # Esito del punto (documento o accettazione del rischio).
     document_outcome = models.CharField(max_length=10, choices=OUTCOME_CHOICES, blank=True)
     document_outcome_applied_at = models.DateTimeField(null=True, blank=True)
     # Perché l'esito non è stato applicato (es. revisione cambiata dopo la
@@ -214,6 +223,11 @@ class ReviewAgendaItem(BaseModel):
                 fields=["review", "document"],
                 condition=models.Q(deleted_at__isnull=True, document__isnull=False),
                 name="uniq_review_document_item",
+            ),
+            models.UniqueConstraint(
+                fields=["review", "risk_acceptance"],
+                condition=models.Q(deleted_at__isnull=True, risk_acceptance__isnull=False),
+                name="uniq_review_risk_acceptance_item",
             ),
         ]
 

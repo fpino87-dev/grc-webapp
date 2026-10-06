@@ -190,6 +190,7 @@ export function ManagementReviewPage() {
               t("management_review.help.steps.8"),
               t("management_review.help.steps.9"),
               t("management_review.help.steps.10"),
+              t("management_review.help.steps.11"),
             ]}
             connections={[
               { module: "M06 Risk", relation: t("management_review.help.connections.risk") },

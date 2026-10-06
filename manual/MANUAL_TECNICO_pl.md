@@ -524,7 +524,7 @@ Odpowiedź: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Klasa wyłącznie z macierzy (`risk.services.risk_class`), wpływ = maksimum z 6 wymiarów z progiem poufności z `InformationClass`
 - Ryzyko bieżące (`current_class`) i oczekiwane (`expected_class`); „zastosuj oczekiwane” tylko przy zakończonych i zweryfikowanych działaniach
 - `RiskAssessmentCycle` (pierwsza / okresowa / nadzwyczajna / legacy) ze `snapshot` zamrożonym przy zatwierdzeniu
-- `RiskAcceptance` z podpisami ról, opinią CISO i uchwałą organu zgodnie z `RiskGovernancePolicy`
+- `RiskAcceptance` z podpisami ról, opinią CISO i uchwałą organu zgodnie z `RiskGovernancePolicy`; uchwała zapada wyłącznie w przeglądzie zarządzania (`RiskAcceptance.review`, punkt `ReviewAgendaItem.risk_acceptance` z kodem `risk_acceptance`, decyzja stosowana przez `decide_acceptance_in_review` po zatwierdzeniu protokołu). Ryzyko zarządzane samodzielnie z jednym podpisującym → `requires_body` (`body_for_self_management` w `acceptance_requirements`)
 - Katalog zagrożeń: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (pozycje własne przez API)
 - Cele biznesowe `BusinessObjective` (procedura §2, `risk_catalogs/business_objectives.json` jako propozycja) powiązane z ryzykiem (`business_objectives`, wymagane do zakończenia); `governance.SecurityObjective.risks` łączy cele bezpieczeństwa z traktowanymi ryzykami
 - Wspólne funkcje dla innych modułów: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`

@@ -469,7 +469,7 @@ Plan önlemlerinin bir sorumlusu, son tarihi ve beklenen etkisi vardır. Tamamla
 
 ### Kabul
 
-Kimin kabul edebileceği sınıfa ve **risk yönetişimi politikasına** (Ayarlar) bağlıdır: gerekli rollerin imzaları, CISO görüşü (bağlayıcı veya bilgilendirici) ve Critical için organ kararı. Azami geçerlilik süresi sınıfa bağlıdır. Yasa ihlali, VDA ISA gereklilikleri veya gizlilik yükümlülükleri içeren riskler asla kabul edilemez; Risk Sahibi riski tek başına değerlendirip işlediyse Tesis Yöneticisinin imzası da gerekir. Sınıf değişirse kabul düşer. Süresi dolmak üzere olan kabuller 30 gün önceden görev oluşturur. Plant Manager'ın ek imzası yalnızca imzalayacak kişi Risk Sahibi'nin kendisiyse gerekir: politika kabulü başka bir role veriyorsa (örneğin yalnızca CISO) kimse eklenmez ve kart Plant Manager'ın neden eklendiğini her zaman belirtir. İşlem «kabul et» ise kabul gerekçesi işlem gerekçesinden alınır ve düzeltilebilir; risk işlem altındaysa kabul, önlemler tamamlanıp doğrulanana kadar mevcut maruziyeti kapsar.
+Kimin kabul edebileceği sınıfa ve **risk yönetişimi politikasına** (Ayarlar) bağlıdır: gerekli rollerin imzaları, CISO görüşü (bağlayıcı veya bilgilendirici) ve Critical için organ kararı. Azami geçerlilik süresi sınıfa bağlıdır. Yasa ihlali, VDA ISA gereklilikleri veya gizlilik yükümlülükleri içeren riskler asla kabul edilemez; Risk Sahibi riski tek başına değerlendirip işlediyse kabule organ yönetim gözden geçirmesinde karar verir. Sınıf değişirse kabul düşer. Süresi dolmak üzere olan kabuller 30 gün önceden görev oluşturur. Organa yönlendirme yalnızca tek imzalayacak kişi Risk Sahibi'nin kendisiyse uygulanır: politika kabulü başka bir role (örneğin yalnızca CISO) veya iki role veriyorsa (iki farklı kişi imzalamak zorundadır) bağımsız kontrol zaten vardır ve kart organın neden karar verdiğini her zaman belirtir. Organa ayrılan kabuller (Critical gibi politika gereği veya kendi kendine yönetim nedeniyle) bir yönetim gözden geçirmesi karara bağlayana kadar *onayda* kalır: kart, kabulün bir gözden geçirmenin gündeminde mi yoksa beklemede mi olduğunu gösterir ve artık elle kaydedilmez. İşlem «kabul et» ise kabul gerekçesi işlem gerekçesinden alınır ve düzeltilebilir; risk işlem altındaysa kabul, önlemler tamamlanıp doğrulanana kadar mevcut maruziyeti kapsar.
 
 ### Devralınan grup riskleri
 
@@ -811,6 +811,16 @@ Tutanakta özet, yapay zekâ desteğiyle (ve hangi modelle) hazırlanıp hazırl
 5. **Toplantıyı kapatın**: en az bir madde gerekir ve her belgenin bir kararı olmalıdır
 6. **Tutanağı onaylayın** (uygulamada veya kararı kaydederek): kararlar belgelere uygulanır. *Onaylananlar* organ kararıyla, karar veya toplantı tarihiyle yürürlüğe girer; *reddedilenler* taslağa döner; *ertelenenler* beklemede kalır. Bir karar uygulanamazsa (örneğin toplantıdan sonra yeni bir revizyon yüklendiyse) nedeniyle birlikte gösterilir ve yeniden denenebilir
 7. Hedefli gözden geçirmenin **tutanağı**, incelenen belgeleri revizyon ve kararıyla, maddeleri ve kararları içerir; **denetim paketinde** hedefli toplantılar `09_management_review/sedute_intermedie/` klasöründedir
+
+### Karara bağlanacak risk kabulleri
+
+Organ, **tam veya hedefli** gözden geçirmede, politikanın kendisine ayırdığı risk kabullerini (örneğin Critical) ve Risk Sahibi'nin tek başına değerlendirip işlediği risklerin kabullerini karara bağlar (risk yönetimi prosedürü §10).
+
+1. **«Risk kabulleri ekle»** (yanındaki sayı kaç tanesinin beklediğini gösterir) organ kararı bekleyen kabullerin listesini açar: bir tesisin gözden geçirmesi o tesisinkileri, organizasyon gözden geçirmesi ayrıca grup risklerininkileri ve politikanın organizasyona ayırdığı sınıflarınkileri gösterir. Henüz onaylanmamış başka bir gözden geçirmenin gündeminde olan kabul listelenmez
+2. Seçilen her kabul risk, sınıf, tesis, önerilen bitiş tarihi ve gerekçe ile bir madde olur; **kararı** kaydedin: *Onaylandı*, *Ertelendi* veya *Reddedildi* (maddenin tartışması ret gerekçesi olur)
+3. Toplantıyı kapatmak için gündemdeki her kabulün bir kararı olmalıdır
+4. **Tutanak onaylandığında** onaylanan kabuller, gözden geçirme organ kararı sayılarak etkin olur (bağlayıcı CISO görüşü henüz yoksa görüş geldiğinde etkin olur); reddedilenler kapatılır; ertelenenler sonraki bir gözden geçirme için beklemede kalır. Bu arada kabul iptal edilmiş veya süresi dolmuşsa karar, gerekçesiyle birlikte maddede kalır
+5. **Tutanak**, karara bağlanan kabullerin tablosunu kararlarıyla birlikte içerir
 
 ---
 

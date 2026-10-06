@@ -41,7 +41,10 @@ def _agenda_item_queryset():
     latest = DocumentVersion.objects.filter(
         document=OuterRef("document"), deleted_at__isnull=True,
     ).order_by("-version_number")
-    return ReviewAgendaItem.objects.select_related("review", "document", "document_version").annotate(
+    return ReviewAgendaItem.objects.select_related(
+        "review", "document", "document_version",
+        "risk_acceptance", "risk_acceptance__risk", "risk_acceptance__risk__plant", "risk_acceptance__risk__threat",
+    ).annotate(
         latest_version_id=Subquery(latest.values("id")[:1]),
         latest_version_label=Subquery(latest.values("version_label")[:1]),
         latest_version_number=Subquery(latest.values("version_number")[:1]),
@@ -152,12 +155,30 @@ class ManagementReviewViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
             "review": self._respond(review).data,
         })
 
+    @action(detail=True, methods=["get"], url_path="pending-acceptances")
+    def pending_acceptances(self, request, pk=None):
+        """Accettazioni del rischio in attesa della delibera dell'organo."""
+        return Response(self._run(services.pending_acceptances, self.get_object(), request.user))
+
+    @action(detail=True, methods=["post"], url_path="acceptance-items")
+    def acceptance_items(self, request, pk=None):
+        """Mette all'ordine del giorno le accettazioni del rischio scelte."""
+        review = self.get_object()
+        result = self._run(
+            services.add_acceptance_items, review, request.data.get("acceptance_ids") or [], request.user,
+        )
+        return Response({
+            "added": [str(i.pk) for i in result["added"]],
+            "skipped": result["skipped"],
+            "review": self._respond(review).data,
+        })
+
     @action(detail=True, methods=["post"], url_path="apply-outcomes")
     def apply_outcomes(self, request, pk=None):
-        """Riesame mirato approvato: ritenta gli esiti non ancora applicati ai
-        documenti (es. dopo aver sistemato una revisione cambiata)."""
+        """Riesame approvato: ritenta gli esiti non ancora applicati a
+        documenti e accettazioni (es. dopo aver sistemato una revisione)."""
         review = self.get_object()
-        result = self._run(services.apply_document_outcomes, review, request.user)
+        result = self._run(services.apply_review_outcomes, review, request.user)
         return Response({**result, "review": self._respond(review).data})
 
     @action(detail=True, methods=["post"], url_path="generate-snapshot")

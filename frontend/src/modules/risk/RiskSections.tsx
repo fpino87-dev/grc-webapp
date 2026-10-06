@@ -6,7 +6,6 @@ import { apiError, riskApi, type Acceptance, type ExistingMeasure, type Mitigati
 import { controlsApi } from "../../api/endpoints/controls";
 import { plantsApi } from "../../api/endpoints/plants";
 import { usersApi } from "../../api/endpoints/users";
-import { governanceApi } from "../../api/endpoints/governance";
 import { useAuthStore } from "../../store/auth";
 import { MixedOwnerField } from "./MixedOwnerField";
 import { ClassBadge, ErrorBox, Field, Section, inputCls } from "./RiskUi";
@@ -287,7 +286,7 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
   // Rischio da accettare: la motivazione del trattamento è già la motivazione
   // dell'accettazione, si riprende e si può correggere.
   const [form, setForm] = useState({
-    rationale: risk.treatment === "accettare" ? risk.treatment_rationale : "", expires_on: "", body: "", ref: "",
+    rationale: risk.treatment === "accettare" ? risk.treatment_rationale : "", expires_on: "",
   });
   const [opinionNote, setOpinionNote] = useState("");
   const [revokeReason, setRevokeReason] = useState("");
@@ -300,7 +299,6 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
   const { data: history = [] } = useQuery({
     queryKey: ["risk-acceptances", risk.id], queryFn: () => riskApi.acceptances({ risk: risk.id }), retry: false,
   });
-  const { data: bodies = [] } = useQuery({ queryKey: ["committees"], queryFn: () => governanceApi.committees(), retry: false });
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["risk-acceptances"] });
     qc.invalidateQueries({ queryKey: ["risk", risk.id] });
@@ -333,7 +331,7 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
                 cls: t(`risk.classes.${req.class}`),
                 roles: req.roles.map(r => t(`risk.acceptance_roles.${r}`, r)).join(" + ") || t("risk.drawer.governing_body"),
               })}</p>
-              {req.added_for_self_management && <p className="text-amber-800">{t("risk.drawer.self_management_note")}</p>}
+              {req.body_for_self_management && <p className="text-amber-800">{t("risk.drawer.self_management_note")}</p>}
               {req.upper_opinion !== "none" && <p>{t(`risk.drawer.opinion_${req.upper_opinion}`)}</p>}
               {req.requires_body && <p>{t("risk.drawer.body_required")}</p>}
               <p>{t("risk.drawer.max_validity", { months: req.max_months })}</p>
@@ -359,7 +357,14 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
               {open.opinion_by_name ? ` (${open.opinion_by_name})` : ""}</p>
           )}
           {open.requires_body && (
-            <p className="text-[11px] text-gray-500">{t("risk.drawer.body")}: {open.body_name ?? "—"} {open.body_resolution_ref}</p>
+            <p className="text-[11px] text-gray-500">
+              {t("risk.drawer.body")}:{" "}
+              {open.body_resolution_ref
+                ? `${open.body_name ?? ""} ${open.body_resolution_ref}`.trim()
+                : open.on_review_agenda
+                  ? t("risk.drawer.body_on_agenda", { title: open.on_review_agenda.title, date: fmt(open.on_review_agenda.review_date, i18n.language) })
+                  : t("risk.drawer.body_awaiting_review")}
+            </p>
           )}
           {open.status === "pending" && (
             <div className="flex flex-wrap gap-2 pt-1">
@@ -376,18 +381,6 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
                     className="px-2 py-1 border border-green-300 text-green-700 rounded text-xs">{t("risk.drawer.favorable")}</button>
                   <button onClick={() => act.mutate(() => riskApi.giveOpinion(open.id, false, opinionNote))}
                     className="px-2 py-1 border border-red-300 text-red-700 rounded text-xs">{t("risk.drawer.unfavorable")}</button>
-                </>
-              )}
-              {open.requires_body && !open.body_resolution_ref && canMonitor && (
-                <>
-                  <select value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} className={`${inputCls} w-40`}>
-                    <option value="">{t("risk.cycle.choose_body")}</option>
-                    {bodies.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                  </select>
-                  <input value={form.ref} onChange={e => setForm({ ...form, ref: e.target.value })} className={`${inputCls} w-40`}
-                    placeholder={t("risk.drawer.resolution_ref")} />
-                  <button onClick={() => act.mutate(() => riskApi.bodyDecision(open.id, form.body, form.ref))}
-                    className="px-2 py-1 border rounded text-xs">{t("risk.drawer.record_decision")}</button>
                 </>
               )}
             </div>
@@ -413,19 +406,10 @@ export function AcceptanceSection({ risk, canMonitor }: { risk: Risk; canMonitor
             <Field label={t("risk.drawer.acceptance_expiry")}>
               <input type="date" value={form.expires_on} onChange={e => setForm({ ...form, expires_on: e.target.value })} className={inputCls} />
             </Field>
-            {req.requires_body && (
-              <Field label={t("risk.drawer.body")}>
-                <select value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} className={inputCls}>
-                  <option value="">{t("risk.cycle.choose_body")}</option>
-                  {bodies.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                </select>
-              </Field>
-            )}
           </div>
           <button
             onClick={() => act.mutate(() => riskApi.requestAcceptance({
               risk: risk.id, rationale: form.rationale, expires_on: form.expires_on || undefined,
-              body: form.body || undefined, body_resolution_ref: form.ref || undefined,
             }))}
             disabled={!form.rationale.trim()}
             className="px-3 py-1.5 bg-primary-600 text-white rounded text-sm disabled:opacity-50"

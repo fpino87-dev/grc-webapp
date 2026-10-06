@@ -515,6 +515,15 @@ def complete_review(review: ManagementReview, user) -> ManagementReview:
             code="agenda_incomplete",
             params={"missing": missing},
         )
+    from .targeted import uncovered_decision_items
+
+    undecided = uncovered_decision_items(review)
+    if undecided:
+        raise ValidationError(
+            _("Prima di chiudere la riunione registrare l'esito di ogni accettazione del rischio all'ordine del giorno."),
+            code="document_outcome_missing",
+            params={"missing": undecided},
+        )
 
     fields = ["status", "updated_at"]
     if review.plant_id:
@@ -539,14 +548,14 @@ def _complete_targeted_review(review: ManagementReview, user) -> ManagementRevie
     """Chiusura del riesame mirato: almeno un punto, e ogni documento con il
     suo esito. Nessuna proposta di prossimo riesame: resta quella del
     riesame completo."""
-    from .targeted import uncovered_targeted_items
+    from .targeted import uncovered_decision_items
 
     if not review.agenda_items.filter(deleted_at__isnull=True).exists():
         raise ValidationError(_("Aggiungere almeno un punto all'ordine del giorno prima di chiudere la riunione."))
-    missing = uncovered_targeted_items(review)
+    missing = uncovered_decision_items(review)
     if missing:
         raise ValidationError(
-            _("Prima di chiudere la riunione registrare l'esito di ogni documento all'ordine del giorno."),
+            _("Prima di chiudere la riunione registrare l'esito di ogni documento e accettazione del rischio all'ordine del giorno."),
             code="document_outcome_missing",
             params={"missing": missing},
         )
@@ -757,11 +766,22 @@ def approve_review(review: ManagementReview, user, note="", *, mode="in_app",
             "resolution_ref": fields["approval_resolution_ref"] or None,
         },
     )
-    # Riesame mirato: l'approvazione del verbale manda a effetto le decisioni
-    # sui documenti (in vigore / respinti). Gli esiti non applicabili restano
-    # sul punto con il motivo, senza annullare l'approvazione.
-    if review.is_targeted:
-        from .targeted import apply_document_outcomes
-
-        apply_document_outcomes(review, user)
+    # L'approvazione del verbale manda a effetto le decisioni dell'organo:
+    # documenti (solo nel mirato) e accettazioni del rischio (entrambi). Gli
+    # esiti non applicabili restano sul punto con il motivo, senza annullare
+    # l'approvazione.
+    apply_review_outcomes(review, user)
     return review
+
+
+def apply_review_outcomes(review: ManagementReview, user) -> dict:
+    from .risk_acceptances import apply_acceptance_outcomes
+    from .targeted import apply_document_outcomes
+
+    applied, skipped = [], []
+    if review.is_targeted:
+        docs = apply_document_outcomes(review, user)
+        applied += docs["applied"]
+        skipped += docs["skipped"]
+    accs = apply_acceptance_outcomes(review, user)
+    return {"applied": applied + accs["applied"], "skipped": skipped + accs["skipped"]}

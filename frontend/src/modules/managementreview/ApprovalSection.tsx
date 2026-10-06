@@ -168,6 +168,9 @@ export function ApprovalSection({ review, isGovernance, onMissing }: {
           {isTargeted
             ? <p className="text-xs text-gray-500">{t("management_review.targeted.approval_hint")}</p>
             : !review.executive_summary && <p className="text-xs text-gray-400">{t("management_review.detail.summary_recommended")}</p>}
+          {(review.agenda_items ?? []).some(i => i.risk_acceptance) && (
+            <p className="text-xs text-gray-500">{t("management_review.risk_acceptances.approval_hint")}</p>
+          )}
         </div>
       )}
     </section>

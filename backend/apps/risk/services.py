@@ -1225,29 +1225,28 @@ def acceptance_requirements(risk) -> dict:
     cls = risk.current_class
     rule = policy["acceptance_matrix"].get(cls) or {}
     roles = list(rule.get("roles", []))
+    requires_body = bool(rule.get("requires_body"))
     # Chi ha valutato e tratta da solo il proprio rischio non lo accetta da
-    # solo: serve il livello superiore (§10). Vale solo se a firmare sarebbe
-    # proprio lui (come Risk Owner o perché ricopre tutti i ruoli richiesti):
-    # se accetta un altro ruolo, per esempio il solo CISO, il controllo
-    # indipendente c'è già.
+    # solo: decide l'organo nel riesame di direzione (§10). Vale solo se a
+    # firmare sarebbe soltanto lui (come Risk Owner o perché ricopre l'unico
+    # ruolo richiesto): con due ruoli firmano per forza due persone diverse e
+    # il controllo indipendente c'è già.
     self_managed = (
         risk.owner_id is not None and risk.owner_id == risk.assessed_by_id
         and risk.treatment_owner_id in (None, risk.owner_id) and not risk.treatment_owner_external.strip()
     )
-    signs_alone = bool(roles) and (
-        "risk_owner" in roles or all(user_holds_role(risk.owner, r, risk.plant) for r in roles)
-    ) if self_managed else False
-    added_for_self_management = (
-        signs_alone and "plant_manager" not in roles and not rule.get("requires_body")
+    signs_alone = self_managed and len(set(roles)) == 1 and (
+        roles[0] == "risk_owner" or user_holds_role(risk.owner, roles[0], risk.plant)
     )
-    if added_for_self_management:
-        roles.append("plant_manager")
+    body_for_self_management = signs_alone and not requires_body
+    if body_for_self_management:
+        requires_body = True
     return {
-        "added_for_self_management": added_for_self_management,
+        "body_for_self_management": body_for_self_management,
         "class": cls,
         "roles": roles,
         "scope": rule.get("scope", "plant"),
-        "requires_body": bool(rule.get("requires_body")),
+        "requires_body": requires_body,
         "notify": list(rule.get("notify", [])),
         "upper_opinion": policy["upper_opinion"].get(cls, "none"),
         "max_months": int(policy["acceptance_max_months"].get(cls, 12)),
@@ -1273,8 +1272,10 @@ def signable_roles(user, acceptance) -> list:
     return out
 
 
-def request_acceptance(user, risk, *, rationale: str, expires_on=None, body=None, body_resolution_ref: str = ""):
-    """Avvia l'accettazione del rischio attuale secondo la policy (§10)."""
+def request_acceptance(user, risk, *, rationale: str, expires_on=None):
+    """Avvia l'accettazione del rischio attuale secondo la policy (§10). Se
+    serve l'organo, l'accettazione attende la delibera in un riesame di
+    direzione (`decide_acceptance_in_review`)."""
     import datetime
 
     from django.utils.translation import gettext as _
@@ -1309,7 +1310,7 @@ def request_acceptance(user, risk, *, rationale: str, expires_on=None, body=None
     with transaction.atomic():
         acc = RiskAcceptance.objects.create(
             risk=risk, risk_class=req["class"], required_roles=req["roles"],
-            requires_body=req["requires_body"], body=body, body_resolution_ref=(body_resolution_ref or "").strip(),
+            requires_body=req["requires_body"],
             rationale=rationale.strip(), expires_on=expires_on,
             upper_opinion="pending" if req["upper_opinion"] == "binding" else "not_required",
             created_by=user,
@@ -1362,25 +1363,72 @@ def sign_acceptance(user, acceptance):
     return acceptance
 
 
-def record_body_decision(user, acceptance, *, body, resolution_ref: str):
-    """Delibera dell'organo per un'accettazione che la richiede (Critical)."""
+def acceptance_decision_scope(acceptance) -> str:
+    """"org" se la policy riserva l'accettazione all'organo di organizzazione
+    (o il rischio è di gruppo), altrimenti "plant"."""
+    if acceptance.risk.plant_id is None:
+        return "org"
+    rule = resolve_policy(acceptance.risk.plant)["acceptance_matrix"].get(acceptance.risk_class) or {}
+    return "org" if rule.get("scope") == "org" else "plant"
+
+
+def acceptances_awaiting_body(plant_id=None):
+    """Accettazioni in attesa della delibera dell'organo che un riesame può
+    decidere (§10): quello di un sito decide i rischi del sito, quello di
+    organizzazione (`plant_id=None`) tutti, compresi i rischi di gruppo e le
+    classi che la policy riserva all'organizzazione. Una delibera già
+    registrata (storica) le esclude."""
+    from .models import RiskAcceptance
+
+    qs = (
+        RiskAcceptance.objects.filter(
+            status="pending", requires_body=True, review__isnull=True, body_resolution_ref="",
+            risk__deleted_at__isnull=True,
+        )
+        .select_related("risk", "risk__plant", "risk__threat")
+        .order_by("risk__plant__code", "created_at")
+    )
+    if plant_id is None:
+        return list(qs)
+    return [a for a in qs.filter(risk__plant_id=plant_id) if acceptance_decision_scope(a) == "plant"]
+
+
+def decide_acceptance_in_review(user, acceptance, *, review, approved: bool, note: str = ""):
+    """Esito della delibera dell'organo presa nel riesame approvato (§10).
+
+    Approvata → l'accettazione registra riesame, organo ed estremi della
+    delibera e si attiva se non manca altro (firme, parere vincolante).
+    Respinta → si chiude come respinta con la motivazione del verbale.
+    I permessi sono quelli dell'approvazione del riesame: qui non si
+    ricontrolla l'accesso al registro di chi approva il verbale.
+    """
     from django.utils.translation import gettext as _
 
     from core.audit import log_action
 
     if acceptance.status != "pending" or not acceptance.requires_body:
-        raise _err(_("Questa accettazione non attende una delibera dell'organo."))
-    if body is None or not (resolution_ref or "").strip():
-        raise _err(_("Indica l'organo e il riferimento della delibera."))
-    plant = None if resolve_policy(acceptance.risk.plant)["acceptance_matrix"].get(
-        acceptance.risk_class, {}).get("scope") == "org" else acceptance.risk.plant
-    require_register_write(user, plant)
+        raise _err(_("L'accettazione non attende più la delibera dell'organo."))
+    if acceptance.review_id or acceptance.body_resolution_ref:
+        raise _err(_("Sull'accettazione c'è già una delibera dell'organo."))
+    decision_date = review.approval_resolution_date or review.review_date
+    ref = _("Riesame di direzione «%(title)s» del %(date)s") % {
+        "title": review.title, "date": decision_date.strftime("%d/%m/%Y")}
+    if review.approval_resolution_ref:
+        ref = f"{ref} — {review.approval_resolution_ref}"
     with transaction.atomic():
-        acceptance.body = body
-        acceptance.body_resolution_ref = resolution_ref.strip()
-        acceptance.save(update_fields=["body", "body_resolution_ref", "updated_at"])
+        if not approved:
+            _close_acceptance(user, acceptance, "rejected",
+                              (note or "").strip() or _("Respinta dall'organo: %(ref)s") % {"ref": ref})
+            acceptance.review = review
+            acceptance.save(update_fields=["review", "updated_at"])
+            return acceptance
+        acceptance.review = review
+        acceptance.body = review.governing_body if review.governing_body_id else None
+        acceptance.body_resolution_ref = ref[:300]
+        acceptance.save(update_fields=["review", "body", "body_resolution_ref", "updated_at"])
         log_action(user=user, action_code="risk.acceptance.body_decision", level="L1",
-                   entity=acceptance.risk, payload={"acceptance_id": str(acceptance.pk)})
+                   entity=acceptance.risk,
+                   payload={"acceptance_id": str(acceptance.pk), "review_id": str(review.pk)})
         _try_activate(user, acceptance)
     return acceptance
 
@@ -1440,7 +1488,10 @@ def _try_activate(user, acceptance) -> None:
     signed = {s["role"] for s in acceptance.signatures}
     if not set(acceptance.required_roles) <= signed:
         return
-    if acceptance.requires_body and not (acceptance.body_id and acceptance.body_resolution_ref):
+    # Delibera dell'organo: nel riesame (`review`), o storica con organo ed estremi.
+    if acceptance.requires_body and not (
+        acceptance.review_id or (acceptance.body_id and acceptance.body_resolution_ref)
+    ):
         return
     if acceptance.upper_opinion == "pending":
         return

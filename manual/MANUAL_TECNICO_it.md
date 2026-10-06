@@ -525,7 +525,7 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Classe solo dalla matrice (`risk.services.risk_class`), impatto = max delle 6 dimensioni con soglia di riservatezza dalle `InformationClass`
 - Rischio attuale (`current_class`) e atteso (`expected_class`); "applica atteso" solo con misure completate e verificate
 - `RiskAssessmentCycle` (primo / periodico / straordinario / legacy) con `snapshot` congelato all'approvazione
-- `RiskAcceptance` con firme dei ruoli, parere del CISO e delibera dell'organo secondo `RiskGovernancePolicy`
+- `RiskAcceptance` con firme dei ruoli, parere del CISO e delibera dell'organo secondo `RiskGovernancePolicy`; la delibera si prende solo nel riesame di direzione (`RiskAcceptance.review`, punto `ReviewAgendaItem.risk_acceptance` con code `risk_acceptance`, esito applicato da `decide_acceptance_in_review` all'approvazione del verbale). Rischio autogestito con un solo firmatario → `requires_body` (`body_for_self_management` in `acceptance_requirements`)
 - Catalogo minacce: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (voci personalizzate da API)
 - Obiettivi aziendali `BusinessObjective` (procedura §2, `risk_catalogs/business_objectives.json` come proposta) collegati al rischio (`business_objectives`, obbligatorio per completare); `governance.SecurityObjective.risks` collega gli obiettivi di sicurezza ai rischi trattati
 - Funzioni uniche per gli altri moduli: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`

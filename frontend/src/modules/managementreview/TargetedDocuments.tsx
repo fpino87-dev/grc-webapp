@@ -214,13 +214,13 @@ function OutcomeState({ item }: { item: ReviewAgendaItem }) {
     : null;
 }
 
-// ── Dopo l'approvazione: esiti applicati ai documenti ────────────────────────
+// ── Dopo l'approvazione: esiti applicati a documenti e accettazioni ─────────
 
 export function OutcomeSummary({ review, isGovernance }: { review: ManagementReview; isGovernance: boolean }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [error, setError] = useState("");
-  const items = (review.agenda_items ?? []).filter(i => i.document);
+  const items = (review.agenda_items ?? []).filter(i => i.document || i.risk_acceptance);
   const failed = items.filter(i => i.document_outcome_error);
 
   const retry = useMutation({
@@ -238,7 +238,8 @@ export function OutcomeSummary({ review, isGovernance }: { review: ManagementRev
           <span className="font-medium">{i.title}</span>{" — "}
           {t(`management_review.targeted.outcomes.${i.document_outcome || "rinviato"}`)}{" · "}
           {i.document_outcome_applied_at
-            ? <span className="text-green-700">{t("management_review.targeted.applied_on", { date: fmtDate(i.document_outcome_applied_at) })}</span>
+            ? <span className="text-green-700">{t(i.risk_acceptance ? "management_review.risk_acceptances.applied_on" : "management_review.targeted.applied_on",
+                { date: fmtDate(i.document_outcome_applied_at) })}</span>
             : <span className="text-red-600">{t("management_review.targeted.not_applied", { reason: i.document_outcome_error || "—" })}</span>}
         </p>
       ))}

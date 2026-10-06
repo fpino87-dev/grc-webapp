@@ -688,6 +688,45 @@ def _outcome_state(item, review_approved: bool) -> dict:
     return {"text": "—", "tone": "muted"}
 
 
+def _acceptance_section(items, approved: bool) -> dict:
+    """Accettazioni del rischio deliberate dall'organo (procedura di risk
+    management §10): il verbale approvato è la delibera."""
+    from apps.risk.services import CLASS_LABELS, risk_label
+
+    rows = []
+    for i in items:
+        acc = i.risk_acceptance
+        rows.append([
+            risk_label(acc.risk),
+            acc.risk.plant.code if acc.risk.plant_id else _("Gruppo"),
+            CLASS_LABELS.get(acc.risk_class, acc.risk_class),
+            fmt_date(acc.expires_on),
+            {"text": OUTCOME.get(i.document_outcome, "—"), "tone": OUTCOME_TONE.get(i.document_outcome),
+             "bold": True},
+            _outcome_state(i, approved),
+        ])
+    return {"heading": _("Accettazioni del rischio deliberate"), "blocks": [_table(
+        None, [_("Rischio"), _("Sito"), _("Classe"), _("Valida fino al"), _("Esito"), _("Applicazione")], rows)]}
+
+
+def _acceptance_item_blocks(item) -> list:
+    acc = item.risk_acceptance
+    return [
+        {"type": "paragraph", "label": _("Motivazione dell'accettazione"), "text": acc.rationale},
+        {"type": "paragraph", "label": _("Esito"),
+         "text": OUTCOME.get(item.document_outcome, _("non registrato"))},
+    ]
+
+
+def _outcome_alerts(items) -> list:
+    return [
+        _("%(title)s: esito «%(outcome)s» non applicato — %(reason)s") % {
+            "title": i.title, "outcome": OUTCOME.get(i.document_outcome, i.document_outcome),
+            "reason": i.document_outcome_error}
+        for i in items if i.document_outcome_error
+    ]
+
+
 def _common_meta(review, chair) -> list:
     return [
         (_("Titolo"), review.title),
@@ -736,6 +775,7 @@ def build_targeted_report(review) -> dict:
     agenda = list(review.agenda_items.all())
     actions = list(review.actions.all())
     doc_items = [i for i in agenda if i.document_id]
+    acc_items = [i for i in agenda if i.risk_acceptance_id]
 
     sections = []
     if participants:
@@ -749,10 +789,15 @@ def build_targeted_report(review) -> dict:
               {"text": OUTCOME.get(i.document_outcome, "—"), "tone": OUTCOME_TONE.get(i.document_outcome),
                "bold": True},
               _outcome_state(i, approved)] for i in doc_items])]})
+    if acc_items:
+        sections.append(_acceptance_section(acc_items, approved))
 
     for item in agenda:
         blocks = []
-        if item.document_id:
+        if item.risk_acceptance_id:
+            heading = item.title
+            blocks += _acceptance_item_blocks(item)
+        elif item.document_id:
             heading = _("Documento: %(title)s") % {"title": item.title}
             blocks.append({"type": "paragraph", "label": _("Esito"), "text": _(
                 "%(outcome)s — revisione esaminata %(version)s"
@@ -771,12 +816,7 @@ def build_targeted_report(review) -> dict:
         sections.append({"heading": _("Altre decisioni"),
                          "blocks": [_table(None, DECISION_HEADERS, _decision_rows(loose))]})
 
-    alerts = [
-        _("%(title)s: esito «%(outcome)s» non applicato — %(reason)s") % {
-            "title": i.title, "outcome": OUTCOME.get(i.document_outcome, i.document_outcome),
-            "reason": i.document_outcome_error}
-        for i in doc_items if i.document_outcome_error
-    ]
+    alerts = _outcome_alerts(doc_items + acc_items)
     return _report_frame(
         review,
         title=_("Riesame mirato"),
@@ -864,6 +904,8 @@ def build_report(review) -> dict:
             clause = ISO_AGENDA_CLAUSE.get(item.code)
             title = ISO_AGENDA_TITLES.get(item.code) or item.title
             blocks = list(DATA_BLOCKS.get(item.code, lambda s, ctx: [])(snap, data_ctx))
+            if item.risk_acceptance_id:
+                blocks += _acceptance_item_blocks(item)
             blocks.append({"type": "paragraph", "label": _("Discussione"),
                            "text": item.discussion.strip() or _("Nessuna annotazione.")})
             # Trasparenza (AI Act art. 50): il lettore del verbale deve sapere
@@ -900,8 +942,11 @@ def build_report(review) -> dict:
     if agenda and len({a.agenda_item_id for a in actions}) > 1:
         sections.append({"heading": _("Riepilogo delle decisioni"),
                          "blocks": [_table(None, DECISION_HEADERS, _decision_rows(actions))]})
+    acc_items = [i for i in agenda if i.risk_acceptance_id]
+    if acc_items:
+        sections.append(_acceptance_section(acc_items, review.approval_status == "approvato"))
 
     return _report_frame(
         review, title=_("Riesame di Direzione SGSI"), subtitle=_scope_subtitle(review),
-        meta=meta, summary=summary, alerts=_alerts(snap), sections=sections,
+        meta=meta, summary=summary, alerts=_alerts(snap) + _outcome_alerts(acc_items), sections=sections,
     )

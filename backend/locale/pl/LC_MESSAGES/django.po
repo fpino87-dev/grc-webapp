@@ -3558,3 +3558,50 @@ msgstr "Oczekiwany wpływ podniesiony do %(floor)s: to próg poufności informac
 
 msgid "Il rischio è già dichiarato non applicabile."
 msgstr "Ryzyko jest już oznaczone jako nie dotyczy."
+
+msgid "L'accettazione non attende più la delibera dell'organo."
+msgstr "Akceptacja nie oczekuje już na uchwałę organu."
+
+msgid "Sull'accettazione c'è già una delibera dell'organo."
+msgstr "Akceptacja ma już uchwałę organu."
+
+#, python-format
+msgid "Riesame di direzione «%(title)s» del %(date)s"
+msgstr "Przegląd zarządzania „%(title)s” z dnia %(date)s"
+
+#, python-format
+msgid "Respinta dall'organo: %(ref)s"
+msgstr "Odrzucona przez organ: %(ref)s"
+
+msgid "Accettazione del rischio"
+msgstr "Akceptacja ryzyka"
+
+msgid "Nessuna accettazione indicata."
+msgstr "Nie wskazano akceptacji."
+
+msgid "Accettazione non in attesa dell'organo, fuori perimetro o già in un altro riesame."
+msgstr "Akceptacja nie oczekuje na organ, jest poza zakresem lub jest już w innym przeglądzie."
+
+msgid "L'accettazione non è più in attesa di decisione (revocata, respinta o scaduta)."
+msgstr "Akceptacja nie oczekuje już na decyzję (cofnięta, odrzucona lub wygasła)."
+
+msgid "Gli esiti si applicano quando il riesame è approvato."
+msgstr "Decyzje są stosowane po zatwierdzeniu przeglądu."
+
+msgid "L'esito si registra solo sui punti relativi a un documento o a un'accettazione del rischio."
+msgstr "Decyzję zapisuje się tylko w punktach dotyczących dokumentu lub akceptacji ryzyka."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni documento e accettazione del rischio all'ordine del giorno."
+msgstr "Przed zamknięciem posiedzenia zapisz decyzję dla każdego dokumentu i akceptacji ryzyka w porządku obrad."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni accettazione del rischio all'ordine del giorno."
+msgstr "Przed zamknięciem posiedzenia zapisz decyzję dla każdej akceptacji ryzyka w porządku obrad."
+
+msgid "Accettazioni del rischio deliberate"
+msgstr "Uchwalone akceptacje ryzyka"
+
+msgid "Valida fino al"
+msgstr "Ważna do"
+
+msgid "Motivazione dell'accettazione"
+msgstr "Uzasadnienie akceptacji"

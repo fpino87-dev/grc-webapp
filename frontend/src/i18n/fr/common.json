@@ -3272,14 +3272,14 @@
         "3": "Dans la fiche du risque, suivez les étapes : scénario (menace, informations, objectifs menacés, Risk Owner), mesures existantes, risque actuel avec les justifications, puis la décision : accepter le risque résiduel ou le traiter avec un plan.",
         "4": "Terminez l'évaluation : High et Critical ouvrent le plan de traitement.",
         "5": "Soumettez à l'approbation : l'organe approuve et le registre est figé.",
-        "6": "Suivez mesures, vérifications et acceptations : la classe ne baisse qu'avec des mesures vérifiées."
+        "6": "Suivez mesures, vérifications et acceptations : la classe ne baisse qu'avec des mesures vérifiées. Les acceptations réservées à l'organe (par la politique ou parce que le Risk Owner a évalué et traite seul le risque) sont délibérées en revue de direction."
       },
       "connections": {
         "governance": "Rôles, organes de gouvernance et objectifs de sécurité",
         "controls": "Mesures existantes et planifiées liées aux contrôles VDA ISA",
         "assets": "Actifs concernés et changements suggérant une révision",
         "bia": "Processus critiques, RTO et MTPD pour l'impact opérationnel",
-        "review": "Approbation annuelle du registre dans la revue de direction"
+        "review": "Approbation annuelle du registre et délibération des acceptations réservées à l'organe dans la revue de direction"
       },
       "config_needed": {
         "1": "Politique de gouvernance des risques (Paramètres)",
@@ -3455,11 +3455,11 @@
       "acceptance_needs_completion": "Seul un risque applicable dont l'évaluation est terminée peut être accepté.",
       "not_acceptable_notice": "Risque non acceptable : il doit être traité.",
       "who_accepts": "Classe {{cls}} : acceptée par {{roles}}.",
-      "self_management_note": "Plant Manager ajouté : le Risk Owner a évalué le risque et en gère aussi le traitement, il ne peut donc pas l'accepter seul (procédure §10). Pas nécessaire si l'évaluation ou le traitement est confié à une autre personne.",
+      "self_management_note": "L'organe décide : le Risk Owner a évalué le risque et en gère aussi le traitement, il ne peut donc pas l'accepter seul (procédure §10). Pas nécessaire si l'évaluation ou le traitement est confié à une autre personne.",
       "governing_body": "l'organe d'administration",
       "opinion_binding": "L'avis favorable du RSSI est requis.",
       "opinion_notify": "Le RSSI est informé.",
-      "body_required": "Une délibération de l'organe est requise.",
+      "body_required": "L'organe décide lors d'une revue de direction (complète ou ciblée) : l'acceptation devient active à l'approbation du procès-verbal.",
       "max_validity": "Validité maximale : {{months}} mois.",
       "expires": "expire le {{date}}",
       "signatures": "Signatures",
@@ -3470,8 +3470,6 @@
       "opinion_note": "Note d'avis",
       "favorable": "Favorable",
       "unfavorable": "Défavorable",
-      "resolution_ref": "Référence de la délibération",
-      "record_decision": "Enregistrer la délibération",
       "revoke_reason": "Motif de la révocation",
       "revoke": "Révoquer",
       "acceptance_rationale": "Justification (pour High : analyse coûts/bénéfices)",
@@ -3542,7 +3540,9 @@
       "make_not_applicable_confirm": "Déclarer non applicable",
       "not_applicable_reason": "Pourquoi la menace ne s'applique pas (ex. aucun actif exposé)",
       "delete_na_confirm": "Retirer la déclaration de non-applicabilité ? La menace redevient à évaluer dans la Couverture.",
-      "not_applicable_undo_hint": "Pour l'évaluer à nouveau, utilisez Supprimer : la menace redevient à évaluer dans l'onglet Couverture."
+      "not_applicable_undo_hint": "Pour l'évaluer à nouveau, utilisez Supprimer : la menace redevient à évaluer dans l'onglet Couverture.",
+      "body_on_agenda": "à l'ordre du jour de la revue « {{title}} » du {{date}}",
+      "body_awaiting_review": "en attente d'une revue de direction"
     },
     "register": {
       "search": "Rechercher",
@@ -3671,7 +3671,7 @@
       "review_months": "Révision périodique (mois)",
       "group_register": "Registre de groupe actif (risques des services partagés, hérités par les sites)",
       "acceptance_matrix": "Qui accepte, par classe",
-      "self_management_hint": "Règle fixe de la procédure (§10) : si le Risk Owner devait signer et qu'il a aussi évalué le risque et en gère le traitement, le Plant Manager est ajouté à l'acceptation.",
+      "self_management_hint": "Règle fixe de la procédure (§10) : si seul le Risk Owner devait signer et qu'il a aussi évalué le risque et en gère le traitement, l'organe décide l'acceptation en revue de direction.",
       "col_class": "Classe",
       "col_roles": "Signatures requises",
       "col_scope": "Niveau",
@@ -6012,10 +6012,11 @@
         "7": "Rédigez la synthèse exécutive ou générez un brouillon avec l'IA, relisez-le et acceptez-le",
         "8": "Approuvez la revue : dans l'application (un membre de l'organe disposant d'un compte, ou la gouvernance) ou en enregistrant le numéro et la date de la délibération de l'organe. Le procès-verbal devient immuable",
         "9": "Téléchargez le procès-verbal en PDF ou HTML (également inclus dans le dossier d'audit)",
-        "10": "Pour approuver des documents isolés ou de petites décisions entre deux revues, créez une revue « Ciblée » : choisissez les documents en attente, enregistrez la décision pour chacun et approuvez le procès-verbal."
+        "10": "Pour approuver des documents isolés ou de petites décisions entre deux revues, créez une revue « Ciblée » : choisissez les documents en attente, enregistrez la décision pour chacun et approuvez le procès-verbal.",
+        "11": "Dans chaque revue, complète ou ciblée, ajoutez les acceptations du risque en attente de l'organe et enregistrez pour chacune si elle est approuvée, reportée ou rejetée : la décision s'applique à l'acceptation à l'approbation du procès-verbal."
       },
       "connections": {
-        "risk": "Risques critiques et risques formellement acceptés dans l'instantané",
+        "risk": "Risques critiques et risques formellement acceptés dans l'instantané ; les acceptations réservées à l'organe sont délibérées comme points de l'ordre du jour",
         "incidents": "Incidents des 12 derniers mois dans l'instantané",
         "pdca": "PDCA ouverts et bloqués dans l'instantané",
         "tasks": "Les décisions peuvent ouvrir des tâches assignées à un rôle",
@@ -6469,12 +6470,27 @@
       "applied_on": "Appliqué au document le {{date}}",
       "not_applied": "Non appliqué : {{reason}}",
       "applies_on_approval": "S'applique au document à l'approbation du procès-verbal.",
-      "outcomes_title": "Décisions appliquées aux documents",
+      "outcomes_title": "Décisions appliquées",
       "retry": "Réessayer les décisions non appliquées",
       "retry_error": "Impossible d'appliquer les décisions.",
-      "outcomes_missing": "Documents sans décision : {{count}}. Enregistrez la décision de chaque document avant de clôturer la réunion.",
+      "outcomes_missing": "Points sans décision : {{count}}. Enregistrez la décision de chaque document et acceptation du risque avant de clôturer la réunion.",
       "no_next_review": "La revue ciblée ne propose pas la prochaine revue : celle de la revue périodique reste valable.",
       "approval_hint": "À l'approbation du procès-verbal, les décisions s'appliquent aux documents : les approuvés entrent en vigueur, les rejetés reviennent en brouillon."
+    },
+    "risk_acceptances": {
+      "add": "Ajouter des acceptations du risque",
+      "pending_title": "Acceptations du risque en attente de l'organe",
+      "pending_hint": "Acceptations que la politique réserve à l'organe et acceptations de risques évalués et traités par le même Risk Owner. Chaque acceptation choisie devient un point : la décision s'applique à l'approbation du procès-verbal.",
+      "no_pending": "Aucune acceptation en attente de l'organe.",
+      "group": "Groupe",
+      "valid_until": "valable jusqu'au {{date}}",
+      "opinion_pending": "Avis du CISO en attente",
+      "rationale": "Motivation",
+      "no_longer_pending": "L'acceptation n'est plus en attente ({{status}}) : la décision ne pourra pas être appliquée.",
+      "applied_on": "Appliquée à l'acceptation le {{date}}",
+      "applies_on_approval": "S'applique à l'acceptation à l'approbation du procès-verbal.",
+      "add_error": "Impossible d'ajouter les acceptations.",
+      "approval_hint": "À l'approbation du procès-verbal, les acceptations du risque approuvées deviennent actives (sauf si l'avis du CISO manque) et celles rejetées sont clôturées."
     }
   },
   "objectives": {

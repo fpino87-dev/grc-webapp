@@ -3537,3 +3537,50 @@ msgstr "Beklenen etki %(floor)s seviyesine yükseltildi: etkilenen bilgilerin gi
 
 msgid "Il rischio è già dichiarato non applicabile."
 msgstr "Risk zaten uygulanamaz olarak beyan edildi."
+
+msgid "L'accettazione non attende più la delibera dell'organo."
+msgstr "Kabul artık organ kararını beklemiyor."
+
+msgid "Sull'accettazione c'è già una delibera dell'organo."
+msgstr "Kabul için zaten bir organ kararı var."
+
+#, python-format
+msgid "Riesame di direzione «%(title)s» del %(date)s"
+msgstr "%(date)s tarihli “%(title)s” yönetim gözden geçirmesi"
+
+#, python-format
+msgid "Respinta dall'organo: %(ref)s"
+msgstr "Organ tarafından reddedildi: %(ref)s"
+
+msgid "Accettazione del rischio"
+msgstr "Risk kabulü"
+
+msgid "Nessuna accettazione indicata."
+msgstr "Kabul belirtilmedi."
+
+msgid "Accettazione non in attesa dell'organo, fuori perimetro o già in un altro riesame."
+msgstr "Kabul organ kararı beklemiyor, kapsam dışında ya da zaten başka bir gözden geçirmede."
+
+msgid "L'accettazione non è più in attesa di decisione (revocata, respinta o scaduta)."
+msgstr "Kabul artık karar beklemiyor (iptal edildi, reddedildi veya süresi doldu)."
+
+msgid "Gli esiti si applicano quando il riesame è approvato."
+msgstr "Kararlar gözden geçirme onaylandığında uygulanır."
+
+msgid "L'esito si registra solo sui punti relativi a un documento o a un'accettazione del rischio."
+msgstr "Karar yalnızca bir belge veya risk kabulüyle ilgili maddelere kaydedilir."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni documento e accettazione del rischio all'ordine del giorno."
+msgstr "Toplantıyı kapatmadan önce gündemdeki her belge ve risk kabulünün kararını kaydedin."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni accettazione del rischio all'ordine del giorno."
+msgstr "Toplantıyı kapatmadan önce gündemdeki her risk kabulünün kararını kaydedin."
+
+msgid "Accettazioni del rischio deliberate"
+msgstr "Karara bağlanan risk kabulleri"
+
+msgid "Valida fino al"
+msgstr "Geçerlilik sonu"
+
+msgid "Motivazione dell'accettazione"
+msgstr "Kabul gerekçesi"

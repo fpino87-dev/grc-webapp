@@ -469,7 +469,7 @@ Działania planu mają odpowiedzialnego, termin i oczekiwany efekt. Zakończone 
 
 ### Akceptacja
 
-Kto może zaakceptować, zależy od klasy i od **polityki zarządzania ryzykiem** (Ustawienia): podpisy wymaganych ról, opinia CISO (wiążąca lub informacyjna) oraz, dla Critical, uchwała organu. Maksymalna ważność zależy od klasy. Ryzyk wiążących się z naruszeniem prawa, wymagań VDA ISA lub zobowiązań do zachowania poufności nigdy nie można zaakceptować; jeśli Właściciel ryzyka sam ocenił i potraktował ryzyko, wymagany jest także podpis Plant Managera. Zmiana klasy unieważnia akceptację. Wygasające akceptacje tworzą zadanie 30 dni wcześniej. Dodatkowy podpis Plant Managera jest wymagany tylko wtedy, gdy podpisywać miałby sam Risk Owner: jeśli polityka przewiduje akceptację przez inną rolę (na przykład tylko CISO), nikt nie jest dodawany, a karta zawsze podaje, dlaczego dodano Plant Managera. Jeśli postępowanie to „akceptacja”, uzasadnienie akceptacji jest przejmowane z uzasadnienia postępowania i można je poprawić; jeśli ryzyko jest w trakcie postępowania, akceptacja obejmuje obecną ekspozycję do czasu zakończenia i weryfikacji działań.
+Kto może zaakceptować, zależy od klasy i od **polityki zarządzania ryzykiem** (Ustawienia): podpisy wymaganych ról, opinia CISO (wiążąca lub informacyjna) oraz, dla Critical, uchwała organu. Maksymalna ważność zależy od klasy. Ryzyk wiążących się z naruszeniem prawa, wymagań VDA ISA lub zobowiązań do zachowania poufności nigdy nie można zaakceptować; jeśli Właściciel ryzyka sam ocenił i potraktował ryzyko, o akceptacji decyduje organ w przeglądzie zarządzania. Zmiana klasy unieważnia akceptację. Wygasające akceptacje tworzą zadanie 30 dni wcześniej. Przekazanie do organu następuje tylko wtedy, gdy podpisywać miałby wyłącznie sam Risk Owner: jeśli polityka przewiduje akceptację przez inną rolę (na przykład tylko CISO) lub dwie role (podpisują wtedy dwie różne osoby), niezależna kontrola już istnieje, a karta zawsze podaje, dlaczego decyduje organ. Akceptacje zastrzeżone dla organu (przez politykę, jak Critical, lub z powodu samodzielnego zarządzania) pozostają *w zatwierdzaniu*, dopóki nie uchwali ich przegląd zarządzania: karta pokazuje, czy są już w porządku obrad przeglądu, czy oczekują, i nie wpisuje się ich już ręcznie. Jeśli postępowanie to „akceptacja”, uzasadnienie akceptacji jest przejmowane z uzasadnienia postępowania i można je poprawić; jeśli ryzyko jest w trakcie postępowania, akceptacja obejmuje obecną ekspozycję do czasu zakończenia i weryfikacji działań.
 
 ### Dziedziczone ryzyka grupy
 
@@ -811,6 +811,16 @@ Między dwoma pełnymi przeglądami organ może zbierać się w sprawie konkretn
 5. **Zamknij posiedzenie**: potrzebny jest co najmniej jeden punkt, a każdy dokument musi mieć decyzję
 6. **Zatwierdź protokół** (w aplikacji lub rejestrując uchwałę): decyzje są stosowane do dokumentów. *Zatwierdzone* wchodzą w życie uchwałą organu, z datą uchwały lub posiedzenia; *odrzucone* wracają do wersji roboczej; *odroczone* pozostają oczekujące. Jeśli decyzji nie da się zastosować (np. po posiedzeniu wgrano nową wersję), pozostaje oznaczona wraz z przyczyną i można ponowić próbę
 7. **Protokół** przeglądu ukierunkowanego zawiera rozpatrzone dokumenty z wersją i decyzją, punkty i decyzje; w **pakiecie audytowym** posiedzenia ukierunkowane są w `09_management_review/sedute_intermedie/`
+
+### Akceptacje ryzyka do uchwalenia
+
+W przeglądzie, **pełnym lub ukierunkowanym**, organ uchwala akceptacje ryzyka, które polityka mu zastrzega (na przykład Critical), oraz akceptacje ryzyk, które Risk Owner sam ocenił i którymi sam zarządza (procedura zarządzania ryzykiem §10).
+
+1. **„Dodaj akceptacje ryzyka”** (liczba obok mówi, ile oczekuje) otwiera listę akceptacji oczekujących na organ: przegląd zakładu pokazuje akceptacje zakładu, przegląd organizacji także te dotyczące ryzyk grupy i klas zastrzeżonych przez politykę dla organizacji. Akceptacja będąca już w porządku obrad innego, jeszcze niezatwierdzonego przeglądu nie jest wyświetlana
+2. Każda wybrana akceptacja staje się punktem z ryzykiem, klasą, zakładem, proponowanym terminem ważności i uzasadnieniem; zapisz **decyzję**: *Zatwierdzono*, *Odłożono* lub *Odrzucono* (dyskusja punktu staje się powodem odrzucenia)
+3. Aby zamknąć posiedzenie, każda akceptacja w porządku obrad musi mieć decyzję
+4. **Po zatwierdzeniu protokołu** zatwierdzone akceptacje stają się aktywne, z przeglądem jako uchwałą (jeśli wciąż brakuje wiążącej opinii CISO, stają się aktywne po jej wydaniu); odrzucone zostają zamknięte; odłożone czekają na kolejny przegląd. Jeśli w międzyczasie akceptacja została cofnięta lub wygasła, decyzja pozostaje w punkcie z podaniem powodu
+5. **Protokół** zawiera tabelę uchwalonych akceptacji z decyzją
 
 ---
 

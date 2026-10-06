@@ -469,7 +469,7 @@ Le misure del piano hanno responsabile, scadenza ed effetto atteso. Quando una m
 
 ### Accettazione
 
-Chi può accettare dipende dalla classe e dalla **policy di governo del rischio** (Impostazioni): le firme dei ruoli richiesti, il parere del CISO (vincolante o informativo) e, per i Critical, la delibera dell'organo. La validità massima dipende dalla classe. Non sono mai accettabili i rischi che comportano violazioni di legge, dei requisiti VDA ISA o degli obblighi di riservatezza; se il Risk Owner ha valutato e trattato da solo il rischio serve anche la firma del Plant Manager. Se la classe cambia, l'accettazione decade. Le accettazioni in scadenza generano un task 30 giorni prima. La firma aggiuntiva del Plant Manager scatta solo se a firmare sarebbe il Risk Owner stesso: se la policy fa accettare un altro ruolo (per esempio solo il CISO) non si aggiunge nessuno, e la scheda indica sempre perché il Plant Manager è stato aggiunto. Se il trattamento è «accettare», la motivazione dell'accettazione riprende quella del trattamento e si può correggere; se il rischio è in trattamento, l'accettazione copre l'esposizione attuale finché le misure non sono completate e verificate.
+Chi può accettare dipende dalla classe e dalla **policy di governo del rischio** (Impostazioni): le firme dei ruoli richiesti, il parere del CISO (vincolante o informativo) e, per i Critical, la delibera dell'organo. La validità massima dipende dalla classe. Non sono mai accettabili i rischi che comportano violazioni di legge, dei requisiti VDA ISA o degli obblighi di riservatezza; se il Risk Owner ha valutato e trattato da solo il rischio, l'accettazione la decide l'organo nel riesame di direzione. Se la classe cambia, l'accettazione decade. Le accettazioni in scadenza generano un task 30 giorni prima. Il passaggio all'organo scatta solo se a firmare sarebbe soltanto il Risk Owner stesso: se la policy fa accettare un altro ruolo (per esempio solo il CISO) o due ruoli (firmano per forza due persone diverse) il controllo indipendente c'è già, e la scheda indica sempre perché decide l'organo. Le accettazioni che spettano all'organo (per policy, come i Critical, o per autogestione) restano *in approvazione* finché un riesame di direzione non le delibera: la scheda mostra se sono già all'ordine del giorno di un riesame o in attesa, e non si registrano più a mano. Se il trattamento è «accettare», la motivazione dell'accettazione riprende quella del trattamento e si può correggere; se il rischio è in trattamento, l'accettazione copre l'esposizione attuale finché le misure non sono completate e verificate.
 
 ### Rischi di gruppo ereditati
 
@@ -811,6 +811,16 @@ Fra un riesame completo e l'altro l'organo può riunirsi su punti specifici, per
 5. **Chiudi la riunione**: serve almeno un punto e ogni documento deve avere un esito
 6. **Approva il verbale** (in app o registrando la delibera): gli esiti si applicano ai documenti. Gli *approvati* entrano in vigore per delibera dell'organo, con la data della delibera o della seduta; i *respinti* tornano in bozza; i *rinviati* restano in attesa. Se un esito non si può applicare (per esempio è stata caricata una nuova revisione dopo la seduta) resta indicato con il motivo e si può ritentare
 7. Il **verbale** del riesame mirato riporta i documenti esaminati con revisione ed esito, i punti e le decisioni; nel **pacchetto audit** le sedute mirate sono in `09_management_review/sedute_intermedie/`
+
+### Accettazioni del rischio da deliberare
+
+L'organo delibera nel riesame, **completo o mirato**, le accettazioni del rischio che la policy gli riserva (per esempio i Critical) e quelle dei rischi che il Risk Owner ha valutato e tratta da solo (procedura di risk management §10).
+
+1. Con **«Aggiungi accettazioni del rischio»** (il numero accanto dice quante sono in attesa) si apre l'elenco delle accettazioni in attesa dell'organo: il riesame di un sito mostra quelle del sito, il riesame di organizzazione anche quelle dei rischi di gruppo e delle classi che la policy riserva all'organizzazione. Un'accettazione già all'ordine del giorno di un altro riesame non ancora approvato non compare
+2. Ogni accettazione scelta diventa un punto con rischio, classe, sito, scadenza proposta e motivazione; registra l'**esito**: *Approvato*, *Rinviato* o *Respinto* (la discussione del punto diventa la motivazione del respingimento)
+3. Per chiudere la riunione ogni accettazione all'ordine del giorno deve avere un esito
+4. **Approvando il verbale** le accettazioni approvate si attivano, con il riesame come delibera (se manca ancora il parere vincolante del CISO si attivano quando arriva); le respinte si chiudono; le rinviate restano in attesa per un riesame successivo. Se nel frattempo un'accettazione è stata revocata o è scaduta, l'esito resta sul punto con il motivo
+5. Il **verbale** riporta la tabella delle accettazioni deliberate con l'esito
 
 ---
 

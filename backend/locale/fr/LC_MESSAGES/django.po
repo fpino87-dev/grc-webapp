@@ -3603,3 +3603,50 @@ msgstr "Impact attendu porté à %(floor)s : c'est le seuil de confidentialité 
 
 msgid "Il rischio è già dichiarato non applicabile."
 msgstr "Le risque est déjà déclaré non applicable."
+
+msgid "L'accettazione non attende più la delibera dell'organo."
+msgstr "L'acceptation n'attend plus la délibération de l'organe."
+
+msgid "Sull'accettazione c'è già una delibera dell'organo."
+msgstr "L'acceptation a déjà une délibération de l'organe."
+
+#, python-format
+msgid "Riesame di direzione «%(title)s» del %(date)s"
+msgstr "Revue de direction « %(title)s » du %(date)s"
+
+#, python-format
+msgid "Respinta dall'organo: %(ref)s"
+msgstr "Rejetée par l'organe : %(ref)s"
+
+msgid "Accettazione del rischio"
+msgstr "Acceptation du risque"
+
+msgid "Nessuna accettazione indicata."
+msgstr "Aucune acceptation indiquée."
+
+msgid "Accettazione non in attesa dell'organo, fuori perimetro o già in un altro riesame."
+msgstr "Acceptation non en attente de l'organe, hors périmètre ou déjà dans une autre revue."
+
+msgid "L'accettazione non è più in attesa di decisione (revocata, respinta o scaduta)."
+msgstr "L'acceptation n'est plus en attente de décision (révoquée, rejetée ou expirée)."
+
+msgid "Gli esiti si applicano quando il riesame è approvato."
+msgstr "Les décisions s'appliquent lorsque la revue est approuvée."
+
+msgid "L'esito si registra solo sui punti relativi a un documento o a un'accettazione del rischio."
+msgstr "La décision ne s'enregistre que sur les points relatifs à un document ou à une acceptation du risque."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni documento e accettazione del rischio all'ordine del giorno."
+msgstr "Avant de clôturer la réunion, enregistrez la décision de chaque document et acceptation du risque à l'ordre du jour."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni accettazione del rischio all'ordine del giorno."
+msgstr "Avant de clôturer la réunion, enregistrez la décision de chaque acceptation du risque à l'ordre du jour."
+
+msgid "Accettazioni del rischio deliberate"
+msgstr "Acceptations du risque délibérées"
+
+msgid "Valida fino al"
+msgstr "Valable jusqu'au"
+
+msgid "Motivazione dell'accettazione"
+msgstr "Motivation de l'acceptation"

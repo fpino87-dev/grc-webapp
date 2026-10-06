@@ -526,7 +526,16 @@ class RiskAcceptanceViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         from core.scoping import scope_queryset_by_plant
 
-        qs = RiskAcceptance.objects.select_related("risk", "risk__plant", "risk__threat", "body", "opinion_by")
+        from apps.management_review.models import ReviewAgendaItem
+
+        qs = RiskAcceptance.objects.select_related(
+            "risk", "risk__plant", "risk__threat", "body", "opinion_by", "review",
+        ).prefetch_related(Prefetch(
+            "review_items", to_attr="open_review_items",
+            queryset=ReviewAgendaItem.objects.filter(
+                deleted_at__isnull=True, review__deleted_at__isnull=True,
+            ).exclude(review__approval_status="approvato").select_related("review").order_by("-created_at"),
+        ))
         qs = scope_queryset_by_plant(qs, self.request.user, plant_field="risk__plant", allow_null_plant=True)
         params = self.request.query_params
         if params.get("risk"):
@@ -549,18 +558,15 @@ class RiskAcceptanceViewSet(viewsets.ReadOnlyModelViewSet):
         return qs
 
     def create(self, request, *args, **kwargs):
-        """Richiesta di accettazione. Body: {risk, rationale, expires_on?, body?, body_resolution_ref?}."""
-        from apps.governance.models import SecurityCommittee
-
+        """Richiesta di accettazione. Body: {risk, rationale, expires_on?}. Se
+        serve l'organo, decide il riesame di direzione (non si registra qui)."""
         risk = RiskAssessment.objects.filter(pk=request.data.get("risk")).first()
         if risk is None or not self._can_see(risk):
             raise DRFValidationError({"risk": _("Rischio inesistente.")})
-        body = SecurityCommittee.objects.filter(pk=request.data.get("body")).first() if request.data.get("body") else None
         acc = _call_service(
             services.request_acceptance, request.user, risk,
             rationale=request.data.get("rationale", ""),
             expires_on=self._date(request.data.get("expires_on")),
-            body=body, body_resolution_ref=request.data.get("body_resolution_ref", ""),
         )
         return Response(self.get_serializer(acc).data, status=201)
 
@@ -591,17 +597,6 @@ class RiskAcceptanceViewSet(viewsets.ReadOnlyModelViewSet):
         acc = _call_service(
             services.give_opinion, request.user, self.get_object(),
             favorable=bool(request.data.get("favorable")), note=request.data.get("note", ""),
-        )
-        return Response(self.get_serializer(acc).data)
-
-    @action(detail=True, methods=["post"], url_path="body-decision")
-    def body_decision(self, request, pk=None):
-        from apps.governance.models import SecurityCommittee
-
-        body = SecurityCommittee.objects.filter(pk=request.data.get("body")).first()
-        acc = _call_service(
-            services.record_body_decision, request.user, self.get_object(),
-            body=body, resolution_ref=request.data.get("resolution_ref", ""),
         )
         return Response(self.get_serializer(acc).data)
 

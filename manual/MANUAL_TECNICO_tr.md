@@ -524,7 +524,7 @@ Yanıt: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Sınıf yalnızca matristen (`risk.services.risk_class`), etki = `InformationClass` kaynaklı gizlilik tabanıyla 6 boyutun en yükseği
 - Mevcut risk (`current_class`) ve beklenen risk (`expected_class`); "beklenen riski uygula" yalnızca tamamlanmış ve doğrulanmış önlemlerle
 - Onayda dondurulan `snapshot` ile `RiskAssessmentCycle` (ilk / dönemsel / olağanüstü / legacy)
-- `RiskGovernancePolicy`'ye göre rol imzaları, CISO görüşü ve organ kararıyla `RiskAcceptance`
+- `RiskGovernancePolicy`'ye göre rol imzaları, CISO görüşü ve organ kararıyla `RiskAcceptance`; organ kararı yalnızca yönetim gözden geçirmesinde alınır (`RiskAcceptance.review`, `risk_acceptance` kodlu `ReviewAgendaItem.risk_acceptance` maddesi, karar tutanak onaylandığında `decide_acceptance_in_review` ile uygulanır). Tek imzacılı, kendi kendine yönetilen risk → `requires_body` (`acceptance_requirements` içinde `body_for_self_management`)
 - Tehdit kataloğu: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (API ile özel kayıtlar)
 - İş hedefleri `BusinessObjective` (prosedür §2, öneri olarak `risk_catalogs/business_objectives.json`) riske bağlı (`business_objectives`, tamamlamak için zorunlu); `governance.SecurityObjective.risks` güvenlik hedeflerini işlenen risklere bağlar
 - Diğer modüller için ortak fonksiyonlar: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`

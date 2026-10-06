@@ -3272,14 +3272,14 @@
         "3": "In the risk sheet follow the steps: scenario (threat, information, threatened objectives, Risk Owner), existing measures, current risk with rationales, then the decision: accept the residual risk or treat it with a plan.",
         "4": "Complete the assessment: High and Critical open the treatment plan.",
         "5": "Submit for approval: the governing body approves and the register is frozen.",
-        "6": "Follow measures, verifications and acceptances: the class drops only with verified measures."
+        "6": "Follow measures, verifications and acceptances: the class drops only with verified measures. Acceptances reserved to the governing body (by policy or because the Risk Owner assessed and treats the risk alone) are decided in the management review."
       },
       "connections": {
         "governance": "Roles, governing bodies and security objectives",
         "controls": "Existing and planned measures linked to VDA ISA controls",
         "assets": "Involved assets and changes that suggest a review",
         "bia": "Critical processes, RTO and MTPD for operational impact",
-        "review": "Annual register approval in the management review"
+        "review": "Annual register approval and decision on acceptances reserved to the governing body in the management review"
       },
       "config_needed": {
         "1": "Risk governance policy (Settings)",
@@ -3455,11 +3455,11 @@
       "acceptance_needs_completion": "Only an applicable risk with a completed assessment can be accepted.",
       "not_acceptable_notice": "Risk not acceptable: it must be treated.",
       "who_accepts": "{{cls}} class: accepted by {{roles}}.",
-      "self_management_note": "Plant Manager added: the Risk Owner assessed the risk and also manages its treatment, so they cannot accept it alone (procedure §10). Not needed if the assessment or the treatment is assigned to someone else.",
+      "self_management_note": "The governing body decides: the Risk Owner assessed the risk and also manages its treatment, so they cannot accept it alone (procedure §10). Not needed if the assessment or the treatment is assigned to someone else.",
       "governing_body": "the governing body",
       "opinion_binding": "The CISO's favourable opinion is required.",
       "opinion_notify": "The CISO is informed.",
-      "body_required": "A governing body resolution is required.",
+      "body_required": "The governing body decides in a management review (full or targeted): the acceptance becomes active when the minutes are approved.",
       "max_validity": "Maximum validity: {{months}} months.",
       "expires": "expires on {{date}}",
       "signatures": "Signatures",
@@ -3470,8 +3470,6 @@
       "opinion_note": "Opinion note",
       "favorable": "Favourable",
       "unfavorable": "Unfavourable",
-      "resolution_ref": "Resolution reference",
-      "record_decision": "Record resolution",
       "revoke_reason": "Reason for revocation",
       "revoke": "Revoke",
       "acceptance_rationale": "Rationale (for High: cost/benefit analysis)",
@@ -3542,7 +3540,9 @@
       "make_not_applicable_confirm": "Declare not applicable",
       "not_applicable_reason": "Why the threat does not apply (e.g. no exposed asset)",
       "delete_na_confirm": "Remove the not-applicable declaration? The threat goes back to be assessed in Coverage.",
-      "not_applicable_undo_hint": "To assess it again use Delete: the threat goes back to be assessed in the Coverage tab."
+      "not_applicable_undo_hint": "To assess it again use Delete: the threat goes back to be assessed in the Coverage tab.",
+      "body_on_agenda": "on the agenda of the review “{{title}}” of {{date}}",
+      "body_awaiting_review": "awaiting a management review"
     },
     "register": {
       "search": "Search",
@@ -3671,7 +3671,7 @@
       "review_months": "Periodic review (months)",
       "group_register": "Group register enabled (shared-service risks, inherited by sites)",
       "acceptance_matrix": "Who accepts, per class",
-      "self_management_hint": "Fixed procedure rule (§10): if the Risk Owner would sign and has also assessed the risk and manages its treatment, the Plant Manager is added to the acceptance.",
+      "self_management_hint": "Fixed procedure rule (§10): if only the Risk Owner would sign and they also assessed the risk and manage its treatment, the governing body decides the acceptance in the management review.",
       "col_class": "Class",
       "col_roles": "Required signatures",
       "col_scope": "Level",
@@ -6012,10 +6012,11 @@
         "7": "Write the executive summary or generate an AI draft, review it and accept it",
         "8": "Approve the review: in the app (a member of the body with an account, or governance) or by recording the number and date of the body's resolution. The minutes become immutable",
         "9": "Download the minutes as PDF or HTML (also included in the audit package)",
-        "10": "To approve single documents or small decisions between reviews, create a “Targeted” review: choose the pending documents, record the outcome of each one and approve the minutes."
+        "10": "To approve single documents or small decisions between reviews, create a “Targeted” review: choose the pending documents, record the outcome of each one and approve the minutes.",
+        "11": "In every review, full or targeted, add the risk acceptances awaiting the governing body and record for each whether it is approved, postponed or rejected: the outcome is applied to the acceptance when the minutes are approved."
       },
       "connections": {
-        "risk": "Critical risks and formally accepted risks in the snapshot",
+        "risk": "Critical risks and formally accepted risks in the snapshot; acceptances reserved to the governing body are decided as agenda items",
         "incidents": "Incidents from the last 12 months in the snapshot",
         "pdca": "Open and blocked PDCA in the snapshot",
         "tasks": "Decisions can open tasks assigned to a role",
@@ -6469,12 +6470,27 @@
       "applied_on": "Applied to the document on {{date}}",
       "not_applied": "Not applied: {{reason}}",
       "applies_on_approval": "Applied to the document when the minutes are approved.",
-      "outcomes_title": "Outcomes applied to documents",
+      "outcomes_title": "Outcomes applied",
       "retry": "Retry outcomes not applied",
       "retry_error": "Could not apply the outcomes.",
-      "outcomes_missing": "Documents without an outcome: {{count}}. Record the outcome of every document before closing the meeting.",
+      "outcomes_missing": "Items without an outcome: {{count}}. Record the outcome of every document and risk acceptance before closing the meeting.",
       "no_next_review": "The targeted review does not propose the next review: the periodic review's date stays.",
       "approval_hint": "When the minutes are approved, the outcomes are applied to the documents: approved ones take effect, rejected ones go back to draft."
+    },
+    "risk_acceptances": {
+      "add": "Add risk acceptances",
+      "pending_title": "Risk acceptances awaiting the governing body",
+      "pending_hint": "Acceptances the policy reserves to the governing body and acceptances of risks assessed and treated by the same Risk Owner. Each one chosen becomes an item: the outcome is applied when the minutes are approved.",
+      "no_pending": "No acceptance awaiting the governing body.",
+      "group": "Group",
+      "valid_until": "valid until {{date}}",
+      "opinion_pending": "CISO opinion pending",
+      "rationale": "Rationale",
+      "no_longer_pending": "The acceptance is no longer pending ({{status}}): the outcome cannot be applied.",
+      "applied_on": "Applied to the acceptance on {{date}}",
+      "applies_on_approval": "Applied to the acceptance when the minutes are approved.",
+      "add_error": "Unable to add the acceptances.",
+      "approval_hint": "When the minutes are approved, approved risk acceptances become active (unless the CISO opinion is missing) and rejected ones are closed."
     }
   },
   "objectives": {

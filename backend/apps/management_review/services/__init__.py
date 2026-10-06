@@ -15,6 +15,7 @@ L'API pubblica resta `apps.management_review.services.<funzione>`.
 from .review import (
     MINUTES_FIELDS,
     add_agenda_item,
+    apply_review_outcomes,
     approve_documents_by_resolution,
     approve_review,
     approving_member,
@@ -35,6 +36,11 @@ from .review import (
     update_agenda_item,
     update_review,
     update_review_action,
+)
+from .risk_acceptances import (
+    add_acceptance_items,
+    apply_acceptance_outcomes,
+    pending_acceptances,
 )
 from .targeted import (
     add_document_items,
@@ -69,5 +75,6 @@ __all__ = [
     "discard_summary_draft", "draft_executive_summary", "ensure_iso_agenda", "generate_snapshot",
     "get_kpi_snapshot", "get_operational_kpi_summary", "start_review", "suggest_chair",
     "uncovered_mandatory_items", "update_agenda_item", "update_review", "update_review_action",
+    "add_acceptance_items", "apply_acceptance_outcomes", "apply_review_outcomes", "pending_acceptances",
     "add_document_items", "apply_document_outcomes", "ensure_full_review", "pending_documents", "refresh_item_version",
 ]

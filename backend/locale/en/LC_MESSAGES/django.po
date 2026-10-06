@@ -3536,3 +3536,50 @@ msgstr "Expected impact raised to %(floor)s: it is the confidentiality threshold
 
 msgid "Il rischio è già dichiarato non applicabile."
 msgstr "The risk is already declared not applicable."
+
+msgid "L'accettazione non attende più la delibera dell'organo."
+msgstr "The acceptance is no longer awaiting the governing body's resolution."
+
+msgid "Sull'accettazione c'è già una delibera dell'organo."
+msgstr "The acceptance already has a governing body resolution."
+
+#, python-format
+msgid "Riesame di direzione «%(title)s» del %(date)s"
+msgstr "Management review “%(title)s” of %(date)s"
+
+#, python-format
+msgid "Respinta dall'organo: %(ref)s"
+msgstr "Rejected by the governing body: %(ref)s"
+
+msgid "Accettazione del rischio"
+msgstr "Risk acceptance"
+
+msgid "Nessuna accettazione indicata."
+msgstr "No acceptance specified."
+
+msgid "Accettazione non in attesa dell'organo, fuori perimetro o già in un altro riesame."
+msgstr "Acceptance not awaiting the governing body, out of scope or already in another review."
+
+msgid "L'accettazione non è più in attesa di decisione (revocata, respinta o scaduta)."
+msgstr "The acceptance is no longer awaiting a decision (revoked, rejected or expired)."
+
+msgid "Gli esiti si applicano quando il riesame è approvato."
+msgstr "Outcomes are applied when the review is approved."
+
+msgid "L'esito si registra solo sui punti relativi a un documento o a un'accettazione del rischio."
+msgstr "The outcome can only be recorded on items about a document or a risk acceptance."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni documento e accettazione del rischio all'ordine del giorno."
+msgstr "Before closing the meeting, record the outcome of every document and risk acceptance on the agenda."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni accettazione del rischio all'ordine del giorno."
+msgstr "Before closing the meeting, record the outcome of every risk acceptance on the agenda."
+
+msgid "Accettazioni del rischio deliberate"
+msgstr "Risk acceptances decided"
+
+msgid "Valida fino al"
+msgstr "Valid until"
+
+msgid "Motivazione dell'accettazione"
+msgstr "Acceptance rationale"

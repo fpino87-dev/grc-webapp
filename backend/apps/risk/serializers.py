@@ -280,6 +280,8 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     signatures_display = serializers.SerializerMethodField()
     can_sign = serializers.SerializerMethodField()
     can_give_opinion = serializers.SerializerMethodField()
+    review_info = serializers.SerializerMethodField()
+    on_review_agenda = serializers.SerializerMethodField()
 
     class Meta:
         model = RiskAcceptance
@@ -289,12 +291,28 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             "body_resolution_ref", "rationale", "expires_on",
             "upper_opinion", "opinion_by", "opinion_by_name", "opinion_at", "opinion_note",
             "activated_at", "closed_at", "close_reason", "can_sign", "can_give_opinion",
-            "created_at",
+            "review", "review_info", "on_review_agenda", "created_at",
         ]
         read_only_fields = fields
 
     def get_opinion_by_name(self, obj):
         return _user_name(obj.opinion_by)
+
+    @staticmethod
+    def _review_dict(review):
+        return {"id": str(review.pk), "title": review.title, "kind": review.kind,
+                "review_date": review.review_date, "approval_status": review.approval_status}
+
+    def get_review_info(self, obj):
+        """Riesame in cui l'organo ha deciso l'accettazione."""
+        return self._review_dict(obj.review) if obj.review_id else None
+
+    def get_on_review_agenda(self, obj):
+        """Riesame non ancora approvato che ha l'accettazione all'ordine del
+        giorno (punti prefetchati dalla view, regola #6)."""
+        for item in getattr(obj, "open_review_items", []):
+            return self._review_dict(item.review)
+        return None
 
     def get_signatures_display(self, obj):
         users = {u.pk: u for u in User.objects.filter(pk__in=[s["user_id"] for s in obj.signatures])}

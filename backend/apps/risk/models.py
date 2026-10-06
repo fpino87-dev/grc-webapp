@@ -255,8 +255,8 @@ class RiskAcceptance(BaseModel):
 
     Diventa `active` quando hanno firmato tutti i ruoli richiesti dalla policy
     per la classe, c'è il parere favorevole del livello superiore se vincolante
-    e, se richiesto, la delibera dell'organo. Una sola accettazione attiva o in
-    corso per rischio.
+    e, se richiesto, la delibera dell'organo presa in un riesame di direzione.
+    Una sola accettazione attiva o in corso per rischio.
     """
 
     STATUS_CHOICES = [
@@ -286,6 +286,12 @@ class RiskAcceptance(BaseModel):
         related_name="risk_acceptances",
     )
     body_resolution_ref = models.CharField(max_length=300, blank=True, default="")
+    # Riesame di direzione (completo o mirato) in cui l'organo ha deciso
+    # l'accettazione: la delibera è il verbale approvato (procedura §10).
+    review = models.ForeignKey(
+        "management_review.ManagementReview", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="risk_acceptances",
+    )
     rationale = models.TextField()
     expires_on = models.DateField()
     upper_opinion = models.CharField(max_length=12, choices=OPINION_CHOICES, default="not_required")
