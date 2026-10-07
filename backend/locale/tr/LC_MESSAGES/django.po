@@ -3588,3 +3588,53 @@ msgstr "Kabul gerekçesi"
 #, python-format
 msgid "Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo (delibera nel riesame di direzione)."
 msgstr "Plant Manager riskleri kabul etmez: %(cls)s sınıfı için organı belirtin (yönetim gözden geçirmesinde karar)."
+
+msgid "La valutazione non è più in approvazione."
+msgstr "Değerlendirme artık onay beklemiyor."
+
+#, python-format
+msgid "Respinta dall'organo nel riesame «%(title)s»."
+msgstr "“%(title)s” gözden geçirmesinde organ tarafından reddedildi."
+
+msgid "Il riesame non indica l'organo che delibera."
+msgstr "Gözden geçirme karar veren organı belirtmiyor."
+
+msgid "Registro di gruppo"
+msgstr "Grup kaydı"
+
+msgid "Approvazione della valutazione dei rischi"
+msgstr "Risk değerlendirmesinin onayı"
+
+msgid "Nessuna valutazione indicata."
+msgstr "Değerlendirme belirtilmedi."
+
+msgid "Valutazione non in approvazione, fuori perimetro o già in un altro riesame."
+msgstr "Değerlendirme onay beklemiyor, kapsam dışında veya başka bir gözden geçirmede."
+
+msgid "La valutazione non è più in approvazione (rinviata o già approvata)."
+msgstr "Değerlendirme artık onay beklemiyor (geri gönderildi veya zaten onaylandı)."
+
+msgid "Indicare l'organo del riesame prima di approvare la valutazione dei rischi."
+msgstr "Risk değerlendirmesini onaylamadan önce gözden geçirmenin organını belirtin."
+
+msgid "L'esito si registra solo sui punti da decidere: documento, accettazione o valutazione dei rischi."
+msgstr "Karar yalnızca karar verilecek maddelere kaydedilir: doküman, kabul veya risk değerlendirmesi."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni accettazione e valutazione dei rischi all'ordine del giorno."
+msgstr "Toplantıyı kapatmadan önce gündemdeki her risk kabulü ve değerlendirmesi için kararı kaydedin."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni documento, accettazione e valutazione dei rischi all'ordine del giorno."
+msgstr "Toplantıyı kapatmadan önce gündemdeki her doküman, risk kabulü ve değerlendirmesi için kararı kaydedin."
+
+msgid "Valutazioni dei rischi deliberate"
+msgstr "Karara bağlanan risk değerlendirmeleri"
+
+msgid "Avviata il"
+msgstr "Başlangıç"
+
+msgid "Valutazione"
+msgstr "Değerlendirme"
+
+#, python-format
+msgid "%(kind)s avviata il %(date)s"
+msgstr "%(kind)s, başlangıç %(date)s"

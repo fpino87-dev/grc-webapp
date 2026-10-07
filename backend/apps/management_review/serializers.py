@@ -60,6 +60,15 @@ def _version_label(version):
 class ReviewAgendaItemSerializer(serializers.ModelSerializer):
     document_info = serializers.SerializerMethodField()
     risk_acceptance_info = serializers.SerializerMethodField()
+    risk_cycle_info = serializers.SerializerMethodField()
+
+    def get_risk_cycle_info(self, obj):
+        """Valutazione dei rischi da approvare (ciclo e sito con select_related dalla view)."""
+        if obj.risk_cycle_id is None:
+            return None
+        from .services.risk_cycles import cycle_info
+
+        return cycle_info(obj.risk_cycle)
 
     def get_risk_acceptance_info(self, obj):
         """Accettazione del rischio da deliberare: rischio, classe, motivazione
@@ -116,6 +125,7 @@ class ReviewAgendaItemSerializer(serializers.ModelSerializer):
             "discussion_meta", "discussion_draft", "discussion_draft_meta", "updated_at",
             "document", "document_version", "document_outcome", "document_outcome_applied_at",
             "document_outcome_error", "document_info", "risk_acceptance", "risk_acceptance_info",
+            "risk_cycle", "risk_cycle_info",
         ]
         # La bozza IA e la sua provenienza non si scrivono via PATCH: passano
         # dalle azioni discussion-draft / discussion, che registrano chi ha
@@ -126,7 +136,7 @@ class ReviewAgendaItemSerializer(serializers.ModelSerializer):
             "id", "code", "order", "mandatory", "updated_at",
             "discussion_meta", "discussion_draft", "discussion_draft_meta",
             "document", "document_version", "document_outcome_applied_at", "document_outcome_error",
-            "risk_acceptance",
+            "risk_acceptance", "risk_cycle",
         ]
 
     def validate(self, attrs):

@@ -433,8 +433,8 @@ La barra sotto il titolo mostra lo stato della valutazione del registro:
 
 1. **Avvia il primo risk assessment** (o, dopo un'approvazione, una **revisione periodica** o **straordinaria** con il motivo)
 2. Valuta i rischi; i campi di valutazione si modificano solo con una valutazione **in corso**
-3. **Invia in approvazione**: il sistema verifica copertura completa e rischi valutati (o confermati, nella revisione periodica); i rischi High e Critical da mitigare, evitare o trasferire devono avere almeno una misura nel piano di trattamento, perché l'organo approva insieme valutazione e piano (ISO 27001 §6.1.3). Conviene approvare nella seduta di riesame di direzione, collegando il verbale
-4. **Approva**: indica l'organo che ha deliberato e, se vuoi, il riesame di direzione con il verbale. L'approvazione congela una fotografia del registro (scheda **Valutazioni**, esportabile in Excel)
+3. **Invia in approvazione**: il sistema verifica copertura completa e rischi valutati (o confermati, nella revisione periodica); i rischi High e Critical da mitigare, evitare o trasferire devono avere almeno una misura nel piano di trattamento, perché l'organo approva insieme valutazione e piano (ISO 27001 §6.1.3). La valutazione resta *in approvazione* (i rischi non si modificano più) finché l'organo non decide: si porta in un riesame di direzione, completo o mirato, con **«Aggiungi valutazioni dei rischi»**
+4. **Approvazione**: approvando il verbale del riesame il registro viene approvato con l'organo e il riesame già compilati; se l'organo ha deliberato fuori dalla piattaforma, **Approva** registra a mano l'organo e, se vuoi, il riesame con il verbale. **Rinvia alla valutazione** la riporta in corso con un motivo. L'approvazione congela una fotografia del registro (scheda **Valutazioni**, esportabile in Excel)
 
 Il registro precedente alla nuova procedura resta consultabile in sola lettura dalla scheda Valutazioni (**metodo superato**). Se dopo l'approvazione accadono eventi rilevanti (incidenti significativi, nuovi asset critici, cambiamenti, non conformità maggiori, controlli in gap, misure in ritardo) la barra li segnala per valutare una revisione straordinaria.
 
@@ -811,6 +811,16 @@ Fra un riesame completo e l'altro l'organo può riunirsi su punti specifici, per
 5. **Chiudi la riunione**: serve almeno un punto e ogni documento deve avere un esito
 6. **Approva il verbale** (in app o registrando la delibera): gli esiti si applicano ai documenti. Gli *approvati* entrano in vigore per delibera dell'organo, con la data della delibera o della seduta; i *respinti* tornano in bozza; i *rinviati* restano in attesa. Se un esito non si può applicare (per esempio è stata caricata una nuova revisione dopo la seduta) resta indicato con il motivo e si può ritentare
 7. Il **verbale** del riesame mirato riporta i documenti esaminati con revisione ed esito, i punti e le decisioni; nel **pacchetto audit** le sedute mirate sono in `09_management_review/sedute_intermedie/`
+
+### Valutazioni dei rischi da approvare
+
+L'organo approva nel riesame, **completo o mirato**, la valutazione del registro dei rischi inviata in approvazione dal modulo Risk (procedura di risk management §5).
+
+1. Con **«Aggiungi valutazioni dei rischi»** (il numero accanto dice quante sono in approvazione) si apre l'elenco: il riesame di un sito mostra la valutazione del sito, il riesame di organizzazione anche quella del registro di gruppo e quelle dei siti quando la policy accentra l'approvazione. Una valutazione già all'ordine del giorno di un altro riesame non ancora approvato non compare
+2. Ogni valutazione scelta diventa un punto con registro, tipo, data di avvio e numero di rischi; registra l'**esito**: *Approvato*, *Rinviato* o *Respinto*. Per approvare il riesame deve indicare l'organo
+3. Per chiudere la riunione ogni valutazione all'ordine del giorno deve avere un esito
+4. **Approvando il verbale** le valutazioni approvate congelano il registro, con l'organo e il riesame come delibera (le accettazioni deliberate nello stesso riesame entrano nella fotografia); le respinte tornano *in corso*; le rinviate restano in approvazione per un riesame successivo. Se nel frattempo la valutazione è stata rinviata o approvata dal modulo Risk, l'esito resta sul punto con il motivo
+5. Il **verbale** riporta la tabella delle valutazioni deliberate con l'esito
 
 ### Accettazioni del rischio da deliberare
 

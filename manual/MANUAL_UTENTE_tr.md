@@ -433,8 +433,8 @@ Başlığın altındaki çubuk, kaydın değerlendirme durumunu gösterir:
 
 1. **İlk risk değerlendirmesini başlatın** (veya bir onaydan sonra, gerekçesiyle birlikte **dönemsel** ya da **olağanüstü** bir gözden geçirme)
 2. Riskleri değerlendirin; değerlendirme alanları yalnızca **devam eden** bir değerlendirme sırasında değiştirilebilir
-3. **Onaya gönderin**: sistem tam kapsamı ve değerlendirilmiş (dönemsel gözden geçirmede onaylanmış) riskleri kontrol eder; azaltılacak, kaçınılacak veya devredilecek High ve Critical riskler işlem planında en az bir önleme sahip olmalıdır, çünkü organ değerlendirmeyi ve planı birlikte onaylar (ISO 27001 §6.1.3). Onayın, tutanak bağlanarak yönetim gözden geçirmesi toplantısında yapılması önerilir
-4. **Onaylayın**: karar veren organı ve isterseniz tutanağıyla birlikte yönetim gözden geçirmesini belirtin. Onay, kaydın bir anlık görüntüsünü dondurur (**Değerlendirmeler** sekmesi, Excel'e aktarılabilir)
+3. **Onaya gönderin**: sistem tam kapsamı ve değerlendirilmiş (dönemsel gözden geçirmede onaylanmış) riskleri kontrol eder; azaltılacak, kaçınılacak veya devredilecek High ve Critical riskler işlem planında en az bir önleme sahip olmalıdır, çünkü organ değerlendirmeyi ve planı birlikte onaylar (ISO 27001 §6.1.3). Değerlendirme, organ karar verene kadar *onay bekliyor* durumunda kalır (riskler artık düzenlenemez): **“Risk değerlendirmeleri ekle”** ile tam veya hedefli bir yönetim gözden geçirmesine getirin
+4. **Onay**: gözden geçirme tutanağının onayı, organ ve gözden geçirme önceden doldurulmuş olarak kaydı onaylar; organ platform dışında karar verdiyse **Onayla** organı ve isterseniz tutanağıyla birlikte gözden geçirmeyi elle kaydeder. **Değerlendirmeye geri gönder** bir gerekçeyle devam ediyor durumuna döndürür. Onay, kaydın bir anlık görüntüsünü dondurur (**Değerlendirmeler** sekmesi, Excel'e aktarılabilir)
 
 Yeni prosedürden önceki kayıt, Değerlendirmeler sekmesinden salt okunur olarak görüntülenebilir (**eski yöntem**). Onaydan sonra önemli olaylar meydana gelirse (ciddi olaylar, yeni kritik varlıklar, değişiklikler, büyük uygunsuzluklar, boşluklu kontroller, geciken önlemler), çubuk olağanüstü bir gözden geçirmeyi değerlendirmek için bunları bildirir.
 
@@ -811,6 +811,16 @@ Tutanakta özet, yapay zekâ desteğiyle (ve hangi modelle) hazırlanıp hazırl
 5. **Toplantıyı kapatın**: en az bir madde gerekir ve her belgenin bir kararı olmalıdır
 6. **Tutanağı onaylayın** (uygulamada veya kararı kaydederek): kararlar belgelere uygulanır. *Onaylananlar* organ kararıyla, karar veya toplantı tarihiyle yürürlüğe girer; *reddedilenler* taslağa döner; *ertelenenler* beklemede kalır. Bir karar uygulanamazsa (örneğin toplantıdan sonra yeni bir revizyon yüklendiyse) nedeniyle birlikte gösterilir ve yeniden denenebilir
 7. Hedefli gözden geçirmenin **tutanağı**, incelenen belgeleri revizyon ve kararıyla, maddeleri ve kararları içerir; **denetim paketinde** hedefli toplantılar `09_management_review/sedute_intermedie/` klasöründedir
+
+### Onaylanacak risk değerlendirmeleri
+
+Organ, **tam veya hedefli** gözden geçirmede, Risk modülünden onaya gönderilen risk kaydı değerlendirmesini onaylar (risk yönetimi prosedürü §5).
+
+1. **“Risk değerlendirmeleri ekle”** (yanındaki sayı kaç tanesinin beklediğini gösterir) listeyi açar: bir sahanın gözden geçirmesi sahanın değerlendirmesini, kuruluş gözden geçirmesi ayrıca grup kaydını ve politika onayı merkezileştirdiğinde sahaların değerlendirmelerini gösterir. Henüz onaylanmamış başka bir gözden geçirmenin gündemindeki değerlendirme listelenmez
+2. Seçilen her değerlendirme kayıt, tür, başlangıç tarihi ve risk sayısıyla bir madde olur; **kararı** kaydedin: *Onaylandı*, *Ertelendi* veya *Reddedildi*. Onaylamak için gözden geçirme organı belirtmelidir
+3. Toplantıyı kapatmak için gündemdeki her değerlendirmenin bir kararı olmalıdır
+4. **Tutanak onaylandığında** onaylanan değerlendirmeler, karar olarak organ ve gözden geçirme ile kaydı dondurur (aynı gözden geçirmede karara bağlanan kabuller anlık görüntüye girer); reddedilenler *devam ediyor* durumuna döner; ertelenenler sonraki bir gözden geçirme için onay bekler. Bu arada değerlendirme Risk modülünden geri gönderildiyse veya onaylandıysa, karar gerekçesiyle maddede kalır
+5. **Tutanak**, karara bağlanan değerlendirmelerin tablosunu kararla birlikte içerir
 
 ### Karara bağlanacak risk kabulleri
 

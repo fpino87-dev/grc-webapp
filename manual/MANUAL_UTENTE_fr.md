@@ -433,8 +433,8 @@ La barre sous le titre indique l'état de l'appréciation du registre :
 
 1. **Lancez la première appréciation des risques** (ou, après une approbation, une **révision périodique** ou **extraordinaire** avec le motif)
 2. Évaluez les risques ; les champs d'évaluation ne se modifient que pendant une appréciation **en cours**
-3. **Soumettez à l'approbation** : le système vérifie la couverture complète et les risques évalués (ou confirmés, en révision périodique) ; les risques High et Critical à atténuer, éviter ou transférer doivent avoir au moins une mesure dans le plan de traitement, car l'organe approuve ensemble l'appréciation et le plan (ISO 27001 §6.1.3). Il est conseillé d'approuver lors de la séance de revue de direction, en liant le procès-verbal
-4. **Approuvez** : indiquez l'organe qui a délibéré et, si vous le souhaitez, la revue de direction avec le procès-verbal. L'approbation fige une photographie du registre (onglet **Appréciations**, exportable en Excel)
+3. **Soumettez à l'approbation** : le système vérifie la couverture complète et les risques évalués (ou confirmés, en révision périodique) ; les risques High et Critical à atténuer, éviter ou transférer doivent avoir au moins une mesure dans le plan de traitement, car l'organe approuve ensemble l'appréciation et le plan (ISO 27001 §6.1.3). L'appréciation reste *en attente d'approbation* (les risques ne sont plus modifiables) jusqu'à la décision de l'organe : portez-la en revue de direction, complète ou ciblée, avec **« Ajouter des appréciations des risques »**
+4. **Approbation** : l'approbation du procès-verbal de la revue approuve le registre avec l'organe et la revue déjà renseignés ; si l'organe a délibéré hors de la plateforme, **Approuver** enregistre l'organe à la main et, si vous le souhaitez, la revue avec le procès-verbal. **Renvoyer à l'appréciation** la remet en cours avec un motif. L'approbation fige une photographie du registre (onglet **Appréciations**, exportable en Excel)
 
 Le registre antérieur à la nouvelle procédure reste consultable en lecture seule depuis l'onglet Appréciations (**méthode remplacée**). Si des événements importants surviennent après l'approbation (incidents importants, nouveaux actifs critiques, changements, non-conformités majeures, contrôles en écart, mesures en retard), la barre les signale pour envisager une révision extraordinaire.
 
@@ -811,6 +811,16 @@ Entre deux revues complètes, l'organe peut se réunir sur des points spécifiqu
 5. **Clôturez la réunion** : il faut au moins un point et chaque document doit avoir une décision
 6. **Approuvez le procès-verbal** (dans l'application ou en enregistrant la délibération) : les décisions s'appliquent aux documents. Les *approuvés* entrent en vigueur par délibération de l'organe, à la date de la délibération ou de la séance ; les *rejetés* reviennent en brouillon ; les *reportés* restent en attente. Si une décision ne peut pas être appliquée (par exemple une nouvelle révision a été chargée après la séance), elle reste indiquée avec le motif et peut être réessayée
 7. Le **procès-verbal** de la revue ciblée présente les documents examinés avec révision et décision, les points et les décisions ; dans le **pack d'audit** les séances ciblées sont dans `09_management_review/sedute_intermedie/`
+
+### Appréciations des risques à approuver
+
+Lors de la revue, **complète ou ciblée**, l'organe approuve l'appréciation du registre des risques soumise à l'approbation depuis le module Risk (procédure de gestion des risques §5).
+
+1. **« Ajouter des appréciations des risques »** (le nombre à côté indique combien sont en attente) ouvre la liste : la revue d'un site montre l'appréciation du site, la revue de l'organisation aussi celle du registre du groupe et celles des sites quand la politique centralise l'approbation. Une appréciation déjà à l'ordre du jour d'une autre revue non encore approuvée n'apparaît pas
+2. Chaque appréciation choisie devient un point avec registre, type, date de lancement et nombre de risques ; enregistrez la **décision** : *Approuvé*, *Reporté* ou *Rejeté*. Pour approuver, la revue doit indiquer l'organe
+3. Pour clore la réunion, chaque appréciation à l'ordre du jour doit avoir une décision
+4. **À l'approbation du procès-verbal** les appréciations approuvées figent le registre, avec l'organe et la revue comme délibération (les acceptations délibérées dans la même revue entrent dans la photographie) ; les rejetées repassent *en cours* ; les reportées restent en attente pour une revue ultérieure. Si entre-temps l'appréciation a été renvoyée ou approuvée depuis le module Risk, la décision reste sur le point avec le motif
+5. Le **procès-verbal** contient le tableau des appréciations délibérées avec la décision
 
 ### Acceptations du risque à délibérer
 

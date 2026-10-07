@@ -42,6 +42,11 @@ from .risk_acceptances import (
     apply_acceptance_outcomes,
     pending_acceptances,
 )
+from .risk_cycles import (
+    add_cycle_items,
+    apply_cycle_outcomes,
+    pending_cycles,
+)
 from .targeted import (
     add_document_items,
     apply_document_outcomes,
@@ -76,5 +81,6 @@ __all__ = [
     "get_kpi_snapshot", "get_operational_kpi_summary", "start_review", "suggest_chair",
     "uncovered_mandatory_items", "update_agenda_item", "update_review", "update_review_action",
     "add_acceptance_items", "apply_acceptance_outcomes", "apply_review_outcomes", "pending_acceptances",
+    "add_cycle_items", "apply_cycle_outcomes", "pending_cycles",
     "add_document_items", "apply_document_outcomes", "ensure_full_review", "pending_documents", "refresh_item_version",
 ]

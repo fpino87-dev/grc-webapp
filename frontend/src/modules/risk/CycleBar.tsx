@@ -104,6 +104,9 @@ export function CycleBar({
           </div>
         )}
       </div>
+      {openCycle?.status === "in_approvazione" && (
+        <p className="mt-1 text-xs">{t("risk.cycle.review_hint")}</p>
+      )}
       {triggers.length > 0 && (
         <ul className="mt-2 text-xs space-y-0.5">
           {triggers.map(tr => (
@@ -214,7 +217,10 @@ function SubmitDialog({ cycle, onClose, onDone }: { cycle: Cycle; onClose: () =>
         {errors.length > 0 ? (
           <ul className="list-disc ml-5 text-red-700">{errors.map(e => <li key={e}>{e}</li>)}</ul>
         ) : (
-          <p>{t("risk.cycle.submit_ready")}</p>
+          <>
+            <p>{t("risk.cycle.submit_ready")}</p>
+            <p className="text-xs text-gray-500">{t("risk.cycle.review_hint")}</p>
+          </>
         )}
         <ErrorBox message={error} />
         <div className="flex justify-end gap-2">

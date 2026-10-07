@@ -3587,3 +3587,53 @@ msgstr "Acceptance rationale"
 #, python-format
 msgid "Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo (delibera nel riesame di direzione)."
 msgstr "The Plant Manager does not accept risks: for class %(cls)s select the governing body (resolution in the management review)."
+
+msgid "La valutazione non è più in approvazione."
+msgstr "The assessment is no longer awaiting approval."
+
+#, python-format
+msgid "Respinta dall'organo nel riesame «%(title)s»."
+msgstr "Rejected by the governing body in the review “%(title)s”."
+
+msgid "Il riesame non indica l'organo che delibera."
+msgstr "The review does not state the deciding governing body."
+
+msgid "Registro di gruppo"
+msgstr "Group register"
+
+msgid "Approvazione della valutazione dei rischi"
+msgstr "Approval of the risk assessment"
+
+msgid "Nessuna valutazione indicata."
+msgstr "No assessment specified."
+
+msgid "Valutazione non in approvazione, fuori perimetro o già in un altro riesame."
+msgstr "Assessment not awaiting approval, out of scope or already in another review."
+
+msgid "La valutazione non è più in approvazione (rinviata o già approvata)."
+msgstr "The assessment is no longer awaiting approval (sent back or already approved)."
+
+msgid "Indicare l'organo del riesame prima di approvare la valutazione dei rischi."
+msgstr "Set the governing body of the review before approving the risk assessment."
+
+msgid "L'esito si registra solo sui punti da decidere: documento, accettazione o valutazione dei rischi."
+msgstr "The outcome can only be recorded on items to decide: document, acceptance or risk assessment."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni accettazione e valutazione dei rischi all'ordine del giorno."
+msgstr "Before closing the meeting, record the outcome of every risk acceptance and assessment on the agenda."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni documento, accettazione e valutazione dei rischi all'ordine del giorno."
+msgstr "Before closing the meeting, record the outcome of every document, risk acceptance and assessment on the agenda."
+
+msgid "Valutazioni dei rischi deliberate"
+msgstr "Risk assessments decided"
+
+msgid "Avviata il"
+msgstr "Started on"
+
+msgid "Valutazione"
+msgstr "Assessment"
+
+#, python-format
+msgid "%(kind)s avviata il %(date)s"
+msgstr "%(kind)s started on %(date)s"

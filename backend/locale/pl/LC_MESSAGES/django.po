@@ -3609,3 +3609,53 @@ msgstr "Uzasadnienie akceptacji"
 #, python-format
 msgid "Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo (delibera nel riesame di direzione)."
 msgstr "Plant Manager nie akceptuje ryzyk: dla klasy %(cls)s wskaż organ (uchwała w przeglądzie zarządzania)."
+
+msgid "La valutazione non è più in approvazione."
+msgstr "Ocena nie oczekuje już na zatwierdzenie."
+
+#, python-format
+msgid "Respinta dall'organo nel riesame «%(title)s»."
+msgstr "Odrzucona przez organ w przeglądzie „%(title)s”."
+
+msgid "Il riesame non indica l'organo che delibera."
+msgstr "Przegląd nie wskazuje organu podejmującego decyzję."
+
+msgid "Registro di gruppo"
+msgstr "Rejestr grupy"
+
+msgid "Approvazione della valutazione dei rischi"
+msgstr "Zatwierdzenie oceny ryzyka"
+
+msgid "Nessuna valutazione indicata."
+msgstr "Nie wskazano żadnej oceny."
+
+msgid "Valutazione non in approvazione, fuori perimetro o già in un altro riesame."
+msgstr "Ocena nie oczekuje na zatwierdzenie, jest poza zakresem lub jest już w innym przeglądzie."
+
+msgid "La valutazione non è più in approvazione (rinviata o già approvata)."
+msgstr "Ocena nie oczekuje już na zatwierdzenie (zwrócona lub już zatwierdzona)."
+
+msgid "Indicare l'organo del riesame prima di approvare la valutazione dei rischi."
+msgstr "Wskaż organ przeglądu przed zatwierdzeniem oceny ryzyka."
+
+msgid "L'esito si registra solo sui punti da decidere: documento, accettazione o valutazione dei rischi."
+msgstr "Decyzję zapisuje się tylko w punktach do rozstrzygnięcia: dokument, akceptacja lub ocena ryzyka."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni accettazione e valutazione dei rischi all'ordine del giorno."
+msgstr "Przed zamknięciem posiedzenia zapisz decyzję dla każdej akceptacji i oceny ryzyka w porządku obrad."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni documento, accettazione e valutazione dei rischi all'ordine del giorno."
+msgstr "Przed zamknięciem posiedzenia zapisz decyzję dla każdego dokumentu, akceptacji i oceny ryzyka w porządku obrad."
+
+msgid "Valutazioni dei rischi deliberate"
+msgstr "Oceny ryzyka rozstrzygnięte"
+
+msgid "Avviata il"
+msgstr "Rozpoczęta"
+
+msgid "Valutazione"
+msgstr "Ocena"
+
+#, python-format
+msgid "%(kind)s avviata il %(date)s"
+msgstr "%(kind)s rozpoczęta %(date)s"

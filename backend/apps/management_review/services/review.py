@@ -520,7 +520,7 @@ def complete_review(review: ManagementReview, user) -> ManagementReview:
     undecided = uncovered_decision_items(review)
     if undecided:
         raise ValidationError(
-            _("Prima di chiudere la riunione registrare l'esito di ogni accettazione del rischio all'ordine del giorno."),
+            _("Prima di chiudere la riunione registrare l'esito di ogni accettazione e valutazione dei rischi all'ordine del giorno."),
             code="document_outcome_missing",
             params={"missing": undecided},
         )
@@ -555,7 +555,7 @@ def _complete_targeted_review(review: ManagementReview, user) -> ManagementRevie
     missing = uncovered_decision_items(review)
     if missing:
         raise ValidationError(
-            _("Prima di chiudere la riunione registrare l'esito di ogni documento e accettazione del rischio all'ordine del giorno."),
+            _("Prima di chiudere la riunione registrare l'esito di ogni documento, accettazione e valutazione dei rischi all'ordine del giorno."),
             code="document_outcome_missing",
             params={"missing": missing},
         )
@@ -776,6 +776,7 @@ def approve_review(review: ManagementReview, user, note="", *, mode="in_app",
 
 def apply_review_outcomes(review: ManagementReview, user) -> dict:
     from .risk_acceptances import apply_acceptance_outcomes
+    from .risk_cycles import apply_cycle_outcomes
     from .targeted import apply_document_outcomes
 
     applied, skipped = [], []
@@ -783,5 +784,9 @@ def apply_review_outcomes(review: ManagementReview, user) -> dict:
         docs = apply_document_outcomes(review, user)
         applied += docs["applied"]
         skipped += docs["skipped"]
-    accs = apply_acceptance_outcomes(review, user)
-    return {"applied": applied + accs["applied"], "skipped": skipped + accs["skipped"]}
+    # Prima le accettazioni, poi le valutazioni: la fotografia del registro
+    # approvato contiene le accettazioni deliberate nello stesso riesame.
+    for result in (apply_acceptance_outcomes(review, user), apply_cycle_outcomes(review, user)):
+        applied += result["applied"]
+        skipped += result["skipped"]
+    return {"applied": applied, "skipped": skipped}

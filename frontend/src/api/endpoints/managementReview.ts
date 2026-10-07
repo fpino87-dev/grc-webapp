@@ -76,6 +76,26 @@ export interface ReviewAgendaItem {
   /** Accettazione del rischio da deliberare (riesame completo o mirato). */
   risk_acceptance?: string | null;
   risk_acceptance_info?: RiskAcceptanceInfo | null;
+  /** Valutazione dei rischi da approvare (riesame completo o mirato). */
+  risk_cycle?: string | null;
+  risk_cycle_info?: RiskCycleInfo | null;
+}
+
+/** Valutazione del registro dei rischi che l'organo approva nel riesame (procedura §5). */
+export interface RiskCycleInfo {
+  id: string;
+  plant_id: string | null;
+  plant_code: string | null;
+  register: string;
+  kind: "primo" | "periodico" | "straordinario";
+  status: "in_corso" | "in_approvazione" | "approvato" | "archiviato";
+  started_at: string;
+  risks_count: number | null;
+}
+
+/** Valutazione in approvazione, selezionabile per l'ordine del giorno. */
+export interface PendingRiskCycle extends RiskCycleInfo {
+  selected: boolean;
 }
 
 /** Accettazione del rischio che l'organo delibera nel riesame (procedura §10). */
@@ -118,8 +138,8 @@ export interface PendingDocument {
 }
 
 export interface OutcomeResult {
-  applied: Array<{ item_id: string; document_id?: string; acceptance_id?: string; title?: string; outcome: DocumentOutcome }>;
-  skipped: Array<{ item_id: string; document_id?: string; acceptance_id?: string; title?: string; outcome: DocumentOutcome; reason: string }>;
+  applied: Array<{ item_id: string; document_id?: string; acceptance_id?: string; cycle_id?: string; title?: string; outcome: DocumentOutcome }>;
+  skipped: Array<{ item_id: string; document_id?: string; acceptance_id?: string; cycle_id?: string; title?: string; outcome: DocumentOutcome; reason: string }>;
 }
 
 export interface ExecutiveSummaryMeta {
@@ -296,6 +316,15 @@ export const managementReviewApi = {
     apiClient
       .post<{ added: string[]; skipped: Array<{ id: string; reason: string }>; review: ManagementReview }>(
         `${base}/${id}/acceptance-items/`, { acceptance_ids },
+      )
+      .then((r) => r.data),
+  // Valutazioni dei rischi da approvare (riesame completo o mirato).
+  pendingRiskCycles: (id: string) =>
+    apiClient.get<PendingRiskCycle[]>(`${base}/${id}/pending-risk-cycles/`).then((r) => r.data),
+  addRiskCycleItems: (id: string, cycle_ids: string[]) =>
+    apiClient
+      .post<{ added: string[]; skipped: Array<{ id: string; reason: string }>; review: ManagementReview }>(
+        `${base}/${id}/risk-cycle-items/`, { cycle_ids },
       )
       .then((r) => r.data),
   refreshItemVersion: (itemId: string) =>

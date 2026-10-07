@@ -433,8 +433,8 @@ The bar under the title shows the status of the register assessment:
 
 1. **Start the first risk assessment** (or, after an approval, a **periodic** or **extraordinary review** with the reason)
 2. Assess the risks; assessment fields can only be edited while an assessment is **in progress**
-3. **Submit for approval**: the system checks full coverage and assessed risks (or confirmed ones, in a periodic review); High and Critical risks to be mitigated, avoided or transferred must have at least one measure in the treatment plan, because the body approves the assessment and the plan together (ISO 27001 §6.1.3). It is best approved in the management review meeting, linking the minutes
-4. **Approve**: select the governing body that decided and, optionally, the management review with the minutes. Approval freezes a snapshot of the register (**Assessments** tab, exportable to Excel)
+3. **Submit for approval**: the system checks full coverage and assessed risks (or confirmed ones, in a periodic review); High and Critical risks to be mitigated, avoided or transferred must have at least one measure in the treatment plan, because the body approves the assessment and the plan together (ISO 27001 §6.1.3). The assessment stays *awaiting approval* (risks can no longer be edited) until the governing body decides: bring it to a management review, full or targeted, with **“Add risk assessments”**
+4. **Approval**: approving the review minutes approves the register with the governing body and the review already filled in; if the body decided outside the platform, **Approve** records the body manually and, optionally, the review with the minutes. **Send back to assessment** puts it back in progress with a reason. Approval freezes a snapshot of the register (**Assessments** tab, exportable to Excel)
 
 The register prior to the new procedure remains available read-only from the Assessments tab (**superseded method**). If relevant events occur after approval (significant incidents, new critical assets, changes, major nonconformities, controls in gap, overdue measures) the bar flags them so you can consider an extraordinary review.
 
@@ -811,6 +811,16 @@ Between one full review and the next, the body can meet on specific items, for e
 5. **Close the meeting**: at least one item is required and every document must have an outcome
 6. **Approve the minutes** (in the app or by recording the resolution): the outcomes are applied to the documents. *Approved* ones take effect by resolution of the body, with the date of the resolution or of the meeting; *rejected* ones go back to draft; *postponed* ones stay pending. If an outcome cannot be applied (for example a new revision was uploaded after the meeting) it is shown with the reason and can be retried
 7. The **minutes** of the targeted review list the documents examined with revision and outcome, the items and the decisions; in the **audit pack** targeted meetings are in `09_management_review/sedute_intermedie/`
+
+### Risk assessments to approve
+
+In the review, **full or targeted**, the governing body approves the risk register assessment submitted for approval from the Risk module (risk management procedure §5).
+
+1. **“Add risk assessments”** (the number next to it says how many are awaiting approval) opens the list: a site review shows the site's assessment, the organisation review also the group register and the site assessments when the policy centralises approval. An assessment already on the agenda of another review not yet approved is not listed
+2. Each assessment selected becomes an item with register, type, start date and number of risks; record the **outcome**: *Approved*, *Postponed* or *Rejected*. To approve, the review must state the governing body
+3. To close the meeting every assessment on the agenda must have an outcome
+4. **When the minutes are approved** approved assessments freeze the register, with the body and the review as the resolution (acceptances decided in the same review are included in the snapshot); rejected ones go back *in progress*; postponed ones stay awaiting approval for a later review. If meanwhile the assessment was sent back or approved from the Risk module, the outcome stays on the item with the reason
+5. The **minutes** include the table of decided assessments with the outcome
 
 ### Risk acceptances to decide
 

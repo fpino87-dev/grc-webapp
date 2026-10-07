@@ -3273,7 +3273,7 @@
         "2": "Dans l'onglet Couverture, évaluez chaque menace applicable ou déclarez-la non applicable avec le motif.",
         "3": "Dans la fiche du risque, suivez les étapes : scénario (menace, informations, objectifs menacés, Risk Owner), mesures existantes, risque actuel avec les justifications, puis la décision : accepter le risque résiduel ou le traiter avec un plan.",
         "4": "Terminez l'évaluation : High et Critical ouvrent le plan de traitement.",
-        "5": "Soumettez à l'approbation : l'organe approuve et le registre est figé.",
+        "5": "Soumettez à l'approbation : l'organe approuve lors de la revue de direction et le registre est figé.",
         "6": "Suivez mesures, vérifications et acceptations : la classe ne baisse qu'avec des mesures vérifiées. Les acceptations réservées à l'organe (par la politique ou parce que le Risk Owner a évalué et traite seul le risque) sont délibérées en revue de direction."
       },
       "connections": {
@@ -3301,6 +3301,7 @@
       "trigger_reason": "Motif de la révision extraordinaire (événement, incident, changement)",
       "submit": "Soumettre à l'approbation",
       "submit_ready": "Couverture complète et risques évalués : l'appréciation peut aller à l'organe.",
+      "review_hint": "Ajoutez-la à l'ordre du jour d'une revue de direction, complète ou ciblée : l'approbation du procès-verbal approuve le registre. Si l'organe a déjà délibéré hors de la plateforme, enregistrez l'approbation ici.",
       "return": "Renvoyer",
       "return_reason": "Motif du renvoi",
       "approve": "Approuver",
@@ -6018,7 +6019,7 @@
         "8": "Approuvez la revue : dans l'application (un membre de l'organe disposant d'un compte, ou la gouvernance) ou en enregistrant le numéro et la date de la délibération de l'organe. Le procès-verbal devient immuable",
         "9": "Téléchargez le procès-verbal en PDF ou HTML (également inclus dans le dossier d'audit)",
         "10": "Pour approuver des documents isolés ou de petites décisions entre deux revues, créez une revue « Ciblée » : choisissez les documents en attente, enregistrez la décision pour chacun et approuvez le procès-verbal.",
-        "11": "Dans chaque revue, complète ou ciblée, ajoutez les acceptations du risque en attente de l'organe et enregistrez pour chacune si elle est approuvée, reportée ou rejetée : la décision s'applique à l'acceptation à l'approbation du procès-verbal."
+        "11": "Dans chaque revue, complète ou ciblée, ajoutez les appréciations des risques en attente d'approbation et les acceptations du risque en attente de l'organe et enregistrez pour chacune si elle est approuvée, reportée ou rejetée : la décision s'applique à l'approbation du procès-verbal."
       },
       "connections": {
         "risk": "Risques critiques et risques formellement acceptés dans l'instantané ; les acceptations réservées à l'organe sont délibérées comme points de l'ordre du jour",
@@ -6496,6 +6497,22 @@
       "applies_on_approval": "S'applique à l'acceptation à l'approbation du procès-verbal.",
       "add_error": "Impossible d'ajouter les acceptations.",
       "approval_hint": "À l'approbation du procès-verbal, les acceptations du risque approuvées deviennent actives (sauf si l'avis du CISO manque) et celles rejetées sont clôturées."
+    },
+    "risk_cycles": {
+      "add": "Ajouter des appréciations des risques",
+      "pending_title": "Appréciations des risques en attente d'approbation",
+      "pending_hint": "Appréciations des registres soumises à l'approbation depuis le module Risk. Chacune choisie devient un point : à l'approbation du procès-verbal, le registre est approuvé et figé.",
+      "no_pending": "Aucune appréciation des risques en attente d'approbation.",
+      "group": "Registre du groupe",
+      "started_on": "lancée le {{date}}",
+      "risks": "risques : {{count}}",
+      "outcome_hint": "Approuvée : le registre est figé avec l'organe et la revue. Rejetée : l'appréciation repasse en cours. Reportée : elle reste en attente d'approbation pour une revue ultérieure.",
+      "no_longer_pending": "L'appréciation n'est plus en attente d'approbation ({{status}}) : la décision ne pourra pas être appliquée.",
+      "body_required": "Indiquez l'organe de la revue pour pouvoir approuver l'appréciation.",
+      "applied_on": "Appliqué au registre des risques le {{date}}",
+      "applies_on_approval": "S'applique au registre des risques à l'approbation du procès-verbal.",
+      "add_error": "Impossible d'ajouter les appréciations.",
+      "approval_hint": "À l'approbation du procès-verbal, les appréciations des risques approuvées figent le registre et celles rejetées repassent en cours."
     }
   },
   "objectives": {

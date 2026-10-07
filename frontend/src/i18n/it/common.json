@@ -3273,7 +3273,7 @@
         "2": "Dalla scheda Copertura valuta ogni minaccia applicabile o dichiarala non applicabile con il motivo.",
         "3": "Nella scheda del rischio segui i passi: scenario (minaccia, informazioni, obiettivi minacciati, Risk Owner), misure esistenti, rischio attuale con le motivazioni, poi la decisione: accettare il residuo o trattarlo con un piano.",
         "4": "Completa la valutazione: High e Critical aprono il piano di trattamento.",
-        "5": "Invia in approvazione: l'organo approva e il registro viene congelato.",
+        "5": "Invia in approvazione: l'organo approva nel riesame di direzione e il registro viene congelato.",
         "6": "Segui misure, verifiche e accettazioni: la classe scende solo con le misure verificate. Le accettazioni che spettano all'organo (per policy o perché il Risk Owner ha valutato e tratta da solo il rischio) si deliberano nel riesame di direzione."
       },
       "connections": {
@@ -3301,6 +3301,7 @@
       "trigger_reason": "Motivo della revisione straordinaria (evento, incidente, cambiamento)",
       "submit": "Invia in approvazione",
       "submit_ready": "Copertura completa e rischi valutati: la valutazione può andare all'organo.",
+      "review_hint": "Aggiungila all'ordine del giorno di un riesame di direzione, completo o mirato: approvando il verbale il registro viene approvato. Se l'organo ha già deliberato fuori dalla piattaforma, registra qui l'approvazione.",
       "return": "Rinvia alla valutazione",
       "return_reason": "Motivo del rinvio",
       "approve": "Approva",
@@ -6018,7 +6019,7 @@
         "8": "Approva il riesame: in app (un componente dell'organo con account, o la governance) oppure registrando numero e data della delibera dell'organo. Il verbale diventa immutabile",
         "9": "Scarica il verbale in PDF o HTML (incluso anche nel pacchetto audit)",
         "10": "Per approvare singoli documenti o piccole decisioni fra un riesame e l'altro crea un riesame «Mirato»: scegli i documenti in attesa, registra l'esito di ciascuno e approva il verbale.",
-        "11": "In ogni riesame, completo o mirato, aggiungi le accettazioni del rischio in attesa dell'organo e registra per ciascuna approvata, rinviata o respinta: l'esito si applica all'accettazione con l'approvazione del verbale."
+        "11": "In ogni riesame, completo o mirato, aggiungi le valutazioni dei rischi in approvazione e le accettazioni del rischio in attesa dell'organo e registra per ciascuna approvata, rinviata o respinta: l'esito si applica con l'approvazione del verbale."
       },
       "connections": {
         "risk": "Rischi critici e rischi accettati formalmente nello snapshot; le accettazioni riservate all'organo si deliberano come punti dell'ordine del giorno",
@@ -6496,6 +6497,22 @@
       "applies_on_approval": "Si applica all'accettazione all'approvazione del verbale.",
       "add_error": "Impossibile aggiungere le accettazioni.",
       "approval_hint": "Approvando il verbale, le accettazioni del rischio approvate si attivano (se il parere CISO non manca) e quelle respinte si chiudono."
+    },
+    "risk_cycles": {
+      "add": "Aggiungi valutazioni dei rischi",
+      "pending_title": "Valutazioni dei rischi in approvazione",
+      "pending_hint": "Valutazioni dei registri inviate in approvazione dal modulo Risk. Ognuna scelta diventa un punto: approvando il verbale il registro viene approvato e congelato.",
+      "no_pending": "Nessuna valutazione dei rischi in approvazione.",
+      "group": "Registro di gruppo",
+      "started_on": "avviata il {{date}}",
+      "risks": "rischi: {{count}}",
+      "outcome_hint": "Approvata: il registro si congela con l'organo e il riesame. Respinta: la valutazione torna in corso. Rinviata: resta in approvazione per un riesame successivo.",
+      "no_longer_pending": "La valutazione non è più in approvazione ({{status}}): l'esito non si potrà applicare.",
+      "body_required": "Indica l'organo del riesame per poter approvare la valutazione.",
+      "applied_on": "Applicato al registro dei rischi il {{date}}",
+      "applies_on_approval": "Si applica al registro dei rischi all'approvazione del verbale.",
+      "add_error": "Impossibile aggiungere le valutazioni.",
+      "approval_hint": "Approvando il verbale, le valutazioni dei rischi approvate congelano il registro e quelle respinte tornano in corso."
     }
   },
   "objectives": {

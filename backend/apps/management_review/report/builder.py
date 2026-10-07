@@ -718,6 +718,33 @@ def _acceptance_item_blocks(item) -> list:
     ]
 
 
+def _cycle_section(items, approved: bool) -> dict:
+    """Valutazioni dei rischi approvate dall'organo (procedura di risk
+    management §5): il verbale approvato è la delibera sul registro."""
+    rows = []
+    for i in items:
+        c = i.risk_cycle
+        rows.append([
+            f"{c.plant.code} — {c.plant.name}" if c.plant_id else _("Registro di gruppo"),
+            CYCLE_KIND.get(c.kind, c.kind),
+            fmt_date(c.started_at),
+            {"text": OUTCOME.get(i.document_outcome, "—"), "tone": OUTCOME_TONE.get(i.document_outcome),
+             "bold": True},
+            _outcome_state(i, approved),
+        ])
+    return {"heading": _("Valutazioni dei rischi deliberate"), "blocks": [_table(
+        None, [_("Registro"), _("Tipo"), _("Avviata il"), _("Esito"), _("Applicazione")], rows)]}
+
+
+def _cycle_item_blocks(item) -> list:
+    return [
+        {"type": "paragraph", "label": _("Valutazione"), "text": _("%(kind)s avviata il %(date)s") % {
+            "kind": CYCLE_KIND.get(item.risk_cycle.kind, item.risk_cycle.kind), "date": fmt_date(item.risk_cycle.started_at)}},
+        {"type": "paragraph", "label": _("Esito"),
+         "text": OUTCOME.get(item.document_outcome, _("non registrato"))},
+    ]
+
+
 def _outcome_alerts(items) -> list:
     return [
         _("%(title)s: esito «%(outcome)s» non applicato — %(reason)s") % {
@@ -776,6 +803,7 @@ def build_targeted_report(review) -> dict:
     actions = list(review.actions.all())
     doc_items = [i for i in agenda if i.document_id]
     acc_items = [i for i in agenda if i.risk_acceptance_id]
+    cycle_items = [i for i in agenda if i.risk_cycle_id]
 
     sections = []
     if participants:
@@ -791,12 +819,17 @@ def build_targeted_report(review) -> dict:
               _outcome_state(i, approved)] for i in doc_items])]})
     if acc_items:
         sections.append(_acceptance_section(acc_items, approved))
+    if cycle_items:
+        sections.append(_cycle_section(cycle_items, approved))
 
     for item in agenda:
         blocks = []
         if item.risk_acceptance_id:
             heading = item.title
             blocks += _acceptance_item_blocks(item)
+        elif item.risk_cycle_id:
+            heading = item.title
+            blocks += _cycle_item_blocks(item)
         elif item.document_id:
             heading = _("Documento: %(title)s") % {"title": item.title}
             blocks.append({"type": "paragraph", "label": _("Esito"), "text": _(
@@ -816,7 +849,7 @@ def build_targeted_report(review) -> dict:
         sections.append({"heading": _("Altre decisioni"),
                          "blocks": [_table(None, DECISION_HEADERS, _decision_rows(loose))]})
 
-    alerts = _outcome_alerts(doc_items + acc_items)
+    alerts = _outcome_alerts(doc_items + acc_items + cycle_items)
     return _report_frame(
         review,
         title=_("Riesame mirato"),
@@ -906,6 +939,8 @@ def build_report(review) -> dict:
             blocks = list(DATA_BLOCKS.get(item.code, lambda s, ctx: [])(snap, data_ctx))
             if item.risk_acceptance_id:
                 blocks += _acceptance_item_blocks(item)
+            elif item.risk_cycle_id:
+                blocks += _cycle_item_blocks(item)
             blocks.append({"type": "paragraph", "label": _("Discussione"),
                            "text": item.discussion.strip() or _("Nessuna annotazione.")})
             # Trasparenza (AI Act art. 50): il lettore del verbale deve sapere
@@ -945,8 +980,12 @@ def build_report(review) -> dict:
     acc_items = [i for i in agenda if i.risk_acceptance_id]
     if acc_items:
         sections.append(_acceptance_section(acc_items, review.approval_status == "approvato"))
+    cycle_items = [i for i in agenda if i.risk_cycle_id]
+    if cycle_items:
+        sections.append(_cycle_section(cycle_items, review.approval_status == "approvato"))
 
     return _report_frame(
         review, title=_("Riesame di Direzione SGSI"), subtitle=_scope_subtitle(review),
-        meta=meta, summary=summary, alerts=_alerts(snap) + _outcome_alerts(acc_items), sections=sections,
+        meta=meta, summary=summary, alerts=_alerts(snap) + _outcome_alerts(acc_items + cycle_items),
+        sections=sections,
     )

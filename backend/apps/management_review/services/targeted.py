@@ -15,6 +15,8 @@ from core.audit import log_action
 
 from ..agenda import ISO_AGENDA_CODES
 from ..models import ManagementReview, ReviewAgendaItem
+from .risk_acceptances import RISK_ACCEPTANCE_ITEM_CODE
+from .risk_cycles import RISK_CYCLE_ITEM_CODE
 
 DOCUMENT_ITEM_CODE = "document"
 # Ordine dell'elenco: prima ciò che è più vicino alla decisione.
@@ -221,19 +223,27 @@ def refresh_item_version(item: ReviewAgendaItem, user) -> ReviewAgendaItem:
     return item
 
 
+# Punti con esito approvato/rinviato/respinto.
+DECISION_ITEM_CODES = (DOCUMENT_ITEM_CODE, RISK_ACCEPTANCE_ITEM_CODE, RISK_CYCLE_ITEM_CODE)
+
+
 def validate_document_outcome(item: ReviewAgendaItem, outcome: str) -> str:
-    """Esito del punto da decidere (documento o accettazione del rischio).
-    Documento: solo se il punto è sulla revisione corrente (una revisione più
-    recente va prima riallineata). Accettazione: solo se è ancora in attesa."""
-    from .risk_acceptances import RISK_ACCEPTANCE_ITEM_CODE, validate_acceptance_outcome
+    """Esito del punto da decidere (documento, accettazione o valutazione dei
+    rischi). Documento: solo se il punto è sulla revisione corrente (una
+    revisione più recente va prima riallineata). Accettazione e valutazione:
+    solo se sono ancora in attesa."""
+    from .risk_acceptances import validate_acceptance_outcome
+    from .risk_cycles import validate_cycle_outcome
 
     outcome = outcome or ""
-    if item.code not in (DOCUMENT_ITEM_CODE, RISK_ACCEPTANCE_ITEM_CODE):
-        raise ValidationError(_("L'esito si registra solo sui punti relativi a un documento o a un'accettazione del rischio."))
+    if item.code not in DECISION_ITEM_CODES:
+        raise ValidationError(_("L'esito si registra solo sui punti da decidere: documento, accettazione o valutazione dei rischi."))
     if outcome and outcome not in dict(ReviewAgendaItem.OUTCOME_CHOICES):
         raise ValidationError(_("Esito non valido."))
     if item.code == RISK_ACCEPTANCE_ITEM_CODE:
         return validate_acceptance_outcome(item, outcome)
+    if item.code == RISK_CYCLE_ITEM_CODE:
+        return validate_cycle_outcome(item, outcome)
     if outcome:
         latest = latest_version(item.document)
         if latest is not None and latest.pk != item.document_version_id:
@@ -245,13 +255,11 @@ def validate_document_outcome(item: ReviewAgendaItem, outcome: str) -> str:
 
 
 def uncovered_decision_items(review: ManagementReview) -> list[str]:
-    """Punti da decidere (documenti, accettazioni del rischio) senza esito:
-    ne bloccano la chiusura della riunione, completa o mirata."""
-    from .risk_acceptances import RISK_ACCEPTANCE_ITEM_CODE
-
+    """Punti da decidere (documenti, accettazioni, valutazioni dei rischi)
+    senza esito: ne bloccano la chiusura della riunione, completa o mirata."""
     return [
         str(i.pk) for i in review.agenda_items.filter(
-            deleted_at__isnull=True, code__in=(DOCUMENT_ITEM_CODE, RISK_ACCEPTANCE_ITEM_CODE),
+            deleted_at__isnull=True, code__in=DECISION_ITEM_CODES,
             document_outcome="",
         )
     ]

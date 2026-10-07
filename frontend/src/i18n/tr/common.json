@@ -3273,7 +3273,7 @@
         "2": "Kapsam sekmesinde her uygulanabilir tehdidi değerlendirin veya nedeniyle uygulanamaz olarak bildirin.",
         "3": "Risk kartında adımları izleyin: senaryo (tehdit, bilgiler, tehdit altındaki hedefler, Risk Sahibi), mevcut önlemler, gerekçeleriyle mevcut risk, ardından karar: artık riski kabul etmek veya bir planla işlemek.",
         "4": "Değerlendirmeyi tamamlayın: High ve Critical işlem planını açar.",
-        "5": "Onaya gönderin: organ onaylar ve kayıt dondurulur.",
+        "5": "Onaya gönderin: organ yönetim gözden geçirmesinde onaylar ve kayıt dondurulur.",
         "6": "Önlemleri, doğrulamaları ve kabulleri izleyin: sınıf yalnızca doğrulanmış önlemlerle düşer. Organa ayrılan kabuller (politika gereği veya Risk Sahibi riski tek başına değerlendirip işlediği için) yönetim gözden geçirmesinde karara bağlanır."
       },
       "connections": {
@@ -3301,6 +3301,7 @@
       "trigger_reason": "Olağanüstü gözden geçirmenin nedeni (olay, vaka, değişiklik)",
       "submit": "Onaya gönder",
       "submit_ready": "Kapsam tam ve riskler değerlendirildi: değerlendirme organa gidebilir.",
+      "review_hint": "Tam veya hedefli bir yönetim gözden geçirmesinin gündemine ekleyin: tutanağın onayı kaydı onaylar. Organ kararı platform dışında zaten verdiyse onayı burada kaydedin.",
       "return": "Geri gönder",
       "return_reason": "Geri gönderme nedeni",
       "approve": "Onayla",
@@ -6018,7 +6019,7 @@
         "8": "Gözden geçirmeyi onaylayın: uygulamada (hesabı olan bir organ üyesi veya yönetişim) ya da organ kararının numarası ve tarihini kaydederek. Tutanak değiştirilemez hale gelir",
         "9": "Tutanağı PDF veya HTML olarak indirin (denetim paketine de eklenir)",
         "10": "İki gözden geçirme arasında tekil belgeleri veya küçük kararları onaylamak için “Hedefli” bir gözden geçirme oluşturun: bekleyen belgeleri seçin, her birinin kararını kaydedin ve tutanağı onaylayın.",
-        "11": "Her gözden geçirmede, tam veya hedefli, organ kararı bekleyen risk kabullerini ekleyin ve her biri için onaylandı, ertelendi veya reddedildi kaydını yapın: karar, tutanak onaylandığında kabule uygulanır."
+        "11": "Her gözden geçirmede, tam veya hedefli, onay bekleyen risk değerlendirmelerini ve organ kararı bekleyen risk kabullerini ekleyin ve her biri için onaylandı, ertelendi veya reddedildi kaydını yapın: karar, tutanak onaylandığında uygulanır."
       },
       "connections": {
         "risk": "Anlık görüntüde kritik riskler ve resmi olarak kabul edilen riskler; organa ayrılan kabuller gündem maddesi olarak karara bağlanır",
@@ -6496,6 +6497,22 @@
       "applies_on_approval": "Tutanak onaylandığında kabule uygulanır.",
       "add_error": "Kabuller eklenemedi.",
       "approval_hint": "Tutanak onaylandığında onaylanan risk kabulleri etkin olur (CISO görüşü eksik değilse), reddedilenler kapatılır."
+    },
+    "risk_cycles": {
+      "add": "Risk değerlendirmeleri ekle",
+      "pending_title": "Onay bekleyen risk değerlendirmeleri",
+      "pending_hint": "Risk modülünden onaya gönderilen kayıt değerlendirmeleri. Seçilen her biri bir gündem maddesi olur: tutanak onaylandığında kayıt onaylanır ve dondurulur.",
+      "no_pending": "Onay bekleyen risk değerlendirmesi yok.",
+      "group": "Grup kaydı",
+      "started_on": "başlangıç {{date}}",
+      "risks": "riskler: {{count}}",
+      "outcome_hint": "Onaylandı: kayıt organ ve gözden geçirme ile dondurulur. Reddedildi: değerlendirme devam ediyor durumuna döner. Ertelendi: sonraki bir gözden geçirme için onay bekler.",
+      "no_longer_pending": "Değerlendirme artık onay beklemiyor ({{status}}): karar uygulanamayacak.",
+      "body_required": "Değerlendirmeyi onaylayabilmek için gözden geçirmenin organını belirtin.",
+      "applied_on": "Risk kaydına uygulandı: {{date}}",
+      "applies_on_approval": "Tutanak onaylandığında risk kaydına uygulanır.",
+      "add_error": "Değerlendirmeler eklenemedi.",
+      "approval_hint": "Tutanak onaylandığında onaylanan risk değerlendirmeleri kaydı dondurur, reddedilenler devam ediyor durumuna döner."
     }
   },
   "objectives": {

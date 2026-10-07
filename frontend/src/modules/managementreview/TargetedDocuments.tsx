@@ -220,7 +220,7 @@ export function OutcomeSummary({ review, isGovernance }: { review: ManagementRev
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [error, setError] = useState("");
-  const items = (review.agenda_items ?? []).filter(i => i.document || i.risk_acceptance);
+  const items = (review.agenda_items ?? []).filter(i => i.document || i.risk_acceptance || i.risk_cycle);
   const failed = items.filter(i => i.document_outcome_error);
 
   const retry = useMutation({
@@ -238,7 +238,8 @@ export function OutcomeSummary({ review, isGovernance }: { review: ManagementRev
           <span className="font-medium">{i.title}</span>{" — "}
           {t(`management_review.targeted.outcomes.${i.document_outcome || "rinviato"}`)}{" · "}
           {i.document_outcome_applied_at
-            ? <span className="text-green-700">{t(i.risk_acceptance ? "management_review.risk_acceptances.applied_on" : "management_review.targeted.applied_on",
+            ? <span className="text-green-700">{t(i.risk_acceptance ? "management_review.risk_acceptances.applied_on"
+                : i.risk_cycle ? "management_review.risk_cycles.applied_on" : "management_review.targeted.applied_on",
                 { date: fmtDate(i.document_outcome_applied_at) })}</span>
             : <span className="text-red-600">{t("management_review.targeted.not_applied", { reason: i.document_outcome_error || "—" })}</span>}
         </p>

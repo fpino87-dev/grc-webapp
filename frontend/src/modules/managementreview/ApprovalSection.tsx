@@ -171,6 +171,9 @@ export function ApprovalSection({ review, isGovernance, onMissing }: {
           {(review.agenda_items ?? []).some(i => i.risk_acceptance) && (
             <p className="text-xs text-gray-500">{t("management_review.risk_acceptances.approval_hint")}</p>
           )}
+          {(review.agenda_items ?? []).some(i => i.risk_cycle) && (
+            <p className="text-xs text-gray-500">{t("management_review.risk_cycles.approval_hint")}</p>
+          )}
         </div>
       )}
     </section>

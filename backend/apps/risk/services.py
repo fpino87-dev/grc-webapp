@@ -1851,15 +1851,19 @@ def approve_cycle(user, cycle, *, body, review=None, local_adoption_ref: str = "
     """Approvazione dell'organo: congela il registro e archivia la valutazione precedente."""
     from django.utils.translation import gettext as _
 
-    from core.audit import log_action
-
-    from .models import RiskAssessmentCycle
-
     if cycle.status != "in_approvazione":
         raise _err(_("Si approva solo una valutazione inviata in approvazione."))
     if body is None:
         raise _err(_("Indica l'organo che approva la valutazione."))
     require_register_write(user, _cycle_approver_plant(cycle))
+    return _approve_cycle(user, cycle, body=body, review=review, local_adoption_ref=local_adoption_ref)
+
+
+def _approve_cycle(user, cycle, *, body, review=None, local_adoption_ref: str = ""):
+    from core.audit import log_action
+
+    from .models import RiskAssessmentCycle
+
     with transaction.atomic():
         RiskAssessmentCycle.objects.filter(plant=cycle.plant, status="approvato").exclude(pk=cycle.pk).update(
             status="archiviato", closed_at=timezone.now(),
@@ -1876,6 +1880,52 @@ def approve_cycle(user, cycle, *, body, review=None, local_adoption_ref: str = "
                    payload={"plant_id": str(cycle.plant_id) if cycle.plant_id else None,
                             "risks": len(cycle.snapshot["risks"])})
     return cycle
+
+
+def cycles_awaiting_body(plant_id=None):
+    """Valutazioni in approvazione che un riesame può deliberare: quello di
+    un sito approva il registro del sito (se la policy non accentra
+    l'approvazione), quello di organizzazione (`plant_id=None`) tutte,
+    compreso il registro di gruppo."""
+    from django.db.models import Count, Q
+
+    from .models import RiskAssessmentCycle
+
+    qs = (
+        RiskAssessmentCycle.objects.exclude(kind="legacy")
+        .filter(status="in_approvazione")
+        .select_related("plant")
+        .annotate(risks_count=Count("risks", filter=Q(risks__deleted_at__isnull=True)))
+        .order_by("plant__code", "started_at")
+    )
+    if plant_id is None:
+        return list(qs)
+    return [c for c in qs.filter(plant_id=plant_id) if _cycle_approver_plant(c) is not None]
+
+
+def decide_cycle_in_review(user, cycle, *, review, approved: bool, note: str = ""):
+    """Esito della delibera dell'organo sulla valutazione, presa nel riesame
+    approvato. Approvata → il registro si congela con organo e riesame del
+    verbale. Respinta → la valutazione torna in corso con la motivazione.
+    I permessi sono quelli dell'approvazione del riesame, come per le
+    accettazioni del rischio."""
+    from django.utils.translation import gettext as _
+
+    from core.audit import log_action
+
+    if cycle.status != "in_approvazione":
+        raise _err(_("La valutazione non è più in approvazione."))
+    if not approved:
+        reason = (note or "").strip() or _("Respinta dall'organo nel riesame «%(title)s».") % {"title": review.title}
+        with transaction.atomic():
+            cycle.status = "in_corso"
+            cycle.save(update_fields=["status", "updated_at"])
+            log_action(user=user, action_code="risk.cycle.returned", level="L1", entity=cycle,
+                       payload={"reason": reason[:200], "review_id": str(review.pk)})
+        return cycle
+    if not review.governing_body_id:
+        raise _err(_("Il riesame non indica l'organo che delibera."))
+    return _approve_cycle(user, cycle, body=review.governing_body, review=review)
 
 
 def revaluation_triggers(plant) -> list:

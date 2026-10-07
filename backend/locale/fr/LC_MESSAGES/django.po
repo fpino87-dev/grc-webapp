@@ -3654,3 +3654,53 @@ msgstr "Motivation de l'acceptation"
 #, python-format
 msgid "Il Plant Manager non accetta i rischi: per la classe %(cls)s indica l'organo (delibera nel riesame di direzione)."
 msgstr "Le Plant Manager n'accepte pas les risques : pour la classe %(cls)s indiquez l'organe (délibération en revue de direction)."
+
+msgid "La valutazione non è più in approvazione."
+msgstr "L'appréciation n'est plus en attente d'approbation."
+
+#, python-format
+msgid "Respinta dall'organo nel riesame «%(title)s»."
+msgstr "Rejetée par l'organe lors de la revue « %(title)s »."
+
+msgid "Il riesame non indica l'organo che delibera."
+msgstr "La revue n'indique pas l'organe qui délibère."
+
+msgid "Registro di gruppo"
+msgstr "Registre du groupe"
+
+msgid "Approvazione della valutazione dei rischi"
+msgstr "Approbation de l'appréciation des risques"
+
+msgid "Nessuna valutazione indicata."
+msgstr "Aucune appréciation indiquée."
+
+msgid "Valutazione non in approvazione, fuori perimetro o già in un altro riesame."
+msgstr "Appréciation non en attente d'approbation, hors périmètre ou déjà dans une autre revue."
+
+msgid "La valutazione non è più in approvazione (rinviata o già approvata)."
+msgstr "L'appréciation n'est plus en attente d'approbation (renvoyée ou déjà approuvée)."
+
+msgid "Indicare l'organo del riesame prima di approvare la valutazione dei rischi."
+msgstr "Indiquez l'organe de la revue avant d'approuver l'appréciation des risques."
+
+msgid "L'esito si registra solo sui punti da decidere: documento, accettazione o valutazione dei rischi."
+msgstr "La décision ne s'enregistre que sur les points à décider : document, acceptation ou appréciation des risques."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni accettazione e valutazione dei rischi all'ordine del giorno."
+msgstr "Avant de clore la réunion, enregistrez la décision de chaque acceptation et appréciation des risques à l'ordre du jour."
+
+msgid "Prima di chiudere la riunione registrare l'esito di ogni documento, accettazione e valutazione dei rischi all'ordine del giorno."
+msgstr "Avant de clore la réunion, enregistrez la décision de chaque document, acceptation et appréciation des risques à l'ordre du jour."
+
+msgid "Valutazioni dei rischi deliberate"
+msgstr "Appréciations des risques délibérées"
+
+msgid "Avviata il"
+msgstr "Lancée le"
+
+msgid "Valutazione"
+msgstr "Appréciation"
+
+#, python-format
+msgid "%(kind)s avviata il %(date)s"
+msgstr "%(kind)s lancée le %(date)s"

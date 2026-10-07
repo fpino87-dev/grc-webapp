@@ -3273,7 +3273,7 @@
         "2": "From the Coverage tab, assess each applicable threat or declare it not applicable with the reason.",
         "3": "In the risk sheet follow the steps: scenario (threat, information, threatened objectives, Risk Owner), existing measures, current risk with rationales, then the decision: accept the residual risk or treat it with a plan.",
         "4": "Complete the assessment: High and Critical open the treatment plan.",
-        "5": "Submit for approval: the governing body approves and the register is frozen.",
+        "5": "Submit for approval: the governing body approves in the management review and the register is frozen.",
         "6": "Follow measures, verifications and acceptances: the class drops only with verified measures. Acceptances reserved to the governing body (by policy or because the Risk Owner assessed and treats the risk alone) are decided in the management review."
       },
       "connections": {
@@ -3301,6 +3301,7 @@
       "trigger_reason": "Reason for the extraordinary review (event, incident, change)",
       "submit": "Submit for approval",
       "submit_ready": "Full coverage and assessed risks: the assessment can go to the governing body.",
+      "review_hint": "Add it to the agenda of a management review, full or targeted: approving the minutes approves the register. If the governing body has already decided outside the platform, record the approval here.",
       "return": "Send back",
       "return_reason": "Reason for sending back",
       "approve": "Approve",
@@ -6018,7 +6019,7 @@
         "8": "Approve the review: in the app (a member of the body with an account, or governance) or by recording the number and date of the body's resolution. The minutes become immutable",
         "9": "Download the minutes as PDF or HTML (also included in the audit package)",
         "10": "To approve single documents or small decisions between reviews, create a “Targeted” review: choose the pending documents, record the outcome of each one and approve the minutes.",
-        "11": "In every review, full or targeted, add the risk acceptances awaiting the governing body and record for each whether it is approved, postponed or rejected: the outcome is applied to the acceptance when the minutes are approved."
+        "11": "In every review, full or targeted, add the risk assessments awaiting approval and the risk acceptances awaiting the governing body and record for each whether it is approved, postponed or rejected: the outcome is applied when the minutes are approved."
       },
       "connections": {
         "risk": "Critical risks and formally accepted risks in the snapshot; acceptances reserved to the governing body are decided as agenda items",
@@ -6496,6 +6497,22 @@
       "applies_on_approval": "Applied to the acceptance when the minutes are approved.",
       "add_error": "Unable to add the acceptances.",
       "approval_hint": "When the minutes are approved, approved risk acceptances become active (unless the CISO opinion is missing) and rejected ones are closed."
+    },
+    "risk_cycles": {
+      "add": "Add risk assessments",
+      "pending_title": "Risk assessments awaiting approval",
+      "pending_hint": "Register assessments submitted for approval from the Risk module. Each one selected becomes an item: when the minutes are approved the register is approved and frozen.",
+      "no_pending": "No risk assessment awaiting approval.",
+      "group": "Group register",
+      "started_on": "started on {{date}}",
+      "risks": "risks: {{count}}",
+      "outcome_hint": "Approved: the register is frozen with the governing body and the review. Rejected: the assessment goes back in progress. Postponed: it stays awaiting approval for a later review.",
+      "no_longer_pending": "The assessment is no longer awaiting approval ({{status}}): the outcome cannot be applied.",
+      "body_required": "Set the governing body of the review to approve the assessment.",
+      "applied_on": "Applied to the risk register on {{date}}",
+      "applies_on_approval": "Applied to the risk register when the minutes are approved.",
+      "add_error": "Unable to add the assessments.",
+      "approval_hint": "When the minutes are approved, approved risk assessments freeze the register and rejected ones go back in progress."
     }
   },
   "objectives": {

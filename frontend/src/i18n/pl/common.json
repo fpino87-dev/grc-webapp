@@ -3273,7 +3273,7 @@
         "2": "Na karcie Pokrycie oceń każde mające zastosowanie zagrożenie lub oznacz je jako niemające zastosowania z uzasadnieniem.",
         "3": "W karcie ryzyka przejdź przez kroki: scenariusz (zagrożenie, informacje, zagrożone cele, Właściciel ryzyka), istniejące środki, ryzyko bieżące z uzasadnieniami, a potem decyzja: zaakceptować ryzyko rezydualne lub obniżyć je planem.",
         "4": "Zakończ ocenę: High i Critical otwierają plan postępowania.",
-        "5": "Prześlij do zatwierdzenia: organ zatwierdza, a rejestr zostaje zamrożony.",
+        "5": "Prześlij do zatwierdzenia: organ zatwierdza w przeglądzie zarządzania, a rejestr zostaje zamrożony.",
         "6": "Monitoruj działania, weryfikacje i akceptacje: klasa spada dopiero po weryfikacji działań. Akceptacje zastrzeżone dla organu (przez politykę lub dlatego, że Risk Owner sam ocenił ryzyko i nim zarządza) są uchwalane w przeglądzie zarządzania."
       },
       "connections": {
@@ -3301,6 +3301,7 @@
       "trigger_reason": "Powód przeglądu nadzwyczajnego (zdarzenie, incydent, zmiana)",
       "submit": "Prześlij do zatwierdzenia",
       "submit_ready": "Pełne pokrycie i ocenione ryzyka: ocenę można przekazać organowi.",
+      "review_hint": "Dodaj ją do porządku obrad przeglądu zarządzania, pełnego lub celowego: zatwierdzenie protokołu zatwierdza rejestr. Jeśli organ podjął już decyzję poza platformą, zarejestruj zatwierdzenie tutaj.",
       "return": "Zwróć do oceny",
       "return_reason": "Powód zwrotu",
       "approve": "Zatwierdź",
@@ -6018,7 +6019,7 @@
         "8": "Zatwierdź przegląd: w aplikacji (członek organu z kontem lub governance) albo rejestrując numer i datę uchwały organu. Protokół staje się niezmienny",
         "9": "Pobierz protokół w PDF lub HTML (dołączany także do pakietu audytowego)",
         "10": "Aby zatwierdzić pojedyncze dokumenty lub drobne decyzje między przeglądami, utwórz przegląd „Ukierunkowany”: wybierz oczekujące dokumenty, zapisz decyzję dla każdego i zatwierdź protokół.",
-        "11": "W każdym przeglądzie, pełnym lub celowym, dodaj akceptacje ryzyka oczekujące na organ i zapisz dla każdej, czy jest zatwierdzona, odłożona czy odrzucona: decyzja jest stosowana do akceptacji po zatwierdzeniu protokołu."
+        "11": "W każdym przeglądzie, pełnym lub celowym, dodaj oceny ryzyka oczekujące na zatwierdzenie oraz akceptacje ryzyka oczekujące na organ i zapisz dla każdej, czy jest zatwierdzona, odłożona czy odrzucona: decyzja jest stosowana po zatwierdzeniu protokołu."
       },
       "connections": {
         "risk": "Ryzyka krytyczne i formalnie zaakceptowane w snapshocie; akceptacje zastrzeżone dla organu są uchwalane jako punkty porządku obrad",
@@ -6496,6 +6497,22 @@
       "applies_on_approval": "Stosowane do akceptacji po zatwierdzeniu protokołu.",
       "add_error": "Nie można dodać akceptacji.",
       "approval_hint": "Po zatwierdzeniu protokołu zatwierdzone akceptacje ryzyka stają się aktywne (o ile nie brakuje opinii CISO), a odrzucone zostają zamknięte."
+    },
+    "risk_cycles": {
+      "add": "Dodaj oceny ryzyka",
+      "pending_title": "Oceny ryzyka oczekujące na zatwierdzenie",
+      "pending_hint": "Oceny rejestrów przesłane do zatwierdzenia z modułu Risk. Każda wybrana staje się punktem: po zatwierdzeniu protokołu rejestr zostaje zatwierdzony i zamrożony.",
+      "no_pending": "Brak ocen ryzyka oczekujących na zatwierdzenie.",
+      "group": "Rejestr grupy",
+      "started_on": "rozpoczęta {{date}}",
+      "risks": "ryzyka: {{count}}",
+      "outcome_hint": "Zatwierdzona: rejestr zostaje zamrożony z organem i przeglądem. Odrzucona: ocena wraca do realizacji. Odłożona: pozostaje do zatwierdzenia w kolejnym przeglądzie.",
+      "no_longer_pending": "Ocena nie oczekuje już na zatwierdzenie ({{status}}): decyzji nie będzie można zastosować.",
+      "body_required": "Wskaż organ przeglądu, aby móc zatwierdzić ocenę.",
+      "applied_on": "Zastosowano do rejestru ryzyka {{date}}",
+      "applies_on_approval": "Stosowane do rejestru ryzyka po zatwierdzeniu protokołu.",
+      "add_error": "Nie można dodać ocen.",
+      "approval_hint": "Po zatwierdzeniu protokołu zatwierdzone oceny ryzyka zamrażają rejestr, a odrzucone wracają do realizacji."
     }
   },
   "objectives": {

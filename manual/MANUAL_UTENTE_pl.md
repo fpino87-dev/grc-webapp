@@ -433,8 +433,8 @@ Pasek pod tytułem pokazuje stan oceny rejestru:
 
 1. **Rozpocznij pierwszą ocenę ryzyka** (lub, po zatwierdzeniu, **przegląd okresowy** albo **nadzwyczajny** z podaniem powodu)
 2. Oceń ryzyka; pola oceny można edytować tylko podczas oceny **w toku**
-3. **Prześlij do zatwierdzenia**: system sprawdza pełne pokrycie i ocenione ryzyka (lub potwierdzone, w przeglądzie okresowym); ryzyka High i Critical do ograniczenia, uniknięcia lub przeniesienia muszą mieć co najmniej jedno działanie w planie postępowania, ponieważ organ zatwierdza razem ocenę i plan (ISO 27001 §6.1.3). Najlepiej zatwierdzać na posiedzeniu przeglądu zarządzania, łącząc protokół
-4. **Zatwierdź**: wskaż organ, który podjął uchwałę, i opcjonalnie przegląd zarządzania z protokołem. Zatwierdzenie zamraża obraz rejestru (zakładka **Oceny**, eksport do Excela)
+3. **Prześlij do zatwierdzenia**: system sprawdza pełne pokrycie i ocenione ryzyka (lub potwierdzone, w przeglądzie okresowym); ryzyka High i Critical do ograniczenia, uniknięcia lub przeniesienia muszą mieć co najmniej jedno działanie w planie postępowania, ponieważ organ zatwierdza razem ocenę i plan (ISO 27001 §6.1.3). Ocena pozostaje *do zatwierdzenia* (ryzyk nie można już edytować), dopóki organ nie zdecyduje: wnieś ją do przeglądu zarządzania, pełnego lub celowego, przyciskiem **„Dodaj oceny ryzyka”**
+4. **Zatwierdzenie**: zatwierdzenie protokołu przeglądu zatwierdza rejestr z już uzupełnionym organem i przeglądem; jeśli organ podjął uchwałę poza platformą, **Zatwierdź** rejestruje ręcznie organ i opcjonalnie przegląd z protokołem. **Zwróć do oceny** przywraca ją do realizacji z podaniem powodu. Zatwierdzenie zamraża obraz rejestru (zakładka **Oceny**, eksport do Excela)
 
 Rejestr sprzed nowej procedury pozostaje dostępny tylko do odczytu w zakładce Oceny (**zastąpiona metoda**). Jeśli po zatwierdzeniu wystąpią istotne zdarzenia (poważne incydenty, nowe krytyczne aktywa, zmiany, poważne niezgodności, kontrole z luką, opóźnione działania), pasek je sygnalizuje, aby rozważyć przegląd nadzwyczajny.
 
@@ -811,6 +811,16 @@ Między dwoma pełnymi przeglądami organ może zbierać się w sprawie konkretn
 5. **Zamknij posiedzenie**: potrzebny jest co najmniej jeden punkt, a każdy dokument musi mieć decyzję
 6. **Zatwierdź protokół** (w aplikacji lub rejestrując uchwałę): decyzje są stosowane do dokumentów. *Zatwierdzone* wchodzą w życie uchwałą organu, z datą uchwały lub posiedzenia; *odrzucone* wracają do wersji roboczej; *odroczone* pozostają oczekujące. Jeśli decyzji nie da się zastosować (np. po posiedzeniu wgrano nową wersję), pozostaje oznaczona wraz z przyczyną i można ponowić próbę
 7. **Protokół** przeglądu ukierunkowanego zawiera rozpatrzone dokumenty z wersją i decyzją, punkty i decyzje; w **pakiecie audytowym** posiedzenia ukierunkowane są w `09_management_review/sedute_intermedie/`
+
+### Oceny ryzyka do zatwierdzenia
+
+W przeglądzie, **pełnym lub celowym**, organ zatwierdza ocenę rejestru ryzyka przesłaną do zatwierdzenia z modułu Risk (procedura zarządzania ryzykiem §5).
+
+1. **„Dodaj oceny ryzyka”** (liczba obok mówi, ile oczekuje) otwiera listę: przegląd zakładu pokazuje ocenę zakładu, przegląd organizacji także rejestr grupy i oceny zakładów, gdy polityka centralizuje zatwierdzanie. Ocena będąca już w porządku obrad innego, jeszcze niezatwierdzonego przeglądu nie jest wyświetlana
+2. Każda wybrana ocena staje się punktem z rejestrem, typem, datą rozpoczęcia i liczbą ryzyk; zapisz **decyzję**: *Zatwierdzone*, *Odłożone* lub *Odrzucone*. Aby zatwierdzić, przegląd musi wskazywać organ
+3. Aby zamknąć posiedzenie, każda ocena w porządku obrad musi mieć decyzję
+4. **Po zatwierdzeniu protokołu** zatwierdzone oceny zamrażają rejestr, z organem i przeglądem jako uchwałą (akceptacje uchwalone w tym samym przeglądzie trafiają do obrazu rejestru); odrzucone wracają *do realizacji*; odłożone czekają na kolejny przegląd. Jeśli w międzyczasie ocena została zwrócona lub zatwierdzona w module Risk, decyzja pozostaje w punkcie z powodem
+5. **Protokół** zawiera tabelę rozstrzygniętych ocen z decyzją
 
 ### Akceptacje ryzyka do uchwalenia
 

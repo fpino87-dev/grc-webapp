@@ -12,6 +12,7 @@ import { AGENDA_CODES_WITH_DATA, AgendaData } from "./SnapshotBlocks";
 import { ISO_CLAUSE, fmtDate, isOverdue, userLabel, type Snap } from "./shared";
 import { DocumentOutcomeControls, PendingDocumentsPicker } from "./TargetedDocuments";
 import { AcceptanceOutcomeControls, PendingAcceptancesPicker } from "./RiskAcceptanceItems";
+import { PendingRiskCyclesPicker, RiskCycleOutcomeControls } from "./RiskCycleItems";
 
 const DECISION_TYPES: DecisionType[] = ["miglioramento", "modifica_sgsi", "risorse", "obiettivo", "altro"];
 const TASK_ROLES = GRC_ACCESS_ROLES.filter(r => r !== "super_admin");
@@ -293,7 +294,8 @@ function AgendaItemCard({
   const clause = ISO_CLAUSE[item.code];
   const isDocument = item.code === "document";
   const isAcceptance = item.code === "risk_acceptance";
-  const toDecide = isDocument || isAcceptance;
+  const isRiskCycle = item.code === "risk_cycle";
+  const toDecide = isDocument || isAcceptance || isRiskCycle;
   const title = item.code === "custom" || toDecide ? item.title : t(`management_review.agenda.items.${item.code}`);
   const covered = item.discussion.trim().length > 0 || decisions.length > 0;
   // Punto da decidere (documento, accettazione del rischio): "fatto" quando ha un esito.
@@ -330,6 +332,7 @@ function AgendaItemCard({
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-gray-100">
           {isDocument && <DocumentOutcomeControls item={item} locked={locked} />}
           {isAcceptance && <AcceptanceOutcomeControls item={item} locked={locked} />}
+          {isRiskCycle && <RiskCycleOutcomeControls item={item} review={review} locked={locked} />}
           {AGENDA_CODES_WITH_DATA.has(item.code) && (
             snap
               ? <div className="bg-gray-50/60 rounded p-2">
@@ -490,6 +493,7 @@ export function AgendaSection({
       {!locked && review.status !== "completato" && (
         <div className="mb-2 flex flex-wrap items-start gap-2">
           {review.kind === "mirato" && <PendingDocumentsPicker review={review} />}
+          <PendingRiskCyclesPicker review={review} />
           <PendingAcceptancesPicker review={review} />
         </div>
       )}

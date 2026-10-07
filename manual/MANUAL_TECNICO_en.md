@@ -526,6 +526,7 @@ Response: { "propagated_to": 3, "skipped_no_instance": 0 }
 - Current risk (`current_class`) and expected risk (`expected_class`); "apply expected" only with completed and verified measures
 - `RiskAssessmentCycle` (first / periodic / extraordinary / legacy) with a `snapshot` frozen on approval
 - `RiskAcceptance` with role signatures, CISO opinion and governing body resolution per `RiskGovernancePolicy`; the resolution is taken only in the management review (`RiskAcceptance.review`, item `ReviewAgendaItem.risk_acceptance` with code `risk_acceptance`, outcome applied by `decide_acceptance_in_review` when the minutes are approved). Self-managed risk with a single signer → `requires_body` (`body_for_self_management` in `acceptance_requirements`)
+- Assessment approval in the review: item `ReviewAgendaItem.risk_cycle` with code `risk_cycle` (`management_review/services/risk_cycles.py`), list from `cycles_awaiting_body`, outcome applied by `decide_cycle_in_review` when the minutes are approved, after acceptances; `approve_cycle` remains for a manually recorded resolution
 - Threat catalogue: `backend/risk_catalogs/threats.json` + `load_risk_catalog` (custom entries via API)
 - Business objectives `BusinessObjective` (procedure §2, `risk_catalogs/business_objectives.json` as a proposal) linked to the risk (`business_objectives`, required to complete); `governance.SecurityObjective.risks` links security objectives to the treated risks
 - Single functions for other modules: `evaluated_risks`, `class_counts`, `untreated_high_risks`, `risk_level_bucket`
