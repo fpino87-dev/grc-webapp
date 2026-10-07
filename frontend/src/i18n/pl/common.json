@@ -3581,6 +3581,9 @@
       "acceptances_expiring_hint": "Aktywne akceptacje wygasające w ciągu 30 dni: odnowić lub potraktować ryzyko",
       "overdue_measures": "Ryzyka z opóźnionymi działaniami",
       "overdue_measures_hint": "Ryzyka z co najmniej jednym działaniem planu po terminie i niezakończonym",
+      "total": "Ocenione ryzyka",
+      "total_hint": "Łączna liczba ocenionych ryzyk w rejestrze (bez dziedziczonych), według klasy. Kliknięcie: pokaż cały rejestr",
+      "total_drafts": "Wersje robocze do uzupełnienia: {{count}}",
       "inherited": "Ryzyka grupy dotyczące zakładu: {{count}} (niezaakceptowane High/Critical: {{high}}) — oceniane przez grupę, niesumowane"
     },
     "plan": {

@@ -38,9 +38,23 @@ function AttentionBar({ data, active, onSelect, inheritedActive, onInherited }: 
 }) {
   const { t } = useTranslation();
   if (!data) return null;
+  const { total } = data;
+  const filtered = active !== null || inheritedActive;
   return (
     <div className="mb-3">
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2" role="group" aria-label={t("risk.attention.label")}>
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-2" role="group" aria-label={t("risk.attention.label")}>
+      {/* Neutro: è il riferimento per leggere i contatori, non una cosa da fare. Clic = tutto il registro. */}
+      <button type="button" onClick={() => onSelect(null)} disabled={!filtered} title={t("risk.attention.total_hint")}
+        className="text-left border border-gray-300 rounded-lg px-3 py-2 bg-white text-gray-800 enabled:hover:bg-gray-50 disabled:cursor-default">
+        <span className="block text-xl font-semibold leading-tight">{total.count}</span>
+        <span className="block text-xs">{t("risk.attention.total")}</span>
+        <span className="block text-[11px] text-gray-500 mt-0.5">
+          {[...RISK_CLASSES].reverse().filter(c => total.by_class[c]).map(c => `${t(`risk.classes.${c}`)} ${total.by_class[c]}`).join(" · ")}
+        </span>
+        {total.drafts > 0 && (
+          <span className="block text-[11px] text-amber-700">{t("risk.attention.total_drafts", { count: total.drafts })}</span>
+        )}
+      </button>
       {ATTENTION_KEYS.map(key => {
         const { count } = data[key];
         const selected = active === key;

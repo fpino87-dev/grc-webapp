@@ -1956,7 +1956,8 @@ def class_counts(qs) -> dict:
     from django.db.models import Count
 
     by_class = {c: 0 for c in RISK_CLASSES}
-    for row in qs.values("current_class").annotate(n=Count("id")):
+    # order_by() vuoto: con Meta.ordering + distinct() il GROUP BY non raggruppa.
+    for row in qs.order_by().values("current_class").annotate(n=Count("id")):
         if row["current_class"] in by_class:
             by_class[row["current_class"]] = row["n"]
     return {
@@ -1988,6 +1989,7 @@ def register_attention(plant=None, today=None) -> dict:
     """Cosa richiede di agire nel registro (procedura §9.2, §10, §11.3):
     Critical non accettati (trattamento obbligatorio), High non accettati
     (da trattare o accettare), accettazioni in scadenza, misure in ritardo.
+    In `total` il totale dei rischi valutati, per leggere i contatori.
     Solo il registro proprio: i rischi di gruppo ereditati li gestisce il gruppo."""
     import datetime
 
@@ -2015,6 +2017,14 @@ def register_attention(plant=None, today=None) -> dict:
     }
     result = {key: {"count": len(ids), "risk_ids": ids} for key, ids in groups.items()}
     result["overdue_measures"]["measures"] = overdue.count()
+    # Il riferimento per leggere i contatori: rischi valutati per classe, più le
+    # bozze ancora da completare (stesso perimetro, ereditati esclusi).
+    counts = class_counts(risks)
+    result["total"] = {
+        "count": counts["total"],
+        "by_class": {c: counts[c] for c in RISK_CLASSES},
+        "drafts": register_queryset(plant).filter(applicable=True).exclude(status="completato").count(),
+    }
     # A parte, non sommati: i rischi di gruppo che riguardano il sito.
     result["inherited"] = inherited_summary(plant) if plant is not None else None
     return result

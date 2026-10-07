@@ -3581,6 +3581,9 @@
       "acceptances_expiring_hint": "Active acceptances expiring within 30 days: renew or treat the risk",
       "overdue_measures": "Risks with overdue measures",
       "overdue_measures_hint": "Risks with at least one plan measure past its deadline and not completed",
+      "total": "Assessed risks",
+      "total_hint": "Total assessed risks in the register (inherited excluded), by class. Click: show the whole register",
+      "total_drafts": "Drafts to complete: {{count}}",
       "inherited": "Group risks concerning the site: {{count}} (High/Critical not accepted: {{high}}) — assessed by the group, not summed"
     },
     "plan": {

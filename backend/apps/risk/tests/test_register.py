@@ -973,6 +973,11 @@ def test_register_attention(org_user, plant, threats, cycle):
     assert data["high_untreated"]["risk_ids"] == [str(high.pk)]
     assert data["acceptances_expiring"]["risk_ids"] == [str(accepted.pk)]
     assert data["overdue_measures"] == {"count": 1, "risk_ids": [str(high.pk)], "measures": 1}
+    assert data["total"]["count"] == 3
+    assert data["total"]["by_class"]["critical"] == 1 and data["total"]["by_class"]["high"] == 2
+    assert data["total"]["drafts"] == 0
+    RiskAssessment.objects.create(plant=plant, cycle=cycle, name="Bozza")
+    assert services.register_attention(plant, today=today)["total"]["drafts"] == 1
     assert services.register_attention(None, today=today)["critical_untreated"]["count"] == 0
 
 
@@ -981,7 +986,7 @@ def test_register_attention_endpoint(org_user, plant):
     resp = _client(org_user).get(f"/api/v1/risk/assessments/attention/?plant={plant.pk}")
     assert resp.status_code == 200
     assert set(resp.data) == {"critical_untreated", "high_untreated", "acceptances_expiring", "overdue_measures",
-                              "inherited"}
+                              "inherited", "total"}
 
 
 @pytest.mark.django_db

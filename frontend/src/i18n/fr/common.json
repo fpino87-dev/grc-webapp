@@ -3581,6 +3581,9 @@
       "acceptances_expiring_hint": "Acceptations actives expirant dans les 30 jours : renouveler ou traiter le risque",
       "overdue_measures": "Risques avec mesures en retard",
       "overdue_measures_hint": "Risques avec au moins une mesure du plan dépassant l'échéance et non terminée",
+      "total": "Risques évalués",
+      "total_hint": "Total des risques évalués du registre (hérités exclus), par classe. Clic : afficher tout le registre",
+      "total_drafts": "Brouillons à compléter : {{count}}",
       "inherited": "Risques de groupe concernant le site : {{count}} (High/Critical non acceptés : {{high}}) — évalués par le groupe, non additionnés"
     },
     "plan": {

@@ -341,6 +341,8 @@ export const ATTENTION_KEYS: AttentionKey[] = ["critical_untreated", "high_untre
 export type Attention = Record<AttentionKey, { count: number; risk_ids: string[]; measures?: number }> & {
   /** Rischi di gruppo che riguardano il sito: a parte, non sommati (null per il registro di gruppo). */
   inherited: { count: number; untreated_high: number; risk_ids: string[] } | null;
+  /** Riferimento per leggere i contatori: rischi valutati per classe e bozze da completare. */
+  total: { count: number; by_class: Record<"very_low" | "low" | "medium" | "high" | "critical", number>; drafts: number };
 };
 
 export type CycleKind = "primo" | "periodico" | "straordinario" | "legacy";

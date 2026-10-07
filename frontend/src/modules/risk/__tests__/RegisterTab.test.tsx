@@ -24,6 +24,7 @@ vi.mock("../../../api/endpoints/plants", () => ({
   plantsApi: { list: () => Promise.resolve([{ id: "p1", code: "S1", name: "Sito Nord" }, { id: "p2", code: "S2", name: "Sito Sud" }]) },
 }));
 const none = { count: 0, risk_ids: [] };
+const total = { count: 2, by_class: { very_low: 0, low: 1, medium: 0, high: 0, critical: 1 }, drafts: 0 };
 
 function renderTab(onOpen = vi.fn(), registerId: string | null = "p1") {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -39,7 +40,7 @@ describe("RegisterTab", () => {
     ]);
     attention.mockResolvedValue({
       critical_untreated: { count: 1, risk_ids: ["b"] }, high_untreated: none,
-      acceptances_expiring: none, overdue_measures: { ...none, measures: 0 },
+      acceptances_expiring: none, overdue_measures: { ...none, measures: 0 }, total,
     });
     renderTab();
     expect(await screen.findAllByRole("row")).toHaveLength(3);
@@ -51,6 +52,14 @@ describe("RegisterTab", () => {
     expect(rows[1].textContent).toContain("Critico");
     fireEvent.click(counter);
     expect(screen.getAllByRole("row")).toHaveLength(3);
+    // Il totale è il riferimento neutro: disattivo senza filtro, con un filtro lo azzera.
+    const totalCard = screen.getByText("risk.attention.total").closest("button")!;
+    expect(totalCard.textContent).toContain("2");
+    expect(totalCard.hasAttribute("disabled")).toBe(true);
+    fireEvent.click(counter);
+    expect(screen.getAllByRole("row")).toHaveLength(2);
+    fireEvent.click(totalCard);
+    expect(screen.getAllByRole("row")).toHaveLength(3);
   });
 
   it("ordina per classe, nasconde i non applicabili e apre la scheda", async () => {
@@ -59,7 +68,7 @@ describe("RegisterTab", () => {
       { ...base, id: "b", name: "Critico", display_name: "Critico", threat_code: "IN_MAL", asset_type: "IT", applicable: true, current_class: "critical", expected_class: "medium" },
       { ...base, id: "c", name: "Fuori", display_name: "Fuori", threat_code: "LO_AST", asset_type: "SEDE", applicable: false, current_class: "", expected_class: "" },
     ]);
-    attention.mockResolvedValue({ critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: none });
+    attention.mockResolvedValue({ critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: none, total });
     const onOpen = renderTab();
     const rows = await screen.findAllByRole("row");
     expect(rows[1].textContent).toContain("Critico");
@@ -78,7 +87,7 @@ describe("RegisterTab", () => {
         asset_type: "PERSONALE", applicable: true, current_class: "medium", expected_class: "", affected_plants: [] },
     ]);
     attention.mockResolvedValue({
-      critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: { ...none, measures: 0 },
+      critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: { ...none, measures: 0 }, total,
     });
     renderTab(vi.fn(), null);
     expect(await screen.findByText("risk.register.col_affected_plants")).toBeTruthy();
@@ -90,7 +99,7 @@ describe("RegisterTab", () => {
   it("vista sito: niente colonna dei siti", async () => {
     list.mockResolvedValue([]);
     attention.mockResolvedValue({
-      critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: { ...none, measures: 0 },
+      critical_untreated: none, high_untreated: none, acceptances_expiring: none, overdue_measures: { ...none, measures: 0 }, total,
     });
     renderTab();
     await screen.findByText("risk.register.empty");

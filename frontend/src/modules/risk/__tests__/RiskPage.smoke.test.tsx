@@ -61,7 +61,7 @@ vi.mock("../../../api/endpoints/risk", () => {
     apiError: (_e: unknown, f: string) => f,
     riskApi: {
       resolvedPolicy: ok(policy), presets: ok({ centralizzato: policy }), cycles: ok([cycle]), triggers: ok([]),
-      attention: ok({ critical_untreated: { count: 1, risk_ids: ["r1"] }, high_untreated: { count: 0, risk_ids: [] }, acceptances_expiring: { count: 0, risk_ids: [] }, overdue_measures: { count: 1, risk_ids: ["r1"], measures: 1 }, inherited: { count: 2, untreated_high: 1, risk_ids: [] } }),
+      attention: ok({ critical_untreated: { count: 1, risk_ids: ["r1"] }, high_untreated: { count: 0, risk_ids: [] }, acceptances_expiring: { count: 0, risk_ids: [] }, overdue_measures: { count: 1, risk_ids: ["r1"], measures: 1 }, inherited: { count: 2, untreated_high: 1, risk_ids: [] }, total: { count: 1, by_class: { very_low: 0, low: 0, medium: 0, high: 0, critical: 1 }, drafts: 0 } }),
       list: ok([risk]), get: ok(risk), legacy: ok([]),
       coverage: ok({ asset_types: ["IT"], pairs: [{ asset_type: "IT", threat_id: "t1", threat_code: "IN_MAL", state: "evaluated", risk_ids: ["r1"], worst_class: "critical" }], total: 1, closed: 1, missing: 0, pct: 100 }),
       matrix: ok([5, 4, 3, 2, 1].flatMap(p => [1, 2, 3, 4, 5].map(i => ({ probability: p, impact: i, count: p === 4 && i === 4 ? 1 : 0, class: "medium" })))),

@@ -3581,6 +3581,9 @@
       "acceptances_expiring_hint": "30 gün içinde sona eren aktif kabuller: yenileyin veya riski işleyin",
       "overdue_measures": "Geciken önlemli riskler",
       "overdue_measures_hint": "Plan önlemlerinden en az biri süresi geçmiş ve tamamlanmamış riskler",
+      "total": "Değerlendirilen riskler",
+      "total_hint": "Kayıttaki değerlendirilmiş risklerin toplamı (devralınanlar hariç), sınıfa göre. Tıklama: tüm kaydı göster",
+      "total_drafts": "Tamamlanacak taslaklar: {{count}}",
       "inherited": "Tesisi ilgilendiren grup riskleri: {{count}} (kabul edilmemiş High/Critical: {{high}}) — grup tarafından değerlendirilir, toplanmaz"
     },
     "plan": {
