@@ -3249,6 +3249,8 @@
       "register": "Register",
       "group_register": "Group",
       "export": "Excel",
+      "export_all": "Full Excel",
+      "export_all_hint": "A single file with the group register and those of all sites: each risk appears once, with its register",
       "new_risk": "New risk",
       "new_needs_cycle": "An assessment in progress on the register is required",
       "tabs_label": "Risk assessment sections",

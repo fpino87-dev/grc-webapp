@@ -3249,6 +3249,8 @@
       "register": "Rejestr",
       "group_register": "Grupa",
       "export": "Excel",
+      "export_all": "Pełny Excel",
+      "export_all_hint": "Jeden plik z rejestrem grupy i rejestrami wszystkich zakładów: każde ryzyko tylko raz, ze wskazaniem rejestru",
       "new_risk": "Nowe ryzyko",
       "new_needs_cycle": "Wymagana jest trwająca ocena rejestru",
       "tabs_label": "Sekcje oceny ryzyka",

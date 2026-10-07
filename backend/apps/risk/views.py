@@ -397,6 +397,29 @@ class RiskAssessmentViewSet(PlantScopedQuerysetMixin, viewsets.ModelViewSet):
         response["Content-Disposition"] = f'attachment; filename="risk_register_{label}.xlsx"'
         return response
 
+    @action(detail=False, methods=["get"], url_path="export-all", throttle_classes=[ExportRateThrottle])
+    def export_all(self, request):
+        """Un unico Excel con il registro di gruppo e quelli di tutti i siti
+        attivi: riservato a chi ha accesso a tutta l'organizzazione."""
+        from django.http import HttpResponse
+        from django.utils.translation import gettext as _
+        from rest_framework.exceptions import PermissionDenied
+
+        from core.scoping import user_has_org_scope
+
+        if not user_has_org_scope(request.user):
+            raise PermissionDenied(_("Solo chi ha accesso a tutta l'organizzazione può esportare tutti i registri."))
+        excel_bytes = services.generate_risk_excel(all_registers=True)
+        log_action(
+            user=request.user, action_code="risk.register.export_all", level="L2",
+            entity=request.user, payload={"all_registers": True},
+        )
+        response = HttpResponse(
+            excel_bytes, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="risk_register_completo.xlsx"'
+        return response
+
 
 class RiskExistingMeasureViewSet(viewsets.ModelViewSet):
     """Misure esistenti di un rischio (`?risk=<id>`)."""

@@ -2137,10 +2137,15 @@ def worst_class(classes) -> str:
 # Export Excel del registro (procedura §12)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def generate_risk_excel(plant=None) -> bytes:
+def generate_risk_excel(plant=None, *, all_registers: bool = False) -> bytes:
     """Registro corrente del sito (o del gruppo se `plant` è None) in Excel:
     fogli Registro, Piano di trattamento, Accettazioni, Obiettivi aziendali,
-    Copertura informazioni, Copertura, Criteri."""
+    Copertura informazioni, Copertura, Criteri.
+
+    Con `all_registers` un unico file con il registro di gruppo e quelli di
+    tutti i siti attivi: ogni rischio compare una volta sola (i rischi di
+    gruppo non si ripetono nei siti che li ereditano) e la colonna «Registro»
+    indica a quale registro appartiene ogni riga."""
     import io
 
     from django.utils.translation import get_language
@@ -2169,17 +2174,41 @@ def generate_risk_excel(plant=None) -> bytes:
     def name(user):
         return (f"{user.first_name} {user.last_name}".strip() or user.username) if user else ""
 
+    def reg_label(p):
+        return p.name if p else "Gruppo"
+
+    def reg_key(p):
+        """Ordine dei registri: prima il gruppo, poi i siti per codice."""
+        return (0, "") if p is None else (1, p.code)
+
+    if all_registers:
+        from django.db.models import Q
+
+        from apps.plants.models import Plant
+
+        site_plants = list(Plant.objects.filter(status="attivo", deleted_at__isnull=True).order_by("code"))
+        registers = [None, *site_plants]
+        risk_qs = RiskAssessment.objects.exclude(cycle__kind="legacy").filter(
+            Q(plant__isnull=True) | Q(plant__in=site_plants))
+    else:
+        registers = [plant]
+        risk_qs = register_queryset(plant, include_inherited=plant is not None)
     risks = list(
-        register_queryset(plant, include_inherited=plant is not None)
+        risk_qs
         .select_related("plant", "threat", "asset", "supplier", "critical_process", "owner", "treatment_owner")
-        .prefetch_related("information_classes", "business_objectives",
+        .prefetch_related("information_classes", "business_objectives", "affected_plants",
                           "existing_measures__control_instance__control")
         .order_by("asset_type", "threat__code")
     )
+    if all_registers:
+        risks.sort(key=lambda r: reg_key(r.plant))
+    # I siti che ereditano un rischio di gruppo: nel registro di gruppo e
+    # nell'export completo (un sito non vede a quali altri siti arriva).
+    show_affected = all_registers or plant is None
     art21 = dict(NIS2_ART21_CHOICES)
     wb = Workbook()
-    ws = sheet(wb, "Registro", [
-        "Registro", "Tipologia", "Codice minaccia", "Minaccia", "Scenario", "Asset / gruppo", "Fornitore",
+    headers = [
+        "Registro", *(["Siti interessati"] if show_affected else []), "Tipologia", "Codice minaccia", "Minaccia", "Scenario", "Asset / gruppo", "Fornitore",
         "Obiettivi aziendali", "Processo BIA", "Informazioni", "Vulnerabilità", "Conseguenza", "Applicabile",
         "Motivo non applicabile",
         "Misure esistenti", "Probabilità", "Motivazione probabilità",
@@ -2188,14 +2217,20 @@ def generate_risk_excel(plant=None) -> bytes:
         "Non accettabile", "Trattamento", "Motivazione trattamento", "Prob. attesa", "Imp. atteso", "Classe attesa",
         "Risk Owner", "Responsabile trattamento", "Scadenza piano", "NIS2 in perimetro", "Art. 21 NIS2",
         "Sistemi impattati", "Possibile incidente significativo", "Stato", "Valutato il",
-    ], first=True)
+    ]
+    ws = sheet(wb, "Registro", headers, first=True)
+    cls_col = headers.index("Classe attuale") + 1
     for row, r in enumerate(risks, 2):
         measures = "; ".join(
             f"{(m.control_instance.control.external_id + ' ') if m.control_instance else ''}{m.description} ({m.effectiveness})"
             for m in r.existing_measures.all()
         )
+        affected = (
+            [", ".join(p.name for p in sorted(r.affected_plants.all(), key=lambda p: p.code)) if r.plant is None else ""]
+            if show_affected else []
+        )
         values = [
-            r.plant.name if r.plant else "Gruppo", r.asset_type, r.threat.code if r.threat else "",
+            reg_label(r.plant), *affected, r.asset_type, r.threat.code if r.threat else "",
             r.threat.get_title((get_language() or "en")[:2]) if r.threat else "", risk_label(r),
             r.asset.name if r.asset else r.asset_group_label, r.supplier.name if r.supplier else "",
             ", ".join(bo.name for bo in r.business_objectives.all()),
@@ -2215,20 +2250,22 @@ def generate_risk_excel(plant=None) -> bytes:
         for col, value in enumerate(values, 1):
             cell = ws.cell(row=row, column=col, value=value)
             cell.alignment = Alignment(vertical="top", wrap_text=True)
-        cls_col = 28
         if r.current_class in class_fill:
             ws.cell(row=row, column=cls_col).fill = PatternFill("solid", fgColor=class_fill[r.current_class])
 
     ws = sheet(wb, "Piano di trattamento", [
-        "Rischio", "Classe attuale", "Classe attesa", "Misura", "Effetto atteso", "Controllo",
+        "Registro", "Rischio", "Classe attuale", "Classe attesa", "Misura", "Effetto atteso", "Controllo",
         "Responsabile", "Scadenza", "Completata il", "Verificata il", "Nota verifica",
     ])
-    plans = RiskMitigationPlan.objects.filter(assessment__in=risks).select_related(
-        "assessment", "assessment__threat", "owner", "control_instance__control",
-    ).order_by("due_date")
+    plans = sorted(
+        RiskMitigationPlan.objects.filter(assessment__in=risks).select_related(
+            "assessment", "assessment__plant", "assessment__threat", "owner", "control_instance__control",
+        ).order_by("due_date"),
+        key=lambda p: reg_key(p.assessment.plant),
+    )
     for row, p in enumerate(plans, 2):
         for col, value in enumerate([
-            risk_label(p.assessment), CLASS_LABELS.get(p.assessment.current_class, ""),
+            reg_label(p.assessment.plant), risk_label(p.assessment), CLASS_LABELS.get(p.assessment.current_class, ""),
             CLASS_LABELS.get(p.assessment.expected_class, ""), p.action, p.expected_effect,
             p.control_instance.control.external_id if p.control_instance else "",
             mixed_owner_name(p.owner, p.owner_external) or "", p.due_date,
@@ -2238,46 +2275,62 @@ def generate_risk_excel(plant=None) -> bytes:
             ws.cell(row=row, column=col, value=value)
 
     ws = sheet(wb, "Accettazioni", [
-        "Rischio", "Classe", "Stato", "Ruoli richiesti", "Firme", "Organo", "Delibera", "Parere",
+        "Registro", "Rischio", "Classe", "Stato", "Ruoli richiesti", "Firme", "Organo", "Delibera", "Parere",
         "Motivazione", "Scadenza", "Attiva dal",
     ])
-    accs = RiskAcceptance.objects.filter(risk__in=risks).select_related("risk", "risk__threat", "body").order_by("-created_at")
+    accs = sorted(
+        RiskAcceptance.objects.filter(risk__in=risks)
+        .select_related("risk", "risk__plant", "risk__threat", "body").order_by("-created_at"),
+        key=lambda a: reg_key(a.risk.plant),
+    )
     for row, a in enumerate(accs, 2):
         for col, value in enumerate([
-            risk_label(a.risk), CLASS_LABELS.get(a.risk_class, ""), a.status, ", ".join(a.required_roles),
+            reg_label(a.risk.plant), risk_label(a.risk), CLASS_LABELS.get(a.risk_class, ""), a.status, ", ".join(a.required_roles),
             ", ".join(s["role"] for s in a.signatures), a.body.name if a.body else "", a.body_resolution_ref,
             a.upper_opinion, a.rationale, a.expires_on, a.activated_at.date() if a.activated_at else None,
         ], 1):
             ws.cell(row=row, column=col, value=value)
 
+    # Fogli calcolati per registro: un blocco per registro, uno sotto l'altro.
     ws = sheet(wb, "Obiettivi aziendali", [
-        "Obiettivo", "Rischi valutati", "Classe peggiore", "High/Critical non accettati",
+        "Registro", "Obiettivo", "Rischi valutati", "Classe peggiore", "High/Critical non accettati",
         "Critical", "High", "Medium", "Low", "Very Low",
         "Rischi di gruppo ereditati (non sommati)", "di cui High/Critical non accettati",
     ])
-    for row, item in enumerate(register_objectives(plant), 2):
-        bc = item["by_class"]
-        for col, value in enumerate([
-            item["objective"]["name"] if item["objective"] else "(nessun obiettivo indicato)",
-            item["count"], CLASS_LABELS.get(item["worst_class"], ""), item["untreated_high"],
-            bc["critical"], bc["high"], bc["medium"], bc["low"], bc["very_low"],
-            item["inherited_count"], item["inherited_untreated_high"],
-        ], 1):
-            ws.cell(row=row, column=col, value=value)
-    ws = sheet(wb, "Copertura informazioni", ["Classe di informazioni", "Riservatezza", "Stato", "Classe peggiore"])
-    for row, item in enumerate(information_coverage(plant), 2):
-        for col, value in enumerate([
-            item["name"], item["confidentiality"], COVERAGE_STATE_LABELS.get(item["state"], item["state"]),
-            CLASS_LABELS.get(item["worst_class"], ""),
-        ], 1):
-            ws.cell(row=row, column=col, value=value)
-    ws = sheet(wb, "Copertura", ["Tipologia", "Codice minaccia", "Stato", "Classe peggiore"])
-    for row, pair in enumerate(register_coverage(plant)["pairs"], 2):
-        for col, value in enumerate([
-            pair["asset_type"], pair["threat_code"], COVERAGE_STATE_LABELS.get(pair["state"], pair["state"]),
-            CLASS_LABELS.get(pair["worst_class"], ""),
-        ], 1):
-            ws.cell(row=row, column=col, value=value)
+    row = 2
+    for reg in registers:
+        for item in register_objectives(reg):
+            bc = item["by_class"]
+            for col, value in enumerate([
+                reg_label(reg),
+                item["objective"]["name"] if item["objective"] else "(nessun obiettivo indicato)",
+                item["count"], CLASS_LABELS.get(item["worst_class"], ""), item["untreated_high"],
+                bc["critical"], bc["high"], bc["medium"], bc["low"], bc["very_low"],
+                item["inherited_count"], item["inherited_untreated_high"],
+            ], 1):
+                ws.cell(row=row, column=col, value=value)
+            row += 1
+    ws = sheet(wb, "Copertura informazioni",
+               ["Registro", "Classe di informazioni", "Riservatezza", "Stato", "Classe peggiore"])
+    row = 2
+    for reg in registers:
+        for item in information_coverage(reg):
+            for col, value in enumerate([
+                reg_label(reg), item["name"], item["confidentiality"],
+                COVERAGE_STATE_LABELS.get(item["state"], item["state"]), CLASS_LABELS.get(item["worst_class"], ""),
+            ], 1):
+                ws.cell(row=row, column=col, value=value)
+            row += 1
+    ws = sheet(wb, "Copertura", ["Registro", "Tipologia", "Codice minaccia", "Stato", "Classe peggiore"])
+    row = 2
+    for reg in registers:
+        for pair in register_coverage(reg)["pairs"]:
+            for col, value in enumerate([
+                reg_label(reg), pair["asset_type"], pair["threat_code"],
+                COVERAGE_STATE_LABELS.get(pair["state"], pair["state"]), CLASS_LABELS.get(pair["worst_class"], ""),
+            ], 1):
+                ws.cell(row=row, column=col, value=value)
+            row += 1
 
     ws = sheet(wb, "Criteri", ["Probabilità \\ Impatto", "1", "2", "3", "4", "5"])
     for row, p in enumerate(range(5, 0, -1), 2):
@@ -2286,13 +2339,18 @@ def generate_risk_excel(plant=None) -> bytes:
             cls = risk_class(p, i)
             cell = ws.cell(row=row, column=i + 1, value=CLASS_LABELS[cls])
             cell.fill = PatternFill("solid", fgColor=class_fill[cls])
-    policy = resolve_policy(plant)
+    # Modello di governo e soglie economiche possono cambiare da sito a sito
+    # (eccezioni nella policy): una riga per registro.
     ws.cell(row=8, column=1, value="Soglie economiche (€, limite inferiore del livello)")
-    for offset, level in enumerate(("2", "3", "4", "5")):
-        ws.cell(row=9 + offset, column=1, value=f"Livello {level}")
-        ws.cell(row=9 + offset, column=2, value=policy["economic_thresholds"][level])
-    ws.cell(row=14, column=1, value="Modello di governo")
-    ws.cell(row=14, column=2, value=policy["preset"])
+    for col, header in enumerate(["Registro", "Modello di governo", "Livello 2", "Livello 3", "Livello 4", "Livello 5"], 1):
+        ws.cell(row=9, column=col, value=header).font = Font(bold=True)
+    for row, reg in enumerate(registers, 10):
+        policy = resolve_policy(reg)
+        for col, value in enumerate([
+            reg_label(reg), policy["preset"],
+            *(policy["economic_thresholds"][level] for level in ("2", "3", "4", "5")),
+        ], 1):
+            ws.cell(row=row, column=col, value=value)
 
     buf = io.BytesIO()
     wb.save(buf)

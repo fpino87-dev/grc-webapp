@@ -832,6 +832,37 @@ def test_excel_export_sheets(org_user, plant, threats, cycle):
 
 
 @pytest.mark.django_db
+def test_excel_export_all_registers(org_user, site_user, plant, other_plant, threats, cycle):
+    """Un unico file: gruppo e siti, ogni rischio una volta, con il registro di riferimento."""
+    from openpyxl import load_workbook
+
+    services.start_cycle(org_user, other_plant, "primo")
+    services.start_cycle(org_user, None, "primo")
+    _completed_risk(org_user, plant, threats["malware"])
+    _completed_risk(org_user, other_plant, threats["fire"], asset_type="SEDE")
+    common = services.create_risk(org_user, None, {**_eval(org_user), "threat": threats["malware"]})
+    common.affected_plants.set([plant, other_plant])
+
+    wb = load_workbook(io.BytesIO(services.generate_risk_excel(all_registers=True)))
+    reg = wb["Registro"]
+    headers = [c.value for c in reg[1]]
+    assert headers[:3] == ["Registro", "Siti interessati", "Tipologia"]
+    rows = [[c.value for c in r] for r in reg.iter_rows(min_row=2)]
+    assert [r[0] for r in rows] == ["Gruppo", plant.name, other_plant.name]  # gruppo una volta, poi i siti
+    assert rows[0][1] == f"{plant.name}, {other_plant.name}" and rows[1][1] in (None, "")
+    for name in ("Copertura", "Obiettivi aziendali"):
+        assert {r[0].value for r in wb[name].iter_rows(min_row=2)} >= {plant.name, other_plant.name}
+    assert [r[0].value for r in wb["Criteri"].iter_rows(min_row=10)] == ["Gruppo", plant.name, other_plant.name]
+
+    # Il colore della classe sta sulla colonna «Classe attuale».
+    cls_col = headers.index("Classe attuale") + 1
+    assert reg.cell(row=3, column=cls_col).fill.fgColor.rgb.endswith("FFC7CE")
+
+    assert _client(org_user).get("/api/v1/risk/assessments/export-all/").status_code == 200
+    assert _client(site_user).get("/api/v1/risk/assessments/export-all/").status_code == 403
+
+
+@pytest.mark.django_db
 def test_revaluation_triggers_after_approval(org_user, plant, threats, cycle):
     from apps.governance.models import SecurityCommittee
     from apps.incidents.models import Incident

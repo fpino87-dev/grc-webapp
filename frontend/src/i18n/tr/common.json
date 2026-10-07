@@ -3249,6 +3249,8 @@
       "register": "Kayıt",
       "group_register": "Grup",
       "export": "Excel",
+      "export_all": "Tam Excel",
+      "export_all_hint": "Grup kaydı ve tüm tesislerin kayıtlarını içeren tek dosya: her risk bir kez, ait olduğu kayıtla birlikte",
       "new_risk": "Yeni risk",
       "new_needs_cycle": "Kayıtta devam eden bir değerlendirme gerekir",
       "tabs_label": "Risk değerlendirmesi bölümleri",

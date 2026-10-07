@@ -469,6 +469,8 @@ export const riskApi = {
     })),
   exportExcel: (plantId: string | null) =>
     apiClient.get("/risk/assessments/export/", { params: { plant: registerParam(plantId) }, responseType: "blob" }),
+  /** Un unico Excel con il registro di gruppo e quelli di tutti i siti (solo scope org). */
+  exportAllExcel: () => apiClient.get("/risk/assessments/export-all/", { responseType: "blob" }),
 
   // Misure esistenti
   measures: (riskId: string) => fetchAllPages<ExistingMeasure>("/risk/existing-measures/", { risk: riskId }),

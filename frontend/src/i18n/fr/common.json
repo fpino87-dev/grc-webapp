@@ -3249,6 +3249,8 @@
       "register": "Registre",
       "group_register": "Groupe",
       "export": "Excel",
+      "export_all": "Excel complet",
+      "export_all_hint": "Un seul fichier avec le registre du groupe et ceux de tous les sites : chaque risque une seule fois, avec son registre",
       "new_risk": "Nouveau risque",
       "new_needs_cycle": "Une appréciation en cours sur le registre est nécessaire",
       "tabs_label": "Sections de l'appréciation des risques",

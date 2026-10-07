@@ -93,14 +93,21 @@ export function RiskPage() {
     [registerId, plants, t],
   );
 
-  const exportExcel = async () => {
-    const resp = await riskApi.exportExcel(registerId);
-    const url = window.URL.createObjectURL(new Blob([resp.data]));
+  const download = (data: BlobPart, filename: string) => {
+    const url = window.URL.createObjectURL(new Blob([data]));
     const a = document.createElement("a");
     a.href = url;
-    a.download = `risk_register_${registerId === null ? "gruppo" : plants.find(p => p.id === registerId)?.code ?? "sito"}.xlsx`;
+    a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
+  };
+  const exportExcel = async () => {
+    const resp = await riskApi.exportExcel(registerId);
+    download(resp.data, `risk_register_${registerId === null ? "gruppo" : plants.find(p => p.id === registerId)?.code ?? "sito"}.xlsx`);
+  };
+  const exportAllExcel = async () => {
+    const resp = await riskApi.exportAllExcel();
+    download(resp.data, "risk_register_completo.xlsx");
   };
 
   return (
@@ -137,6 +144,12 @@ export function RiskPage() {
             className="px-3 py-1.5 border border-green-300 text-green-700 rounded text-sm hover:bg-green-50 disabled:opacity-50">
             ⬇ {t("risk.page.export")}
           </button>
+          {policy?.user_org_scope && (
+            <button onClick={exportAllExcel} title={t("risk.page.export_all_hint")}
+              className="px-3 py-1.5 border border-green-300 text-green-700 rounded text-sm hover:bg-green-50">
+              ⬇ {t("risk.page.export_all")}
+            </button>
+          )}
           <button
             onClick={() => setNewRisk({})}
             disabled={!evaluating || !canWrite}
